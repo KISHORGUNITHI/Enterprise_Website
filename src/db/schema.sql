@@ -1,129 +1,270 @@
-create TABLE USERS(
-    user_id INT auto_increment primary key,
-    username varchar(40) not null,
-    name varchar(40) not null,
-    email varchar(40) not null,
-    phone number not null,
-    hashed_password varchar(255) not null,
-    gender varchar(6) not null check(gender in ("M","F","Others")),
-    date_of_birth date ,
-    is_verfied boolean default false,
-    created_at timestamp default current_timestamp,
-    updated_at timestamp default current_timestamp on update current_timestamp,
-    profile_picture blob default null
+-- USERS
+CREATE TABLE users (
+    user_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    username VARCHAR(40) NOT NULL,
+    name VARCHAR(40) NOT NULL,
+    email VARCHAR(40) NOT NULL UNIQUE,
+    phone VARCHAR(15) NOT NULL,
+    hashed_password VARCHAR(255) NOT NULL,
+
+    gender VARCHAR(10) NOT NULL
+        CHECK (gender IN ('M', 'F', 'Others')),
+
+    date_of_birth DATE,
+
+    is_verified BOOLEAN DEFAULT FALSE,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    profile_picture BYTEA
 );
 
 
-create table address(
-    address_id int auto_increment primary key,
-    user_id int not null ,
-    Full_name varchar(60) not null,
-    phone number not null,
-    house_number varchar(20) not null,
-    street varchar(255) not null,
-    city varchar(100) not null,
-    state varchar(100) not null,
-    postal_code varchar(20) not null,
-    country varchar(100) not null,
-    is_default boolean default false,
-    created_at timestamp default current_timestamp,
-    updated_at timestamp default current_timestamp on update current_timestamp,
-    foreign key (user_id) references users(user_id) on delete cascade
+-- ADDRESS
+CREATE TABLE address (
+    address_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    user_id INT NOT NULL,
+
+    full_name VARCHAR(60) NOT NULL,
+    phone VARCHAR(15) NOT NULL,
+
+    house_number VARCHAR(20) NOT NULL,
+    street VARCHAR(255) NOT NULL,
+
+    city VARCHAR(100) NOT NULL,
+    state VARCHAR(100) NOT NULL,
+
+    postal_code VARCHAR(20) NOT NULL,
+    country VARCHAR(100) NOT NULL,
+
+    is_default BOOLEAN DEFAULT FALSE,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE
 );
 
 
+-- BRANDS
+CREATE TABLE brands (
+    brand_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
-create table products(
-    product_id int auto_increment primary key,
-    name varchar(255) not null,
-    description text,
-    brand_id int not null,
-    category_id int not null,
-    price decimal(10,2) not null,
-    discount_price decimal(10,2) default null,
-    stock int not null,
-    warranty_period int default null,
-    rating decimal(3,2) default null,
-    review_count int default 0,
-    status boolean default true,
-    created_at timestamp default current_timestamp,
-    updated_at timestamp default current_timestamp on update current_timestamp,
-    foreign key (brand_id) references brands(brand_id) on delete cascade,
-    foreign key (category_id) references categories(category_id) on delete cascade
+    brand_name VARCHAR(255) NOT NULL,
+    brand_logo VARCHAR(255),
+
+    description TEXT,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-create table product_images(
-    image_id int auto_increment primary key,
-    product_id int not null,
-    image_url varchar(255) not null,
-    is_primary boolean default false,
-    created_at timestamp default current_timestamp,
-    updated_at timestamp default current_timestamp on update current_timestamp,
-    foreign key (product_id) references products(product_id) on delete cascade
+
+-- CATEGORIES
+CREATE TABLE categories (
+    category_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    name VARCHAR(40) NOT NULL,
+
+    parent_category INT,
+
+    description TEXT,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (parent_category)
+        REFERENCES categories(category_id)
+        ON DELETE CASCADE
 );
 
-//brand_id
-//brand_name
-//brand_logo
-//description
 
-create table brands(
-    brand_id int auto_increment primary key,
-    brand_name varchar(255) not null,
-    brand_logo  varchar(255) default null,
-    description text default null,
-    created_at timestamp default current_timestamp,
-    updated_at timestamp default current_timestamp on update current_timestamp
-)
+-- COLORS
+CREATE TABLE colors (
+    color_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
-create table categories(
-    category_id int primary_key,
-    name varchar(40) not null,
-    parent_category int default null,
-    description text,
-    created_at timestamp default current_timestamp,
-    updated_at timestamp default current_timestamp on update current_timestamp,
-    foreign key (parent_category) references categories(category_id) on delete cascade
-)
+    color_name VARCHAR(50) NOT NULL,
 
-craete table product_de(
-    spec_id int auto_increment primary key,
-    product_id int not null,
-    display_size varchar(20) default null,
-    display_type varchar(50) default null,
-    refresh_rate varchar(20) default null,
-    processor varchar(255) default null,
-    ram varchar(20) default null,
-    storage varchar(20) default null,
-    rear_camera varchar(255) default null,
-    front_camera varchar(255) default null,
-    battery varchar(20) default null,
-    charging varchar(20) default null,
-    operating_system varchar(50) default null,
-    network varchar(50) default null,
-    sim_type varchar(50) default null,
-    weight varchar(20) default null,
-    dimensions varchar(50) default null,
-    color_id int not null,
-    created_at timestamp default current_timestamp,
-    updated_at timestamp default current_timestamp on update current_timestamp,
-    foreign key (product_id) references products(product_id) on delete cascade,
-    foreign key (color_id) references colors(color_id) on delete cascade    
+    hex_code VARCHAR(7) NOT NULL
 );
 
-create table colors(
-    color_id int auto_increment primary key,
-    color_name varchar(50) not null,
-    hex_code varchar(7) not null
-); 
+
+-- PRODUCTS
+CREATE TABLE products (
+    product_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    name VARCHAR(255) NOT NULL,
+
+    description TEXT,
+
+    brand_id INT NOT NULL,
+    category_id INT NOT NULL,
+
+    price DECIMAL(10,2) NOT NULL,
+
+    discount_price DECIMAL(10,2),
+
+    stock INT NOT NULL,
+
+    warranty_period INT,
+
+    rating DECIMAL(3,2),
+
+    review_count INT DEFAULT 0,
+
+    status BOOLEAN DEFAULT TRUE,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (brand_id)
+        REFERENCES brands(brand_id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (category_id)
+        REFERENCES categories(category_id)
+        ON DELETE CASCADE
+);
 
 
-create table inventory(
-    inventory_id int auto_increment primary key,
-    product_id int not null,
-    quantity_available int not null,
-    quantity_reserved int not null,
-    warehouse_location varchar(255) not null,
-    last_updated timestamp default current_timestamp on update current_timestamp,
-    foreign key (product_id) references products(product_id) on delete cascade
-)
+-- PRODUCT IMAGES
+CREATE TABLE product_images (
+    image_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    product_id INT NOT NULL,
+
+    image_url VARCHAR(255) NOT NULL,
+
+    is_primary BOOLEAN DEFAULT FALSE,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (product_id)
+        REFERENCES products(product_id)
+        ON DELETE CASCADE
+);
+
+
+-- PRODUCT DETAILS
+CREATE TABLE product_details (
+    spec_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    product_id INT NOT NULL,
+
+    display_size VARCHAR(20),
+    display_type VARCHAR(50),
+
+    refresh_rate VARCHAR(20),
+
+    processor VARCHAR(255),
+
+    ram VARCHAR(20),
+
+    storage VARCHAR(20),
+
+    rear_camera VARCHAR(255),
+
+    front_camera VARCHAR(255),
+
+    battery VARCHAR(20),
+
+    charging VARCHAR(20),
+
+    operating_system VARCHAR(50),
+
+    network VARCHAR(50),
+
+    sim_type VARCHAR(50),
+
+    weight VARCHAR(20),
+
+    dimensions VARCHAR(50),
+
+    color_id INT NOT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (product_id)
+        REFERENCES products(product_id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (color_id)
+        REFERENCES colors(color_id)
+        ON DELETE CASCADE
+);
+
+
+-- INVENTORY
+CREATE TABLE inventory (
+    inventory_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    product_id INT NOT NULL,
+
+    quantity_available INT NOT NULL,
+
+    quantity_reserved INT NOT NULL,
+
+    warehouse_location VARCHAR(255) NOT NULL,
+
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (product_id)
+        REFERENCES products(product_id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE wishlist (
+    wishlist_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    user_id INT NOT NULL,
+
+    product_id INT NOT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (product_id)
+        REFERENCES products(product_id)
+        ON DELETE CASCADE,
+
+    UNIQUE(user_id, product_id)
+);
+
+CREATE TABLE cart (
+    cart_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    user_id INT NOT NULL UNIQUE,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY(user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE cart_items (
+    cart_item_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    cart_id INT NOT NULL,
+
+    product_id INT NOT NULL,
+
+    quantity INT NOT NULL DEFAULT 1,
+
+    FOREIGN KEY(cart_id)
+        REFERENCES cart(cart_id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY(product_id)
+        REFERENCES products(product_id)
+        ON DELETE CASCADE
+);
