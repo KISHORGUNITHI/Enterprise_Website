@@ -12,19 +12,20 @@ export class RegisterService{
         const {username,email,password}=userData;
         console.log(username);
 
+        //check for email existence
         await this.emailExistenceCheck(email);
-
+        //validate password(business logic- should be 8 character long)
         this.validatePassword(password);
-
+        //hashing password
         const hashedPassword=await bcrypt.hash(password, 10);
-
+        //creating user
         const user=await this.userRepository.createUser({
             username,
             email,
             password_hash:hashedPassword
         });
-
-        const token = this.generateToken(user.id);
+        //generating token
+        const token=this.generateToken(user.id);
         const {password_hash,...safeuser}=user
         return {
             safeuser,
@@ -73,7 +74,7 @@ export class LoginService{
             process.env.JWT_SECRET,{
             expiresIn:'1h'
         });
-
+        //hiding password_hash using object destructuring
         const {password_hash,...safeuser}=user;
         return{
             safeuser,
@@ -82,5 +83,5 @@ export class LoginService{
     }
 }
 export class LogoutService{
-
+    
 }

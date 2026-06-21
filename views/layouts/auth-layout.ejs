@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/header') %>
+</head>
+<body>
+    <main class="auth-wrapper">
+        <div class="auth-container" id="authContainer">
+            
+            <!-- SIGN UP FORM -->
+            <%- include('../auth/signup-form') %>
+
+            <!-- LOGIN FORM -->
+            <%- include('../auth/login-form') %>
+
+            <!-- SLIDING PANEL (OVERLAY) -->
+            <%- include('../partials/auth/auth-panel') %>
+
+        </div>
+    </main>
+
+    <!-- Scripts / Footer elements -->
+    <%- include('../partials/auth/auth-footer') %>
+</body>
+</html>

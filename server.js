@@ -28,11 +28,16 @@ app.use(express.urlencoded({ extended: true }));
 // Authentication Routes
 app.use("/api/auth",authRoutes);
 
-app.get("/test",jwtAuthenticate,(req,res)=>{
+app.get("/test-jwt",jwtAuthenticate,(req,res)=>{
     res.json({
         success:true,
         user:req.user
     });
+})
+
+//Testing the frontend
+app.get("/test-frontend",(req,res)=>{
+    res.render("auth/auth");
 })
 
 //Server Listening
