@@ -6,5 +6,7 @@ const authController=new AuthController();
 
 router.post('/register',authController.register);
 router.post('/login',authController.login);
-
+router.get('/',(req,res)=>{
+    res.render("auth/auth");
+})
 export default router;

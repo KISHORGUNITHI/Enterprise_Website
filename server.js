@@ -26,6 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 
 
 // Authentication Routes
+app.use("/",authRoutes);
 app.use("/api/auth",authRoutes);
 
 app.get("/test-jwt",jwtAuthenticate,(req,res)=>{
@@ -35,10 +36,11 @@ app.get("/test-jwt",jwtAuthenticate,(req,res)=>{
     });
 })
 
-//Testing the frontend
+//Testing the frontend(auth)
 app.get("/test-frontend",(req,res)=>{
     res.render("auth/auth");
 })
+
 
 //Server Listening
 const port=3000;

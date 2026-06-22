@@ -6,17 +6,12 @@ const loginService=new LoginService();
 export class AuthController{
     async register(req,res){
         try{
-            const result=await registerService.regitserUser(req.body);
-            return res.status(201).json({
-                success:true,
-                data:result
-            })
+            console.log(req.body);
+            const result=await registerService.registerUser(req.body);
+            res.render("products/products.ejs",{success:true,message:"Registered Successfully",data:result});
         }
         catch(error){
-            return res.status(400).json({
-                success:false,
-                message:error.message
-            })
+            return res.render("auth/auth",{success:false,error:error.message});
         }
     }
     async login(req,res){
@@ -28,10 +23,10 @@ export class AuthController{
             })
         }
         catch(error){
-            return res.json({
+            return res.render("auth/auth",{
                 success:false,
-                message:error.message
-            })
+                error:error.message
+            });
         }
     }
 }

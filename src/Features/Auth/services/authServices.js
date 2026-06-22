@@ -7,11 +7,17 @@ export class RegisterService{
     constructor(){
         this.userRepository=new UserRepository();
     }
-    async regitserUser(userData){
-        console.log(userData)
-        const {username,email,password}=userData;
+    async registerUser(userData){
+        const {username,email,phone_number,password,confirmPassword}=userData;
         console.log(username);
-
+        //password and confirm password check
+        if(password!=confirmPassword){
+            throw new Error("Password mismatch")
+        }
+        //check length of username
+        if(username.length<3){
+            throw new Error("Username must be 3 characters long")
+        }
         //check for email existence
         await this.emailExistenceCheck(email);
         //validate password(business logic- should be 8 character long)
@@ -22,6 +28,7 @@ export class RegisterService{
         const user=await this.userRepository.createUser({
             username,
             email,
+            phone_number,
             password_hash:hashedPassword
         });
         //generating token

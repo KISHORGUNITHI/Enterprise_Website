@@ -20,6 +20,10 @@
     </main>
 
     <!-- Scripts / Footer elements -->
+     <script>
+        const successMessage="<%= typeof message!=='undefined' ? message:'' %>"
+        const errorMessage = "<%= typeof error !== 'undefined' ? error : '' %>";
+    </script>
     <%- include('../partials/auth/auth-footer') %>
 </body>
 </html>

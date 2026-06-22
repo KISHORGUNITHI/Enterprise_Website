@@ -28,4 +28,17 @@ document.addEventListener("DOMContentLoaded", () => {
             container.classList.remove("right-panel-active");
         });
     }
+
+    //Error message alrets at rightcorner
+    if (typeof errorMessage !== "undefined" && errorMessage) {
+        Swal.fire({
+            toast: true,
+            position: "top-end",
+            icon: "error",
+            title: errorMessage,
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true
+        });
+    }
 });
