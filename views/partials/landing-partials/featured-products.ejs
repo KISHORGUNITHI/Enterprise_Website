@@ -1,0 +1,27 @@
+<section class="featured-products reveal-up" id="featured-products">
+  <div class="container">
+    <div class="section-header">
+      <h2>Featured Showcase</h2>
+      <p>The latest arrivals, top sellers, and exclusive flagships currently in stock.</p>
+    </div>
+    
+    <div class="product-grid">
+      <% if (locals.products && products.length > 0) { %>
+        <% products.forEach(product => { %>
+          <div class="product-card">
+            <div class="product-img-wrapper">
+              <img class="product-img" src="<%= product.image %>" alt="<%= product.name %>">
+            </div>
+            <div class="product-info">
+              <h3 class="product-name"><%= product.name %></h3>
+              <p class="product-price"><%= product.price %></p>
+              <p class="product-desc"><%= product.description %></p>
+            </div>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <p style="text-align: center; grid-column: 1/-1;">No products featured at the moment.</p>
+      <% } %>
+    </div>
+  </div>
+</section>

@@ -1,21 +1,21 @@
 /* Page-specific layouts and typography */
 body {
     background-color: var(--bg-color);
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--font-primary);
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
     min-height: 100vh;
     margin: 0;
     overflow-x: hidden;
 }
 
 .auth-wrapper {
+    flex-grow: 1;
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    padding: 20px;
+    padding: 60px 20px;
 }
 
 /* Forms layout position */
@@ -164,7 +164,7 @@ span.subtext {
 }
 
 .overlay {
-    background-image: url("../../images/auth-hero.png");
+    background-image: url("../../images/hero.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -176,6 +176,7 @@ span.subtext {
     transform: translateX(0);
     transition: transform var(--transition-speed) var(--transition-ease);
 }
+
 
 .overlay-panel {
     position: absolute;
@@ -189,6 +190,7 @@ span.subtext {
     height: 100%;
     width: 45%; /* Back to 45% of overlay, which equals 100% of overlay-container */
     transition: transform var(--transition-speed) var(--transition-ease);
+    z-index: 2;
 }
 
 .overlay-left {

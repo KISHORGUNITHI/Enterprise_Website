@@ -1,13 +1,13 @@
 :root {
     --bg-color: #f5f7fb;
     --card-bg: #ffffff;
-    --primary-color: #1667ff;
-    --primary-gradient: linear-gradient(135deg, #1667ff 0%, #4a9dff 100%);
+    --primary-color: var(--primary);
+    --primary-gradient: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
     --text-color: #2d3748;
     --text-muted: #718096;
     --text-light: #ffffff;
     --input-bg: #f7fafc;
-    --input-focus-border: #1667ff;
+    --input-focus-border: var(--accent);
     --border-radius-card: 18px;
     --border-radius-input: 10px;
     --border-radius-btn: 30px;
@@ -61,7 +61,7 @@
     outline: none;
     width: 100%;
     height: 100%;
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--font-primary);
     font-size: 14px;
     font-weight: 400;
     color: var(--text-color);
@@ -145,7 +145,7 @@
     border: none;
     height: 48px;
     border-radius: var(--border-radius-btn);
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--font-primary);
     font-size: 14px;
     font-weight: 500;
     letter-spacing: 0.5px;

@@ -4,6 +4,8 @@
     <%- include('../partials/header') %>
 </head>
 <body>
+    <%- include('../partials/navbar', { isAuthPage: true }) %>
+
     <main class="auth-wrapper">
         <div class="auth-container" id="authContainer">
             
@@ -18,6 +20,8 @@
 
         </div>
     </main>
+
+    <%- include('../partials/footer') %>
 
     <!-- Scripts / Footer elements -->
      <script>
