@@ -784,6 +784,10 @@
   margin-bottom: 4rem;
 }
 
+.footer-grid.auth-footer-grid {
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+}
+
 .footer-col h3 {
   font-size: 1.25rem;
   font-weight: 700;
@@ -862,6 +866,9 @@
   .footer-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 3rem;
+  }
+  .footer-grid.auth-footer-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
