@@ -1,0 +1,91 @@
+<%#
+  navbar.ejs — Site navigation
+  Future React component: <Navbar />
+  Props: none (static for now, dynamic via JS scroll behavior)
+%>
+
+<header class="navbar" id="navbar" role="banner">
+  <div class="container navbar__container">
+
+    <!-- Logo -->
+    <a href="/" class="navbar__logo" aria-label="Enterprise Store Home">
+      <div class="navbar__logo-icon" aria-hidden="true">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="32" height="32" rx="8" fill="var(--color-primary-700)"/>
+          <path d="M8 10h16M8 16h10M8 22h13" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="24" cy="22" r="3" fill="var(--color-accent-500)"/>
+        </svg>
+      </div>
+      <div class="navbar__logo-text">
+        <span class="navbar__logo-name">Enterprise</span>
+        <span class="navbar__logo-tagline">Store</span>
+      </div>
+    </a>
+
+    <!-- Nav links — center -->
+    <nav class="navbar__nav" aria-label="Primary navigation">
+      <ul class="navbar__nav-list" role="list">
+        <li><a href="#hero"             class="navbar__nav-link">Home</a></li>
+        <li><a href="#categories"       class="navbar__nav-link">Categories</a></li>
+        <li><a href="#featured"         class="navbar__nav-link">Products</a></li>
+        <li><a href="#emi"              class="navbar__nav-link">EMI</a></li>
+        <li><a href="#location"         class="navbar__nav-link">Store</a></li>
+      </ul>
+    </nav>
+
+    <!-- Actions — right -->
+    <div class="navbar__actions">
+      <a href="tel:9963657799" class="navbar__call-btn" aria-label="Call us at 9963657799">
+        <svg class="icon icon--sm" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+        </svg>
+        <span>Call Us</span>
+      </a>
+      <a href="/login" class="btn btn--primary btn--sm navbar__login-btn">
+        <svg class="icon icon--sm" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+        </svg>
+        Login
+      </a>
+    </div>
+
+    <!-- Mobile hamburger -->
+    <button
+      class="navbar__hamburger"
+      id="navHamburger"
+      aria-label="Toggle mobile menu"
+      aria-expanded="false"
+      aria-controls="mobileMenu"
+    >
+      <span class="navbar__hamburger-line"></span>
+      <span class="navbar__hamburger-line"></span>
+      <span class="navbar__hamburger-line"></span>
+    </button>
+
+  </div>
+
+  <!-- Mobile menu -->
+  <div class="navbar__mobile-menu" id="mobileMenu" aria-hidden="true" role="dialog" aria-label="Mobile navigation">
+    <nav class="navbar__mobile-nav">
+      <ul class="navbar__mobile-nav-list" role="list">
+        <li><a href="#hero"       class="navbar__mobile-nav-link" data-mobile-nav>Home</a></li>
+        <li><a href="#categories" class="navbar__mobile-nav-link" data-mobile-nav>Categories</a></li>
+        <li><a href="#featured"   class="navbar__mobile-nav-link" data-mobile-nav>Products</a></li>
+        <li><a href="#emi"        class="navbar__mobile-nav-link" data-mobile-nav>EMI</a></li>
+        <li><a href="#location"   class="navbar__mobile-nav-link" data-mobile-nav>Store</a></li>
+      </ul>
+      <div class="navbar__mobile-actions">
+        <a href="tel:9963657799" class="btn btn--outline btn--lg w-full">
+          <svg class="icon icon--md" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+          </svg>
+          Call: 9963 657 799
+        </a>
+        <a href="/login" class="btn btn--primary btn--lg w-full">Login</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<!-- Spacer to prevent content going under fixed navbar -->
+<div class="navbar__spacer" aria-hidden="true"></div>

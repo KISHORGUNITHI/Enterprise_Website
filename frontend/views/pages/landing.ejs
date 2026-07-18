@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+  <!-- SEO -->
+  <title><%= title %></title>
+  <meta name="description" content="<%= description %>" />
+  <meta name="keywords" content="electronics store, mobiles, TVs, AC, refrigerator, 0% EMI, Hyderabad electronics" />
+  <meta name="author" content="Enterprise Store" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:title"       content="<%= title %>" />
+  <meta property="og:description" content="<%= description %>" />
+  <meta property="og:site_name"   content="Enterprise Store" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="<%= title %>" />
+  <meta name="twitter:description" content="<%= description %>" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="/" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/public/icons/favicon.svg" />
+
+  <!-- Google Fonts — Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- =============================================
+       CSS — Load order matters:
+       1. Design tokens (variables)
+       2. Reset + base
+       3. Utilities
+       4. Components (one file per section)
+       5. Responsive overrides (last)
+  ============================================= -->
+
+  <!-- Foundation -->
+  <link rel="stylesheet" href="/assets/css/variables.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/utilities.css" />
+
+  <!-- Components -->
+  <link rel="stylesheet" href="/assets/css/navbar.css" />
+  <link rel="stylesheet" href="/assets/css/hero.css" />
+  <link rel="stylesheet" href="/assets/css/trust.css" />
+  <link rel="stylesheet" href="/assets/css/categories.css" />
+  <link rel="stylesheet" href="/assets/css/featured-products.css" />
+  <link rel="stylesheet" href="/assets/css/emi.css" />
+  <link rel="stylesheet" href="/assets/css/achievements.css" />
+  <link rel="stylesheet" href="/assets/css/location.css" />
+  <link rel="stylesheet" href="/assets/css/whatsapp.css" />
+  <link rel="stylesheet" href="/assets/css/footer.css" />
+
+  <!-- Auth modal -->
+  <link rel="stylesheet" href="/assets/css/login-required-modal.css" />
+
+  <!-- Responsive (must be last) -->
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
+
+</head>
+
+<body class="page-loading">
+
+  <%# ============================================================
+      PARTIALS — Each maps to one future React component.
+      Order matches the landing page specification.
+  ============================================================ %>
+
+  <%- include('../partials/navbar') %>
+
+  <main id="main-content">
+
+    <%- include('../partials/hero') %>
+
+    <%- include('../partials/trust') %>
+
+    <%- include('../partials/categories') %>
+
+    <%- include('../partials/featured-products') %>
+
+    <%- include('../partials/emi') %>
+
+    <%- include('../partials/achievements') %>
+
+    <%- include('../partials/location') %>
+
+    <%- include('../partials/whatsapp') %>
+
+  </main>
+
+  <%- include('../partials/footer') %>
+
+  <%# Auth guard modal — included once, triggered globally via showLoginRequiredModal() %>
+  <%- include('../partials/login-required-modal') %>
+
+  <!-- =============================================
+       DATA FILES — Load before JS that depends on them
+  ============================================= -->
+  <script src="/assets/data/banners.js"></script>
+  <script src="/assets/data/categories.js"></script>
+  <script src="/assets/data/featured-products.js"></script>
+
+  <!-- =============================================
+       JAVASCRIPT — Deferred, non-blocking
+       Load order: data → sliders → UI components → page-level
+  ============================================= -->
+  <script src="/assets/js/hero-slider.js"           defer></script>
+  <script src="/assets/js/categories.js"             defer></script>
+  <script src="/assets/js/featured-slider.js"        defer></script>
+  <script src="/assets/js/navbar.js"                 defer></script>
+  <script src="/assets/js/whatsapp.js"               defer></script>
+  <script src="/assets/js/auth-guard.js"             defer></script>
+
+</body>
+</html>

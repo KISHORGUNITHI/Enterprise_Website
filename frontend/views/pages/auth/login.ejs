@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — Enterprise Store</title>
+  <link rel="icon" type="image/svg+xml" href="/public/icons/favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/assets/css/variables.css"/>
+  <link rel="stylesheet" href="/assets/css/base.css"/>
+  <link rel="stylesheet" href="/assets/css/utilities.css"/>
+  <link rel="stylesheet" href="/assets/css/auth-pages.css"/>
+</head>
+
+<body class="auth-body">
+<div class="auth-page">
+
+  <!-- Logo -->
+  <a href="/" class="auth-page__logo" aria-label="Enterprise Store — Home">
+    <svg width="36" height="36" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <rect width="32" height="32" rx="8" fill="var(--color-primary-700)"/>
+      <path d="M8 10h16M8 16h10M8 22h13" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="24" cy="22" r="3" fill="var(--color-accent-500)"/>
+    </svg>
+    <div>
+      <p class="auth-page__logo-name">Enterprise Store</p>
+      <p class="auth-page__logo-sub">Official Electronics Store</p>
+    </div>
+  </a>
+
+  <!-- Card -->
+  <div class="auth-card">
+
+    <div class="auth-card__heading">
+      <h1 class="auth-card__title">Welcome back</h1>
+      <p class="auth-card__subtitle">Sign in to your account to continue shopping.</p>
+    </div>
+
+    <form class="auth-form" id="loginForm" novalidate>
+
+      <!-- Email / Phone -->
+      <div class="auth-form__group">
+        <label class="auth-form__label" for="loginIdentifier">Email or Phone Number</label>
+        <div class="auth-form__field" id="identifierField">
+          <input
+            type="text"
+            id="loginIdentifier"
+            name="identifier"
+            class="auth-form__input"
+            placeholder="you@example.com or 98765 43210"
+            autocomplete="username"
+            autocapitalize="none"
+            spellcheck="false"
+            required
+          />
+        </div>
+        <span class="auth-form__error" id="identifierError" hidden>
+          <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0a6 6 0 100 12A6 6 0 006 0zm0 9a.75.75 0 110-1.5A.75.75 0 016 9zm.75-3.75a.75.75 0 01-1.5 0V3.75a.75.75 0 011.5 0v1.5z"/></svg>
+          Please enter your email or phone number.
+        </span>
+      </div>
+
+      <!-- Password -->
+      <div class="auth-form__group">
+        <label class="auth-form__label" for="loginPassword">Password</label>
+        <div class="auth-form__field" id="passwordField">
+          <input
+            type="password"
+            id="loginPassword"
+            name="password"
+            class="auth-form__input"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+            required
+          />
+          <!-- Show / Hide toggle -->
+          <button
+            type="button"
+            class="auth-form__toggle"
+            id="loginPasswordToggle"
+            aria-label="Show password"
+            aria-pressed="false"
+          >
+            <!-- Eye icon (shown when password hidden) -->
+            <svg id="loginEyeShow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/>
+              <circle cx="10" cy="10" r="2.5"/>
+            </svg>
+            <!-- Eye-off icon (shown when password visible) -->
+            <svg id="loginEyeHide" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;">
+              <path d="M13.359 11.238C13.75 10.546 14 9.797 14 9c0-2.21-1.79-4-4-4-.797 0-1.546.25-2.238.641M3.78 3.78l12.44 12.44M8.682 8.682A3.5 3.5 0 0010 10.5M1 1l18 18M9 15.93A9.006 9.006 0 011 10s3.5-6 9-6c1.036 0 2.03.175 2.952.488"/>
+            </svg>
+          </button>
+        </div>
+        <span class="auth-form__error" id="passwordError" hidden>
+          <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0a6 6 0 100 12A6 6 0 006 0zm0 9a.75.75 0 110-1.5A.75.75 0 016 9zm.75-3.75a.75.75 0 01-1.5 0V3.75a.75.75 0 011.5 0v1.5z"/></svg>
+          Please enter your password.
+        </span>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="btn btn--primary auth-form__submit">
+        Login
+      </button>
+
+    </form>
+
+    <!-- Footer -->
+    <div class="auth-card__footer">
+      Don't have an account? <a href="/signup">Create Account</a>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+(function () {
+  // ── Show / hide password ──────────────────────────────────────────
+  const toggle   = document.getElementById('loginPasswordToggle');
+  const passInput= document.getElementById('loginPassword');
+  const eyeShow  = document.getElementById('loginEyeShow');
+  const eyeHide  = document.getElementById('loginEyeHide');
+
+  toggle.addEventListener('click', function () {
+    const isHidden = passInput.type === 'password';
+    passInput.type     = isHidden ? 'text' : 'password';
+    eyeShow.style.display = isHidden ? 'none'   : '';
+    eyeHide.style.display = isHidden ? ''       : 'none';
+    toggle.setAttribute('aria-label',   isHidden ? 'Hide password' : 'Show password');
+    toggle.setAttribute('aria-pressed', String(isHidden));
+  });
+
+  // ── Inline validation ─────────────────────────────────────────────
+  const form            = document.getElementById('loginForm');
+  const identifierInput = document.getElementById('loginIdentifier');
+  const identifierField = document.getElementById('identifierField');
+  const identifierError = document.getElementById('identifierError');
+  const passwordField   = document.getElementById('passwordField');
+  const passwordError   = document.getElementById('passwordError');
+
+  function setFieldState(field, errorEl, isValid) {
+    field.classList.toggle('auth-form__field--error',   !isValid);
+    field.classList.toggle('auth-form__field--success',  isValid);
+    errorEl.hidden = isValid;
+  }
+
+  identifierInput.addEventListener('blur', function () {
+    setFieldState(identifierField, identifierError, identifierInput.value.trim().length > 0);
+  });
+
+  passInput.addEventListener('blur', function () {
+    setFieldState(passwordField, passwordError, passInput.value.length > 0);
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const idOk   = identifierInput.value.trim().length > 0;
+    const passOk = passInput.value.length > 0;
+    setFieldState(identifierField, identifierError, idOk);
+    setFieldState(passwordField,   passwordError,   passOk);
+    if (idOk && passOk) {
+      // Future: POST /api/auth/login
+      window.location.href = '/home';
+    }
+  });
+}());
+</script>
+</body>
+</html>

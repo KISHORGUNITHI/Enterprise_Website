@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Account — Enterprise Store</title>
+  <link rel="icon" type="image/svg+xml" href="/public/icons/favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/assets/css/variables.css"/>
+  <link rel="stylesheet" href="/assets/css/base.css"/>
+  <link rel="stylesheet" href="/assets/css/utilities.css"/>
+  <link rel="stylesheet" href="/assets/css/auth-pages.css"/>
+</head>
+
+<body class="auth-body">
+<div class="auth-page">
+
+  <!-- Logo -->
+  <a href="/" class="auth-page__logo" aria-label="Enterprise Store — Home">
+    <svg width="36" height="36" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <rect width="32" height="32" rx="8" fill="var(--color-primary-700)"/>
+      <path d="M8 10h16M8 16h10M8 22h13" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="24" cy="22" r="3" fill="var(--color-accent-500)"/>
+    </svg>
+    <div>
+      <p class="auth-page__logo-name">Enterprise Store</p>
+      <p class="auth-page__logo-sub">Official Electronics Store</p>
+    </div>
+  </a>
+
+  <!-- Card -->
+  <div class="auth-card">
+
+    <div class="auth-card__heading">
+      <h1 class="auth-card__title">Create account</h1>
+      <p class="auth-card__subtitle">Join Enterprise Store and start shopping today.</p>
+    </div>
+
+    <form class="auth-form" id="registerForm" novalidate>
+
+      <!-- Full Name -->
+      <div class="auth-form__group">
+        <label class="auth-form__label" for="regName">Full Name</label>
+        <div class="auth-form__field" id="nameField">
+          <input
+            type="text"
+            id="regName"
+            name="name"
+            class="auth-form__input"
+            placeholder="Your full name"
+            autocomplete="name"
+            required
+          />
+        </div>
+        <span class="auth-form__error" id="nameError" hidden>
+          <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0a6 6 0 100 12A6 6 0 006 0zm0 9a.75.75 0 110-1.5A.75.75 0 016 9zm.75-3.75a.75.75 0 01-1.5 0V3.75a.75.75 0 011.5 0v1.5z"/></svg>
+          Please enter your full name.
+        </span>
+      </div>
+
+      <!-- Email -->
+      <div class="auth-form__group">
+        <label class="auth-form__label" for="regEmail">Email Address</label>
+        <div class="auth-form__field" id="emailField">
+          <input
+            type="email"
+            id="regEmail"
+            name="email"
+            class="auth-form__input"
+            placeholder="you@example.com"
+            autocomplete="email"
+            required
+          />
+        </div>
+        <span class="auth-form__error" id="emailError" hidden>
+          <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0a6 6 0 100 12A6 6 0 006 0zm0 9a.75.75 0 110-1.5A.75.75 0 016 9zm.75-3.75a.75.75 0 01-1.5 0V3.75a.75.75 0 011.5 0v1.5z"/></svg>
+          Please enter a valid email address.
+        </span>
+      </div>
+
+      <!-- Phone -->
+      <div class="auth-form__group">
+        <label class="auth-form__label" for="regPhone">Phone Number</label>
+        <div class="auth-form__field" id="phoneField">
+          <span class="auth-form__prefix">+91</span>
+          <input
+            type="tel"
+            id="regPhone"
+            name="phone"
+            class="auth-form__input"
+            placeholder="98765 43210"
+            maxlength="10"
+            inputmode="numeric"
+            autocomplete="tel-national"
+            required
+          />
+        </div>
+        <span class="auth-form__error" id="phoneError" hidden>
+          <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0a6 6 0 100 12A6 6 0 006 0zm0 9a.75.75 0 110-1.5A.75.75 0 016 9zm.75-3.75a.75.75 0 01-1.5 0V3.75a.75.75 0 011.5 0v1.5z"/></svg>
+          Please enter a valid 10-digit phone number.
+        </span>
+      </div>
+
+      <!-- Password -->
+      <div class="auth-form__group">
+        <label class="auth-form__label" for="regPassword">Password</label>
+        <div class="auth-form__field" id="regPasswordField">
+          <input
+            type="password"
+            id="regPassword"
+            name="password"
+            class="auth-form__input"
+            placeholder="Min. 8 characters"
+            autocomplete="new-password"
+            required
+          />
+          <button type="button" class="auth-form__toggle" id="regPasswordToggle" aria-label="Show password" aria-pressed="false">
+            <svg id="regEyeShow1" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="10" cy="10" r="2.5"/>
+            </svg>
+            <svg id="regEyeHide1" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;">
+              <path d="M13.359 11.238C13.75 10.546 14 9.797 14 9c0-2.21-1.79-4-4-4-.797 0-1.546.25-2.238.641M3.78 3.78l12.44 12.44M8.682 8.682A3.5 3.5 0 0010 10.5M1 1l18 18M9 15.93A9.006 9.006 0 011 10s3.5-6 9-6c1.036 0 2.03.175 2.952.488"/>
+            </svg>
+          </button>
+        </div>
+        <span class="auth-form__error" id="regPasswordError" hidden>
+          <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0a6 6 0 100 12A6 6 0 006 0zm0 9a.75.75 0 110-1.5A.75.75 0 016 9zm.75-3.75a.75.75 0 01-1.5 0V3.75a.75.75 0 011.5 0v1.5z"/></svg>
+          Password must be at least 8 characters.
+        </span>
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="auth-form__group">
+        <label class="auth-form__label" for="regConfirm">Confirm Password</label>
+        <div class="auth-form__field" id="confirmField">
+          <input
+            type="password"
+            id="regConfirm"
+            name="confirmPassword"
+            class="auth-form__input"
+            placeholder="Repeat your password"
+            autocomplete="new-password"
+            required
+          />
+          <button type="button" class="auth-form__toggle" id="regConfirmToggle" aria-label="Show confirm password" aria-pressed="false">
+            <svg id="regEyeShow2" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="10" cy="10" r="2.5"/>
+            </svg>
+            <svg id="regEyeHide2" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;">
+              <path d="M13.359 11.238C13.75 10.546 14 9.797 14 9c0-2.21-1.79-4-4-4-.797 0-1.546.25-2.238.641M3.78 3.78l12.44 12.44M8.682 8.682A3.5 3.5 0 0010 10.5M1 1l18 18M9 15.93A9.006 9.006 0 011 10s3.5-6 9-6c1.036 0 2.03.175 2.952.488"/>
+            </svg>
+          </button>
+        </div>
+        <span class="auth-form__error" id="confirmError" hidden>
+          <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0a6 6 0 100 12A6 6 0 006 0zm0 9a.75.75 0 110-1.5A.75.75 0 016 9zm.75-3.75a.75.75 0 01-1.5 0V3.75a.75.75 0 011.5 0v1.5z"/></svg>
+          Passwords do not match.
+        </span>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="btn btn--primary auth-form__submit">
+        Create Account
+      </button>
+
+    </form>
+
+    <!-- Footer -->
+    <div class="auth-card__footer">
+      Already have an account? <a href="/login">Login</a>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+(function () {
+
+  // ── Helpers ──────────────────────────────────────────────────────────────
+  function setFieldState(field, errorEl, isValid) {
+    field.classList.toggle('auth-form__field--error',   !isValid);
+    field.classList.toggle('auth-form__field--success',  isValid);
+    errorEl.hidden = isValid;
+  }
+
+  function makeToggle(toggleBtn, input, eyeShow, eyeHide) {
+    toggleBtn.addEventListener('click', function () {
+      const hidden = input.type === 'password';
+      input.type           = hidden ? 'text'  : 'password';
+      eyeShow.style.display = hidden ? 'none'  : '';
+      eyeHide.style.display = hidden ? ''      : 'none';
+      toggleBtn.setAttribute('aria-label',   hidden ? 'Hide password' : 'Show password');
+      toggleBtn.setAttribute('aria-pressed', String(hidden));
+    });
+  }
+
+  // ── Show/hide toggles ────────────────────────────────────────────────────
+  makeToggle(
+    document.getElementById('regPasswordToggle'),
+    document.getElementById('regPassword'),
+    document.getElementById('regEyeShow1'),
+    document.getElementById('regEyeHide1')
+  );
+
+  makeToggle(
+    document.getElementById('regConfirmToggle'),
+    document.getElementById('regConfirm'),
+    document.getElementById('regEyeShow2'),
+    document.getElementById('regEyeHide2')
+  );
+
+  // ── Phone: digits only ───────────────────────────────────────────────────
+  document.getElementById('regPhone').addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '');
+  });
+
+  // ── Blur validation ──────────────────────────────────────────────────────
+  const nameInput  = document.getElementById('regName');
+  const emailInput = document.getElementById('regEmail');
+  const phoneInput = document.getElementById('regPhone');
+  const passInput  = document.getElementById('regPassword');
+  const confInput  = document.getElementById('regConfirm');
+
+  nameInput.addEventListener('blur',  () => setFieldState(document.getElementById('nameField'),        document.getElementById('nameError'),        nameInput.value.trim().length > 1));
+  emailInput.addEventListener('blur', () => setFieldState(document.getElementById('emailField'),       document.getElementById('emailError'),       /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim())));
+  phoneInput.addEventListener('blur', () => setFieldState(document.getElementById('phoneField'),       document.getElementById('phoneError'),       phoneInput.value.replace(/\D/g,'').length === 10));
+  passInput.addEventListener('blur',  () => setFieldState(document.getElementById('regPasswordField'), document.getElementById('regPasswordError'), passInput.value.length >= 8));
+  confInput.addEventListener('blur',  () => setFieldState(document.getElementById('confirmField'),     document.getElementById('confirmError'),     confInput.value === passInput.value && confInput.value.length > 0));
+
+  // ── Submit ───────────────────────────────────────────────────────────────
+  document.getElementById('registerForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const checks = [
+      [document.getElementById('nameField'),        document.getElementById('nameError'),        nameInput.value.trim().length > 1],
+      [document.getElementById('emailField'),       document.getElementById('emailError'),       /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim())],
+      [document.getElementById('phoneField'),       document.getElementById('phoneError'),       phoneInput.value.replace(/\D/g,'').length === 10],
+      [document.getElementById('regPasswordField'), document.getElementById('regPasswordError'), passInput.value.length >= 8],
+      [document.getElementById('confirmField'),     document.getElementById('confirmError'),     confInput.value === passInput.value && confInput.value.length > 0],
+    ];
+    const allValid = checks.every(([field, errEl, isValid]) => { setFieldState(field, errEl, isValid); return isValid; });
+    if (allValid) {
+      // Future: POST /api/auth/register
+      window.location.href = '/home';
+    }
+  });
+
+}());
+</script>
+</body>
+</html>

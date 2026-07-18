@@ -1,0 +1,11 @@
+<%#
+  category-product-grid.ejs — Product grid shell for Category PLP.
+  Cards are rendered by category-page.js (JS reads categoryPlpData and injects HTML).
+  Receives: slug from category.ejs locals.
+  Future React component: <ProductGrid slug={slug} />
+%>
+
+<div class="plp-grid" id="plpGrid" role="list" aria-label="Products" data-slug="<%= slug %>">
+  <%# JS renders product cards here at runtime %>
+  <%# Empty state is also rendered by JS if no products match filters %>
+</div>

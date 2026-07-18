@@ -1,0 +1,167 @@
+<%#
+  location.ejs — Store location, contact info, and embedded map
+  Future React component: <LocationSection />
+%>
+
+<section class="location section" id="location" aria-labelledby="location-heading">
+  <div class="container">
+
+    <div class="section__header reveal">
+      <span class="section__eyebrow">Find Us</span>
+      <h2 class="section__title" id="location-heading">Locate Us &amp; Timings</h2>
+      <p class="section__subtitle">
+        Visit our store for hands-on demos, instant EMI, and expert advice. We are always here to help.
+      </p>
+    </div>
+
+    <div class="location__layout">
+
+      <!-- LEFT: Store info -->
+      <div class="location__info reveal--left">
+
+        <!-- Address card -->
+        <div class="location__info-card">
+          <div class="location__info-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="location__info-title">Store Address</h3>
+            <address class="location__address">
+              Enterprise Store,<br>
+              Main Road, Near City Center,<br>
+              Hyderabad, Telangana — 500001
+            </address>
+          </div>
+        </div>
+
+        <!-- Phone -->
+        <div class="location__info-card">
+          <div class="location__info-icon location__info-icon--accent" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13 19.79 19.79 0 0 1 1.61 4.4 2 2 0 0 1 3.59 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="location__info-title">Phone</h3>
+            <a href="tel:9963657799" class="location__info-value location__info-value--link">
+              +91 99636 57799
+            </a>
+          </div>
+        </div>
+
+        <!-- WhatsApp -->
+        <div class="location__info-card">
+          <div class="location__info-icon location__info-icon--whatsapp" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="location__info-title">WhatsApp</h3>
+            <a
+              href="https://wa.me/919963657799"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="location__info-value location__info-value--link location__info-value--whatsapp"
+            >
+              +91 99636 57799
+            </a>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="location__info-card">
+          <div class="location__info-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="location__info-title">Email</h3>
+            <a href="mailto:info@enterprisestore.in" class="location__info-value location__info-value--link">
+              info@enterprisestore.in
+            </a>
+          </div>
+        </div>
+
+        <!-- Working hours -->
+        <div class="location__hours">
+          <h3 class="location__hours-title">
+            <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+            </svg>
+            Working Hours
+          </h3>
+          <div class="location__hours-grid">
+            <div class="location__hours-row">
+              <span class="location__hours-day">Mon – Sat</span>
+              <span class="location__hours-time">10:00 AM – 9:00 PM</span>
+            </div>
+            <div class="location__hours-row">
+              <span class="location__hours-day">Sunday</span>
+              <span class="location__hours-time">11:00 AM – 7:00 PM</span>
+            </div>
+          </div>
+          <div class="location__hours-status" id="storeStatus" aria-live="polite">
+            <!-- JS will inject open/closed status -->
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="location__actions">
+          <a href="tel:9963657799" class="btn btn--primary btn--lg">
+            <svg class="icon icon--md" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+            </svg>
+            Call Store
+          </a>
+          <a
+            href="https://maps.google.com/?q=Enterprise+Store+Hyderabad"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn--outline btn--lg"
+          >
+            <svg class="icon icon--md" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+            </svg>
+            Get Directions
+          </a>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: Map embed -->
+      <div class="location__map-wrap reveal--right">
+        <div class="location__map" aria-label="Google Maps showing Enterprise Store location">
+          <!-- 
+            PRODUCTION NOTE:
+            Replace the src below with your actual Google Maps embed URL.
+            Generate it from: maps.google.com → Share → Embed a map
+          -->
+          <iframe
+            class="location__map-iframe"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d243647.31604788417!2d78.24323050982906!3d17.41228635785538!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb99daeaebd2c7%3A0xae93b78392bafbc2!2sHyderabad%2C%20Telangana!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
+            width="100%"
+            height="100%"
+            style="border:0;"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Enterprise Store location on Google Maps"
+          ></iframe>
+        </div>
+        <div class="location__map-badge">
+          <svg viewBox="0 0 20 20" fill="currentColor" class="icon icon--sm" aria-hidden="true">
+            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+          </svg>
+          Enterprise Store, Hyderabad
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>

@@ -1,0 +1,96 @@
+<%#
+  category-strip.ejs — Dynamic sticky category strip for Category pages.
+  Active state determined server-side via `activeCategory` local.
+  "All" navigates to /home — the full shopping experience.
+  Future React component: <CategoryStrip activeCategory={activeCategory} />
+
+  activeCategory values:
+    'mobiles' | 'tvs' | 'acs' | 'home-theatres' | 'kitchen' | 'refrigerators'
+    (never 'all' — category pages only show individual categories)
+%>
+
+<%
+  const active = locals.activeCategory || '';
+
+  const categories = [
+    { slug: 'all',            href: '/home',                  label: 'All'           },
+    { slug: 'mobiles',        href: '/products/mobiles',      label: 'Mobiles'       },
+    { slug: 'tvs',            href: '/products/tvs',          label: 'TVs'           },
+    { slug: 'acs',            href: '/products/acs',          label: 'ACs'           },
+    { slug: 'home-theatres',  href: '/products/home-theatres',label: 'Home Theatres' },
+    { slug: 'kitchen',        href: '/products/kitchen',      label: 'Kitchen'       },
+    { slug: 'refrigerators',  href: '/products/refrigerators',label: 'Refrigerators' },
+  ];
+
+  const illustrations = {
+    all: `<svg viewBox="0 0 40 40" fill="none">
+      <rect x="4"  y="4"  width="13" height="13" rx="2.5" fill="var(--color-primary-100)" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+      <rect x="23" y="4"  width="13" height="13" rx="2.5" fill="var(--color-primary-100)" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+      <rect x="4"  y="23" width="13" height="13" rx="2.5" fill="var(--color-primary-100)" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+      <rect x="23" y="23" width="13" height="13" rx="2.5" fill="var(--color-primary-100)" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+    </svg>`,
+    mobiles: `<svg viewBox="0 0 40 40" fill="none">
+      <rect x="10" y="3"  width="20" height="34" rx="4"   fill="#e8edf5" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+      <rect x="14" y="8"  width="12" height="20" rx="1.5" fill="var(--color-primary-200)" opacity=".6"/>
+      <circle cx="20" cy="32" r="2" fill="var(--color-primary-500)"/>
+      <rect x="16" y="6" width="8" height="1.5" rx=".75" fill="var(--color-primary-400)"/>
+    </svg>`,
+    tvs: `<svg viewBox="0 0 40 40" fill="none">
+      <rect x="3" y="7"  width="34" height="22" rx="3"   fill="#e8edf5" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+      <rect x="7" y="11" width="26" height="14" rx="1.5" fill="var(--color-primary-200)" opacity=".6"/>
+      <path d="M14 33h12" stroke="var(--color-primary-400)" stroke-width="2" stroke-linecap="round"/>
+      <path d="M20 29v4"  stroke="var(--color-primary-400)" stroke-width="2" stroke-linecap="round"/>
+    </svg>`,
+    acs: `<svg viewBox="0 0 40 40" fill="none">
+      <rect x="3" y="10" width="34" height="14" rx="4" fill="#e8edf5" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+      <circle cx="33" cy="17" r="3" fill="var(--color-primary-200)" stroke="var(--color-primary-400)" stroke-width="1"/>
+      <path d="M8 17h18" stroke="var(--color-primary-400)" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M8 28 Q13 25 18 28 Q23 31 28 28" stroke="var(--color-primary-300)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    </svg>`,
+    'home-theatres': `<svg viewBox="0 0 40 40" fill="none">
+      <rect x="13" y="4"  width="14" height="22" rx="3" fill="#e8edf5" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+      <circle cx="20" cy="15" r="4" fill="var(--color-primary-200)" stroke="var(--color-primary-400)" stroke-width="1"/>
+      <circle cx="20" cy="15" r="1.5" fill="var(--color-primary-500)"/>
+      <path d="M10 36h20" stroke="var(--color-primary-400)" stroke-width="2" stroke-linecap="round"/>
+      <rect x="16" y="26" width="8" height="8" rx="1" fill="var(--color-primary-100)" stroke="var(--color-primary-300)" stroke-width="1.2"/>
+    </svg>`,
+    kitchen: `<svg viewBox="0 0 40 40" fill="none">
+      <rect x="8"  y="18" width="24" height="16" rx="3" fill="#e8edf5" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+      <path d="M14 18V10 Q14 5 20 5 Q26 5 26 10 V18" stroke="var(--color-primary-400)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M13 27h14" stroke="var(--color-primary-300)" stroke-width="1.2" stroke-linecap="round"/>
+      <circle cx="29" cy="22" r="2" fill="var(--color-primary-400)"/>
+    </svg>`,
+    refrigerators: `<svg viewBox="0 0 40 40" fill="none">
+      <rect x="10" y="3"  width="20" height="34" rx="3.5" fill="#e8edf5" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+      <path d="M10 19h20" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+      <path d="M27 11v5"  stroke="var(--color-primary-500)" stroke-width="2" stroke-linecap="round"/>
+      <path d="M27 23v8"  stroke="var(--color-primary-500)" stroke-width="2" stroke-linecap="round"/>
+    </svg>`,
+  };
+%>
+
+<nav class="cat-strip cat-strip--page" id="catStripPage" aria-label="Shop by category">
+  <div class="cat-strip__inner">
+    <ul class="cat-strip__list" role="list">
+
+      <% categories.forEach(function(cat) {
+        const isActive = active === cat.slug;
+      %>
+      <li>
+        <a
+          href="<%= cat.href %>"
+          class="cat-strip__item<%= isActive ? ' cat-strip__item--active' : '' %>"
+          aria-label="<%= cat.label %>"
+          <%= isActive ? 'aria-current="page"' : '' %>
+        >
+          <div class="cat-strip__illustration" aria-hidden="true">
+            <%- illustrations[cat.slug] %>
+          </div>
+          <span class="cat-strip__label"><%= cat.label %></span>
+        </a>
+      </li>
+      <% }); %>
+
+    </ul>
+  </div>
+</nav>

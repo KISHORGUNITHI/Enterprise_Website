@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= title %></title>
+  <link rel="icon" type="image/svg+xml" href="/public/icons/favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+  <!-- Foundation -->
+  <link rel="stylesheet" href="/assets/css/variables.css"/>
+  <link rel="stylesheet" href="/assets/css/base.css"/>
+  <link rel="stylesheet" href="/assets/css/utilities.css"/>
+
+  <!-- Header (reused exactly — no category strip) -->
+  <link rel="stylesheet" href="/assets/css/home-header.css"/>
+  <link rel="stylesheet" href="/assets/css/category-header.css"/>
+
+  <!-- PLP card styles (for related products) -->
+  <link rel="stylesheet" href="/assets/css/category-page.css"/>
+
+  <!-- PDP styles -->
+  <link rel="stylesheet" href="/assets/css/pdp.css"/>
+
+  <!-- Footer -->
+  <link rel="stylesheet" href="/assets/css/footer.css"/>
+  <link rel="stylesheet" href="/assets/css/home-footer.css"/>
+
+  <!-- Auth modal -->
+  <link rel="stylesheet" href="/assets/css/login-required-modal.css"/>
+
+  <!-- Responsive last -->
+  <link rel="stylesheet" href="/assets/css/responsive.css"/>
+</head>
+
+<body>
+
+  <!-- ── Existing category header — reused exactly, NO strip ── -->
+  <%- include('../../partials/category-header') %>
+
+  <main id="main-content" class="pdp pdp-below">
+    <div class="pdp__container">
+
+      <!-- ══════════════════════════════════════════════════════
+           MAIN: Two-column — Gallery (left) | Info (right)
+      ══════════════════════════════════════════════════════ -->
+      <div class="pdp__main">
+
+        <!-- ─── LEFT: Image Gallery ─── -->
+        <div class="pdp-gallery">
+
+          <div class="pdp-gallery__main-wrap" id="pdpMainWrap">
+            <span class="pdp-gallery__badge" id="pdpBadge">Sale</span>
+            <button class="pdp-gallery__wishlist" id="pdpWishlist" aria-label="Add to wishlist">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/>
+              </svg>
+            </button>
+            <!-- JS injects SVG placeholder here -->
+            <div class="pdp-gallery__main-img" id="pdpMainImg"></div>
+          </div>
+
+          <div class="pdp-gallery__thumbs" id="pdpThumbs"></div>
+
+        </div>
+
+        <!-- ─── RIGHT: Product Info ─── -->
+        <div class="pdp-info">
+
+          <!-- Brand -->
+          <span class="pdp-info__brand" id="pdpBrand">Brand</span>
+
+          <!-- Title + tagline -->
+          <div>
+            <h1 class="pdp-info__title" id="pdpTitle">Loading…</h1>
+            <p class="pdp-info__tagline" id="pdpTagline"></p>
+          </div>
+
+          <!-- Rating -->
+          <div class="pdp-info__rating" id="pdpRating"></div>
+
+          <!-- Price -->
+          <div class="pdp-info__price-block">
+            <div class="pdp-info__price-row">
+              <span class="pdp-info__price-sale" id="pdpPriceSale">—</span>
+              <span class="pdp-info__price-original" id="pdpPriceOrig"></span>
+              <span class="pdp-info__price-discount" id="pdpPriceDiscount"></span>
+            </div>
+            <span class="pdp-info__price-save" id="pdpPriceSave"></span>
+            <p class="pdp-info__emi-note" id="pdpEmiNote"></p>
+          </div>
+
+          <!-- Color Selector -->
+          <div class="pdp-colors reveal">
+            <p class="pdp-colors__label">
+              Color: <span id="pdpColorLabel">—</span>
+            </p>
+            <div class="pdp-colors__options" id="pdpColors"></div>
+          </div>
+
+          <!-- Variant Selectors -->
+          <div class="pdp-variants reveal" id="pdpVariants"></div>
+
+          <!-- EMI Card -->
+          <div class="pdp-emi reveal" id="pdpEmi"></div>
+
+          <!-- Delivery Info -->
+          <div class="pdp-delivery reveal" id="pdpDelivery"></div>
+
+          <!-- Highlights -->
+          <div class="pdp-highlights reveal">
+            <p class="pdp-section__title">Highlights</p>
+            <ul class="pdp-highlights__list" id="pdpHighlights"></ul>
+          </div>
+
+        </div>
+        <!-- end pdp-info -->
+
+      </div>
+      <!-- end pdp__main -->
+
+
+      <!-- ══════════════════════════════════════════════════════
+           BELOW FOLD: Description, Specs, Related + Sticky Bar
+           The bar is position:sticky inside this wrapper.
+           It sticks to the bottom while scrolling through this
+           section and naturally stops at the end — zero JS needed.
+      ══════════════════════════════════════════════════════ -->
+      <div class="pdp-below-wrap">
+
+        <!-- Description -->
+        <div class="pdp-description reveal" style="margin-top:var(--space-6);">
+          <p class="pdp-section__title">Description</p>
+          <div class="pdp-description__body pdp-description__body--collapsed" id="pdpDescBody"></div>
+          <button class="pdp-description__toggle" id="pdpDescToggle">
+            Read More
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <polyline points="4 6 8 10 12 6"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Specifications -->
+        <div class="pdp-specs reveal" id="pdpSpecsSection" style="margin-top:var(--space-6);">
+          <p class="pdp-section__title">Specifications</p>
+          <div id="pdpSpecs"></div>
+        </div>
+
+        <!-- Related Products -->
+        <section class="pdp-related reveal" aria-label="You may also like">
+          <div class="pdp-related__header">
+            <h2 class="pdp-related__title">You May Also Like</h2>
+            <div class="pdp-related__controls">
+              <button class="pdp-related__ctrl" id="pdpRelPrev" aria-label="Scroll left">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="10 12 6 8 10 4"/></svg>
+              </button>
+              <button class="pdp-related__ctrl" id="pdpRelNext" aria-label="Scroll right">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 4 10 8 6 12"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="pdp-related__viewport" id="pdpRelViewport">
+            <div class="pdp-related__track" id="pdpRelTrack" role="list"></div>
+          </div>
+        </section>
+
+      </div>
+      <!-- end pdp-below-wrap -->
+
+    </div>
+    <!-- end pdp__container -->
+  </main>
+
+  <!-- ── Fixed purchase action bar — always visible from page load ── -->
+  <div class="pdp-buy-bar" id="pdpBuyBar" role="region" aria-label="Purchase actions">
+    <div class="pdp-buy-bar__inner">
+
+      <button class="pdp-buy-bar__cart" data-action="add-cart" aria-label="Add to cart">
+        <svg class="pdp-buy-bar__cart-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M2 2h2l2.5 10M8 15h10l3-8H6.5"/>
+          <circle cx="10" cy="19" r="1.5" fill="currentColor" stroke="none"/>
+          <circle cx="18" cy="19" r="1.5" fill="currentColor" stroke="none"/>
+        </svg>
+        <span class="pdp-buy-bar__cart-label">Add to Cart</span>
+      </button>
+
+      <a href="tel:9963657799" class="pdp-buy-bar__emi-btn" aria-label="Call for EMI">
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" style="flex-shrink:0;">
+          <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+        </svg>
+        <span class="pdp-buy-bar__emi-text">
+          <span class="pdp-buy-bar__emi-label">Call for EMI</span>
+          <span class="pdp-buy-bar__emi-sub">TVS Credit | Bajaj Finserv</span>
+        </span>
+      </a>
+
+      <button class="pdp-buy-bar__buy" data-action="buy-now" aria-label="Buy Now">
+        <span class="pdp-buy-bar__buy-label">Buy Now</span>
+        <span class="pdp-buy-bar__buy-price" id="pdpBarPrice">—</span>
+      </button>
+
+    </div>
+  </div>
+
+  <%# Footer %>
+  <%- include('../../partials/home-footer') %>
+
+  <!-- Auth modal -->
+  <%- include('../../partials/login-required-modal') %>
+
+  <!-- Data (must load before pdp.js) -->
+  <script src="/assets/data/product-data.js"></script>
+  <script src="/assets/data/category-plp-data.js"></script>
+
+  <!-- JS -->
+  <script src="/assets/js/category-header.js" defer></script>
+  <script src="/assets/js/pdp.js"             defer></script>
+  <script src="/assets/js/auth-guard.js"       defer></script>
+
+</body>
+</html>

@@ -1,0 +1,161 @@
+<%#
+  emi.ejs — 0% EMI split-layout section
+  Future React component: <EMISection />
+  No forms, no calculator. CTA opens tel: link.
+%>
+
+<section class="emi section" id="emi" aria-labelledby="emi-heading">
+  <div class="container">
+    <div class="emi__layout">
+
+      <!-- LEFT: Content -->
+      <div class="emi__content reveal--left">
+
+        <span class="section__eyebrow">Easy Financing</span>
+        <h2 class="emi__title" id="emi-heading">
+          0% Interest EMI<br>
+          <span class="gradient-text">On All Products</span>
+        </h2>
+        <p class="emi__subtitle">
+          Own your dream gadget today without any financial burden.
+          Instant approval, zero paperwork, flexible tenures.
+        </p>
+
+        <!-- Partner logos -->
+        <div class="emi__partners" aria-label="EMI partners">
+          <p class="emi__partners-label">Available on</p>
+          <div class="emi__partners-list">
+
+            <div class="emi__partner-card" aria-label="TVS Credit">
+              <div class="emi__partner-logo emi__partner-logo--tvs" aria-hidden="true">
+                <svg viewBox="0 0 80 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="80" height="32" rx="6" fill="#cc0000"/>
+                  <text x="40" y="21" text-anchor="middle" font-size="13" font-weight="800" fill="#fff" font-family="Arial, sans-serif">TVS Credit</text>
+                </svg>
+              </div>
+            </div>
+
+            <div class="emi__partner-card" aria-label="Bajaj Finserv">
+              <div class="emi__partner-logo emi__partner-logo--bajaj" aria-hidden="true">
+                <svg viewBox="0 0 100 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="100" height="32" rx="6" fill="#00008b"/>
+                  <text x="50" y="21" text-anchor="middle" font-size="11" font-weight="800" fill="#fff" font-family="Arial, sans-serif">Bajaj Finserv</text>
+                </svg>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Benefits list -->
+        <ul class="emi__benefits" aria-label="EMI benefits">
+          <li class="emi__benefit">
+            <div class="emi__benefit-icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <span>Zero Down Payment</span>
+          </li>
+          <li class="emi__benefit">
+            <div class="emi__benefit-icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <span>Instant Approval in Minutes</span>
+          </li>
+          <li class="emi__benefit">
+            <div class="emi__benefit-icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <span>Flexible EMI Plans (3–24 months)</span>
+          </li>
+          <li class="emi__benefit">
+            <div class="emi__benefit-icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <span>No Hidden Charges</span>
+          </li>
+        </ul>
+
+        <!-- CTA — opens phone dialer -->
+        <a
+          href="tel:9963657799"
+          class="btn btn--accent btn--lg emi__cta"
+          aria-label="Call us to check EMI eligibility"
+        >
+          <svg class="icon icon--md" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+          </svg>
+          Know Eligibility
+        </a>
+
+        <p class="emi__cta-note">
+          <svg class="icon icon--sm" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+          </svg>
+          100% secure • No CIBIL impact check
+        </p>
+
+      </div>
+
+      <!-- RIGHT: Visual card -->
+      <div class="emi__visual reveal--right" aria-hidden="true">
+        <div class="emi__card-scene">
+
+          <!-- Floating decorative ring -->
+          <div class="emi__ring emi__ring--1"></div>
+          <div class="emi__ring emi__ring--2"></div>
+
+          <!-- Main EMI card mockup -->
+          <div class="emi__card emi__card--main">
+            <div class="emi__card-header">
+              <div class="emi__card-chip"></div>
+              <div class="emi__card-brand">
+                <svg viewBox="0 0 36 24" fill="none">
+                  <circle cx="14" cy="12" r="10" fill="#eb001b" opacity="0.9"/>
+                  <circle cx="22" cy="12" r="10" fill="#f79e1b" opacity="0.9"/>
+                </svg>
+              </div>
+            </div>
+            <div class="emi__card-number">•••• •••• •••• 4521</div>
+            <div class="emi__card-footer-row">
+              <div>
+                <p class="emi__card-meta-label">Card Holder</p>
+                <p class="emi__card-meta-value">ENTERPRISE CUSTOMER</p>
+              </div>
+              <div>
+                <p class="emi__card-meta-label">EMI Rate</p>
+                <p class="emi__card-meta-value emi__card-meta-value--accent">0%</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Floating stat badges -->
+          <div class="emi__stat-badge emi__stat-badge--1">
+            <div class="emi__stat-badge-icon">✓</div>
+            <div>
+              <p class="emi__stat-value">Instant</p>
+              <p class="emi__stat-label">Approval</p>
+            </div>
+          </div>
+
+          <div class="emi__stat-badge emi__stat-badge--2">
+            <div class="emi__stat-badge-icon">%</div>
+            <div>
+              <p class="emi__stat-value">0%</p>
+              <p class="emi__stat-label">Interest</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>

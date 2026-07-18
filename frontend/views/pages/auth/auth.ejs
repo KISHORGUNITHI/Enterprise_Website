@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign In — Enterprise Store</title>
+  <link rel="icon" type="image/svg+xml" href="/public/icons/favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/assets/css/variables.css"/>
+  <link rel="stylesheet" href="/assets/css/base.css"/>
+  <link rel="stylesheet" href="/assets/css/utilities.css"/>
+  <link rel="stylesheet" href="/assets/css/auth-pages.css"/>
+</head>
+
+<body class="auth-body auth-body--split">
+
+<div class="auth-split">
+
+  <!-- ── LEFT: Branding panel (desktop only) ── -->
+  <div class="auth-split__brand" aria-hidden="true">
+    <div class="auth-split__brand-inner">
+      <a href="/" class="auth-split__logo">
+        <svg width="48" height="48" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="rgba(255,255,255,0.15)"/>
+          <path d="M8 10h16M8 16h10M8 22h13" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="24" cy="22" r="3" fill="var(--color-accent-500)"/>
+        </svg>
+        <div>
+          <p class="auth-split__brand-name">Enterprise Store</p>
+          <p class="auth-split__brand-tag">Official Electronics Store</p>
+        </div>
+      </a>
+
+      <div class="auth-split__brand-content">
+        <h2 class="auth-split__headline">
+          Shop the best<br>electronics in town.
+        </h2>
+        <p class="auth-split__subline">
+          Mobiles, TVs, ACs, Refrigerators and more — all with official warranty and 0% EMI.
+        </p>
+        <ul class="auth-split__perks">
+          <li><span class="auth-split__perk-dot"></span> Official brand warranty on every product</li>
+          <li><span class="auth-split__perk-dot"></span> 0% Interest EMI via TVS Credit &amp; Bajaj Finserv</li>
+          <li><span class="auth-split__perk-dot"></span> Free data transfer at our store</li>
+          <li><span class="auth-split__perk-dot"></span> Best price guarantee</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT: Auth card ── -->
+  <div class="auth-split__form-side">
+
+    <!-- Back to home -->
+    <a href="/" class="auth-back-home" aria-label="Back to Enterprise Store home page">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="10 12 6 8 10 4"/>
+      </svg>
+      Back to Home
+    </a>
+
+    <!-- Mobile logo (only visible on small screens) -->
+    <a href="/" class="auth-page__logo auth-page__logo--mobile">
+      <svg width="36" height="36" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <rect width="32" height="32" rx="8" fill="var(--color-primary-700)"/>
+        <path d="M8 10h16M8 16h10M8 22h13" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="24" cy="22" r="3" fill="var(--color-accent-500)"/>
+      </svg>
+      <div>
+        <p class="auth-page__logo-name">Enterprise Store</p>
+        <p class="auth-page__logo-sub">Official Electronics Store</p>
+      </div>
+    </a>
+
+    <div class="auth-card">
+
+      <!-- Tab switcher -->
+      <div class="auth-tabs" role="tablist" aria-label="Authentication options">
+        <button
+          class="auth-tab active"
+          id="tab-login"
+          role="tab"
+          aria-selected="true"
+          aria-controls="panel-login"
+          data-tab="login"
+        >Login</button>
+        <button
+          class="auth-tab"
+          id="tab-register"
+          role="tab"
+          aria-selected="false"
+          aria-controls="panel-register"
+          data-tab="register"
+        >Register</button>
+        <span class="auth-tabs__pill" aria-hidden="true"></span>
+      </div>
+
+      <!-- ── LOGIN PANEL ── -->
+      <div class="auth-panel active" id="panel-login" role="tabpanel" aria-labelledby="tab-login">
+
+        <div class="auth-card__heading">
+          <h1 class="auth-card__title">Welcome back</h1>
+          <p class="auth-card__subtitle">Sign in to continue shopping.</p>
+        </div>
+
+        <form class="auth-form" id="loginForm" novalidate>
+
+          <div class="auth-form__group">
+            <label class="auth-form__label" for="loginIdentifier">Email or Phone Number</label>
+            <div class="auth-form__field" id="identifierField">
+              <input type="text" id="loginIdentifier" name="identifier"
+                class="auth-form__input"
+                placeholder="you@example.com or 98765 43210"
+                autocomplete="username" autocapitalize="none" spellcheck="false"/>
+            </div>
+            <span class="auth-form__error" id="identifierError" aria-live="polite" hidden>
+              <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0a6 6 0 100 12A6 6 0 006 0zm0 9a.75.75 0 110-1.5A.75.75 0 016 9zm.75-3.75a.75.75 0 01-1.5 0V3.75a.75.75 0 011.5 0v1.5z"/></svg>
+              Please enter your email or phone number.
+            </span>
+          </div>
+
+          <div class="auth-form__group">
+            <label class="auth-form__label" for="loginPassword">Password</label>
+            <div class="auth-form__field" id="loginPasswordField">
+              <input type="password" id="loginPassword" name="password"
+                class="auth-form__input"
+                placeholder="Enter your password"
+                autocomplete="current-password"/>
+              <button type="button" class="auth-form__toggle" id="loginPassToggle" aria-label="Show password" aria-pressed="false">
+                <svg class="eye-show" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="10" cy="10" r="2.5"/></svg>
+                <svg class="eye-hide" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;"><path d="M13.359 11.238C13.75 10.546 14 9.797 14 9c0-2.21-1.79-4-4-4-.797 0-1.546.25-2.238.641M3.78 3.78l12.44 12.44M8.682 8.682A3.5 3.5 0 0010 10.5M1 1l18 18M9 15.93A9.006 9.006 0 011 10s3.5-6 9-6c1.036 0 2.03.175 2.952.488"/></svg>
+              </button>
+            </div>
+            <span class="auth-form__error" id="loginPasswordError" aria-live="polite" hidden>
+              <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0a6 6 0 100 12A6 6 0 006 0zm0 9a.75.75 0 110-1.5A.75.75 0 016 9zm.75-3.75a.75.75 0 01-1.5 0V3.75a.75.75 0 011.5 0v1.5z"/></svg>
+              Please enter your password.
+            </span>
+          </div>
+
+          <button type="submit" class="btn btn--primary auth-form__submit" id="loginBtn">Login</button>
+        </form>
+
+        <div class="auth-card__footer">
+          Don't have an account?
+          <button type="button" class="auth-link-btn" data-switch="register">Create Account</button>
+        </div>
+      </div>
+
+      <!-- ── REGISTER PANEL ── -->
+      <div class="auth-panel" id="panel-register" role="tabpanel" aria-labelledby="tab-register" hidden>
+
+        <div class="auth-card__heading">
+          <h1 class="auth-card__title">Create account</h1>
+          <p class="auth-card__subtitle">Join Enterprise Store today.</p>
+        </div>
+
+        <form class="auth-form" id="registerForm" novalidate>
+
+          <div class="auth-form__group">
+            <label class="auth-form__label" for="regName">Full Name</label>
+            <div class="auth-form__field" id="nameField">
+              <input type="text" id="regName" name="name" class="auth-form__input" placeholder="Your full name" autocomplete="name"/>
+            </div>
+            <span class="auth-form__error" id="nameError" aria-live="polite" hidden>
+              <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0a6 6 0 100 12A6 6 0 006 0zm0 9a.75.75 0 110-1.5A.75.75 0 016 9zm.75-3.75a.75.75 0 01-1.5 0V3.75a.75.75 0 011.5 0v1.5z"/></svg>
+              Please enter your full name.
+            </span>
+          </div>
+
+          <div class="auth-form__group">
+            <label class="auth-form__label" for="regEmail">Email Address</label>
+            <div class="auth-form__field" id="emailField">
+              <input type="email" id="regEmail" name="email" class="auth-form__input" placeholder="you@example.com" autocomplete="email"/>
+            </div>
+            <span class="auth-form__error" id="emailError" aria-live="polite" hidden>
+              <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0a6 6 0 100 12A6 6 0 006 0zm0 9a.75.75 0 110-1.5A.75.75 0 016 9zm.75-3.75a.75.75 0 01-1.5 0V3.75a.75.75 0 011.5 0v1.5z"/></svg>
+              Please enter a valid email address.
+            </span>
+          </div>
+
+          <div class="auth-form__group">
+            <label class="auth-form__label" for="regPhone">Phone Number</label>
+            <div class="auth-form__field" id="phoneField">
+              <span class="auth-form__prefix">+91</span>
+              <input type="tel" id="regPhone" name="phone" class="auth-form__input" placeholder="98765 43210" maxlength="10" inputmode="numeric" autocomplete="tel-national"/>
+            </div>
+            <span class="auth-form__error" id="phoneError" aria-live="polite" hidden>
+              <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0a6 6 0 100 12A6 6 0 006 0zm0 9a.75.75 0 110-1.5A.75.75 0 016 9zm.75-3.75a.75.75 0 01-1.5 0V3.75a.75.75 0 011.5 0v1.5z"/></svg>
+              Please enter a valid 10-digit phone number.
+            </span>
+          </div>
+
+          <div class="auth-form__group">
+            <label class="auth-form__label" for="regPassword">Password</label>
+            <div class="auth-form__field" id="regPasswordField">
+              <input type="password" id="regPassword" name="password" class="auth-form__input" placeholder="Min. 8 characters" autocomplete="new-password"/>
+              <button type="button" class="auth-form__toggle" id="regPassToggle" aria-label="Show password" aria-pressed="false">
+                <svg class="eye-show" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="10" cy="10" r="2.5"/></svg>
+                <svg class="eye-hide" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;"><path d="M13.359 11.238C13.75 10.546 14 9.797 14 9c0-2.21-1.79-4-4-4-.797 0-1.546.25-2.238.641M3.78 3.78l12.44 12.44M8.682 8.682A3.5 3.5 0 0010 10.5M1 1l18 18M9 15.93A9.006 9.006 0 011 10s3.5-6 9-6c1.036 0 2.03.175 2.952.488"/></svg>
+              </button>
+            </div>
+            <span class="auth-form__error" id="regPasswordError" aria-live="polite" hidden>
+              <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0a6 6 0 100 12A6 6 0 006 0zm0 9a.75.75 0 110-1.5A.75.75 0 016 9zm.75-3.75a.75.75 0 01-1.5 0V3.75a.75.75 0 011.5 0v1.5z"/></svg>
+              Password must be at least 8 characters.
+            </span>
+          </div>
+
+          <div class="auth-form__group">
+            <label class="auth-form__label" for="regConfirm">Confirm Password</label>
+            <div class="auth-form__field" id="confirmField">
+              <input type="password" id="regConfirm" name="confirmPassword" class="auth-form__input" placeholder="Repeat your password" autocomplete="new-password"/>
+              <button type="button" class="auth-form__toggle" id="regConfirmToggle" aria-label="Show confirm password" aria-pressed="false">
+                <svg class="eye-show" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="10" cy="10" r="2.5"/></svg>
+                <svg class="eye-hide" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;"><path d="M13.359 11.238C13.75 10.546 14 9.797 14 9c0-2.21-1.79-4-4-4-.797 0-1.546.25-2.238.641M3.78 3.78l12.44 12.44M8.682 8.682A3.5 3.5 0 0010 10.5M1 1l18 18M9 15.93A9.006 9.006 0 011 10s3.5-6 9-6c1.036 0 2.03.175 2.952.488"/></svg>
+              </button>
+            </div>
+            <span class="auth-form__error" id="confirmError" aria-live="polite" hidden>
+              <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0a6 6 0 100 12A6 6 0 006 0zm0 9a.75.75 0 110-1.5A.75.75 0 016 9zm.75-3.75a.75.75 0 01-1.5 0V3.75a.75.75 0 011.5 0v1.5z"/></svg>
+              Passwords do not match.
+            </span>
+          </div>
+
+          <button type="submit" class="btn btn--primary auth-form__submit" id="registerBtn">Create Account</button>
+        </form>
+
+        <div class="auth-card__footer">
+          Already have an account?
+          <button type="button" class="auth-link-btn" data-switch="login">Login</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ─── Tab switching ────────────────────────────────────────────────────────
+  const tabs   = document.querySelectorAll('.auth-tab');
+  const panels = document.querySelectorAll('.auth-panel');
+  const pill   = document.querySelector('.auth-tabs__pill');
+
+  function switchTab(tabName) {
+    tabs.forEach(t => {
+      const active = t.dataset.tab === tabName;
+      t.classList.toggle('active', active);
+      t.setAttribute('aria-selected', String(active));
+    });
+    panels.forEach(p => {
+      const active = p.id === `panel-${tabName}`;
+      p.classList.toggle('active', active);
+      p.hidden = !active;
+    });
+    // Move pill
+    const activeTab = document.getElementById(`tab-${tabName}`);
+    if (pill && activeTab) {
+      pill.style.left  = activeTab.offsetLeft + 'px';
+      pill.style.width = activeTab.offsetWidth + 'px';
+    }
+    // Clear all field states when switching
+    document.querySelectorAll('.auth-form__field').forEach(f => {
+      f.classList.remove('auth-form__field--error', 'auth-form__field--success');
+    });
+    document.querySelectorAll('.auth-form__error').forEach(e => { e.hidden = true; });
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+  });
+
+  // "Switch" links inside footer
+  document.querySelectorAll('.auth-link-btn[data-switch]').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.switch));
+  });
+
+  // Init pill position
+  setTimeout(() => switchTab('login'), 0);
+
+  // ─── Password show/hide ───────────────────────────────────────────────────
+  function wireToggle(btnId, inputId) {
+    const btn = document.getElementById(btnId);
+    const inp = document.getElementById(inputId);
+    if (!btn || !inp) return;
+    btn.addEventListener('click', function () {
+      const hidden = inp.type === 'password';
+      inp.type = hidden ? 'text' : 'password';
+      btn.querySelector('.eye-show').style.display = hidden ? 'none' : '';
+      btn.querySelector('.eye-hide').style.display = hidden ? ''     : 'none';
+      btn.setAttribute('aria-label',   hidden ? 'Hide password' : 'Show password');
+      btn.setAttribute('aria-pressed', String(hidden));
+    });
+  }
+
+  wireToggle('loginPassToggle',  'loginPassword');
+  wireToggle('regPassToggle',    'regPassword');
+  wireToggle('regConfirmToggle', 'regConfirm');
+
+  // Phone: digits only
+  const regPhone = document.getElementById('regPhone');
+  regPhone && regPhone.addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '');
+  });
+
+  // ─── Validation helpers ───────────────────────────────────────────────────
+  // Tracks which fields the user has touched
+  const touched = new Set();
+
+  function markTouched(inputId) { touched.add(inputId); }
+
+  function setFieldState(fieldId, errorId, isValid) {
+    const field = document.getElementById(fieldId);
+    const errEl = document.getElementById(errorId);
+    if (!field || !errEl) return;
+    field.classList.toggle('auth-form__field--error',   !isValid);
+    field.classList.toggle('auth-form__field--success',  isValid);
+    errEl.hidden = isValid;
+  }
+
+  function clearFieldState(fieldId, errorId) {
+    const field = document.getElementById(fieldId);
+    const errEl = document.getElementById(errorId);
+    if (!field || !errEl) return;
+    field.classList.remove('auth-form__field--error', 'auth-form__field--success');
+    errEl.hidden = true;
+  }
+
+  // Validate a field only if it has been touched OR forceAll is true
+  function validateField(inputId, fieldId, errorId, rule, forceAll) {
+    const input = document.getElementById(inputId);
+    if (!input) return true;
+    if (!forceAll && !touched.has(inputId)) return true; // not touched yet → skip
+    const valid = rule(input.value);
+    setFieldState(fieldId, errorId, valid);
+    return valid;
+  }
+
+  // ─── Login validation ─────────────────────────────────────────────────────
+  const loginId  = document.getElementById('loginIdentifier');
+  const loginPas = document.getElementById('loginPassword');
+
+  // Only validate on blur if user touched the field
+  loginId  && loginId.addEventListener('blur',  () => { markTouched('loginIdentifier'); validateField('loginIdentifier', 'identifierField', 'identifierError', v => v.trim().length > 0, false); });
+  loginPas && loginPas.addEventListener('blur', () => { markTouched('loginPassword');   validateField('loginPassword',   'loginPasswordField',  'loginPasswordError',  v => v.length > 0, false); });
+
+  // Clear error as soon as field becomes valid (real-time after touch)
+  loginId  && loginId.addEventListener('input',  () => { if (touched.has('loginIdentifier') && loginId.value.trim().length > 0)  setFieldState('identifierField', 'identifierError', true); });
+  loginPas && loginPas.addEventListener('input', () => { if (touched.has('loginPassword')   && loginPas.value.length > 0)          setFieldState('loginPasswordField',  'loginPasswordError',  true); });
+
+  document.getElementById('loginForm') && document.getElementById('loginForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    // Force validate all fields on submit
+    ['loginIdentifier', 'loginPassword'].forEach(id => markTouched(id));
+    const ok1 = validateField('loginIdentifier', 'identifierField',     'identifierError',     v => v.trim().length > 0, true);
+    const ok2 = validateField('loginPassword',   'loginPasswordField',  'loginPasswordError',  v => v.length > 0,        true);
+    if (ok1 && ok2) {
+      const btn = document.getElementById('loginBtn');
+      if (btn) { btn.disabled = true; btn.textContent = 'Signing in…'; }
+      // Future: POST /api/auth/login
+      setTimeout(() => { window.location.href = '/home'; }, 400);
+    }
+  });
+
+  // ─── Register validation ──────────────────────────────────────────────────
+  const regName  = document.getElementById('regName');
+  const regEmail = document.getElementById('regEmail');
+  const regPass  = document.getElementById('regPassword');
+  const regConf  = document.getElementById('regConfirm');
+
+  // Blur handlers
+  const regBlurs = [
+    ['regName',     'nameField',        'nameError',        v => v.trim().length > 1],
+    ['regEmail',    'emailField',       'emailError',       v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())],
+    ['regPhone',    'phoneField',       'phoneError',       v => v.replace(/\D/g,'').length === 10],
+    ['regPassword', 'regPasswordField', 'regPasswordError', v => v.length >= 8],
+    ['regConfirm',  'confirmField',     'confirmError',     v => v === (regPass ? regPass.value : '') && v.length > 0],
+  ];
+
+  regBlurs.forEach(([inputId, fieldId, errorId, rule]) => {
+    const el = document.getElementById(inputId);
+    el && el.addEventListener('blur', () => {
+      markTouched(inputId);
+      validateField(inputId, fieldId, errorId, rule, false);
+    });
+    // Real-time clear once valid after touch
+    el && el.addEventListener('input', () => {
+      if (touched.has(inputId) && rule(el.value)) setFieldState(fieldId, errorId, true);
+      else if (touched.has(inputId) && !rule(el.value)) setFieldState(fieldId, errorId, false);
+    });
+  });
+
+  document.getElementById('registerForm') && document.getElementById('registerForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    regBlurs.forEach(([id]) => markTouched(id));
+    const results = regBlurs.map(([inputId, fieldId, errorId, rule]) => {
+      const input = document.getElementById(inputId);
+      const valid = input ? rule(input.value) : false;
+      setFieldState(fieldId, errorId, valid);
+      return valid;
+    });
+    if (results.every(Boolean)) {
+      const btn = document.getElementById('registerBtn');
+      if (btn) { btn.disabled = true; btn.textContent = 'Creating account…'; }
+      // Future: POST /api/auth/register
+      setTimeout(() => { window.location.href = '/home'; }, 400);
+    }
+  });
+
+  // ─── URL hash to pre-select tab ───────────────────────────────────────────
+  const hash = window.location.hash.replace('#', '');
+  if (hash === 'register') switchTab('register');
+
+}());
+</script>
+</body>
+</html>

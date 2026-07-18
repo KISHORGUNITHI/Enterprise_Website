@@ -1,0 +1,46 @@
+<%#
+  hero.ejs — Auto-sliding hero carousel with CTAs
+  Future React component: <HeroSlider banners={bannersData} />
+  Data is injected via window.bannersData from banners.js
+%>
+
+<section class="hero" id="hero" aria-label="Hero banner carousel">
+
+  <!-- Slider track -->
+  <div class="hero__slider" id="heroSlider" role="region" aria-roledescription="carousel" aria-label="Featured promotions">
+
+    <!-- Slides are injected by hero-slider.js -->
+    <div class="hero__track" id="heroTrack" aria-live="polite"></div>
+
+    <!-- Navigation arrows -->
+    <button
+      class="hero__arrow hero__arrow--prev"
+      id="heroPrev"
+      aria-label="Previous slide"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
+
+    <button
+      class="hero__arrow hero__arrow--next"
+      id="heroNext"
+      aria-label="Next slide"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+
+    <!-- Dots indicator -->
+    <div class="hero__dots" id="heroDots" role="tablist" aria-label="Slide indicators"></div>
+
+    <!-- Progress bar -->
+    <div class="hero__progress" aria-hidden="true">
+      <div class="hero__progress-bar" id="heroProgressBar"></div>
+    </div>
+
+  </div>
+
+</section>

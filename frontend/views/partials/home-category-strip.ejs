@@ -1,0 +1,110 @@
+<%# home-category-strip.ejs — Sticky strip. Image/illustration above category name. %>
+
+<nav class="cat-strip" id="catStrip" aria-label="Shop by category">
+  <div class="cat-strip__inner">
+    <ul class="cat-strip__list" role="list">
+
+      <li>
+        <a href="/home" class="cat-strip__item" aria-label="All categories">
+          <div class="cat-strip__illustration" aria-hidden="true">
+            <svg viewBox="0 0 40 40" fill="none">
+              <rect x="4" y="4"   width="13" height="13" rx="2.5" fill="var(--color-primary-100)" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+              <rect x="23" y="4"  width="13" height="13" rx="2.5" fill="var(--color-primary-100)" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+              <rect x="4" y="23"  width="13" height="13" rx="2.5" fill="var(--color-primary-100)" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+              <rect x="23" y="23" width="13" height="13" rx="2.5" fill="var(--color-primary-100)" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <span class="cat-strip__label">All</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/products/mobiles" class="cat-strip__item">
+          <div class="cat-strip__illustration" aria-hidden="true">
+            <svg viewBox="0 0 40 40" fill="none">
+              <rect x="10" y="3" width="20" height="34" rx="4" fill="#e8edf5" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+              <rect x="14" y="8"  width="12" height="20" rx="1.5" fill="var(--color-primary-200)" opacity=".6"/>
+              <circle cx="20" cy="32" r="2" fill="var(--color-primary-500)"/>
+              <rect x="16" y="6" width="8" height="1.5" rx=".75" fill="var(--color-primary-400)"/>
+            </svg>
+          </div>
+          <span class="cat-strip__label">Mobiles</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/products/tvs" class="cat-strip__item">
+          <div class="cat-strip__illustration" aria-hidden="true">
+            <svg viewBox="0 0 40 40" fill="none">
+              <rect x="3" y="7"  width="34" height="22" rx="3" fill="#e8edf5" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+              <rect x="7" y="11" width="26" height="14" rx="1.5" fill="var(--color-primary-200)" opacity=".6"/>
+              <path d="M14 33 h12" stroke="var(--color-primary-400)" stroke-width="2" stroke-linecap="round"/>
+              <path d="M20 29 v4"  stroke="var(--color-primary-400)" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="cat-strip__label">TVs</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/products/acs" class="cat-strip__item">
+          <div class="cat-strip__illustration" aria-hidden="true">
+            <svg viewBox="0 0 40 40" fill="none">
+              <rect x="3" y="10" width="34" height="14" rx="4" fill="#e8edf5" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+              <circle cx="33" cy="17" r="3" fill="var(--color-primary-200)" stroke="var(--color-primary-400)" stroke-width="1"/>
+              <path d="M8 17 h18" stroke="var(--color-primary-400)" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M8 28 Q13 25 18 28 Q23 31 28 28" stroke="var(--color-primary-300)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+              <path d="M8 32 Q13 29 18 32 Q23 35 28 32" stroke="var(--color-primary-200)" stroke-width="1"   fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="cat-strip__label">ACs</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/products/home-theatres" class="cat-strip__item">
+          <div class="cat-strip__illustration" aria-hidden="true">
+            <svg viewBox="0 0 40 40" fill="none">
+              <rect x="13" y="4"  width="14" height="22" rx="3" fill="#e8edf5" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+              <circle cx="20" cy="15" r="4" fill="var(--color-primary-200)" stroke="var(--color-primary-400)" stroke-width="1"/>
+              <circle cx="20" cy="15" r="1.5" fill="var(--color-primary-500)"/>
+              <path d="M10 36 h20" stroke="var(--color-primary-400)" stroke-width="2" stroke-linecap="round"/>
+              <rect x="16" y="26" width="8" height="8" rx="1" fill="var(--color-primary-100)" stroke="var(--color-primary-300)" stroke-width="1.2"/>
+            </svg>
+          </div>
+          <span class="cat-strip__label">Home Theatres</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/products/kitchen" class="cat-strip__item">
+          <div class="cat-strip__illustration" aria-hidden="true">
+            <svg viewBox="0 0 40 40" fill="none">
+              <rect x="8"  y="18" width="24" height="16" rx="3" fill="#e8edf5" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+              <path d="M14 18 V10 Q14 5 20 5 Q26 5 26 10 V18" stroke="var(--color-primary-400)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+              <path d="M13 27 h14" stroke="var(--color-primary-300)" stroke-width="1.2" stroke-linecap="round"/>
+              <path d="M13 31 h8"  stroke="var(--color-primary-200)" stroke-width="1.2" stroke-linecap="round"/>
+              <circle cx="29" cy="22" r="2" fill="var(--color-primary-400)"/>
+            </svg>
+          </div>
+          <span class="cat-strip__label">Kitchen</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/products/refrigerators" class="cat-strip__item">
+          <div class="cat-strip__illustration" aria-hidden="true">
+            <svg viewBox="0 0 40 40" fill="none">
+              <rect x="10" y="3"  width="20" height="34" rx="3.5" fill="#e8edf5" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+              <path d="M10 19 h20" stroke="var(--color-primary-400)" stroke-width="1.5"/>
+              <path d="M27 11 v5"  stroke="var(--color-primary-500)" stroke-width="2" stroke-linecap="round"/>
+              <path d="M27 23 v8"  stroke="var(--color-primary-500)" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="cat-strip__label">Refrigerators</span>
+        </a>
+      </li>
+
+    </ul>
+  </div>
+</nav>

@@ -1,0 +1,167 @@
+<%#
+  home-header.ejs — Two-row sticky header. Layout reference: Flipkart desktop.
+  Row 1: Logo (left) | Location (right)
+  Row 2: Search flex-1 (left) | Profile Wishlist Cart Orders (right)
+  Future React component: <HomeHeader />
+%>
+
+<header class="hdr" id="homeHeader" role="banner">
+  <div class="hdr__wrapper">
+
+    <!-- ════════════════════════════════════════
+         ROW 1 — Logo + Location
+    ════════════════════════════════════════ -->
+    <div class="hdr__row1">
+
+      <!-- Logo -->
+      <a href="/home" class="hdr__logo" aria-label="Enterprise Store — Go to home">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="8" fill="rgba(255,255,255,0.95)"/>
+          <path d="M8 10h16M8 16h10M8 22h13" stroke="var(--color-primary-700)" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="24" cy="22" r="3" fill="var(--color-accent-500)"/>
+        </svg>
+        <div class="hdr__logo-text">
+          <span class="hdr__logo-name">Enterprise</span>
+          <span class="hdr__logo-sub">Store <span class="hdr__logo-tag">Plus</span></span>
+        </div>
+      </a>
+
+      <!-- Location — right-aligned -->
+      <button class="hdr__location" id="hdrLocation" aria-label="Set delivery location" aria-haspopup="true">
+        <svg class="hdr__location-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M10 11a3 3 0 100-6 3 3 0 000 6z"/>
+          <path d="M10 18s-7-5.686-7-10a7 7 0 1114 0C17 12.314 10 18 10 18z"/>
+        </svg>
+        <div class="hdr__location-text">
+          <!-- Desktop: "Deliver to" label + value -->
+          <span class="hdr__location-label hdr__location-label--desktop">Deliver to</span>
+          <span class="hdr__location-value" id="hdrLocationValue">
+            <!-- Full text: desktop/tablet -->
+            <span class="hdr__loc-full">Location not set</span>
+            <!-- Compact text: mobile -->
+            <span class="hdr__loc-short">📍 Set Location</span>
+          </span>
+        </div>
+        <svg class="hdr__chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <polyline points="4 6 8 10 12 6"/>
+        </svg>
+      </button>
+
+    </div>
+
+    <!-- ════════════════════════════════════════
+         ROW 2 — Search + Action Icons
+    ════════════════════════════════════════ -->
+    <div class="hdr__row2">
+
+      <!-- Search bar — flex:1, starts from left -->
+      <div class="hdr__search-wrap" role="search">
+        <form class="hdr__search-form" id="hdrSearchForm" action="/products" method="GET" aria-label="Search products">
+          <div class="hdr__search-box" id="hdrSearchBox">
+            <!-- Search icon (left) -->
+            <span class="hdr__search-icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="9" r="6"/>
+                <path d="M13.5 13.5L17 17"/>
+              </svg>
+            </span>
+            <!-- Input -->
+            <input
+              type="search"
+              name="q"
+              id="hdrSearchInput"
+              class="hdr__search-input"
+              placeholder="Search for Mobiles, TVs, Refrigerators and more"
+              autocomplete="off"
+              aria-label="Search for products"
+              aria-autocomplete="list"
+              aria-controls="hdrSuggestions"
+              aria-expanded="false"
+            />
+            <!-- Search button (right) -->
+            <button type="submit" class="hdr__search-submit" aria-label="Search">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="9" cy="9" r="6"/>
+                <path d="M13.5 13.5L17 17"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Suggestions dropdown -->
+          <div class="hdr__suggestions" id="hdrSuggestions" role="listbox" aria-label="Search suggestions" hidden>
+            <div class="hdr__suggestions-group">
+              <p class="hdr__suggestions-label">Popular Searches</p>
+              <ul class="hdr__suggestions-list">
+                <li><a href="/products/mobiles"       class="hdr__suggestion-item" role="option">iPhone 15 Pro</a></li>
+                <li><a href="/products/mobiles"       class="hdr__suggestion-item" role="option">Samsung Galaxy S24</a></li>
+                <li><a href="/products/tvs"           class="hdr__suggestion-item" role="option">55 inch OLED TV</a></li>
+                <li><a href="/products/acs"           class="hdr__suggestion-item" role="option">1.5 Ton Inverter AC</a></li>
+                <li><a href="/products/refrigerators" class="hdr__suggestion-item" role="option">Double Door Refrigerator</a></li>
+              </ul>
+            </div>
+            <div class="hdr__suggestions-group">
+              <p class="hdr__suggestions-label">Browse Categories</p>
+              <div class="hdr__suggestions-cats">
+                <a href="/products/mobiles"        class="hdr__suggestion-cat">Mobiles</a>
+                <a href="/products/tvs"            class="hdr__suggestion-cat">TVs</a>
+                <a href="/products/acs"            class="hdr__suggestion-cat">ACs</a>
+                <a href="/products/refrigerators"  class="hdr__suggestion-cat">Fridges</a>
+                <a href="/products/kitchen"        class="hdr__suggestion-cat">Kitchen</a>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Action icons — right side -->
+      <nav class="hdr__actions" aria-label="Account and shopping">
+
+        <a href="/profile" class="hdr__action-btn" aria-label="My Profile">
+          <div class="hdr__action-icon-wrap">
+            <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M11 11a4 4 0 100-8 4 4 0 000 8z"/>
+              <path d="M3 20c0-3.314 3.582-6 8-6s8 2.686 8 6"/>
+            </svg>
+          </div>
+          <span class="hdr__action-label">Profile</span>
+        </a>
+
+        <a href="/wishlist" class="hdr__action-btn" aria-label="Wishlist">
+          <div class="hdr__action-icon-wrap hdr__action-icon-wrap--badge">
+            <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3.5 5.5a4.5 4.5 0 016.364 0L11 6.636l1.136-1.136a4.5 4.5 0 116.364 6.364L11 19.364l-7.5-7.5A4.5 4.5 0 013.5 5.5z"/>
+            </svg>
+            <span class="hdr__badge" aria-label="2 items in wishlist">2</span>
+          </div>
+          <span class="hdr__action-label">Wishlist</span>
+        </a>
+
+        <a href="/cart" class="hdr__action-btn" aria-label="Cart">
+          <div class="hdr__action-icon-wrap hdr__action-icon-wrap--badge">
+            <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M2 2h2l2.5 10M8 15h10l3-8H6.5"/>
+              <circle cx="10" cy="19" r="1.5" fill="currentColor" stroke="none"/>
+              <circle cx="18" cy="19" r="1.5" fill="currentColor" stroke="none"/>
+            </svg>
+            <span class="hdr__badge" aria-label="3 items in cart">3</span>
+          </div>
+          <span class="hdr__action-label">Cart</span>
+        </a>
+
+        <a href="/orders" class="hdr__action-btn" aria-label="My Orders">
+          <div class="hdr__action-icon-wrap">
+            <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="2" width="16" height="18" rx="2.5"/>
+              <path d="M7 8h8M7 12h5"/>
+            </svg>
+          </div>
+          <span class="hdr__action-label">Orders</span>
+        </a>
+
+      </nav>
+
+    </div>
+    <!-- end row 2 -->
+
+  </div>
+</header>

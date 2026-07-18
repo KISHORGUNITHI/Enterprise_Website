@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= title %></title>
+  <link rel="icon" type="image/svg+xml" href="/public/icons/favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+  <!-- Foundation -->
+  <link rel="stylesheet" href="/assets/css/variables.css"/>
+  <link rel="stylesheet" href="/assets/css/base.css"/>
+  <link rel="stylesheet" href="/assets/css/utilities.css"/>
+
+  <!-- Header -->
+  <link rel="stylesheet" href="/assets/css/home-header.css"/>
+  <link rel="stylesheet" href="/assets/css/category-header.css"/>
+
+  <!-- Footer -->
+  <link rel="stylesheet" href="/assets/css/footer.css"/>
+  <link rel="stylesheet" href="/assets/css/home-footer.css"/>
+
+  <!-- Orders page -->
+  <link rel="stylesheet" href="/assets/css/orders.css"/>
+
+  <!-- Auth modal -->
+  <link rel="stylesheet" href="/assets/css/login-required-modal.css"/>
+
+  <!-- Responsive -->
+  <link rel="stylesheet" href="/assets/css/responsive.css"/>
+</head>
+
+<body>
+
+  <%- include('../../partials/category-header') %>
+
+  <main class="orders-page" id="main-content">
+    <div class="orders-page__container">
+
+      <!-- ── Page heading ── -->
+      <div class="orders-heading">
+        <h1 class="orders-heading__title">My Orders</h1>
+        <p class="orders-heading__sub">Track all your purchases from Enterprise Store.</p>
+      </div>
+
+      <!-- ── Search ── -->
+      <div class="orders-search" role="search">
+        <svg class="orders-search__icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="9" cy="9" r="6"/><path d="M13.5 13.5L17 17"/>
+        </svg>
+        <input
+          type="search"
+          id="ordersSearch"
+          class="orders-search__input"
+          placeholder="Search by Product Name or Order ID"
+          autocomplete="off"
+          aria-label="Search orders"
+        />
+      </div>
+
+      <!-- ── Filter chips ── -->
+      <div class="orders-filters" role="group" aria-label="Filter orders by status">
+
+        <button class="orders-filter-chip active" data-filter="all">
+          All
+        </button>
+        <button class="orders-filter-chip" data-filter="processing">
+          <span class="orders-filter-chip__dot" style="background:#eab308;"></span>
+          Processing
+        </button>
+        <button class="orders-filter-chip" data-filter="confirmed">
+          <span class="orders-filter-chip__dot" style="background:#3b82f6;"></span>
+          Confirmed
+        </button>
+        <button class="orders-filter-chip" data-filter="out_for_delivery">
+          <span class="orders-filter-chip__dot" style="background:#f97316;"></span>
+          Out for Delivery
+        </button>
+        <button class="orders-filter-chip" data-filter="delivered">
+          <span class="orders-filter-chip__dot" style="background:#22c55e;"></span>
+          Delivered
+        </button>
+        <button class="orders-filter-chip" data-filter="cancelled">
+          <span class="orders-filter-chip__dot" style="background:#ef4444;"></span>
+          Cancelled
+        </button>
+
+      </div>
+
+      <!-- ── Results count ── -->
+      <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-4);">
+        <span id="ordersCount">—</span>
+      </p>
+
+      <!-- ── Orders list (rendered by orders.js) ── -->
+      <div id="ordersList" aria-label="Orders" aria-live="polite"></div>
+
+    </div>
+  </main>
+
+  <!-- ── Order detail drawer ── -->
+  <div class="orders-overlay" id="ordersOverlay" aria-hidden="true"></div>
+  <aside
+    class="orders-drawer"
+    id="ordersDrawer"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Order Details"
+    aria-hidden="true"
+  >
+    <div class="orders-drawer__header">
+      <h2 class="orders-drawer__title">Order Details</h2>
+      <button class="orders-drawer__close" id="ordersDrawerClose" aria-label="Close order details">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M3 3l10 10M13 3L3 13"/>
+        </svg>
+      </button>
+    </div>
+    <div class="orders-drawer__body" id="ordersDrawerBody">
+      <%# Populated by orders.js %>
+    </div>
+  </aside>
+
+  <%- include('../../partials/home-footer') %>
+  <%- include('../../partials/login-required-modal') %>
+
+  <!-- Data -->
+  <script src="/assets/data/orders-data.js"></script>
+
+  <!-- JS -->
+  <script src="/assets/js/category-header.js" defer></script>
+  <script src="/assets/js/orders.js"           defer></script>
+  <script src="/assets/js/auth-guard.js"        defer></script>
+
+</body>
+</html>

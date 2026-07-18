@@ -1,0 +1,160 @@
+<%#
+  whatsapp.ejs — WhatsApp subscription / newsletter replacement section
+  Future React component: <WhatsAppSection />
+  No backend — all links open wa.me URLs directly.
+%>
+
+<section class="whatsapp-section section" id="whatsapp" aria-labelledby="whatsapp-heading">
+  <div class="container">
+    <div class="whatsapp-section__layout">
+
+      <!-- LEFT: Content -->
+      <div class="whatsapp-section__content reveal--left">
+
+        <div class="whatsapp-section__icon-wrap" aria-hidden="true">
+          <div class="whatsapp-section__icon-ring"></div>
+          <div class="whatsapp-section__icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M41.1 7C36.7 2.5 30.8 0 24.5 0 11.1 0 0.1 11 0 24.4c0 4.3 1.1 8.5 3.3 12.2L0 48l11.7-3.1c3.5 1.9 7.5 2.9 11.5 2.9h.1c13.3 0 24.2-11 24.3-24.4 0-6.5-2.5-12.6-6.5-16.4z" fill="#25d366"/>
+              <path d="M24.5 44.4c-3.7 0-7.3-1-10.5-2.8l-.7-.4-7.5 2 2-7.3-.5-.7C5.6 32.3 4.4 28.4 4.4 24.4 4.5 13.4 13.5 4.4 24.5 4.4c5.4 0 10.4 2.1 14.2 5.9 3.8 3.8 5.9 8.8 5.9 14.2-.1 11-9.1 19.9-20.1 19.9z" fill="#fff"/>
+              <path d="M35.6 29.1c-.6-.3-3.6-1.8-4.1-2-.5-.2-.9-.3-1.3.3-.4.6-1.5 2-1.9 2.4-.3.4-.7.5-1.3.2-3.5-1.7-5.8-3.1-8.1-7-.6-1.1.6-1 1.7-3.4.2-.4.1-.8-.1-1.1-.2-.3-1.3-3.1-1.8-4.3-.5-1.1-.9-1-1.3-1h-1.1c-.4 0-.9.1-1.4.7-.5.5-1.8 1.8-1.8 4.3s1.9 5 2.1 5.3c.3.4 3.7 5.6 8.9 7.9 5.2 2.2 5.2 1.5 6.2 1.4 1-.1 3.1-1.3 3.6-2.5.4-1.2.4-2.3.3-2.5-.2-.2-.6-.4-1.3-.7z" fill="#25d366"/>
+            </svg>
+          </div>
+        </div>
+
+        <span class="section__eyebrow">Stay Updated</span>
+        <h2 class="whatsapp-section__title" id="whatsapp-heading">
+          Never Miss a Deal
+        </h2>
+        <p class="whatsapp-section__subtitle">
+          Join our WhatsApp channel and receive exclusive updates directly on your phone.
+        </p>
+
+        <!-- What you receive -->
+        <ul class="whatsapp-section__features" aria-label="What you'll receive">
+          <li class="whatsapp-section__feature">
+            <div class="whatsapp-section__feature-dot" aria-hidden="true"></div>
+            <span>New Product Launches</span>
+          </li>
+          <li class="whatsapp-section__feature">
+            <div class="whatsapp-section__feature-dot" aria-hidden="true"></div>
+            <span>Festival &amp; Seasonal Offers</span>
+          </li>
+          <li class="whatsapp-section__feature">
+            <div class="whatsapp-section__feature-dot" aria-hidden="true"></div>
+            <span>Trending Discounts</span>
+          </li>
+          <li class="whatsapp-section__feature">
+            <div class="whatsapp-section__feature-dot" aria-hidden="true"></div>
+            <span>Flash Sales &amp; Limited Deals</span>
+          </li>
+        </ul>
+
+        <!-- Trust notes -->
+        <div class="whatsapp-section__trust-notes" aria-label="Our promise to you">
+          <div class="whatsapp-section__trust-note">
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm11.78-1.72a.75.75 0 00-1.06-1.06L6.75 9.19 5.28 7.72a.75.75 0 00-1.06 1.06l2 2a.75.75 0 001.06 0l4.5-4.5z" clip-rule="evenodd"/>
+            </svg>
+            No Spam
+          </div>
+          <div class="whatsapp-section__trust-note">
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm11.78-1.72a.75.75 0 00-1.06-1.06L6.75 9.19 5.28 7.72a.75.75 0 00-1.06 1.06l2 2a.75.75 0 001.06 0l4.5-4.5z" clip-rule="evenodd"/>
+            </svg>
+            Max 2–3 updates/week
+          </div>
+          <div class="whatsapp-section__trust-note">
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm11.78-1.72a.75.75 0 00-1.06-1.06L6.75 9.19 5.28 7.72a.75.75 0 00-1.06 1.06l2 2a.75.75 0 001.06 0l4.5-4.5z" clip-rule="evenodd"/>
+            </svg>
+            Leave Anytime
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: CTA card -->
+      <div class="whatsapp-section__cta-card reveal--right">
+
+        <div class="whatsapp-section__card-header">
+          <div class="whatsapp-section__card-icon" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none">
+              <circle cx="16" cy="16" r="16" fill="rgba(37,211,102,0.15)"/>
+              <path d="M10 16 L14 20 L22 12" stroke="#25d366" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <p class="whatsapp-section__card-title">Join Our Community</p>
+            <p class="whatsapp-section__card-subtitle">Instant • Free • No App Needed</p>
+          </div>
+        </div>
+
+        <!-- Phone input -->
+        <div class="whatsapp-section__input-group">
+          <label for="waPhone" class="whatsapp-section__input-label">Your WhatsApp Number</label>
+          <div class="whatsapp-section__input-wrap">
+            <span class="whatsapp-section__input-prefix" aria-label="India country code">+91</span>
+            <input
+              type="tel"
+              id="waPhone"
+              class="whatsapp-section__input"
+              placeholder="98765 43210"
+              maxlength="10"
+              pattern="[0-9]{10}"
+              inputmode="numeric"
+              aria-label="Enter your 10-digit WhatsApp number"
+              autocomplete="tel-national"
+            />
+          </div>
+        </div>
+
+        <!-- Primary CTA — Join WhatsApp -->
+        <a
+          href="https://wa.me/919963657799"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn btn--whatsapp btn--lg whatsapp-section__join-btn"
+          id="joinWhatsAppBtn"
+          aria-label="Join our WhatsApp channel"
+        >
+          <svg class="icon icon--md" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+          </svg>
+          Join WhatsApp
+        </a>
+
+        <!-- Divider -->
+        <div class="whatsapp-section__divider" aria-hidden="true">
+          <span>or</span>
+        </div>
+
+        <!-- Secondary CTA — Message Us -->
+        <a
+          href="https://wa.me/919963657799?text=Hi%20Enterprise%20Store%2C%0AI'm%20interested%20in%20your%20latest%20offers."
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn btn--outline whatsapp-section__msg-btn"
+          aria-label="Send us a WhatsApp message"
+        >
+          <svg class="icon icon--md" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"/>
+            <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"/>
+          </svg>
+          Message Us
+        </a>
+
+        <!-- Assurance row -->
+        <div class="whatsapp-section__assurance" aria-label="Privacy assurance">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M8 1L14 3.5V8C14 11.5 11.5 14.5 8 15.5C4.5 14.5 2 11.5 2 8V3.5L8 1Z"/>
+            <path d="M5.5 8L7 9.5L10.5 6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Your number is safe. We never share it with anyone.
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</section>

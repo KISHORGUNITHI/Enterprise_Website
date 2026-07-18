@@ -1,0 +1,65 @@
+<%#
+  home-trust.ejs — Compact horizontal trust badges bar.
+  Future React component: <HomeTrustBar />
+%>
+
+<div class="home-trust" aria-label="Why shop with us">
+  <div class="container--wide">
+    <div class="home-trust__grid">
+
+      <div class="home-trust__item">
+        <div class="home-trust__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V6l-9-4z"/>
+            <polyline points="9 12 11 14 15 10"/>
+          </svg>
+        </div>
+        <div>
+          <p class="home-trust__title">Official Warranty</p>
+          <p class="home-trust__desc">100% genuine products</p>
+        </div>
+      </div>
+
+      <div class="home-trust__item">
+        <div class="home-trust__icon home-trust__icon--accent" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="5" width="20" height="14" rx="3"/>
+            <path d="M2 10h20"/>
+            <circle cx="8" cy="15" r="1.5" fill="currentColor" stroke="none"/>
+          </svg>
+        </div>
+        <div>
+          <p class="home-trust__title">0% EMI</p>
+          <p class="home-trust__desc">Instant approval</p>
+        </div>
+      </div>
+
+      <div class="home-trust__item">
+        <div class="home-trust__icon home-trust__icon--green" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 11 12 14 22 4"/>
+            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+          </svg>
+        </div>
+        <div>
+          <p class="home-trust__title">Best Price Match</p>
+          <p class="home-trust__desc">We match any price</p>
+        </div>
+      </div>
+
+      <div class="home-trust__item">
+        <div class="home-trust__icon home-trust__icon--purple" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2"/>
+            <rect x="8" y="10" width="12" height="10" rx="2"/>
+          </svg>
+        </div>
+        <div>
+          <p class="home-trust__title">Instant Data Transfer</p>
+          <p class="home-trust__desc">Free in-store service</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

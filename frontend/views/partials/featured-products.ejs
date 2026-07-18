@@ -1,0 +1,48 @@
+<%#
+  featured-products.ejs — Netflix-style horizontal product carousel
+  Future React component: <FeaturedProducts products={productsData} />
+  Cards rendered by featured-slider.js
+%>
+
+<section class="featured section" id="featured" aria-labelledby="featured-heading">
+  <div class="container">
+
+    <div class="featured__header reveal">
+      <div class="featured__header-text">
+        <span class="section__eyebrow">Handpicked For You</span>
+        <h2 class="section__title" id="featured-heading">Featured Products</h2>
+        <p class="section__subtitle" style="text-align:left; margin-inline: 0;">
+          Top-selling gadgets and appliances — all with official warranty and best-in-market pricing.
+        </p>
+      </div>
+      <div class="featured__header-controls" aria-label="Scroll product cards">
+        <button class="featured__ctrl-btn" id="featuredPrev" aria-label="Scroll products left">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="13 16 7 10 13 4"/>
+          </svg>
+        </button>
+        <button class="featured__ctrl-btn" id="featuredNext" aria-label="Scroll products right">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="7 4 13 10 7 16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Full-width scrollable track (outside container for edge-to-edge scroll) -->
+  <div class="featured__viewport" aria-label="Product carousel">
+    <div class="featured__track" id="featuredTrack" role="list">
+      <%# Cards injected by featured-slider.js %>
+    </div>
+  </div>
+
+  <!-- Scroll progress indicator -->
+  <div class="container">
+    <div class="featured__scroll-bar" aria-hidden="true">
+      <div class="featured__scroll-thumb" id="featuredScrollThumb"></div>
+    </div>
+  </div>
+
+</section>

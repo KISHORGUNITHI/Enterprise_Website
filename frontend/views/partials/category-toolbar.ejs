@@ -1,0 +1,43 @@
+<%#
+  category-toolbar.ejs — Toolbar: category title, product count, sort dropdown, mobile filter button.
+  Future React component: <CategoryToolbar label={pageLabel} slug={slug} />
+%>
+
+<div class="plp-toolbar" id="plpToolbar">
+  <div class="plp__container">
+    <div class="plp-toolbar__inner">
+
+      <!-- Left: title + count -->
+      <div class="plp-toolbar__left">
+        <h2 class="plp-toolbar__category"><%= pageLabel %></h2>
+        <p class="plp-toolbar__count" id="plpCount" aria-live="polite">Loading products…</p>
+      </div>
+
+      <!-- Right: filter button (mobile) + sort -->
+      <div class="plp-toolbar__right">
+
+        <!-- Mobile filter trigger -->
+        <button class="plp-toolbar__filter-btn" id="plpFilterBtn" aria-label="Open filters" aria-haspopup="dialog">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true">
+            <path d="M3 5h14M6 10h8M9 15h2"/>
+          </svg>
+          Filters
+        </button>
+
+        <!-- Sort by -->
+        <div class="plp-sort">
+          <label class="plp-sort__label" for="plpSort">Sort by</label>
+          <select class="plp-sort__select" id="plpSort" aria-label="Sort products">
+            <option value="popularity">Popularity</option>
+            <option value="newest">Newest First</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="rating">Highest Rated</option>
+            <option value="discount">Best Discount</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

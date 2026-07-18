@@ -1,0 +1,24 @@
+<%#
+  home-hero.ejs — Home page hero banner carousel.
+  Lighter than the landing hero — compact height, faster transitions.
+  Future React component: <HomeHero banners={homeBannersData} />
+%>
+
+<section class="home-hero" id="homeHero" aria-label="Featured promotions">
+  <div class="home-hero__slider" id="homeHeroSlider">
+
+    <div class="home-hero__track" id="homeHeroTrack" aria-live="polite"></div>
+
+    <!-- Arrows -->
+    <button class="home-hero__arrow home-hero__arrow--prev" id="homeHeroPrev" aria-label="Previous banner">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="13 16 7 10 13 4"/></svg>
+    </button>
+    <button class="home-hero__arrow home-hero__arrow--next" id="homeHeroNext" aria-label="Next banner">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="7 4 13 10 7 16"/></svg>
+    </button>
+
+    <!-- Dots -->
+    <div class="home-hero__dots" id="homeHeroDots" role="tablist" aria-label="Banner indicators"></div>
+
+  </div>
+</section>

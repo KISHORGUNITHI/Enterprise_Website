@@ -1,0 +1,177 @@
+<%#
+  footer.ejs — Site footer with logo, links, contact, and legal
+  Future React component: <Footer />
+%>
+
+<footer class="footer" id="footer" role="contentinfo">
+
+  <!-- Main footer grid -->
+  <div class="footer__main">
+    <div class="container">
+      <div class="footer__grid">
+
+        <!-- Column 1: Brand -->
+        <div class="footer__col footer__col--brand">
+          <a href="/" class="footer__logo" aria-label="Enterprise Store Home">
+            <div class="footer__logo-icon" aria-hidden="true">
+              <svg width="36" height="36" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="32" height="32" rx="8" fill="var(--color-primary-700)"/>
+                <path d="M8 10h16M8 16h10M8 22h13" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="24" cy="22" r="3" fill="var(--color-accent-500)"/>
+              </svg>
+            </div>
+            <div class="footer__logo-text">
+              <span class="footer__logo-name">Enterprise</span>
+              <span class="footer__logo-tagline">Store</span>
+            </div>
+          </a>
+
+          <p class="footer__brand-desc">
+            Your trusted local electronics partner since 2009. Official dealer for 100+ top brands with 0% EMI and official warranty on all products.
+          </p>
+
+          <!-- Social links -->
+          <div class="footer__social" aria-label="Follow us on social media">
+            <a
+              href="https://instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="footer__social-link"
+              aria-label="Follow Enterprise Store on Instagram"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+            </a>
+
+            <a
+              href="https://facebook.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="footer__social-link"
+              aria-label="Follow Enterprise Store on Facebook"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+            </a>
+
+            <a
+              href="https://youtube.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="footer__social-link"
+              aria-label="Follow Enterprise Store on YouTube"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              </svg>
+            </a>
+
+            <a
+              href="https://wa.me/919963657799"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="footer__social-link footer__social-link--whatsapp"
+              aria-label="Message Enterprise Store on WhatsApp"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Column 2: Quick Links -->
+        <nav class="footer__col footer__col--links" aria-label="Quick links">
+          <h3 class="footer__col-heading">Quick Links</h3>
+          <ul class="footer__nav-list" role="list">
+            <li><a href="#hero"         class="footer__nav-link">Home</a></li>
+            <li><a href="#categories"   class="footer__nav-link">Categories</a></li>
+            <li><a href="#featured"     class="footer__nav-link">Offers</a></li>
+            <li><a href="#emi"          class="footer__nav-link">EMI Plans</a></li>
+            <li><a href="#location"     class="footer__nav-link">Contact Us</a></li>
+            <li><a href="#"             class="footer__nav-link">FAQ</a></li>
+          </ul>
+        </nav>
+
+        <!-- Column 3: Contact & Hours -->
+        <div class="footer__col footer__col--contact">
+          <h3 class="footer__col-heading">Contact Us</h3>
+
+          <address class="footer__contact-list">
+
+            <div class="footer__contact-item">
+              <div class="footer__contact-icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <span>Main Road, Near City Center,<br>Hyderabad, Telangana — 500001</span>
+            </div>
+
+            <div class="footer__contact-item">
+              <div class="footer__contact-icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                </svg>
+              </div>
+              <a href="tel:9963657799" class="footer__contact-link">+91 99636 57799</a>
+            </div>
+
+            <div class="footer__contact-item">
+              <div class="footer__contact-icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                </svg>
+              </div>
+              <a href="mailto:info@enterprisestore.in" class="footer__contact-link">info@enterprisestore.in</a>
+            </div>
+
+            <div class="footer__contact-item">
+              <div class="footer__contact-icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <div>
+                <span>Mon–Sat: 10AM – 9PM</span><br>
+                <span>Sun: 11AM – 7PM</span>
+              </div>
+            </div>
+
+          </address>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="footer__bottom">
+    <div class="container">
+      <div class="footer__bottom-inner">
+
+        <p class="footer__copyright">
+          &copy; <span id="footerYear"></span> Enterprise Store. All rights reserved.
+        </p>
+
+        <nav class="footer__legal-links" aria-label="Legal links">
+          <a href="#" class="footer__legal-link">Privacy Policy</a>
+          <span class="footer__legal-sep" aria-hidden="true">·</span>
+          <a href="#" class="footer__legal-link">Terms of Service</a>
+          <span class="footer__legal-sep" aria-hidden="true">·</span>
+          <a href="#" class="footer__legal-link">Refund Policy</a>
+        </nav>
+
+      </div>
+    </div>
+  </div>
+
+</footer>
+
+<script>
+  // Inject current year
+  document.getElementById('footerYear').textContent = new Date().getFullYear();
+</script>

@@ -1,0 +1,107 @@
+<%#
+  achievements.ejs — Store statistics / achievement counters
+  Future React component: <AchievementsSection />
+  Animated counters driven by achievements counter script (inline in this partial).
+%>
+
+<section class="achievements section" id="achievements" aria-labelledby="achievements-heading">
+  <div class="container">
+
+    <div class="section__header reveal">
+      <span class="section__eyebrow">Our Track Record</span>
+      <h2 class="section__title section__title--inverse" id="achievements-heading">
+        Trusted By Thousands
+      </h2>
+      <p class="section__subtitle section__subtitle--inverse">
+        Numbers that reflect our commitment to quality, trust, and exceptional service.
+      </p>
+    </div>
+
+    <div class="achievements__grid">
+
+      <article class="achievements__card reveal" aria-label="15+ Years of Service">
+        <div class="achievements__card-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="20" fill="rgba(245,133,0,0.15)" stroke="rgba(245,133,0,0.4)" stroke-width="1.5"/>
+            <path d="M24 14 L24 24 L30 30" stroke="#f58500" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="24" cy="24" r="2" fill="#f58500"/>
+          </svg>
+        </div>
+        <div class="achievements__stat">
+          <span class="achievements__number" data-target="15" data-suffix="+">0</span>
+          <span class="achievements__unit">Years</span>
+        </div>
+        <p class="achievements__label">Years of Service</p>
+        <p class="achievements__desc">Trusted electronics partner since 2009</p>
+      </article>
+
+      <article class="achievements__card reveal delay-100" aria-label="50,000+ Happy Customers">
+        <div class="achievements__card-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="20" fill="rgba(34,197,94,0.15)" stroke="rgba(34,197,94,0.4)" stroke-width="1.5"/>
+            <circle cx="19" cy="20" r="4" stroke="#22c55e" stroke-width="2" fill="none"/>
+            <circle cx="29" cy="20" r="4" stroke="#22c55e" stroke-width="2" fill="none"/>
+            <path d="M11 34 C11 29 14.7 26 19 26" stroke="#22c55e" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <path d="M37 34 C37 29 33.3 26 29 26" stroke="#22c55e" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <path d="M19 26 C19 26 21 28 24 28 C27 28 29 26 29 26" stroke="#22c55e" stroke-width="2" stroke-linecap="round" fill="none"/>
+          </svg>
+        </div>
+        <div class="achievements__stat">
+          <span class="achievements__number" data-target="50000" data-suffix="+" data-format="compact">0</span>
+        </div>
+        <p class="achievements__label">Happy Customers</p>
+        <p class="achievements__desc">Smiles delivered across the city</p>
+      </article>
+
+      <article class="achievements__card reveal delay-200" aria-label="100+ Top Brands">
+        <div class="achievements__card-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="20" fill="rgba(96,165,250,0.15)" stroke="rgba(96,165,250,0.4)" stroke-width="1.5"/>
+            <path d="M24 14 L26.5 20.5 L34 20.5 L28 24.8 L30 31 L24 27.2 L18 31 L20 24.8 L14 20.5 L21.5 20.5 Z" stroke="#60a5fa" stroke-width="2" fill="rgba(96,165,250,0.2)"/>
+          </svg>
+        </div>
+        <div class="achievements__stat">
+          <span class="achievements__number" data-target="100" data-suffix="+">0</span>
+        </div>
+        <p class="achievements__label">Top Brands</p>
+        <p class="achievements__desc">Official authorized dealer</p>
+      </article>
+
+      <article class="achievements__card reveal delay-300" aria-label="98% Customer Satisfaction">
+        <div class="achievements__card-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="20" fill="rgba(167,139,250,0.15)" stroke="rgba(167,139,250,0.4)" stroke-width="1.5"/>
+            <path d="M17 21 C17 18 19 16 22 17 C23 14 25 13 27 14 C30 15 31 18 29 20 L24 25 L17 21 Z" fill="rgba(167,139,250,0.3)" stroke="#a78bfa" stroke-width="1.5"/>
+            <path d="M16 30 C18 28 22 27 24 29 C26 27 30 28 32 30" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" fill="none"/>
+          </svg>
+        </div>
+        <div class="achievements__stat">
+          <span class="achievements__number" data-target="98" data-suffix="%">0</span>
+        </div>
+        <p class="achievements__label">Customer Satisfaction</p>
+        <p class="achievements__desc">Based on post-purchase surveys</p>
+      </article>
+
+      <article class="achievements__card reveal delay-400" aria-label="365 Days Support">
+        <div class="achievements__card-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="20" fill="rgba(251,191,36,0.15)" stroke="rgba(251,191,36,0.4)" stroke-width="1.5"/>
+            <rect x="14" y="16" width="20" height="18" rx="3" stroke="#fbbf24" stroke-width="2" fill="none"/>
+            <path d="M14 22 L34 22" stroke="#fbbf24" stroke-width="2"/>
+            <path d="M19 13 L19 19" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+            <path d="M29 13 L29 19" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+            <rect x="19" y="26" width="4" height="4" rx="1" fill="#fbbf24" opacity="0.7"/>
+          </svg>
+        </div>
+        <div class="achievements__stat">
+          <span class="achievements__number" data-target="365" data-suffix="">0</span>
+          <span class="achievements__unit">Days</span>
+        </div>
+        <p class="achievements__label">Support</p>
+        <p class="achievements__desc">Year-round customer assistance</p>
+      </article>
+
+    </div>
+
+  </div>
+</section>

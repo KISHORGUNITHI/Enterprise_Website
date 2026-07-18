@@ -1,0 +1,100 @@
+<%#
+  category-promo-banner.ejs — Promotional hero banner at the top of every category PLP.
+  Receives: slug, pageLabel from category.ejs locals.
+  Future React component: <CategoryPromoBanner slug={slug} label={pageLabel} />
+%>
+
+<%
+  const banners = {
+    mobiles: {
+      eyebrow:    'New Arrivals 2025',
+      title:      'Latest Smartphones',
+      subtitle:   'Top flagship phones from Apple, Samsung & OnePlus at the best prices in Hyderabad.',
+      bg:         'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 55%, #2f52a0 100%)',
+      accent:     '#f58500',
+    },
+    tvs: {
+      eyebrow:    'Entertainment Awaits',
+      title:      'Entertainment Starts Here',
+      subtitle:   'OLED, QLED and Neo QLED screens — stunning visuals with official warranty.',
+      bg:         'linear-gradient(135deg, #1a0d2e 0%, #3b1f6b 55%, #5a2ea0 100%)',
+      accent:     '#a78bfa',
+    },
+    acs: {
+      eyebrow:    'Beat the Heat',
+      title:      'Beat the Summer Heat',
+      subtitle:   'Energy-efficient inverter ACs with 5-star ratings and instant installation support.',
+      bg:         'linear-gradient(135deg, #0a1a30 0%, #0d3a6e 55%, #1e5aa0 100%)',
+      accent:     '#60a5fa',
+    },
+    'home-theatres': {
+      eyebrow:    'Cinematic Experience',
+      title:      'Experience Cinematic Sound',
+      subtitle:   'Dolby Atmos soundbars and home theatre systems that transform your living room.',
+      bg:         'linear-gradient(135deg, #10141f 0%, #1f2937 55%, #374151 100%)',
+      accent:     '#fbbf24',
+    },
+    kitchen: {
+      eyebrow:    'Smart Kitchen',
+      title:      'Upgrade Your Kitchen',
+      subtitle:   'Premium microwaves, washing machines, mixers and more — all with official warranty.',
+      bg:         'linear-gradient(135deg, #1a0a2e 0%, #4c1d95 55%, #7c3aed 100%)',
+      accent:     '#c4b5fd',
+    },
+    refrigerators: {
+      eyebrow:    'Freshness Technology',
+      title:      'Freshness Meets Technology',
+      subtitle:   'Double door, side-by-side and French door refrigerators keeping food fresh longer.',
+      bg:         'linear-gradient(135deg, #0a2218 0%, #065f46 55%, #047857 100%)',
+      accent:     '#34d399',
+    },
+  };
+
+  const b = banners[slug] || {
+    eyebrow: 'Shop Now',
+    title:   pageLabel,
+    subtitle: 'Explore our collection of premium electronics with official warranty.',
+    bg:      'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 100%)',
+    accent:  '#f58500',
+  };
+%>
+
+<div class="plp-banner">
+  <div class="plp__container">
+    <div class="plp-banner__inner" aria-label="<%= b.title %> promotion">
+      <!-- Background -->
+      <div class="plp-banner__bg" style="background: <%= b.bg %>;" aria-hidden="true"></div>
+      <div class="plp-banner__overlay" aria-hidden="true"></div>
+
+      <!-- Text content -->
+      <div class="plp-banner__content">
+        <span class="plp-banner__eyebrow"><%= b.eyebrow %></span>
+        <h1 class="plp-banner__title"><%= b.title %></h1>
+        <p class="plp-banner__subtitle"><%= b.subtitle %></p>
+        <a href="#plpGrid" class="plp-banner__cta">
+          Shop Now
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M3 8h10M9 4l4 4-4 4"/>
+          </svg>
+        </a>
+      </div>
+
+      <!-- Illustration -->
+      <div class="plp-banner__illustration" aria-hidden="true">
+        <svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="80" cy="80" r="64" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+          <circle cx="80" cy="80" r="44" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+          <text x="80" y="88" text-anchor="middle" font-size="38" font-weight="900" fill="rgba(255,255,255,0.2)" font-family="system-ui,sans-serif">
+            <% if (slug === 'mobiles') { %>📱<% } %>
+            <% if (slug === 'tvs') { %>📺<% } %>
+            <% if (slug === 'acs') { %>❄️<% } %>
+            <% if (slug === 'home-theatres') { %>🔊<% } %>
+            <% if (slug === 'kitchen') { %>🍳<% } %>
+            <% if (slug === 'refrigerators') { %>🧊<% } %>
+          </text>
+        </svg>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,128 @@
+<%#
+  category-header.ejs — Simplified single-row shopping header for Category pages.
+  No delivery location. Search is the primary focus.
+  Reuses all .hdr__* design tokens from home-header.css.
+  Future React component: <CategoryHeader />
+%>
+
+<header class="cat-hdr" id="categoryHeader" role="banner">
+  <div class="cat-hdr__wrapper">
+
+    <!-- Logo — fixed width, left-anchored -->
+    <a href="/home" class="hdr__logo cat-hdr__logo" aria-label="Enterprise Store — Go to home">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <rect width="32" height="32" rx="8" fill="rgba(255,255,255,0.95)"/>
+        <path d="M8 10h16M8 16h10M8 22h13" stroke="var(--color-primary-700)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="24" cy="22" r="3" fill="var(--color-accent-500)"/>
+      </svg>
+      <div class="hdr__logo-text">
+        <span class="hdr__logo-name">Enterprise</span>
+        <span class="hdr__logo-sub">Store <span class="hdr__logo-tag">Plus</span></span>
+      </div>
+    </a>
+
+    <!-- Search bar — flex:1, primary focus -->
+    <div class="hdr__search-wrap" role="search">
+      <form class="hdr__search-form" id="catSearchForm" action="/products" method="GET" aria-label="Search products">
+        <div class="hdr__search-box" id="catSearchBox">
+          <span class="hdr__search-icon" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="9" r="6"/>
+              <path d="M13.5 13.5L17 17"/>
+            </svg>
+          </span>
+          <input
+            type="search"
+            name="q"
+            id="catSearchInput"
+            class="hdr__search-input"
+            placeholder="Search for Mobiles, TVs, Refrigerators and more"
+            autocomplete="off"
+            aria-label="Search for products"
+            aria-autocomplete="list"
+            aria-controls="catSuggestions"
+            aria-expanded="false"
+          />
+          <button type="submit" class="hdr__search-submit" aria-label="Search">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="9" cy="9" r="6"/>
+              <path d="M13.5 13.5L17 17"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Suggestions dropdown -->
+        <div class="hdr__suggestions" id="catSuggestions" role="listbox" aria-label="Search suggestions" hidden>
+          <div class="hdr__suggestions-group">
+            <p class="hdr__suggestions-label">Popular Searches</p>
+            <ul class="hdr__suggestions-list">
+              <li><a href="/products/mobiles"       class="hdr__suggestion-item" role="option">iPhone 15 Pro</a></li>
+              <li><a href="/products/mobiles"       class="hdr__suggestion-item" role="option">Samsung Galaxy S24</a></li>
+              <li><a href="/products/tvs"           class="hdr__suggestion-item" role="option">55 inch OLED TV</a></li>
+              <li><a href="/products/acs"           class="hdr__suggestion-item" role="option">1.5 Ton Inverter AC</a></li>
+              <li><a href="/products/refrigerators" class="hdr__suggestion-item" role="option">Double Door Refrigerator</a></li>
+            </ul>
+          </div>
+          <div class="hdr__suggestions-group">
+            <p class="hdr__suggestions-label">Browse Categories</p>
+            <div class="hdr__suggestions-cats">
+              <a href="/products/mobiles"       class="hdr__suggestion-cat">Mobiles</a>
+              <a href="/products/tvs"           class="hdr__suggestion-cat">TVs</a>
+              <a href="/products/acs"           class="hdr__suggestion-cat">ACs</a>
+              <a href="/products/refrigerators" class="hdr__suggestion-cat">Fridges</a>
+              <a href="/products/kitchen"       class="hdr__suggestion-cat">Kitchen</a>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Action icons — right-anchored -->
+    <nav class="hdr__actions" aria-label="Account and shopping">
+
+      <a href="/profile" class="hdr__action-btn" aria-label="My Profile">
+        <div class="hdr__action-icon-wrap">
+          <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M11 11a4 4 0 100-8 4 4 0 000 8z"/>
+            <path d="M3 20c0-3.314 3.582-6 8-6s8 2.686 8 6"/>
+          </svg>
+        </div>
+        <span class="hdr__action-label">Profile</span>
+      </a>
+
+      <a href="/wishlist" class="hdr__action-btn" aria-label="Wishlist">
+        <div class="hdr__action-icon-wrap hdr__action-icon-wrap--badge">
+          <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3.5 5.5a4.5 4.5 0 016.364 0L11 6.636l1.136-1.136a4.5 4.5 0 116.364 6.364L11 19.364l-7.5-7.5A4.5 4.5 0 013.5 5.5z"/>
+          </svg>
+          <span class="hdr__badge" aria-label="2 items in wishlist">2</span>
+        </div>
+        <span class="hdr__action-label">Wishlist</span>
+      </a>
+
+      <a href="/cart" class="hdr__action-btn" aria-label="Cart">
+        <div class="hdr__action-icon-wrap hdr__action-icon-wrap--badge">
+          <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M2 2h2l2.5 10M8 15h10l3-8H6.5"/>
+            <circle cx="10" cy="19" r="1.5" fill="currentColor" stroke="none"/>
+            <circle cx="18" cy="19" r="1.5" fill="currentColor" stroke="none"/>
+          </svg>
+          <span class="hdr__badge" aria-label="3 items in cart">3</span>
+        </div>
+        <span class="hdr__action-label">Cart</span>
+      </a>
+
+      <a href="/orders" class="hdr__action-btn" aria-label="My Orders">
+        <div class="hdr__action-icon-wrap">
+          <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="2" width="16" height="18" rx="2.5"/>
+            <path d="M7 8h8M7 12h5"/>
+          </svg>
+        </div>
+        <span class="hdr__action-label">Orders</span>
+      </a>
+
+    </nav>
+
+  </div>
+</header>

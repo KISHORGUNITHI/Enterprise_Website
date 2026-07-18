@@ -1,0 +1,24 @@
+<%#
+  categories.ejs — Shop By Category grid section
+  Future React component: <CategoriesSection categories={categoriesData} />
+  Cards rendered by categories.js into #categoriesGrid
+%>
+
+<section class="categories section" id="categories" aria-labelledby="categories-heading">
+  <div class="container">
+
+    <div class="section__header reveal">
+      <span class="section__eyebrow">Browse Products</span>
+      <h2 class="section__title" id="categories-heading">Shop By Category</h2>
+      <p class="section__subtitle">
+        Find exactly what you need. From flagship phones to large home appliances — we have it all.
+      </p>
+    </div>
+
+    <!-- Grid is populated by categories.js -->
+    <div class="categories__grid" id="categoriesGrid" role="list" aria-label="Product categories">
+      <%# JS renders cards here %>
+    </div>
+
+  </div>
+</section>

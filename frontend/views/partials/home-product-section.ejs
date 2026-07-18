@@ -1,0 +1,42 @@
+<!--
+  home-product-section.ejs — Reusable Netflix-style horizontal product carousel.
+  Rendered once per category section. JS reads data-section attr to pick the dataset.
+  Future React component: <ProductSection sectionId="trending" title="Trending Deals" />
+-->
+
+<section
+  class="prod-section section"
+  id="ps-<%= sectionId %>"
+  aria-labelledby="ps-heading-<%= sectionId %>"
+  data-section="<%= sectionId %>"
+>
+  <div class="container--wide">
+
+    <div class="prod-section__header">
+      <div class="prod-section__header-text">
+        <span class="section__eyebrow"><%= eyebrow %></span>
+        <h2 class="prod-section__title" id="ps-heading-<%= sectionId %>"><%= sectionTitle %></h2>
+      </div>
+      <div class="prod-section__header-right">
+        <div class="prod-section__controls">
+          <button class="prod-section__ctrl" data-dir="prev" aria-label="Scroll <%= sectionTitle %> left">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="10 12 6 8 10 4"/></svg>
+          </button>
+          <button class="prod-section__ctrl" data-dir="next" aria-label="Scroll <%= sectionTitle %> right">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 4 10 8 6 12"/></svg>
+          </button>
+        </div>
+        <a href="<%= viewAllHref %>" class="prod-section__view-all">
+          View All
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="prod-section__viewport" data-viewport="<%= sectionId %>">
+    <div class="prod-section__track" data-track="<%= sectionId %>" role="list"></div>
+  </div>
+
+</section>

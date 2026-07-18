@@ -1,0 +1,62 @@
+<%#
+  home-emi.ejs — Compact horizontal EMI financing strip for the Home page.
+  Future React component: <HomeEMIStrip />
+%>
+
+<section class="home-emi" id="homeEmi" aria-labelledby="home-emi-heading">
+  <div class="container--wide">
+
+    <div class="home-emi__layout">
+
+      <!-- Label side -->
+      <div class="home-emi__label">
+        <span class="home-emi__badge">0% EMI</span>
+        <div>
+          <h2 class="home-emi__title" id="home-emi-heading">Easy Financing Available</h2>
+          <p class="home-emi__subtitle">Zero interest · Zero down payment · Instant approval</p>
+        </div>
+      </div>
+
+      <!-- Partner cards -->
+      <div class="home-emi__partners">
+
+        <div class="home-emi__partner">
+          <div class="home-emi__partner-logo" aria-label="TVS Credit" style="background:#cc0000;">
+            <span>TVS Credit</span>
+          </div>
+          <div class="home-emi__partner-info">
+            <p class="home-emi__partner-name">TVS Credit</p>
+            <p class="home-emi__partner-desc">3 – 24 month plans</p>
+          </div>
+        </div>
+
+        <div class="home-emi__divider" aria-hidden="true"></div>
+
+        <div class="home-emi__partner">
+          <div class="home-emi__partner-logo" aria-label="Bajaj Finserv" style="background:#00008b;">
+            <span>Bajaj Finserv</span>
+          </div>
+          <div class="home-emi__partner-info">
+            <p class="home-emi__partner-name">Bajaj Finserv</p>
+            <p class="home-emi__partner-desc">Instant approval</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CTA -->
+      <a
+        href="tel:9963657799"
+        class="btn btn--accent home-emi__cta"
+        aria-label="Call us to check EMI eligibility"
+      >
+        <svg class="icon icon--sm" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+        </svg>
+        Know Eligibility
+      </a>
+
+    </div>
+
+  </div>
+</section>

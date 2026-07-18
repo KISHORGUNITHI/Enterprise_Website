@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= title %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/assets/css/variables.css"/>
+  <link rel="stylesheet" href="/assets/css/base.css"/>
+  <link rel="stylesheet" href="/assets/css/utilities.css"/>
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-bg-secondary);
+      font-family: var(--font-sans);
+    }
+    .stub {
+      text-align: center;
+      padding: var(--space-12) var(--space-6);
+      max-width: 480px;
+    }
+    .stub__icon {
+      width: 72px; height: 72px;
+      border-radius: var(--radius-2xl);
+      background: var(--color-primary-50);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--space-6);
+    }
+    .stub__icon svg { width: 36px; height: 36px; color: var(--color-primary-700); }
+    .stub__tag {
+      display: inline-block;
+      padding: 2px var(--space-3);
+      background: var(--color-accent-50);
+      color: var(--color-accent-600);
+      font-size: var(--text-xs);
+      font-weight: var(--font-bold);
+      border-radius: var(--radius-full);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+      margin-bottom: var(--space-4);
+    }
+    .stub__title {
+      font-size: var(--text-3xl);
+      font-weight: var(--font-extrabold);
+      color: var(--color-text-primary);
+      letter-spacing: var(--tracking-tight);
+      margin-bottom: var(--space-3);
+    }
+    .stub__desc {
+      font-size: var(--text-base);
+      color: var(--color-text-muted);
+      line-height: var(--leading-relaxed);
+      margin-bottom: var(--space-8);
+    }
+    .stub__route {
+      font-size: var(--text-xs);
+      font-family: monospace;
+      background: var(--color-bg-tertiary);
+      border: 1px solid var(--color-border-light);
+      border-radius: var(--radius-lg);
+      padding: var(--space-2) var(--space-4);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-8);
+      display: inline-block;
+    }
+    .stub__actions { display: flex; gap: var(--space-3); justify-content: center; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <div class="stub">
+    <div class="stub__icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <span class="stub__tag">Coming Soon</span>
+    <h1 class="stub__title"><%= pageLabel || 'Page Under Construction' %></h1>
+    <p class="stub__desc">
+      This page is being built. You provided the design — it'll be implemented when ready.
+    </p>
+    <code class="stub__route"><%= currentPath || '/' %></code>
+    <div class="stub__actions">
+      <a href="/home" class="btn btn--primary">Go to Home</a>
+      <a href="/" class="btn btn--outline">Landing Page</a>
+    </div>
+  </div>
+</body>
+</html>

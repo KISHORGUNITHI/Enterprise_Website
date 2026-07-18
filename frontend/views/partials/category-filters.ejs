@@ -1,0 +1,123 @@
+<%#
+  category-filters.ejs — Filter sidebar for Category PLP.
+  All filter groups start open. category-page.js handles collapse.
+  Receives: slug, pageLabel from category.ejs locals.
+  Future React component: <FilterSidebar slug={slug} />
+%>
+
+<%
+  const filterConfig = {
+    mobiles:        { brands: ['Apple','Samsung','OnePlus','Xiaomi','Google','Vivo','OPPO','Realme'] },
+    tvs:            { brands: ['Samsung','LG','Sony','TCL','Hisense','Mi','OnePlus','Vu'] },
+    acs:            { brands: ['Daikin','Voltas','LG','Samsung','Hitachi','Blue Star','Carrier','Panasonic'] },
+    'home-theatres':{ brands: ['Sony','Samsung','LG','Bose','JBL','Yamaha','Denon','Philips'] },
+    kitchen:        { brands: ['IFB','Bosch','Philips','LG','Havells','Samsung','Prestige','Bajaj'] },
+    refrigerators:  { brands: ['Samsung','LG','Whirlpool','Haier','Bosch','Godrej','Panasonic','Hitachi'] },
+  };
+  const cfg = filterConfig[slug] || { brands: [] };
+%>
+
+<aside class="plp-filters" id="plpFilters" aria-label="Product filters">
+
+  <div class="plp-filters__header">
+    <span class="plp-filters__title">Filters</span>
+    <button class="plp-filters__clear" id="plpClearFilters" aria-label="Clear all filters">Clear All</button>
+  </div>
+
+  <!-- Brand -->
+  <div class="plp-filter-group plp-filter-group--open">
+    <button class="plp-filter-group__toggle" aria-expanded="true">
+      <span class="plp-filter-group__name">Brand</span>
+      <svg class="plp-filter-group__chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <polyline points="4 6 8 10 12 6"/>
+      </svg>
+    </button>
+    <div class="plp-filter-group__body plp-filter-brand">
+      <% cfg.brands.forEach(function(brand) { %>
+      <label class="plp-filter-option">
+        <input type="checkbox" value="<%= brand %>" aria-label="<%= brand %>"/>
+        <span class="plp-filter-option__label"><%= brand %></span>
+      </label>
+      <% }); %>
+    </div>
+  </div>
+
+  <!-- Price -->
+  <div class="plp-filter-group plp-filter-group--open">
+    <button class="plp-filter-group__toggle" aria-expanded="true">
+      <span class="plp-filter-group__name">Price Range</span>
+      <svg class="plp-filter-group__chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <polyline points="4 6 8 10 12 6"/>
+      </svg>
+    </button>
+    <div class="plp-filter-price">
+      <div class="plp-filter-price__inputs">
+        <input type="number" id="plpPriceMin" class="plp-filter-price__input" placeholder="Min ₹" min="0" aria-label="Minimum price"/>
+        <span class="plp-filter-price__sep">–</span>
+        <input type="number" id="plpPriceMax" class="plp-filter-price__input" placeholder="Max ₹" min="0" aria-label="Maximum price"/>
+      </div>
+      <button class="btn btn--primary btn--sm" id="plpApplyPrice" style="width:100%; justify-content:center;">Apply</button>
+    </div>
+  </div>
+
+  <!-- Rating -->
+  <div class="plp-filter-group plp-filter-group--open">
+    <button class="plp-filter-group__toggle" aria-expanded="true">
+      <span class="plp-filter-group__name">Customer Rating</span>
+      <svg class="plp-filter-group__chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <polyline points="4 6 8 10 12 6"/>
+      </svg>
+    </button>
+    <div class="plp-filter-rating">
+      <% [4, 3, 2].forEach(function(r) { %>
+      <label class="plp-filter-rating__option">
+        <input type="radio" name="plpRating" value="<%= r %>" aria-label="<%= r %> stars and above"/>
+        <div class="plp-filter-rating__stars">
+          <% for(let i = 0; i < 5; i++) { %>
+          <svg class="plp-filter-rating__star<%= i >= r ? ' plp-card__star--empty' : '' %>" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M8 1.5l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11.5l-5.2 3.3 1.8-5.5L0 7h6.2z"/>
+          </svg>
+          <% } %>
+        </div>
+        <span class="plp-filter-option__label"><%= r %>★ & above</span>
+      </label>
+      <% }); %>
+    </div>
+  </div>
+
+  <!-- Discount -->
+  <div class="plp-filter-group plp-filter-group--open">
+    <button class="plp-filter-group__toggle" aria-expanded="true">
+      <span class="plp-filter-group__name">Discount</span>
+      <svg class="plp-filter-group__chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <polyline points="4 6 8 10 12 6"/>
+      </svg>
+    </button>
+    <div class="plp-filter-group__body plp-filter-discount">
+      <% [10, 15, 20, 30].forEach(function(d) { %>
+      <label class="plp-filter-option">
+        <input type="checkbox" value="<%= d %>" aria-label="<%= d %>% or more off"/>
+        <span class="plp-filter-option__label"><%= d %>% or more</span>
+      </label>
+      <% }); %>
+    </div>
+  </div>
+
+  <!-- EMI Available -->
+  <div class="plp-filter-group plp-filter-group--open">
+    <button class="plp-filter-group__toggle" aria-expanded="true">
+      <span class="plp-filter-group__name">EMI Available</span>
+      <svg class="plp-filter-group__chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <polyline points="4 6 8 10 12 6"/>
+      </svg>
+    </button>
+    <div class="plp-filter-group__body">
+      <label class="plp-filter-option">
+        <input type="checkbox" value="emi" aria-label="0% EMI available"/>
+        <span class="plp-filter-option__label">0% EMI</span>
+        <span class="plp-filter-option__count">All</span>
+      </label>
+    </div>
+  </div>
+
+</aside>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= title %></title>
+  <link rel="icon" type="image/svg+xml" href="/public/icons/favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+  <!-- Foundation -->
+  <link rel="stylesheet" href="/assets/css/variables.css"/>
+  <link rel="stylesheet" href="/assets/css/base.css"/>
+  <link rel="stylesheet" href="/assets/css/utilities.css"/>
+
+  <!-- Header tokens + overrides -->
+  <link rel="stylesheet" href="/assets/css/home-header.css"/>
+  <link rel="stylesheet" href="/assets/css/category-header.css"/>
+  <link rel="stylesheet" href="/assets/css/home-category-strip.css"/>
+  <link rel="stylesheet" href="/assets/css/category-strip.css"/>
+
+  <!-- Footer (reused from home page) -->
+  <link rel="stylesheet" href="/assets/css/footer.css"/>
+  <link rel="stylesheet" href="/assets/css/home-footer.css"/>
+
+  <!-- Category PLP page styles -->
+  <link rel="stylesheet" href="/assets/css/category-page.css"/>
+
+  <!-- Auth modal -->
+  <link rel="stylesheet" href="/assets/css/login-required-modal.css"/>
+
+  <!-- Responsive last -->
+  <link rel="stylesheet" href="/assets/css/responsive.css"/>
+</head>
+
+<body id="plpRoot" data-slug="<%= slug %>">
+
+  <!-- ── Existing: category header ── -->
+  <%- include('../../partials/category-header') %>
+
+  <!-- ── Existing: sticky category strip ── -->
+  <%- include('../../partials/category-strip') %>
+
+  <main id="main-content" class="plp">
+
+    <!-- 1. Promo banner -->
+    <%- include('../../partials/category-promo-banner') %>
+
+    <!-- 2. Toolbar: title, count, sort, mobile filter btn -->
+    <%- include('../../partials/category-toolbar') %>
+
+    <!-- 3. Sidebar filters + product grid -->
+    <div class="plp-body">
+      <div class="plp__container">
+        <div class="plp-body__inner">
+
+          <!-- Sticky filter sidebar (desktop only — hidden on mobile via CSS) -->
+          <%- include('../../partials/category-filters') %>
+
+          <!-- Product grid + pagination -->
+          <section aria-label="Product listing" id="plpContent">
+            <%- include('../../partials/category-product-grid') %>
+            <%- include('../../partials/category-pagination') %>
+          </section>
+
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 4. Mobile filter bottom sheet -->
+  <div class="plp-filter-overlay" id="plpFilterOverlay" aria-hidden="true"></div>
+  <div class="plp-filter-sheet" id="plpFilterSheet" role="dialog" aria-modal="true" aria-label="Filters">
+    <div class="plp-filter-sheet__handle" aria-hidden="true"></div>
+    <div class="plp-filter-sheet__header">
+      <span class="plp-filter-sheet__title">Filters</span>
+      <button class="plp-filter-sheet__close" id="plpSheetClose" aria-label="Close filters">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M3 3l10 10M13 3L3 13"/>
+        </svg>
+      </button>
+    </div>
+    <div class="plp-filter-sheet__content">
+      <%- include('../../partials/category-filters') %>
+    </div>
+    <div class="plp-filter-sheet__apply">
+      <button class="btn btn--primary btn--lg w-full" id="plpSheetApply"
+        style="width:100%; justify-content:center;">
+        Apply Filters
+      </button>
+    </div>
+  </div>
+
+  <!-- 5. Footer -->
+  <%- include('../../partials/home-footer') %>
+
+  <!-- Auth modal -->
+  <%- include('../../partials/login-required-modal') %>
+
+  <!-- Data -->
+  <script src="/assets/data/category-plp-data.js"></script>
+
+  <!-- JS -->
+  <script src="/assets/js/category-header.js" defer></script>
+  <script src="/assets/js/category-page.js"   defer></script>
+  <script src="/assets/js/auth-guard.js"       defer></script>
+
+</body>
+</html>

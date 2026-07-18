@@ -1,0 +1,116 @@
+<%#
+  trust.ejs — "Why Buy From Enterprise Store?" trust signals section
+  Future React component: <TrustSection />
+%>
+
+<section class="trust section" id="trust" aria-labelledby="trust-heading">
+  <div class="container">
+
+    <div class="section__header reveal">
+      <span class="section__eyebrow">Our Promise</span>
+      <h2 class="section__title" id="trust-heading">Why Buy From Enterprise Store?</h2>
+      <p class="section__subtitle">
+        We are not just a store — we are your trusted electronics partner with over 15 years of experience.
+      </p>
+    </div>
+
+    <div class="trust__grid">
+
+      <!-- Card 1: Instant Data Transfer -->
+      <article class="trust__card reveal" aria-label="Instant Data Transfer">
+        <div class="trust__card-icon-wrap">
+          <div class="trust__card-icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="24" cy="24" r="20" fill="var(--color-primary-50)" stroke="var(--color-primary-200)" stroke-width="1.5"/>
+              <path d="M16 24 L32 24 M26 18 L32 24 L26 30" stroke="var(--color-primary-700)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M16 18 L16 30" stroke="var(--color-accent-500)" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="trust__card-number" aria-hidden="true">01</div>
+        </div>
+        <div class="trust__card-body">
+          <h3 class="trust__card-title">Instant Data Transfer</h3>
+          <p class="trust__card-desc">
+            Switching phones? Our in-store experts transfer all your contacts, photos, and apps to your new device instantly — for free.
+          </p>
+        </div>
+        <div class="trust__card-footer">
+          <span class="trust__card-tag">Free Service</span>
+        </div>
+      </article>
+
+      <!-- Card 2: Instant Zero EMI -->
+      <article class="trust__card reveal delay-100" aria-label="Instant Zero EMI">
+        <div class="trust__card-icon-wrap">
+          <div class="trust__card-icon trust__card-icon--accent">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="24" cy="24" r="20" fill="var(--color-accent-50)" stroke="var(--color-accent-200)" stroke-width="1.5"/>
+              <rect x="13" y="17" width="22" height="16" rx="4" stroke="var(--color-accent-500)" stroke-width="2.5" fill="none"/>
+              <path d="M13 22 L35 22" stroke="var(--color-accent-500)" stroke-width="2.5"/>
+              <circle cx="19" cy="28" r="2" fill="var(--color-accent-500)"/>
+              <text x="25" y="31" font-size="7" font-weight="700" fill="var(--color-accent-600)">0%</text>
+            </svg>
+          </div>
+          <div class="trust__card-number" aria-hidden="true">02</div>
+        </div>
+        <div class="trust__card-body">
+          <h3 class="trust__card-title">Instant Zero EMI</h3>
+          <p class="trust__card-desc">
+            Get approved for 0% interest EMI in minutes. No paperwork hassle — walk in, choose your product, and walk out owning it.
+          </p>
+        </div>
+        <div class="trust__card-footer">
+          <span class="trust__card-tag trust__card-tag--accent">Zero Interest</span>
+        </div>
+      </article>
+
+      <!-- Card 3: Best Price Match -->
+      <article class="trust__card reveal delay-200" aria-label="Best Price Match">
+        <div class="trust__card-icon-wrap">
+          <div class="trust__card-icon trust__card-icon--success">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="24" cy="24" r="20" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+              <path d="M17 24 L22 29 L31 18" stroke="var(--color-success-600)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M24 13 L25.8 18.5 L32 18.5 L27.1 21.8 L28.9 27.3 L24 24 L19.1 27.3 L20.9 21.8 L16 18.5 L22.2 18.5 Z" fill="var(--color-success-500)" opacity="0.2"/>
+            </svg>
+          </div>
+          <div class="trust__card-number" aria-hidden="true">03</div>
+        </div>
+        <div class="trust__card-body">
+          <h3 class="trust__card-title">Best Price Match</h3>
+          <p class="trust__card-desc">
+            Found a better price elsewhere? We will match it. Our promise: you always get the best deal when you buy from us.
+          </p>
+        </div>
+        <div class="trust__card-footer">
+          <span class="trust__card-tag trust__card-tag--success">Price Guarantee</span>
+        </div>
+      </article>
+
+      <!-- Card 4: Official Warranty -->
+      <article class="trust__card reveal delay-300" aria-label="Official Warranty">
+        <div class="trust__card-icon-wrap">
+          <div class="trust__card-icon trust__card-icon--purple">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="24" cy="24" r="20" fill="#faf5ff" stroke="#e9d5ff" stroke-width="1.5"/>
+              <path d="M24 13 L33 17 L33 24 C33 29.5 29 34 24 36 C19 34 15 29.5 15 24 L15 17 Z" stroke="#9333ea" stroke-width="2" fill="rgba(147,51,234,0.08)"/>
+              <path d="M20 24 L23 27 L28 21" stroke="#9333ea" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="trust__card-number" aria-hidden="true">04</div>
+        </div>
+        <div class="trust__card-body">
+          <h3 class="trust__card-title">Official Warranty</h3>
+          <p class="trust__card-desc">
+            Every product is 100% genuine with official brand warranty. We are an authorized dealer — your investment is fully protected.
+          </p>
+        </div>
+        <div class="trust__card-footer">
+          <span class="trust__card-tag trust__card-tag--purple">Brand Authorized</span>
+        </div>
+      </article>
+
+    </div>
+
+  </div>
+</section>

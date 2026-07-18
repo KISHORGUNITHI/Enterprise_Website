@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+
+  <title><%= title %></title>
+  <meta name="description" content="<%= description %>"/>
+  <meta name="robots" content="noindex"/>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/public/icons/favicon.svg"/>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+  <!-- ── Foundation ── -->
+  <link rel="stylesheet" href="/assets/css/variables.css"/>
+  <link rel="stylesheet" href="/assets/css/base.css"/>
+  <link rel="stylesheet" href="/assets/css/utilities.css"/>
+
+  <!-- ── Home page components ── -->
+  <link rel="stylesheet" href="/assets/css/home-header.css"/>
+  <link rel="stylesheet" href="/assets/css/home-category-strip.css"/>
+  <link rel="stylesheet" href="/assets/css/home-hero.css"/>
+  <link rel="stylesheet" href="/assets/css/home-trust.css"/>
+  <link rel="stylesheet" href="/assets/css/home-product-section.css"/>
+  <link rel="stylesheet" href="/assets/css/home-brands.css"/>
+  <link rel="stylesheet" href="/assets/css/home-emi.css"/>
+  <link rel="stylesheet" href="/assets/css/home-location.css"/>
+  <link rel="stylesheet" href="/assets/css/home-footer.css"/>
+
+  <!-- ── Shared reuse ── -->
+  <link rel="stylesheet" href="/assets/css/footer.css"/>
+  <link rel="stylesheet" href="/assets/css/login-required-modal.css"/>
+
+  <!-- ── Responsive last ── -->
+  <link rel="stylesheet" href="/assets/css/responsive.css"/>
+
+  <style>
+    /* Home page resets the landing navbar spacer — not needed here */
+    body { padding-top: 0; }
+  </style>
+</head>
+
+<body class="home-page">
+
+  <%# ── Sticky header (logo + location + search + action icons) ── %>
+  <%- include('../partials/home-header') %>
+
+  <%# ── Sticky category strip (sits directly below header) ── %>
+  <%- include('../partials/home-category-strip') %>
+
+  <main id="main-content">
+
+    <%# ── Hero banner carousel ── %>
+    <%- include('../partials/home-hero') %>
+
+    <%# ── Trust bar ── %>
+    <%- include('../partials/home-trust') %>
+
+    <%# ── Product sections — Netflix-style horizontal carousels ──
+         Each include passes { sectionId, sectionTitle, eyebrow, viewAllHref }
+         home-slider.js reads data-section to pull the right dataset.
+    ── %>
+
+    <%- include('../partials/home-product-section', {
+      sectionId:    'trending',
+      sectionTitle: 'Trending Deals',
+      eyebrow:      "Today's Top Picks",
+      viewAllHref:  '/products',
+    }) %>
+
+    <%- include('../partials/home-product-section', {
+      sectionId:    'mobiles',
+      sectionTitle: 'Mobiles',
+      eyebrow:      'Latest Smartphones',
+      viewAllHref:  '/products/mobiles',
+    }) %>
+
+    <%- include('../partials/home-product-section', {
+      sectionId:    'tvs',
+      sectionTitle: 'TVs',
+      eyebrow:      'Smart & OLED TVs',
+      viewAllHref:  '/products/tvs',
+    }) %>
+
+    <%# ── EMI strip ── %>
+    <%- include('../partials/home-emi') %>
+
+    <%- include('../partials/home-product-section', {
+      sectionId:    'acs',
+      sectionTitle: 'Air Conditioners',
+      eyebrow:      'Inverter & 5-Star',
+      viewAllHref:  '/products/acs',
+    }) %>
+
+    <%- include('../partials/home-product-section', {
+      sectionId:    'homeTheatres',
+      sectionTitle: 'Home Theatres',
+      eyebrow:      'Dolby Atmos & Soundbars',
+      viewAllHref:  '/products/home-theatres',
+    }) %>
+
+    <%- include('../partials/home-product-section', {
+      sectionId:    'kitchen',
+      sectionTitle: 'Kitchen Appliances',
+      eyebrow:      'Microwaves, Washers & More',
+      viewAllHref:  '/products/kitchen',
+    }) %>
+
+    <%- include('../partials/home-product-section', {
+      sectionId:    'refrigerators',
+      sectionTitle: 'Refrigerators',
+      eyebrow:      'Double Door & Side-by-Side',
+      viewAllHref:  '/products/refrigerators',
+    }) %>
+
+    <%# ── Brands grid ── %>
+    <%- include('../partials/home-brands') %>
+
+    <%# ── Compact location ── %>
+    <%- include('../partials/home-location') %>
+
+  </main>
+
+  <%# ── Footer ── %>
+  <%- include('../partials/home-footer') %>
+
+  <%# ── Auth modal (global) ── %>
+  <%- include('../partials/login-required-modal') %>
+
+  <!-- ── Data ── -->
+  <script src="/assets/data/home-banners.js"></script>
+  <script src="/assets/data/home-products.js"></script>
+
+  <!-- ── JS (deferred) ── -->
+  <script src="/assets/js/home-hero.js"     defer></script>
+  <script src="/assets/js/home-slider.js"   defer></script>
+  <script src="/assets/js/home-header.js"   defer></script>
+  <script src="/assets/js/auth-guard.js"    defer></script>
+  <script src="/assets/js/whatsapp.js"      defer></script>
+
+</body>
+</html>
