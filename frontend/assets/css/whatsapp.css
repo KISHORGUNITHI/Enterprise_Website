@@ -1,0 +1,339 @@
+/**
+ * whatsapp.css — WhatsApp subscription section
+ */
+
+/* =============================================
+   SECTION
+============================================= */
+
+.whatsapp-section {
+  background: linear-gradient(160deg, #0a1f0a 0%, #0d2e0f 50%, #051005 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background radial glow */
+.whatsapp-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 15% 50%, rgba(37, 211, 102, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 85% 30%, rgba(37, 211, 102, 0.06) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+/* =============================================
+   LAYOUT
+============================================= */
+
+.whatsapp-section__layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-16);
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* =============================================
+   CONTENT (LEFT)
+============================================= */
+
+/* WhatsApp icon with pulsing ring */
+.whatsapp-section__icon-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin-bottom: var(--space-5);
+}
+
+.whatsapp-section__icon-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px solid rgba(37, 211, 102, 0.25);
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+.whatsapp-section__icon {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-xl);
+  background-color: rgba(37, 211, 102, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(37, 211, 102, 0.25);
+}
+
+.whatsapp-section__icon svg {
+  width: 44px;
+  height: 44px;
+}
+
+.whatsapp-section__title {
+  font-size: var(--text-5xl);
+  font-weight: var(--font-extrabold);
+  color: var(--color-text-inverse);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: var(--space-4);
+}
+
+.whatsapp-section__subtitle {
+  font-size: var(--text-lg);
+  color: rgba(255, 255, 255, 0.65);
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-8);
+  max-width: 420px;
+}
+
+/* ─── Feature list ──── */
+
+.whatsapp-section__features {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+}
+
+.whatsapp-section__feature {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+}
+
+.whatsapp-section__feature-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-whatsapp);
+  flex-shrink: 0;
+  box-shadow: 0 0 8px rgba(37, 211, 102, 0.6);
+}
+
+/* ─── Trust notes ──── */
+
+.whatsapp-section__trust-notes {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.whatsapp-section__trust-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.whatsapp-section__trust-note svg {
+  width: 14px;
+  height: 14px;
+  color: var(--color-whatsapp);
+  flex-shrink: 0;
+}
+
+/* =============================================
+   CTA CARD (RIGHT)
+============================================= */
+
+.whatsapp-section__cta-card {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: var(--radius-3xl);
+  padding: var(--space-8);
+  backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* ─── Card header ──── */
+
+.whatsapp-section__card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.whatsapp-section__card-icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.whatsapp-section__card-icon svg {
+  width: 48px;
+  height: 48px;
+}
+
+.whatsapp-section__card-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--color-text-inverse);
+}
+
+.whatsapp-section__card-subtitle {
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.45);
+  margin-top: var(--space-1);
+}
+
+/* ─── Input group ──── */
+
+.whatsapp-section__input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.whatsapp-section__input-label {
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.whatsapp-section__input-wrap {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.whatsapp-section__input-wrap:focus-within {
+  border-color: rgba(37, 211, 102, 0.5);
+  box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.12);
+}
+
+.whatsapp-section__input-prefix {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: rgba(255, 255, 255, 0.5);
+  border-right: 1px solid rgba(255, 255, 255, 0.10);
+  background-color: rgba(255, 255, 255, 0.04);
+  flex-shrink: 0;
+}
+
+.whatsapp-section__input {
+  flex: 1;
+  padding: var(--space-3) var(--space-4);
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  color: var(--color-text-inverse);
+  letter-spacing: var(--tracking-wide);
+}
+
+.whatsapp-section__input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+/* ─── Primary CTA ──── */
+
+.whatsapp-section__join-btn {
+  width: 100%;
+  justify-content: center;
+  font-size: var(--text-base);
+  padding-block: var(--space-4);
+  border-radius: var(--radius-xl);
+}
+
+/* ─── Divider ──── */
+
+.whatsapp-section__divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: rgba(255, 255, 255, 0.25);
+  font-size: var(--text-xs);
+}
+
+.whatsapp-section__divider::before,
+.whatsapp-section__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.10);
+}
+
+/* ─── Secondary CTA ──── */
+
+.whatsapp-section__msg-btn {
+  width: 100%;
+  justify-content: center;
+  color: var(--color-text-inverse);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.whatsapp-section__msg-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: var(--color-text-inverse);
+}
+
+/* ─── Assurance ──── */
+
+.whatsapp-section__assurance {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.35);
+  text-align: center;
+  justify-content: center;
+}
+
+.whatsapp-section__assurance svg {
+  width: 14px;
+  height: 14px;
+  color: var(--color-whatsapp);
+  flex-shrink: 0;
+}
+
+/* =============================================
+   RESPONSIVE
+============================================= */
+
+@media (max-width: 1024px) {
+  .whatsapp-section__layout {
+    grid-template-columns: 1fr;
+    gap: var(--space-10);
+  }
+
+  .whatsapp-section__title {
+    font-size: var(--text-4xl);
+  }
+}
+
+@media (max-width: 600px) {
+  .whatsapp-section__title {
+    font-size: var(--text-3xl);
+  }
+
+  .whatsapp-section__cta-card {
+    padding: var(--space-6);
+  }
+
+  .whatsapp-section__trust-notes {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+}

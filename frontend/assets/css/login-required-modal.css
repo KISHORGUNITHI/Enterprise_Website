@@ -1,0 +1,224 @@
+/**
+ * login-required-modal.css — Compact premium auth prompt
+ * Follows the Enterprise Store design system (variables.css).
+ */
+
+/* =============================================
+   BACKDROP
+============================================= */
+
+.auth-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+
+  /* Subtle dark blur — doesn't dominate the screen */
+  background-color: rgba(10, 14, 30, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+
+  /* Fade in/out */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s var(--ease-out);
+}
+
+.auth-modal-backdrop.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* =============================================
+   MODAL PANEL
+============================================= */
+
+.auth-modal {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--color-bg-primary);
+  border-radius: 20px;
+  border: 1px solid var(--color-border-light);
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.04),
+    0 20px 40px rgba(0, 0, 0, 0.14),
+    0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+  padding: var(--space-8) var(--space-8) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  text-align: center;
+
+  /* Scale + fade in */
+  transform: scale(0.94) translateY(8px);
+  transition:
+    transform 0.28s var(--ease-spring),
+    opacity 0.22s var(--ease-out);
+  opacity: 0;
+}
+
+.auth-modal-backdrop.open .auth-modal {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+/* =============================================
+   ICON
+============================================= */
+
+.auth-modal__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-xl);
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid var(--color-primary-100);
+}
+
+.auth-modal__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* =============================================
+   TEXT
+============================================= */
+
+.auth-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.auth-modal__title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+}
+
+.auth-modal__desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: var(--leading-relaxed);
+  max-width: 280px;
+  margin-inline: auto;
+}
+
+/* =============================================
+   ACTIONS
+============================================= */
+
+.auth-modal__actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Login — primary solid */
+.auth-modal__btn--login {
+  width: 100%;
+  justify-content: center;
+  padding-block: var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  border-radius: var(--radius-lg);
+}
+
+/* Create Account — outline */
+.auth-modal__btn--signup {
+  width: 100%;
+  justify-content: center;
+  padding-block: var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  border-radius: var(--radius-lg);
+  color: var(--color-primary-700);
+  border-color: var(--color-primary-200);
+}
+
+.auth-modal__btn--signup:hover {
+  background-color: var(--color-primary-50);
+  border-color: var(--color-primary-400);
+  color: var(--color-primary-700);
+  transform: translateY(-1px);
+}
+
+/* Continue Browsing — text-only */
+.auth-modal__btn--browse {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-text-muted);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  transition: color 0.18s ease, background-color 0.18s ease;
+  width: 100%;
+}
+
+.auth-modal__btn--browse:hover {
+  color: var(--color-text-primary);
+  background-color: var(--gray-100);
+}
+
+/* =============================================
+   CLOSE BUTTON
+============================================= */
+
+.auth-modal__close {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  border: none;
+  background-color: var(--gray-100);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.auth-modal__close svg {
+  width: 12px;
+  height: 12px;
+}
+
+.auth-modal__close:hover {
+  background-color: var(--gray-200);
+  color: var(--color-text-primary);
+}
+
+/* =============================================
+   RESPONSIVE
+============================================= */
+
+@media (max-width: 480px) {
+  .auth-modal {
+    padding: var(--space-6) var(--space-6) var(--space-5);
+    max-width: 100%;
+    border-radius: 16px;
+  }
+
+  .auth-modal__title {
+    font-size: var(--text-lg);
+  }
+}

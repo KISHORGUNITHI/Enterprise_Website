@@ -1,0 +1,95 @@
+/**
+ * home-trust.css — Compact horizontal trust bar. Aligned to container system.
+ */
+
+.home-trust {
+  background-color: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
+  padding-block: var(--space-6);
+}
+
+.home-trust .container--wide,
+.home-trust > .container--wide {
+  max-width: var(--container-max-width);
+  padding-inline: var(--container-padding);
+  margin-inline: auto;
+}
+
+.home-trust__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-5);
+}
+
+/* ── Item ── */
+.home-trust__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-4);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  transition: var(--transition-fast);
+}
+
+.home-trust__item:hover {
+  border-color: var(--color-primary-200);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* Icon */
+.home-trust__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.3s var(--ease-spring);
+}
+
+.home-trust__icon svg { width: 24px; height: 24px; }
+
+.home-trust__item:hover .home-trust__icon {
+  transform: scale(1.1) rotate(-4deg);
+}
+
+.home-trust__icon--accent  { background-color: var(--color-accent-50);  color: var(--color-accent-500); }
+.home-trust__icon--green   { background-color: #dcfce7; color: var(--color-success-600); }
+.home-trust__icon--purple  { background-color: #faf5ff; color: #9333ea; }
+
+/* Text */
+.home-trust__title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+  line-height: var(--leading-tight);
+}
+
+.home-trust__desc {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-top: 3px;
+}
+
+@media (max-width: 1024px) {
+  .home-trust__grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .home-trust__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+  .home-trust { padding-block: var(--space-5); }
+}
+
+@media (max-width: 400px) {
+  .home-trust__grid { grid-template-columns: 1fr; }
+}

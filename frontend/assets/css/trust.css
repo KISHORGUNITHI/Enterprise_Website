@@ -1,0 +1,205 @@
+/**
+ * trust.css — "Why Buy From Enterprise Store?" section
+ */
+
+/* =============================================
+   SECTION
+============================================= */
+
+.trust {
+  background-color: var(--color-bg-secondary);
+}
+
+/* =============================================
+   GRID
+============================================= */
+
+.trust__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-6);
+}
+
+/* =============================================
+   CARD
+============================================= */
+
+.trust__card {
+  position: relative;
+  background-color: var(--color-bg-card);
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--color-border-light);
+  padding: var(--space-8) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  overflow: hidden;
+  transition: var(--transition-base);
+  cursor: default;
+}
+
+/* Subtle top accent line */
+.trust__card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--space-6);
+  right: var(--space-6);
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary-700), var(--color-accent-500));
+  border-radius: 0 0 var(--radius-full) var(--radius-full);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s var(--ease-out);
+}
+
+/* Glow on hover */
+.trust__card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--color-primary-200);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.trust__card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--color-primary-100);
+}
+
+.trust__card:hover::before {
+  transform: scaleX(1);
+}
+
+.trust__card:hover::after {
+  opacity: 1;
+}
+
+/* =============================================
+   ICON WRAPPER
+============================================= */
+
+.trust__card-icon-wrap {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.trust__card-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.35s var(--ease-spring);
+}
+
+.trust__card-icon svg {
+  width: 48px;
+  height: 48px;
+}
+
+.trust__card:hover .trust__card-icon {
+  transform: scale(1.1) rotate(-3deg);
+}
+
+/* Icon variants */
+.trust__card-icon--accent  { /* orange — default SVG already uses accent */ }
+.trust__card-icon--success { /* green */ }
+.trust__card-icon--purple  { /* purple */ }
+
+.trust__card-number {
+  font-size: var(--text-4xl);
+  font-weight: var(--font-extrabold);
+  color: var(--color-border-light);
+  line-height: 1;
+  letter-spacing: var(--tracking-tight);
+  transition: color 0.3s ease;
+}
+
+.trust__card:hover .trust__card-number {
+  color: var(--color-border-medium);
+}
+
+/* =============================================
+   CARD BODY
+============================================= */
+
+.trust__card-body {
+  flex: 1;
+}
+
+.trust__card-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-3);
+  line-height: var(--leading-snug);
+}
+
+.trust__card-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+/* =============================================
+   CARD FOOTER
+============================================= */
+
+.trust__card-footer {
+  margin-top: auto;
+}
+
+.trust__card-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  border-radius: var(--radius-full);
+  letter-spacing: var(--tracking-wide);
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-700);
+}
+
+.trust__card-tag--accent {
+  background-color: var(--color-accent-50);
+  color: var(--color-accent-700);
+}
+
+.trust__card-tag--success {
+  background-color: #dcfce7;
+  color: var(--color-success-600);
+}
+
+.trust__card-tag--purple {
+  background-color: #faf5ff;
+  color: #9333ea;
+}
+
+/* =============================================
+   RESPONSIVE
+============================================= */
+
+@media (max-width: 1024px) {
+  .trust__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .trust__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trust__card {
+    padding: var(--space-6);
+  }
+}

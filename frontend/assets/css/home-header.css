@@ -1,0 +1,551 @@
+/**
+ * home-header.css — Two-row sticky shopping header.
+ * Row 1: Logo (left) | Location (right)
+ * Row 2: Search flex-1 (~70-75%) | Action icons (right)
+ * Layout reference: Flipkart desktop proportions. Enterprise Store branding.
+ */
+
+/* =============================================
+   HEADER SHELL
+============================================= */
+
+.hdr {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-sticky);
+  background: linear-gradient(160deg, var(--color-primary-800) 0%, var(--color-primary-700) 100%);
+  transition: box-shadow 0.25s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+
+.hdr.scrolled {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.28);
+}
+
+/* ── Outer wrapper: max-width + padding ── */
+.hdr__wrapper {
+  max-width: var(--container-max-width);
+  margin-inline: auto;
+  padding-inline: var(--container-padding);
+  display: flex;
+  flex-direction: column;
+}
+
+/* =============================================
+   ROW 1 — Logo + Location
+   Logo: left   |   Location: right
+============================================= */
+
+.hdr__row1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  min-height: 38px;
+}
+
+/* ── Logo ── */
+.hdr__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease;
+}
+
+.hdr__logo:hover { opacity: 0.88; }
+
+.hdr__logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.hdr__logo-name {
+  font-size: var(--text-xl);
+  font-weight: var(--font-extrabold);
+  color: #fff;
+  letter-spacing: var(--tracking-tight);
+  white-space: nowrap;
+}
+
+.hdr__logo-sub {
+  font-size: var(--text-xs);
+  color: rgba(255,255,255,0.6);
+  font-weight: var(--font-medium);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.hdr__logo-tag {
+  display: inline-block;
+  background-color: var(--color-accent-500);
+  color: #fff;
+  font-size: 9px;
+  font-weight: var(--font-bold);
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.06em;
+  margin-left: var(--space-1);
+  vertical-align: middle;
+}
+
+/* ── Location ── */
+.hdr__location {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  padding: 6px var(--space-3);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.hdr__location:hover {
+  background-color: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.3);
+}
+
+.hdr__location-icon {
+  width: 18px;
+  height: 18px;
+  color: rgba(255,255,255,0.8);
+  flex-shrink: 0;
+}
+
+.hdr__location-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.hdr__location-label {
+  font-size: 10px;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.03em;
+}
+
+.hdr__location-value {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* Adaptive location text — desktop defaults */
+.hdr__loc-full  { display: inline; }
+.hdr__loc-short { display: none; }
+
+.hdr__chevron {
+  width: 12px;
+  height: 12px;
+  color: rgba(255,255,255,0.5);
+  flex-shrink: 0;
+}
+
+/* =============================================
+   ROW 2 — Search + Action icons
+   Search: flex-1 (~70-75%)  |  Icons: right
+============================================= */
+
+.hdr__row2 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  padding-block: 6px;
+}
+
+/* ── Search wrap — takes up all available space ── */
+.hdr__search-wrap {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+.hdr__search-form {
+  position: relative;
+}
+
+.hdr__search-box {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border-radius: var(--radius-lg);
+  height: 42px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  transition: box-shadow 0.2s ease;
+}
+
+.hdr__search-box:focus-within {
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.35), 0 2px 8px rgba(0,0,0,0.12);
+}
+
+/* Search icon — static, left side */
+.hdr__search-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.hdr__search-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.hdr__search-box:focus-within .hdr__search-icon {
+  color: var(--color-primary-700);
+}
+
+/* Input */
+.hdr__search-input {
+  flex: 1;
+  height: 100%;
+  padding: 0 var(--space-2);
+  font-size: var(--text-base);
+  font-weight: var(--font-regular);
+  color: var(--color-text-primary);
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  min-width: 0;
+}
+
+.hdr__search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Cleanse the default "X" button on search inputs */
+.hdr__search-input::-webkit-search-cancel-button { display: none; }
+
+/* Search button — right side, accent */
+.hdr__search-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 100%;
+  background: var(--color-primary-700);
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
+}
+
+.hdr__search-submit svg {
+  width: 18px;
+  height: 18px;
+}
+
+.hdr__search-submit:hover {
+  background-color: var(--color-primary-800);
+}
+
+/* ── Suggestions dropdown ── */
+.hdr__suggestions {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background-color: var(--color-bg-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-2xl);
+  border: 1px solid var(--color-border-light);
+  z-index: var(--z-dropdown);
+  overflow: hidden;
+}
+
+.hdr__suggestions[hidden] { display: none; }
+
+.hdr__suggestions-group {
+  padding: var(--space-4) var(--space-5);
+}
+
+.hdr__suggestions-group + .hdr__suggestions-group {
+  border-top: 1px solid var(--color-border-light);
+}
+
+.hdr__suggestions-label {
+  font-size: 10px;
+  font-weight: var(--font-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-3);
+}
+
+.hdr__suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hdr__suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.hdr__suggestion-item:hover {
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-700);
+}
+
+.hdr__suggestions-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.hdr__suggestion-cat {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  border: 1px solid var(--color-border-light);
+  transition: var(--transition-fast);
+}
+
+.hdr__suggestion-cat:hover {
+  background-color: var(--color-primary-700);
+  color: #fff;
+  border-color: var(--color-primary-700);
+}
+
+/* =============================================
+   ACTION ICONS — right side of row 2
+============================================= */
+
+.hdr__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.hdr__action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px var(--space-3);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: #fff;
+  transition: background-color 0.2s ease;
+  position: relative;
+  min-width: 54px;
+  cursor: pointer;
+}
+
+.hdr__action-btn:hover {
+  background-color: rgba(255,255,255,0.12);
+  color: #fff;
+}
+
+.hdr__action-icon-wrap {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hdr__action-icon-wrap svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Cart / Wishlist count badge */
+.hdr__badge {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-accent-500);
+  color: #fff;
+  font-size: 10px;
+  font-weight: var(--font-bold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid var(--color-primary-700);
+  line-height: 1;
+}
+
+.hdr__action-label {
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: rgba(255,255,255,0.82);
+  white-space: nowrap;
+}
+
+/* =============================================
+   RESPONSIVE
+   Rule: never hide logo, store name, or location.
+   Only shrink typography, spacing, and padding.
+============================================= */
+
+/* ── Laptop: 1280px ── */
+@media (max-width: 1280px) {
+  /* Keep same padding as page sections until 1200px */
+  .hdr__logo-name {
+    font-size: var(--text-lg);
+  }
+
+  .hdr__row2 { gap: var(--space-5); }
+}
+
+/* ── 1200px — matches when sections switch to tablet padding ── */
+@media (max-width: 1200px) {
+  .hdr__wrapper {
+    padding-inline: var(--container-padding-tablet); /* 24px — same as .container--wide */
+  }
+
+  .hdr__row2 { gap: var(--space-5); }
+}
+
+/* ── Small desktop: 1024px ── */
+@media (max-width: 1024px) {
+  /* padding-inline already 24px from above — no change needed */
+  .hdr__row1 { padding-block: var(--space-1); min-height: 40px; }
+  .hdr__row2 { gap: var(--space-4); padding-block: var(--space-2); }
+
+  .hdr__logo-name { font-size: var(--text-base); }
+  .hdr__logo-sub  { font-size: 10px; }
+
+  .hdr__location  { padding: var(--space-2) var(--space-3); gap: var(--space-2); }
+  .hdr__location-icon { width: 15px; height: 15px; }
+  .hdr__location-value { font-size: var(--text-xs); }
+
+  .hdr__search-box    { height: 38px; }
+  .hdr__search-icon   { width: 38px; height: 38px; }
+  .hdr__search-submit { width: 38px; }
+
+  .hdr__action-btn   { padding: var(--space-2) var(--space-3); min-width: 52px; }
+  .hdr__action-label { font-size: 10px; }
+  .hdr__action-icon-wrap svg { width: 22px; height: 22px; }
+}
+
+/* ── Tablet: 768px ── */
+@media (max-width: 768px) {
+  .hdr__wrapper { padding-inline: var(--container-padding-mobile); } /* 16px — matches sections */
+
+  /* Row 1: tighter */
+  .hdr__row1 {
+    padding-block: var(--space-2);
+    min-height: 40px;
+    border-bottom-color: rgba(255,255,255,0.06);
+  }
+
+  /* Logo scales down — never hidden */
+  .hdr__logo svg        { width: 26px; height: 26px; }
+  .hdr__logo           { gap: var(--space-2); }
+  .hdr__logo-name      { font-size: var(--text-sm); }
+  .hdr__logo-sub       { font-size: 9px; }
+  .hdr__logo-tag       { font-size: 8px; padding: 1px 5px; }
+
+  /* Location scales down — never hidden */
+  .hdr__location       { padding: var(--space-1) var(--space-2); gap: var(--space-1); border-radius: var(--radius-md); }
+  .hdr__location-icon  { width: 14px; height: 14px; }
+  .hdr__location-label { font-size: 9px; }
+  .hdr__location-value { font-size: 11px; }
+  .hdr__chevron        { width: 10px; height: 10px; }
+
+  /* Hide verbose label on tablet, keep value */
+  .hdr__location-label--desktop { display: none; }
+  /* Show full location value, hide short version */
+  .hdr__loc-full  { display: inline; }
+  .hdr__loc-short { display: none; }
+
+  /* Row 2: tighter */
+  .hdr__row2 {
+    gap: var(--space-3);
+    padding-block: var(--space-1) var(--space-2);
+  }
+
+  /* Search bar */
+  .hdr__search-box    { height: 36px; }
+  .hdr__search-icon   { width: 32px; height: 36px; }
+  .hdr__search-icon svg { width: 16px; height: 16px; }
+  .hdr__search-submit { width: 36px; }
+  .hdr__search-submit svg { width: 16px; height: 16px; }
+  .hdr__search-input  { font-size: var(--text-sm); }
+
+  /* Action icons: reduce padding, keep label */
+  .hdr__action-btn   { padding: var(--space-1) var(--space-2); min-width: 44px; gap: 3px; }
+  .hdr__action-label { font-size: 9px; }
+  .hdr__action-icon-wrap svg { width: 20px; height: 20px; }
+  .hdr__actions { gap: 0; }
+}
+
+/* ── Mobile: 480px ── */
+@media (max-width: 480px) {
+  .hdr__wrapper { padding-inline: var(--container-padding-mobile); } /* stays 16px — same as sections */
+
+  /* Row 1: ultra-compact */
+  .hdr__row1 { padding-block: var(--space-1); min-height: 36px; }
+
+  /* Logo: smallest — still visible */
+  .hdr__logo svg    { width: 22px; height: 22px; }
+  .hdr__logo        { gap: var(--space-2); }
+  .hdr__logo-name   { font-size: var(--text-xs); font-weight: var(--font-bold); }
+  .hdr__logo-sub    { display: none; } /* "Store Plus" tagline only hidden on 480 */
+
+  /* Location: switch to compact emoji + short text */
+  .hdr__location        { padding: var(--space-1) var(--space-2); gap: var(--space-1); }
+  .hdr__location-icon   { display: none; } /* icon replaced by emoji in text */
+  .hdr__location-label  { display: none; }
+  .hdr__loc-full        { display: none; }
+  .hdr__loc-short       { display: inline; font-size: 11px; font-weight: var(--font-semibold); }
+  .hdr__chevron         { display: none; }
+
+  /* Row 2: ultra-compact */
+  .hdr__row2 {
+    gap: var(--space-2);
+    padding-block: var(--space-2);
+  }
+
+  /* Search */
+  .hdr__search-box    { height: 36px; }
+  .hdr__search-icon   { width: 32px; height: 36px; }
+  .hdr__search-submit { width: 36px; }
+  .hdr__search-input  { font-size: var(--text-xs); }
+  .hdr__search-input::placeholder { font-size: var(--text-xs); }
+
+  /* Action icons: icon only, no labels */
+  .hdr__action-btn   { padding: var(--space-1); min-width: 34px; gap: 0; }
+  .hdr__action-label { display: none; } /* label hidden only at 480px, icon+badge still visible */
+  .hdr__action-icon-wrap svg { width: 18px; height: 18px; }
+  .hdr__actions { gap: 0; }
+}

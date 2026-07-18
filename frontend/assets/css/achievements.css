@@ -1,0 +1,203 @@
+/**
+ * achievements.css — Store statistics / animated counters section
+ */
+
+/* =============================================
+   SECTION
+============================================= */
+
+.achievements {
+  background: linear-gradient(160deg, #0d1e4d 0%, #1a2a6c 50%, #0d1e4d 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background mesh */
+.achievements::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 10% 50%, rgba(30, 61, 143, 0.5) 0%, transparent 40%),
+    radial-gradient(circle at 90% 50%, rgba(245, 133, 0, 0.08) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+/* Subtle grid pattern overlay */
+.achievements::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+/* =============================================
+   GRID
+============================================= */
+
+.achievements__grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-5);
+}
+
+/* =============================================
+   CARD
+============================================= */
+
+.achievements__card {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-8) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+  transition: var(--transition-base);
+  cursor: default;
+  backdrop-filter: blur(8px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shimmer top border */
+.achievements__card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transform: scaleX(0);
+  transition: transform 0.5s ease;
+}
+
+.achievements__card:hover {
+  background-color: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.achievements__card:hover::before {
+  transform: scaleX(1);
+}
+
+/* ─── Icon ──── */
+
+.achievements__card-icon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.4s var(--ease-spring);
+}
+
+.achievements__card-icon svg {
+  width: 48px;
+  height: 48px;
+}
+
+.achievements__card:hover .achievements__card-icon {
+  transform: scale(1.15) rotate(-5deg);
+}
+
+/* ─── Stat number ──── */
+
+.achievements__stat {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-1);
+}
+
+.achievements__number {
+  font-size: var(--text-5xl);
+  font-weight: var(--font-extrabold);
+  color: var(--color-text-inverse);
+  line-height: 1;
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s ease;
+}
+
+.achievements__card:hover .achievements__number {
+  color: var(--color-accent-400);
+}
+
+.achievements__unit {
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: rgba(255, 255, 255, 0.6);
+  margin-left: var(--space-1);
+}
+
+/* ─── Text ──── */
+
+.achievements__label {
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-inverse);
+  line-height: var(--leading-tight);
+}
+
+.achievements__desc {
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.45);
+  line-height: var(--leading-normal);
+}
+
+/* =============================================
+   RESPONSIVE
+============================================= */
+
+@media (max-width: 1200px) {
+  .achievements__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Last two cards centered */
+  .achievements__card:nth-child(4),
+  .achievements__card:nth-child(5) {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .achievements__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .achievements__card:last-child {
+    grid-column: span 2;
+  }
+
+  .achievements__number {
+    font-size: var(--text-4xl);
+  }
+}
+
+@media (max-width: 480px) {
+  .achievements__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .achievements__card:last-child {
+    grid-column: span 1;
+  }
+}

@@ -1,0 +1,364 @@
+/**
+ * emi.css — 0% EMI split-layout section
+ */
+
+/* =============================================
+   SECTION
+============================================= */
+
+.emi {
+  background: linear-gradient(160deg, var(--color-bg-dark) 0%, #1a2a6c 50%, #0d1e4d 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background pattern */
+.emi::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(30, 61, 143, 0.4) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(245, 133, 0, 0.12) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* =============================================
+   LAYOUT
+============================================= */
+
+.emi__layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: var(--space-20);
+  position: relative;
+  z-index: 1;
+}
+
+/* =============================================
+   CONTENT (LEFT)
+============================================= */
+
+.emi__title {
+  font-size: var(--text-5xl);
+  font-weight: var(--font-extrabold);
+  color: var(--color-text-inverse);
+  line-height: var(--leading-tight);
+  margin-bottom: var(--space-4);
+  letter-spacing: var(--tracking-tight);
+}
+
+.emi__subtitle {
+  font-size: var(--text-lg);
+  color: rgba(255, 255, 255, 0.72);
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-8);
+  max-width: 440px;
+}
+
+/* ─── Partners ──── */
+
+.emi__partners {
+  margin-bottom: var(--space-8);
+}
+
+.emi__partners-label {
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: var(--space-3);
+}
+
+.emi__partners-list {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.emi__partner-card {
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  backdrop-filter: blur(8px);
+  transition: var(--transition-fast);
+}
+
+.emi__partner-card:hover {
+  background-color: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.emi__partner-logo svg {
+  display: block;
+  height: 32px;
+  width: auto;
+}
+
+/* ─── Benefits list ──── */
+
+.emi__benefits {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+.emi__benefit {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+}
+
+.emi__benefit-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--color-success-500);
+  flex-shrink: 0;
+}
+
+.emi__benefit-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* ─── CTA ──── */
+
+.emi__cta {
+  width: fit-content;
+}
+
+.emi__cta-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.emi__cta-note .icon {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+/* =============================================
+   VISUAL / CARD SCENE (RIGHT)
+============================================= */
+
+.emi__visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emi__card-scene {
+  position: relative;
+  width: 380px;
+  height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Decorative rings */
+.emi__ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  pointer-events: none;
+}
+
+.emi__ring--1 {
+  width: 360px;
+  height: 360px;
+  animation: float 5s ease-in-out infinite;
+}
+
+.emi__ring--2 {
+  width: 280px;
+  height: 280px;
+  border-color: rgba(245, 133, 0, 0.12);
+  animation: float 5s ease-in-out infinite;
+  animation-delay: -2.5s;
+}
+
+/* ─── Main card ──── */
+
+.emi__card {
+  border-radius: var(--radius-2xl);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  position: absolute;
+}
+
+.emi__card--main {
+  width: 300px;
+  background: linear-gradient(135deg, #1e3d8f 0%, #2f52a0 50%, #1a2f6e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.05);
+  backdrop-filter: blur(12px);
+  transform: rotate(-4deg);
+  transition: transform 0.4s var(--ease-spring);
+  z-index: 2;
+}
+
+.emi__card--main:hover {
+  transform: rotate(0deg) scale(1.03);
+}
+
+/* Card header */
+.emi__card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Chip */
+.emi__card-chip {
+  width: 40px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, #d4a017, #f0c040, #d4a017);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Card number */
+.emi__card-number {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: var(--font-medium);
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.15em;
+}
+
+/* Card footer row */
+.emi__card-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.emi__card-meta-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 2px;
+}
+
+.emi__card-meta-value {
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: 0.04em;
+}
+
+.emi__card-meta-value--accent {
+  font-size: var(--text-2xl);
+  color: var(--color-accent-400);
+}
+
+/* ─── Floating stat badges ──── */
+
+.emi__stat-badge {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background-color: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-xl);
+  padding: var(--space-3) var(--space-4);
+  white-space: nowrap;
+  animation: float 4s ease-in-out infinite;
+}
+
+.emi__stat-badge--1 {
+  top: 20px;
+  right: -10px;
+  animation-delay: -1s;
+  z-index: 3;
+}
+
+.emi__stat-badge--2 {
+  bottom: 40px;
+  left: -10px;
+  animation-delay: -2s;
+  z-index: 3;
+}
+
+.emi__stat-badge-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-accent-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-base);
+  font-weight: var(--font-extrabold);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.emi__stat-value {
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  color: var(--color-text-inverse);
+}
+
+.emi__stat-label {
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* =============================================
+   RESPONSIVE
+============================================= */
+
+@media (max-width: 1024px) {
+  .emi__layout {
+    grid-template-columns: 1fr;
+    gap: var(--space-16);
+  }
+
+  .emi__visual {
+    order: -1;
+  }
+
+  .emi__card-scene {
+    width: 340px;
+    height: 320px;
+  }
+
+  .emi__card--main {
+    width: 280px;
+  }
+
+  .emi__title {
+    font-size: var(--text-4xl);
+  }
+}
+
+@media (max-width: 600px) {
+  .emi__visual {
+    display: none;
+  }
+
+  .emi__title {
+    font-size: var(--text-3xl);
+  }
+
+  .emi__partners-list {
+    flex-wrap: wrap;
+  }
+}

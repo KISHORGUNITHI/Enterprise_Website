@@ -1,0 +1,148 @@
+/**
+ * category-strip.css — Clean underline-only active state for the Category page strip.
+ * No pill. No background. Just a primary-color underline + bold text on active.
+ * Also fixes responsive layout for the category page specifically.
+ * Extends home-category-strip.css.
+ */
+
+/* =============================================
+   STRIP POSITION — category page has a single-row
+   header, so the top offset is different from home page.
+   JS (category-header.js) updates this dynamically,
+   but CSS provides the correct first-paint fallback.
+============================================= */
+
+.cat-strip--page {
+  /* Single-row header height: 72px desktop */
+  top: 72px;
+}
+
+@media (max-width: 1024px) {
+  .cat-strip--page { top: 68px; }
+}
+
+@media (max-width: 768px) {
+  /* Override the home-page mobile value (header-height-mobile = 60px).
+     Category header single row is 56px at this breakpoint. */
+  .cat-strip--page { top: 56px; }
+}
+
+@media (max-width: 480px) {
+  /* Category header is 50px at this breakpoint */
+  .cat-strip--page { top: 50px; }
+}
+
+/* =============================================
+   MOBILE STRIP LAYOUT — switch from forced equal
+   widths (space-between) to natural scroll layout
+   so items never get too narrow.
+============================================= */
+
+@media (max-width: 768px) {
+  /* Let the list be as wide as its content — enables natural scroll */
+  .cat-strip--page .cat-strip__list {
+    width: max-content;
+    justify-content: flex-start;
+    gap: var(--space-1);
+  }
+
+  /* Fixed comfortable width per item instead of flex:1 */
+  .cat-strip--page .cat-strip__item {
+    flex: none;
+    width: 68px;
+    min-width: 68px;
+    padding: var(--space-2) var(--space-1);
+    gap: var(--space-1);
+  }
+
+  /* Keep labels visible on mobile for category page — override the home-strip hide */
+  .cat-strip--page .cat-strip__label {
+    display: block !important;
+    font-size: 10px;
+    font-weight: var(--font-semibold);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 66px;
+    text-align: center;
+  }
+
+  /* Illustration size */
+  .cat-strip--page .cat-strip__illustration,
+  .cat-strip--page .cat-strip__img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .cat-strip--page .cat-strip__illustration svg {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cat-strip--page .cat-strip__list {
+    width: max-content;
+    justify-content: flex-start;
+    gap: var(--space-1);
+  }
+
+  .cat-strip--page .cat-strip__item {
+    flex: none;
+    width: 60px;
+    min-width: 60px;
+    padding: var(--space-2) var(--space-1);
+    gap: 4px;
+  }
+
+  /* Labels stay visible — override base 480px rule that hides them */
+  .cat-strip--page .cat-strip__label {
+    display: block !important;
+    font-size: 9px;
+    max-width: 58px;
+  }
+
+  .cat-strip--page .cat-strip__illustration,
+  .cat-strip--page .cat-strip__img {
+    width: 24px;
+    height: 24px;
+  }
+
+  .cat-strip--page .cat-strip__illustration svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* =============================================
+   ACTIVE & HOVER STATES — clean underline only
+============================================= */
+
+.cat-strip--page .cat-strip__item {
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+  background: none;
+}
+
+.cat-strip--page .cat-strip__item:hover {
+  color: var(--color-primary-700);
+  border-bottom-color: var(--color-primary-200);
+  background: none;
+}
+
+.cat-strip--page .cat-strip__item:hover .cat-strip__illustration,
+.cat-strip--page .cat-strip__item:hover .cat-strip__img {
+  transform: translateY(-3px) scale(1.08);
+}
+
+.cat-strip--page .cat-strip__item--active {
+  color: var(--color-primary-700);
+  border-bottom-color: var(--color-primary-700);
+  background: none;
+}
+
+.cat-strip--page .cat-strip__item--active .cat-strip__label {
+  font-weight: var(--font-bold);
+  color: var(--color-primary-700);
+}
+

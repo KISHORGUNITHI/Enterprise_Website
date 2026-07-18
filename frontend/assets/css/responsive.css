@@ -1,0 +1,393 @@
+/**
+ * responsive.css — Global responsive overrides (v2 — complete audit)
+ * Component-level breakpoints live in each component CSS file.
+ * This file handles cross-page global fixes and mobile-first refinements.
+ */
+
+/* =============================================
+   GLOBAL TYPOGRAPHY SCALE (mobile-first)
+============================================= */
+
+@media (max-width: 1024px) {
+  :root { --section-py: 4rem; }
+  .section__title    { font-size: var(--text-3xl); }
+  .section__subtitle { font-size: var(--text-base); }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --section-py: 3rem;
+    --section-px: 1rem;
+  }
+  h1 { font-size: var(--text-4xl); }
+  h2 { font-size: var(--text-3xl); }
+  h3 { font-size: var(--text-2xl); }
+  .section__title  { font-size: var(--text-2xl); }
+  .section__header { margin-bottom: var(--space-8); }
+  .container       { padding-inline: var(--space-4); }
+  .btn--xl         { padding: var(--space-4) var(--space-8); font-size: var(--text-base); }
+  /* Hide large decorative visuals on tablet */
+  .emi__visual        { display: none; }
+  .hero__illustration { display: none; }
+}
+
+@media (max-width: 600px) {
+  :root { --section-py: 2.5rem; }
+  .hero__cta-group,
+  .location__actions { flex-direction: column; }
+  .hero__cta-group .btn,
+  .location__actions .btn { width: 100%; justify-content: center; }
+  .section__eyebrow { font-size: 10px; }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --section-py: 2rem;
+    --navbar-height: 64px;
+  }
+  h1 { font-size: var(--text-3xl); }
+  h2 { font-size: var(--text-2xl); }
+  .section__title  { font-size: var(--text-xl); }
+  .container       { padding-inline: var(--space-4); }
+  .navbar__spacer  { height: var(--navbar-height); }
+  .section__header { margin-bottom: var(--space-6); }
+  .achievements__card-number { display: none; }
+  /* Force single column on very small screens */
+  .trust__grid,
+  .achievements__grid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 375px) {
+  :root { --section-py: 2rem; }
+  .section__title  { font-size: var(--text-xl); }
+  .container       { padding-inline: var(--space-3); }
+  .categories__grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .emi__partners-list { flex-direction: column; align-items: flex-start; }
+}
+
+/* =============================================
+   LANDING — HERO (additional mobile fixes)
+============================================= */
+
+@media (max-width: 480px) {
+  .hero {
+    height: calc(100svh - var(--navbar-height));
+    min-height: 400px;
+  }
+  .hero__content { padding-inline: var(--space-4); }
+  .hero__badge   { font-size: 10px; padding: var(--space-1) var(--space-3); }
+  .hero__dots    { bottom: var(--space-5); }
+}
+
+@media (max-width: 375px) {
+  .hero__title { font-size: var(--text-2xl); }
+}
+
+/* =============================================
+   LANDING — CATEGORIES (grid padding fix)
+============================================= */
+
+@media (max-width: 480px) {
+  .categories__card {
+    padding: var(--space-4) var(--space-2);
+    gap: var(--space-2);
+    border-radius: var(--radius-xl);
+  }
+  .categories__card-icon {
+    width: 44px;
+    height: 44px;
+  }
+  .categories__card-icon svg {
+    width: 26px;
+    height: 26px;
+  }
+  .categories__card-label { font-size: var(--text-xs); }
+  .categories__card-desc  { display: none; }
+}
+
+/* =============================================
+   LANDING — FEATURED PRODUCTS
+   Fix viewport overflow on small screens
+============================================= */
+
+@media (max-width: 768px) {
+  .featured__viewport {
+    padding-inline: var(--space-4);
+  }
+  .featured__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
+  }
+}
+
+@media (max-width: 480px) {
+  .product-card { width: 180px; }
+  .featured__ctrl-btn { width: 36px; height: 36px; }
+  .featured__ctrl-btn svg { width: 14px; height: 14px; }
+}
+
+/* =============================================
+   LANDING — EMI SECTION
+============================================= */
+
+@media (max-width: 480px) {
+  .emi__title    { font-size: var(--text-2xl); }
+  .emi__subtitle { font-size: var(--text-sm); }
+  .emi__cta      { width: 100%; justify-content: center; }
+}
+
+/* =============================================
+   LANDING — ACHIEVEMENTS
+============================================= */
+
+@media (max-width: 768px) {
+  .achievements__number { font-size: var(--text-3xl); }
+  .achievements__label  { font-size: var(--text-sm); }
+}
+
+@media (max-width: 480px) {
+  .achievements__card { padding: var(--space-5) var(--space-4); }
+  .achievements__number { font-size: var(--text-2xl); }
+}
+
+/* =============================================
+   LANDING — WHATSAPP SECTION
+============================================= */
+
+@media (max-width: 480px) {
+  .whatsapp-section__title  { font-size: var(--text-2xl); }
+  .whatsapp-section__cta-card { padding: var(--space-5); }
+  .whatsapp-section__input-wrap { border-radius: var(--radius-lg); }
+}
+
+/* =============================================
+   LANDING — FOOTER
+============================================= */
+
+@media (max-width: 480px) {
+  .footer__main { padding-block: var(--space-10) var(--space-8); }
+  .footer__logo-name { font-size: var(--text-lg); }
+  .footer__brand-desc { font-size: var(--text-xs); }
+}
+
+/* =============================================
+   HOME PAGE — PRODUCT SECTIONS
+   Ensure carousel cards don't overflow on mobile
+============================================= */
+
+@media (max-width: 480px) {
+  .prod-section .product-card { width: 155px; }
+  .prod-section__title { font-size: var(--text-xl); }
+  .prod-section__view-all { font-size: var(--text-xs); padding: var(--space-2) var(--space-3); }
+}
+
+/* =============================================
+   HOME PAGE — BRANDS GRID
+============================================= */
+
+@media (max-width: 480px) {
+  .brands { padding-block: var(--space-10); }
+  .brands__card { min-height: 56px; }
+}
+
+/* =============================================
+   CATEGORY PLP — TOOLBAR sticky top fix
+   Uses CSS variables that match actual header heights
+============================================= */
+
+@media (max-width: 768px) {
+  /* Category header is 56px, strip is ~56px → toolbar at ~112px */
+  .plp-toolbar {
+    top: 112px;
+    padding-block: var(--space-2);
+  }
+  .plp-toolbar__category { font-size: var(--text-base); }
+  .plp-toolbar__count    { font-size: 10px; }
+  /* Sort select: smaller on mobile */
+  .plp-sort__select {
+    font-size: var(--text-xs);
+    padding: var(--space-2) var(--space-6) var(--space-2) var(--space-2);
+  }
+}
+
+@media (max-width: 480px) {
+  .plp-toolbar { top: 100px; }
+  .plp-grid    { grid-template-columns: repeat(2, 1fr); gap: var(--space-3); }
+  .plp-card__price-sale { font-size: var(--text-lg); }
+  .plp-banner__inner { min-height: 130px; }
+  .plp-banner__content { padding: var(--space-4) var(--space-4); }
+  .plp-pagination__btn { min-width: 34px; height: 34px; font-size: var(--text-xs); }
+}
+
+/* =============================================
+   PRODUCT DETAILS PAGE — mobile refinements
+============================================= */
+
+@media (max-width: 768px) {
+  /* Variant buttons — allow wrapping without overflow */
+  .pdp-variant-group__options { gap: var(--space-2); }
+  .pdp-variant-btn {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-xs);
+  }
+  /* Price block */
+  .pdp-info__price-sale    { font-size: var(--text-2xl); }
+  .pdp-info__price-original{ font-size: var(--text-base); }
+  /* Description padding */
+  .pdp-description,
+  .pdp-highlights,
+  .pdp-specs { padding: var(--space-4); }
+  /* Related section */
+  .pdp-related { margin-top: var(--space-6); }
+  .pdp-related__title { font-size: var(--text-lg); }
+}
+
+@media (max-width: 480px) {
+  /* Gallery thumbs — smaller on very small screens */
+  .pdp-gallery__thumbs { gap: var(--space-1); }
+  .pdp-gallery__thumb  { width: 44px; height: 44px; }
+  /* Color swatches */
+  .pdp-color-btn__swatch { width: 28px; height: 28px; }
+  /* Specs table — responsive key width */
+  .pdp-specs__key { width: 35%; font-size: var(--text-xs); }
+  .pdp-specs__val { font-size: var(--text-xs); }
+  /* Buy bar — make all buttons equal on very small screens */
+  .pdp-buy-bar__cart  { flex: 0 0 42px; padding: var(--space-2); }
+  .pdp-buy-bar__emi-btn { flex: 1; }
+  .pdp-buy-bar__buy   { flex: 1.5; padding-inline: var(--space-3); }
+  .pdp-buy-bar__buy-label { font-size: var(--text-xs); }
+}
+
+/* =============================================
+   ORDERS PAGE — mobile refinements
+============================================= */
+
+@media (max-width: 768px) {
+  /* Cards stack cleanly */
+  .order-card__body  { flex-direction: row; flex-wrap: wrap; align-items: flex-start; }
+  .order-card__info  { min-width: calc(100% - 100px); }
+  .order-card__action {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border-light);
+  }
+  .order-card__view-btn { flex: 1; text-align: center; justify-content: center; }
+  /* Drawer slides up from bottom on mobile */
+  .orders-drawer { width: 100vw; top: auto; height: 88vh; border-radius: var(--radius-2xl) var(--radius-2xl) 0 0; }
+}
+
+@media (max-width: 480px) {
+  .orders-heading__title { font-size: var(--text-xl); }
+  .orders-search__input  { height: 44px; font-size: var(--text-sm); }
+  .orders-filter-chip    { font-size: var(--text-xs); padding: var(--space-2) var(--space-3); }
+  .order-card__product-name { font-size: var(--text-sm); }
+  .order-card__price     { font-size: var(--text-base); }
+  .order-card__image     { width: 72px; height: 72px; }
+  .order-card__header    { padding: var(--space-3) var(--space-4); }
+  .order-card__body      { padding: var(--space-4); gap: var(--space-3); }
+}
+
+/* =============================================
+   AUTH PAGES — mobile refinements
+============================================= */
+
+@media (max-width: 480px) {
+  .auth-body  { padding: var(--space-4) var(--space-3); align-items: flex-start; padding-top: var(--space-8); }
+  .auth-card  { padding: var(--space-5) var(--space-4); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); }
+  .auth-card__title { font-size: var(--text-xl); }
+  .auth-form__input { height: 44px; font-size: var(--text-sm); }
+  .auth-form__submit { height: 46px; font-size: var(--text-sm); }
+}
+
+@media (max-width: 375px) {
+  .auth-page { gap: var(--space-4); }
+  .auth-card { padding: var(--space-4) var(--space-3); }
+}
+
+/* =============================================
+   GLOBAL — touch targets (min 44×44px)
+============================================= */
+
+@media (max-width: 768px) {
+  /* Ensure all buttons are easy to tap */
+  .btn--sm { min-height: 36px; }
+  .btn     { min-height: 40px; }
+
+  /* Pagination numbers */
+  .plp-pagination__btn { min-width: 36px; height: 36px; }
+}
+
+/* =============================================
+   GLOBAL — no horizontal scroll anywhere
+============================================= */
+
+body { overflow-x: hidden; }
+
+/* =============================================
+   GLOBAL — safe-area insets (notched phones)
+============================================= */
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  /* Bottom bars that sit above the home indicator */
+  .pdp-buy-bar {
+    padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+  }
+  .plp-filter-sheet {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .orders-drawer {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* =============================================
+   PRINT STYLES
+============================================= */
+
+@media print {
+  .navbar, .hdr, .pdp-buy-bar, .hero, .whatsapp-section,
+  .footer__social, .hero__arrow, .hero__dots, .featured__ctrl-btn {
+    display: none !important;
+  }
+  body       { font-size: 12pt; color: #000; }
+  .section   { padding-block: 1.5rem; }
+  a          { color: #000; text-decoration: underline; }
+  .container { max-width: 100%; padding-inline: 0; }
+}
+
+/* =============================================
+   REDUCED MOTION — ACCESSIBILITY
+============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .hero__track { transition: none !important; }
+  .reveal, .reveal--left, .reveal--right {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .animate-float, .emi__ring, .emi__stat-badge,
+  .whatsapp-section__icon-ring { animation: none !important; }
+}
+
+/* =============================================
+   HIGH CONTRAST MODE
+============================================= */
+
+@media (forced-colors: active) {
+  .btn                { border: 2px solid ButtonText; }
+  .hero__arrow, .featured__ctrl-btn { border: 1px solid ButtonText; }
+  .hero__dot.active   { background-color: Highlight; }
+}

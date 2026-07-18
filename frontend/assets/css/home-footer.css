@@ -1,0 +1,58 @@
+/**
+ * home-footer.css — Home page footer with container system alignment.
+ */
+
+.home-footer {
+  background-color: var(--color-secondary-900);
+  color: rgba(255,255,255,0.7);
+  position: relative;
+  z-index: calc(var(--z-sticky) + 1);
+}
+
+.home-footer__main {
+  padding-block: var(--space-20) var(--space-16);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+/* Override container--wide inside footer to use footer-specific padding */
+.home-footer .container--wide,
+.home-footer__main > .container--wide,
+.home-footer__bottom > .container--wide {
+  max-width: var(--container-max-width);
+  padding-inline: var(--container-padding);
+  margin-inline: auto;
+}
+
+.home-footer__grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+  gap: var(--space-12);
+  align-items: start;
+}
+
+.home-footer__bottom {
+  padding-block: var(--space-6);
+}
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  .home-footer__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-10);
+  }
+  .home-footer__col--brand { grid-column: span 2; }
+}
+
+@media (max-width: 768px) {
+  .home-footer__main {
+    padding-block: var(--space-12) var(--space-10);
+  }
+}
+
+@media (max-width: 640px) {
+  .home-footer__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+  .home-footer__col--brand { grid-column: span 1; }
+}

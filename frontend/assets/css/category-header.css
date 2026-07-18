@@ -1,0 +1,106 @@
+/**
+ * category-header.css — Simplified single-row sticky header for Category pages.
+ * Inherits all .hdr__* token styles from home-header.css.
+ * Only defines the .cat-hdr shell and single-row layout overrides.
+ */
+
+/* ── Shell ── */
+.cat-hdr {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-sticky);
+  background: linear-gradient(160deg, var(--color-primary-800) 0%, var(--color-primary-700) 100%);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  transition: box-shadow 0.25s ease;
+}
+
+.cat-hdr.scrolled {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.28);
+}
+
+/* ── Single-row wrapper ── */
+.cat-hdr__wrapper {
+  max-width: var(--container-max-width);
+  margin-inline: auto;
+  padding-inline: var(--container-padding);
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  height: 72px;
+}
+
+/* ── Logo: fixed width, never flex-shrinks ── */
+.cat-hdr__logo {
+  flex-shrink: 0;
+  width: 180px;
+}
+
+/* Search takes all remaining space */
+.cat-hdr__wrapper .hdr__search-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  .cat-hdr__wrapper {
+    padding-inline: var(--container-padding-tablet);
+    gap: var(--space-5);
+  }
+  .cat-hdr__logo { width: 160px; }
+}
+
+@media (max-width: 1024px) {
+  .cat-hdr__wrapper { gap: var(--space-4); }
+  .cat-hdr__logo { width: 140px; }
+  .cat-hdr__wrapper .hdr__logo-name { font-size: var(--text-base); }
+  .cat-hdr__wrapper .hdr__logo-sub  { font-size: 10px; }
+  .cat-hdr__wrapper .hdr__search-box { height: 44px; }
+  .cat-hdr__wrapper .hdr__search-icon { width: 40px; height: 44px; }
+  .cat-hdr__wrapper .hdr__search-submit { width: 44px; }
+  .cat-hdr__wrapper .hdr__action-btn { padding: var(--space-2) var(--space-3); min-width: 52px; }
+  .cat-hdr__wrapper .hdr__action-label { font-size: 10px; }
+}
+
+@media (max-width: 768px) {
+  .cat-hdr__wrapper {
+    padding-inline: var(--container-padding-mobile);
+    gap: var(--space-3);
+    height: 56px;
+  }
+  .cat-hdr__logo { width: auto; }
+  .cat-hdr__wrapper .hdr__logo-text { display: flex; }
+  .cat-hdr__wrapper .hdr__logo-name { font-size: var(--text-sm); }
+  .cat-hdr__wrapper .hdr__logo-sub  { font-size: 9px; }
+  .cat-hdr__wrapper .hdr__logo svg  { width: 26px; height: 26px; }
+  .cat-hdr__wrapper .hdr__search-box { height: 40px; }
+  .cat-hdr__wrapper .hdr__search-icon { width: 36px; height: 40px; }
+  .cat-hdr__wrapper .hdr__search-icon svg { width: 16px; height: 16px; }
+  .cat-hdr__wrapper .hdr__search-submit { width: 40px; }
+  .cat-hdr__wrapper .hdr__search-submit svg { width: 16px; height: 16px; }
+  .cat-hdr__wrapper .hdr__search-input { font-size: var(--text-sm); }
+  .cat-hdr__wrapper .hdr__action-btn { padding: var(--space-1) var(--space-2); min-width: 40px; gap: 2px; }
+  .cat-hdr__wrapper .hdr__action-label { font-size: 9px; }
+  .cat-hdr__wrapper .hdr__action-icon-wrap svg { width: 20px; height: 20px; }
+  .cat-hdr__wrapper .hdr__actions { gap: 0; }
+}
+
+@media (max-width: 480px) {
+  .cat-hdr__wrapper {
+    padding-inline: var(--container-padding-mobile);
+    gap: var(--space-2);
+    height: 50px;
+  }
+  .cat-hdr__wrapper .hdr__logo svg  { width: 24px; height: 24px; }
+  .cat-hdr__wrapper .hdr__logo-name { font-size: var(--text-xs); }
+  .cat-hdr__wrapper .hdr__logo-sub  { display: none; }
+  .cat-hdr__wrapper .hdr__search-box { height: 36px; }
+  .cat-hdr__wrapper .hdr__search-icon { width: 32px; height: 36px; }
+  .cat-hdr__wrapper .hdr__search-submit { width: 36px; }
+  .cat-hdr__wrapper .hdr__search-input { font-size: var(--text-xs); }
+  .cat-hdr__wrapper .hdr__action-btn { padding: var(--space-1); min-width: 34px; }
+  .cat-hdr__wrapper .hdr__action-label { display: none; }
+  .cat-hdr__wrapper .hdr__action-icon-wrap svg { width: 18px; height: 18px; }
+}

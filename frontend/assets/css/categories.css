@@ -1,0 +1,169 @@
+/**
+ * categories.css — Shop By Category section
+ */
+
+/* =============================================
+   SECTION
+============================================= */
+
+.categories {
+  background-color: var(--color-bg-primary);
+}
+
+/* =============================================
+   GRID
+============================================= */
+
+.categories__grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-5);
+}
+
+/* =============================================
+   CARD
+============================================= */
+
+.categories__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-8) var(--space-4);
+  background-color: var(--color-bg-card);
+  border: 1.5px solid var(--color-border-light);
+  border-radius: var(--radius-2xl);
+  text-decoration: none;
+  color: inherit;
+  text-align: center;
+  overflow: hidden;
+  transition: var(--transition-base);
+  cursor: pointer;
+}
+
+/* Animated background gradient on hover */
+.categories__card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--card-bg, rgba(30, 61, 143, 0.06));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: inherit;
+}
+
+.categories__card:hover::before {
+  opacity: 1;
+}
+
+.categories__card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--card-color, var(--color-primary-200));
+}
+
+/* ─── Icon ──── */
+
+.categories__card-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--card-bg, var(--color-primary-50));
+  color: var(--card-color, var(--color-primary-700));
+  transition: transform 0.4s var(--ease-spring);
+  flex-shrink: 0;
+}
+
+.categories__card-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.categories__card:hover .categories__card-icon {
+  transform: scale(1.15) rotate(-5deg);
+}
+
+/* ─── Text ──── */
+
+.categories__card-label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+  line-height: var(--leading-tight);
+  transition: color 0.25s ease;
+}
+
+.categories__card:hover .categories__card-label {
+  color: var(--card-color, var(--color-primary-700));
+}
+
+.categories__card-desc {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  line-height: var(--leading-normal);
+}
+
+/* ─── Arrow indicator ──── */
+
+.categories__card-arrow {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--card-color, var(--color-primary-700));
+  color: #fff;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  flex-shrink: 0;
+}
+
+.categories__card-arrow svg {
+  width: 14px;
+  height: 14px;
+}
+
+.categories__card:hover .categories__card-arrow {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =============================================
+   RESPONSIVE
+============================================= */
+
+@media (max-width: 1200px) {
+  .categories__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .categories__grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+  }
+
+  .categories__card {
+    padding: var(--space-5) var(--space-3);
+    gap: var(--space-3);
+  }
+
+  .categories__card-icon {
+    width: 52px;
+    height: 52px;
+  }
+}
+
+@media (max-width: 480px) {
+  .categories__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

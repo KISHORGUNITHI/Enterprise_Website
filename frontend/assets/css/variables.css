@@ -1,0 +1,262 @@
+/**
+ * variables.css — Enterprise Store Design System
+ * Single source of truth for all design tokens.
+ * All CSS files must reference these variables — no hardcoded values.
+ */
+
+:root {
+
+  /* =============================================
+     BRAND COLORS
+  ============================================= */
+
+  --color-primary-50:  #e8edf5;
+  --color-primary-100: #c5d1e8;
+  --color-primary-200: #9fb2d9;
+  --color-primary-300: #7893ca;
+  --color-primary-400: #5a7bbf;
+  --color-primary-500: #3b63b4;
+  --color-primary-600: #2f52a0;
+  --color-primary-700: #1e3d8f;
+  --color-primary-800: #162d6e;
+  --color-primary-900: #0d1e4d;
+
+  --color-secondary-50:  #f2f2f3;
+  --color-secondary-100: #d9d9db;
+  --color-secondary-200: #b8b9bc;
+  --color-secondary-300: #94969a;
+  --color-secondary-400: #767880;
+  --color-secondary-500: #585b65;
+  --color-secondary-600: #464a54;
+  --color-secondary-700: #2e3340;
+  --color-secondary-800: #1e2330;
+  --color-secondary-900: #10141f;
+
+  --color-accent-50:  #fff3e8;
+  --color-accent-100: #ffddb8;
+  --color-accent-200: #ffc685;
+  --color-accent-300: #ffae52;
+  --color-accent-400: #ff9d30;
+  --color-accent-500: #f58500;
+  --color-accent-600: #d97200;
+  --color-accent-700: #b85e00;
+  --color-accent-800: #964c00;
+  --color-accent-900: #6e3600;
+
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+  --color-error-500:   #ef4444;
+  --color-error-600:   #dc2626;
+  --color-whatsapp:    #25d366;
+  --color-whatsapp-dark: #128c7e;
+
+  /* =============================================
+     SEMANTIC COLORS
+  ============================================= */
+
+  --color-bg-primary:   #ffffff;
+  --color-bg-secondary: #f8f9fc;
+  --color-bg-tertiary:  #f1f3f8;
+  --color-bg-dark:      #0d1e4d;
+  --color-bg-card:      #ffffff;
+
+  --color-text-primary:   #10141f;
+  --color-text-secondary: #464a54;
+  --color-text-muted:     #767880;
+  --color-text-disabled:  #b8b9bc;
+  --color-text-inverse:   #ffffff;
+  --color-text-accent:    #f58500;
+  --color-text-brand:     #1e3d8f;
+
+  --color-border-light:  #e8edf5;
+  --color-border-medium: #c5d1e8;
+  --color-border-strong: #9fb2d9;
+
+  /* =============================================
+     GRAY SCALE
+  ============================================= */
+
+  --gray-50:  #fafafa;
+  --gray-100: #f4f4f5;
+  --gray-200: #e4e4e7;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
+  /* =============================================
+     TYPOGRAPHY
+  ============================================= */
+
+  --font-sans:    'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-display: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+  --text-4xl:  2.25rem;
+  --text-5xl:  3rem;
+  --text-6xl:  3.75rem;
+
+  --font-light:     300;
+  --font-regular:   400;
+  --font-medium:    500;
+  --font-semibold:  600;
+  --font-bold:      700;
+  --font-extrabold: 800;
+
+  --leading-none:    1;
+  --leading-tight:   1.25;
+  --leading-snug:    1.375;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose:   2;
+
+  --tracking-tight:   -0.025em;
+  --tracking-normal:   0em;
+  --tracking-wide:     0.025em;
+  --tracking-wider:    0.05em;
+  --tracking-widest:   0.1em;
+
+  /* =============================================
+     8-POINT SPACING SCALE
+     All spacing uses multiples of 8px.
+  ============================================= */
+
+  --space-0:   0;
+  --space-1:   0.25rem;   /*  4px */
+  --space-2:   0.5rem;    /*  8px */
+  --space-3:   0.75rem;   /* 12px */
+  --space-4:   1rem;      /* 16px */
+  --space-5:   1.25rem;   /* 20px */
+  --space-6:   1.5rem;    /* 24px */
+  --space-8:   2rem;      /* 32px */
+  --space-10:  2.5rem;    /* 40px */
+  --space-12:  3rem;      /* 48px */
+  --space-14:  3.5rem;    /* 56px */
+  --space-16:  4rem;      /* 64px */
+  --space-20:  5rem;      /* 80px */
+  --space-24:  6rem;      /* 96px */
+  --space-32:  8rem;      /* 128px */
+
+  /* =============================================
+     LAYOUT — CONTAINER SYSTEM
+     1440px max, 1320px content, 60px padding
+  ============================================= */
+
+  /* Max outer width */
+  --container-max-width: 1440px;
+  /* Actual content width */
+  --container-content-width: 1320px;
+  /* Horizontal padding at each breakpoint */
+  --container-padding-desktop: 60px;
+  --container-padding-tablet:  24px;
+  --container-padding-mobile:  16px;
+  /* Active padding — overridden at breakpoints */
+  --container-padding: var(--container-padding-desktop);
+
+  /* Legacy named containers */
+  --container-sm:  640px;
+  --container-md:  768px;
+  --container-lg:  1024px;
+  --container-xl:  1280px;
+  --container-2xl: 1440px;
+
+  /* =============================================
+     SECTION SPACING
+     80px between every section on desktop.
+  ============================================= */
+
+  --section-gap:     5rem;    /* 80px between sections */
+  --section-py:      5rem;    /* internal top/bottom padding */
+  --section-px:      var(--container-padding);
+
+  /* =============================================
+     COMPONENT SPACING
+  ============================================= */
+
+  --card-padding:        var(--space-6);    /* 24px inside cards */
+  --card-padding-sm:     var(--space-4);    /* 16px compact cards */
+  --card-gap:            var(--space-4);    /* 16px between cards */
+  --card-gap-lg:         var(--space-6);    /* 24px between large cards */
+
+  --header-height:       80px;
+  --header-height-mobile: 60px;
+  --cat-strip-height:    72px;
+  --cat-strip-height-mobile: 56px;
+
+  /* =============================================
+     BORDER RADIUS
+  ============================================= */
+
+  --radius-none: 0;
+  --radius-sm:   0.25rem;
+  --radius-md:   0.5rem;
+  --radius-lg:   0.75rem;
+  --radius-xl:   1rem;
+  --radius-2xl:  1.5rem;
+  --radius-3xl:  2rem;
+  --radius-full: 9999px;
+
+  /* =============================================
+     SHADOWS
+  ============================================= */
+
+  --shadow-xs:  0 1px 2px rgba(0,0,0,0.05);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:  0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg:  0 10px 15px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.04);
+  --shadow-xl:  0 20px 25px rgba(0,0,0,0.10), 0 8px 10px rgba(0,0,0,0.04);
+  --shadow-2xl: 0 25px 50px rgba(0,0,0,0.15);
+
+  --shadow-primary:     0 8px 24px rgba(30,61,143,0.25);
+  --shadow-accent:      0 8px 24px rgba(245,133,0,0.30);
+  --shadow-card:        0 2px 12px rgba(0,0,0,0.08);
+  --shadow-card-hover:  0 12px 32px rgba(0,0,0,0.14);
+  --shadow-header:      0 2px 12px rgba(0,0,0,0.15);
+  --shadow-inset:       inset 0 2px 4px rgba(0,0,0,0.06);
+
+  /* =============================================
+     TRANSITIONS
+  ============================================= */
+
+  --transition-fast:   all 0.15s ease;
+  --transition-base:   all 0.25s ease;
+  --transition-slow:   all 0.4s ease;
+  --transition-slower: all 0.6s ease;
+
+  --ease-in:     cubic-bezier(0.4, 0, 1, 1);
+  --ease-out:    cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* =============================================
+     Z-INDEX
+  ============================================= */
+
+  --z-below:    -1;
+  --z-base:      0;
+  --z-raised:    10;
+  --z-dropdown:  100;
+  --z-sticky:    200;
+  --z-overlay:   300;
+  --z-modal:     400;
+  --z-toast:     500;
+
+  /* =============================================
+     LEGACY / LANDING PAGE
+  ============================================= */
+
+  --navbar-height:          72px;
+  --navbar-height-scrolled: 60px;
+}

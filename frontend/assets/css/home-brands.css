@@ -1,0 +1,76 @@
+/**
+ * home-brands.css — Brands we sell grid. Container-aligned.
+ */
+
+.brands {
+  background-color: var(--color-bg-primary);
+  padding-block: var(--section-gap);
+}
+
+.brands .container--wide {
+  max-width: var(--container-max-width);
+  padding-inline: var(--container-padding);
+  margin-inline: auto;
+}
+
+.brands__grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+}
+
+.brands__card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5) var(--space-4);
+  background-color: var(--color-bg-card);
+  border: 1.5px solid var(--color-border-light);
+  border-radius: var(--radius-xl);
+  text-decoration: none;
+  transition: var(--transition-base);
+  min-height: 76px;
+  overflow: hidden;
+}
+
+.brands__card:hover {
+  border-color: var(--color-primary-200);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}
+
+.brands__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.brands__logo svg {
+  width: 100%;
+  max-width: 110px;
+  height: 36px;
+  transition: transform 0.3s var(--ease-spring);
+}
+
+.brands__card:hover .brands__logo svg {
+  transform: scale(1.08);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .brands .container--wide { padding-inline: var(--container-padding-tablet); }
+  .brands__grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .brands { padding-block: var(--space-12); }
+  .brands .container--wide { padding-inline: var(--container-padding-mobile); }
+  .brands__grid { grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
+}
+
+@media (max-width: 480px) {
+  .brands__grid { grid-template-columns: repeat(2, 1fr); }
+  .brands__card { padding: var(--space-4) var(--space-3); min-height: 60px; }
+}

@@ -1,0 +1,379 @@
+/**
+ * navbar.css — Enterprise Store Navigation
+ * Fixed top navbar with scroll shrink effect and mobile drawer.
+ */
+
+/* =============================================
+   NAVBAR BASE
+============================================= */
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-sticky);
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid transparent;
+  transition: var(--transition-base);
+  height: var(--navbar-height);
+}
+
+/* Scrolled state — added via JS */
+.navbar.scrolled {
+  height: var(--navbar-height-scrolled);
+  background-color: rgba(255, 255, 255, 0.98);
+  border-bottom-color: var(--color-border-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.navbar__spacer {
+  height: var(--navbar-height);
+}
+
+/* =============================================
+   NAVBAR CONTAINER
+============================================= */
+
+.navbar__container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  gap: var(--space-8);
+  /* Prevent overflow on small screens */
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* Logo never shrinks */
+.navbar__logo { flex-shrink: 0; }
+
+/* Actions never shrink */
+.navbar__actions { flex-shrink: 0; }
+
+/* =============================================
+   LOGO
+============================================= */
+
+.navbar__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: var(--transition-fast);
+}
+
+.navbar__logo:hover {
+  opacity: 0.85;
+}
+
+.navbar__logo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.3s var(--ease-spring);
+}
+
+.navbar__logo:hover .navbar__logo-icon {
+  transform: rotate(-5deg) scale(1.05);
+}
+
+.navbar__logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.navbar__logo-name {
+  font-size: var(--text-lg);
+  font-weight: var(--font-extrabold);
+  color: var(--color-primary-700);
+  letter-spacing: var(--tracking-tight);
+}
+
+.navbar__logo-tagline {
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--color-accent-500);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+}
+
+/* =============================================
+   DESKTOP NAV LINKS
+============================================= */
+
+.navbar__nav {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.navbar__nav-list {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.navbar__nav-link {
+  position: relative;
+  display: inline-block;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-md);
+  transition: var(--transition-fast);
+  text-decoration: none;
+}
+
+.navbar__nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primary-700), var(--color-accent-500));
+  border-radius: var(--radius-full);
+  transform: translateX(-50%);
+  transition: width 0.25s var(--ease-out);
+}
+
+.navbar__nav-link:hover {
+  color: var(--color-primary-700);
+  background-color: var(--color-primary-50);
+}
+
+.navbar__nav-link:hover::after {
+  width: calc(100% - 32px);
+}
+
+.navbar__nav-link.active {
+  color: var(--color-primary-700);
+  font-weight: var(--font-semibold);
+}
+
+.navbar__nav-link.active::after {
+  width: calc(100% - 32px);
+}
+
+/* =============================================
+   NAVBAR ACTIONS
+============================================= */
+
+.navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.navbar__call-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.navbar__call-btn:hover {
+  color: var(--color-primary-700);
+  background-color: var(--color-primary-50);
+}
+
+.navbar__login-btn {
+  /* inherits .btn .btn--primary .btn--sm */
+}
+
+/* =============================================
+   HAMBURGER BUTTON
+============================================= */
+
+.navbar__hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-2);
+  transition: var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.navbar__hamburger:hover {
+  background-color: var(--color-primary-50);
+}
+
+.navbar__hamburger-line {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background-color: var(--color-text-primary);
+  border-radius: var(--radius-full);
+  transition: var(--transition-base);
+  transform-origin: center;
+}
+
+/* Hamburger → X animation */
+.navbar__hamburger.open .navbar__hamburger-line:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.navbar__hamburger.open .navbar__hamburger-line:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.navbar__hamburger.open .navbar__hamburger-line:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* =============================================
+   MOBILE MENU DRAWER
+============================================= */
+
+.navbar__mobile-menu {
+  position: fixed;
+  top: var(--navbar-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-bg-primary);
+  z-index: calc(var(--z-sticky) - 1);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.35s var(--ease-out);
+  overflow-y: auto;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.navbar__mobile-menu.open {
+  transform: translateX(0);
+}
+
+.navbar__mobile-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  height: 100%;
+}
+
+.navbar__mobile-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.navbar__mobile-nav-link {
+  display: block;
+  padding: var(--space-4) var(--space-4);
+  font-size: var(--text-lg);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  transition: var(--transition-fast);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.navbar__mobile-nav-link:hover {
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-700);
+  padding-left: var(--space-6);
+}
+
+.navbar__mobile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: auto;
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border-light);
+}
+
+/* =============================================
+   RESPONSIVE — compact actions on mobile, never hide buttons
+============================================= */
+
+@media (max-width: 768px) {
+  /* Hide the center nav links — they're in the drawer */
+  .navbar__nav { display: none; }
+
+  /* Keep actions visible but compact */
+  .navbar__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  /* Call Us — icon only on mobile */
+  .navbar__call-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border-medium);
+    background-color: var(--color-bg-primary);
+  }
+
+  .navbar__call-btn span { display: none; } /* hide "Call Us" text */
+
+  /* Login button — compact */
+  .navbar__login-btn {
+    padding: var(--space-2) var(--space-3) !important;
+    font-size: var(--text-xs) !important;
+  }
+
+  .navbar__login-btn .icon { display: none; } /* hide icon, keep text */
+
+  .navbar__hamburger { display: flex; }
+
+  .navbar__mobile-menu { top: var(--navbar-height); }
+  .navbar.scrolled .navbar__mobile-menu { top: var(--navbar-height-scrolled); }
+}
+
+@media (max-width: 480px) {
+  .navbar__logo-tagline { display: none; }
+
+  /* Tighten container gap */
+  .navbar__container { gap: var(--space-3); }
+
+  /* Call Us — icon only, smaller */
+  .navbar__call-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  /* Login — minimal */
+  .navbar__login-btn {
+    padding: var(--space-2) var(--space-2) !important;
+    font-size: 11px !important;
+    gap: var(--space-1) !important;
+  }
+}
+
+@media (max-width: 360px) {
+  /* On very small screens, hide hamburger and show only icon actions */
+  .navbar__login-btn .btn-text { display: none; }
+  .navbar__login-btn .icon     { display: flex !important; }
+}
