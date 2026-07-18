@@ -6,14 +6,15 @@ import authRoutes from './src/Features/Auth/routes/authRoutes.js'
 import jwtAuthenticate from './src/middleware/jwtmiddleware.js'
 
 const app=express();
+const PORT = process.env.PORT || 3000;
 
 // Fix for __dirname when using ES modules
 const __filename=fileURLToPath(import.meta.url);
 const __dirname=path.dirname(__filename);
 
 // Req Folder Paths generation
-const viewsPath=path.join(__dirname,'views');
-const publicPath=path.join(__dirname,'public');
+const viewsPath=path.join(__dirname,'frontend/views');
+const publicPath=path.join(__dirname,'frontend');
 
 // Setting EJS as the view engine
 app.set('view engine', 'ejs');
@@ -25,76 +26,164 @@ app.use(express.urlencoded({ extended: true }));
 
 
 
-// Authentication Routes
-app.use("/",authRoutes);
-app.use("/api/auth",authRoutes);
+// // Authentication Routes
+// app.use("/",authRoutes);
+// app.use("/api/auth",authRoutes);
 
-app.get("/test-jwt",jwtAuthenticate,(req,res)=>{
-    res.json({
-        success:true,
-        user:req.user
+// app.get("/test-jwt",jwtAuthenticate,(req,res)=>{
+//     res.json({
+//         success:true,
+//         user:req.user
+//     });
+// })
+
+// //Testing the frontend(auth)
+// app.get("/test-frontend",(req,res)=>{
+//     res.render("auth/auth");
+// })
+
+// ─── Site-wide constants ─────────────────────────────────────────────────────
+const site = {
+  name:    'Enterprise Store',
+  tagline: 'Official Electronics Store',
+  phone:   '9963657799',
+  wa:      'https://wa.me/919963657799',
+};
+
+// ─── Helper: render stub for pages not yet designed ──────────────────────────
+function stub(label) {
+  return (req, res) => {
+    res.render('pages/stub', {
+      title:       `${label} — ${site.name}`,
+      pageLabel:   label,
+      currentPath: req.path,
+      site,
     });
-})
+  };
+}
 
-//Testing the frontend(auth)
-app.get("/test-frontend",(req,res)=>{
-    res.render("auth/auth");
-})
+// =====================================================================
+//  BUILT PAGES
+// =====================================================================
 
-// Dummy data for products and reviews
-const products = [
-  {
-    name: 'iPhone 15 Pro Max',
-    price: '₹1,44,900',
-    description: 'A titanium masterpiece with a 5x Telephoto camera, action button, and A17 Pro chip.',
-    image: 'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3'
-  },
-  {
-    name: 'Samsung Galaxy S24 Ultra',
-    price: '₹1,29,999',
-    description: 'Galaxy AI is here. Epic zoom capabilities, titanium frame, and built-in S Pen.',
-    image: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3'
-  },
-  {
-    name: 'MacBook Pro 14" M3',
-    price: '₹1,69,900',
-    description: 'The most advanced laptop chip for demanding workflows. Over 22 hours of battery life.',
-    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3'
-  },
-  {
-    name: 'Sony WH-1000XM5',
-    price: '₹29,990',
-    description: 'Industry-leading noise canceling headphones with exceptional sound and call quality.',
-    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3'
-  }
-];
-
-const testimonials = [
-  {
-    name: 'Rohan Sharma',
-    role: 'Local Business Owner',
-    text: 'Highly recommend buying from Enterprise Store! Got my S24 Ultra here. They matched online prices, gave me zero-interest EMI on the spot, and transferred my data in 10 minutes. Super friendly service!'
-  },
-  {
-    name: 'Priya Patel',
-    role: 'Software Engineer',
-    text: 'The best local store in town. Delivery was done within 2 hours of ordering online. Plus, knowing I can walk into the store if anything goes wrong gives me huge peace of mind compared to big e-commerce sites.'
-  },
-  {
-    name: 'Vikram Singh',
-    role: 'Professional Photographer',
-    text: 'Excellent customer support. They helped me compare different models, offered the best deals, and gave a free premium screen guard and case. Truly our own local store.'
-  }
-];
-
-// Main landing page route
+// Landing — marketing / pre-login
 app.get('/', (req, res) => {
-  res.render('landing/landing', { products, testimonials });
+  res.render('pages/landing', {
+    title:       `${site.name} — ${site.tagline}`,
+    description: 'Premium electronics at best prices. Mobiles, TVs, ACs, Refrigerators and more with 0% EMI and official warranty.',
+    site,
+  });
 });
 
-//Server Listening
-const port=3000;
-const host='localhost';
-app.listen(port,host,()=>{
-    console.log(`Server Listening at http://${host}:${port}`);
-})
+// Home — main shopping hub (fully built)
+app.get('/home', (req, res) => {
+  res.render('pages/home', {
+    title:       `Home — ${site.name}`,
+    description: 'Shop mobiles, TVs, ACs, refrigerators and more at Enterprise Store.',
+    site,
+  });
+});
+
+// =====================================================================
+//  STUB ROUTES — render when designs are provided these become real pages
+// =====================================================================
+
+// Auth — combined /auth page + aliases
+app.get('/auth', (req, res) => {
+  res.render('pages/auth/auth', { title: `Sign In — ${site.name}`, site });
+});
+app.get('/login', (req, res) => {
+  res.render('pages/auth/auth', { title: `Login — ${site.name}`, site });
+});
+app.get('/signup', (req, res) => {
+  res.render('pages/auth/auth', { title: `Create Account — ${site.name}`, site });
+});
+app.get('/forgot-password', stub('Forgot Password'));
+app.get('/otp',             stub('OTP Verification'));
+app.get('/reset-password',  stub('Reset Password'));
+
+// Products — real category page (header + strip + content area)
+app.get('/products', (req, res) => {
+  res.render('pages/products/category', {
+    title:          `All Products — ${site.name}`,
+    pageLabel:      'All Products',
+    activeCategory: 'all',
+    slug:           'all',
+    site,
+  });
+});
+
+const categoryRoutes = [
+  { path: '/products/mobiles',       label: 'Mobiles',            slug: 'mobiles'        },
+  { path: '/products/tvs',           label: 'TVs',                slug: 'tvs'            },
+  { path: '/products/acs',           label: 'Air Conditioners',   slug: 'acs'            },
+  { path: '/products/home-theatres', label: 'Home Theatres',      slug: 'home-theatres'  },
+  { path: '/products/kitchen',       label: 'Kitchen Appliances', slug: 'kitchen'        },
+  { path: '/products/refrigerators', label: 'Refrigerators',      slug: 'refrigerators'  },
+];
+
+categoryRoutes.forEach(({ path: routePath, label, slug }) => {
+  app.get(routePath, (req, res) => {
+    res.render('pages/products/category', {
+      title:          `${label} — ${site.name}`,
+      pageLabel:      label,
+      activeCategory: slug,
+      slug,
+      site,
+    });
+  });
+});
+// Product detail page
+app.get('/product/:id', (req, res) => {
+  res.render('pages/products/detail', {
+    title:     `Product Details — ${site.name}`,
+    productId: req.params.id,
+    site,
+  });
+});
+
+// Shopping
+app.get('/cart',     stub('Shopping Cart'));
+app.get('/checkout', stub('Checkout'));
+app.get('/wishlist', stub('Wishlist'));
+
+// Account
+app.get('/orders', (req, res) => {
+  res.render('pages/account/orders', {
+    title: `My Orders — ${site.name}`,
+    site,
+  });
+});
+app.get('/profile', stub('My Profile'));
+
+// =====================================================================
+//  404
+// =====================================================================
+
+app.get('/404', (req, res) => {
+  res.status(404).render('pages/stub', {
+    title:       `Page Not Found — ${site.name}`,
+    pageLabel:   '404 — Not Found',
+    currentPath: req.path,
+    site,
+  });
+});
+
+app.use((req, res) => {
+  res.status(404).render('pages/stub', {
+    title:       `Page Not Found — ${site.name}`,
+    pageLabel:   '404 — Not Found',
+    currentPath: req.path,
+    site,
+  });
+});
+
+// ─── Start ───────────────────────────────────────────────────────────────────
+app.listen(PORT, () => {
+  console.log(`\n  Enterprise Store  →  http://localhost:${PORT}\n`);
+  console.log('  Routes:');
+  console.log('  /         → Landing Page');
+  console.log('  /home     → Home Page');
+  console.log('  /login    → Stub (design pending)');
+  console.log('  /products → Stub (design pending)\n');
+});
