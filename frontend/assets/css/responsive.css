@@ -330,6 +330,103 @@
 body { overflow-x: hidden; }
 
 /* =============================================
+   SMALL SCREEN SAFEGUARDS
+   Keep grid and flex children from expanding the viewport.  This is
+   especially important for long product names, prices, and controls.
+============================================= */
+html,
+body {
+  max-width: 100%;
+}
+
+main,
+section,
+.container,
+.container--wide,
+.plp__container,
+.pdp__container,
+.hdr__wrapper {
+  min-width: 0;
+}
+
+.plp-toolbar__left,
+.plp-toolbar__right,
+.plp-toolbar__category,
+.pdp-info,
+.pdp-related,
+.order-card__info,
+.product-card,
+.plp-card {
+  min-width: 0;
+}
+
+.pdp-info__title,
+.plp-card__name,
+.product-card__name,
+.order-card__product-name,
+.plp-banner__title,
+.plp-banner__subtitle {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  /* Let toolbar controls fit rather than forcing a horizontal scroll. */
+  .plp-toolbar__inner {
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+  .plp-toolbar__right {
+    flex-shrink: 1;
+    gap: var(--space-2);
+  }
+  .plp-sort__select,
+  .plp-toolbar__filter-btn {
+    max-width: 100%;
+  }
+
+  /* Fixed PDP controls stay usable on narrow phones. */
+  .pdp-buy-bar__inner { gap: var(--space-2); }
+  .pdp-buy-bar__emi-btn { padding-inline: var(--space-2); }
+  .pdp-buy-bar__emi-label { white-space: normal; text-align: center; }
+  .pdp-buy-bar__buy { padding-inline: var(--space-2); }
+}
+
+@media (max-width: 375px) {
+  /* 320–375px devices: preserve readable two-column cards and controls. */
+  .hdr__wrapper,
+  .container--wide,
+  .plp__container,
+  .pdp__container,
+  .prod-section__header,
+  .prod-section__viewport {
+    padding-inline: var(--space-3);
+  }
+  .hdr__row2 { gap: var(--space-1); }
+  .hdr__action-btn { min-width: 32px; }
+  .hdr__search-input::placeholder { color: transparent; }
+
+  .plp-toolbar__inner { flex-wrap: wrap; }
+  .plp-toolbar__right { width: 100%; justify-content: space-between; }
+  .plp-sort__select { min-width: 0; }
+  .plp-filter-sheet__header,
+  .plp-filter-sheet__content,
+  .plp-filter-sheet__apply { padding-inline: var(--space-4); }
+
+  .plp-card__body { padding: var(--space-3); }
+  .plp-card__footer { padding: var(--space-2) var(--space-3) var(--space-3); }
+  .plp-card__price { gap: var(--space-1); }
+  .plp-card__price-original,
+  .plp-card__price-discount { font-size: 9px; }
+
+  .pdp-info { padding: var(--space-4) var(--space-3); }
+  .pdp-buy-bar { padding-inline: var(--space-2); }
+  .pdp-buy-bar__cart { flex-basis: 40px; }
+  .pdp-buy-bar__emi-btn { flex: 1; }
+  .pdp-buy-bar__emi-btn svg { display: none; }
+  .pdp-buy-bar__buy { flex: 1.25; }
+}
+
+/* =============================================
    GLOBAL — safe-area insets (notched phones)
 ============================================= */
 

@@ -549,3 +549,22 @@
   .hdr__action-icon-wrap svg { width: 18px; height: 18px; }
   .hdr__actions { gap: 0; }
 }
+
+/* ─── Logout button — inherits .hdr__action-btn, red hover accent ─── */
+.hdr__action-btn--logout {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+}
+
+.hdr__action-btn--logout:hover .hdr__action-icon-wrap,
+.hdr__action-btn--logout:focus-visible .hdr__action-icon-wrap {
+  color: #fca5a5;
+}
+
+.hdr__action-btn--logout:hover .hdr__action-label,
+.hdr__action-btn--logout:focus-visible .hdr__action-label {
+  color: #fca5a5;
+}

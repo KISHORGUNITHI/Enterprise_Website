@@ -2,11 +2,11 @@ import express from 'express';
 import path from 'path';
 import {fileURLToPath} from 'url';
 import "dotenv/config"
-import authRoutes from './src/Features/Auth/routes/authRoutes.js'
+import authRoutes from './src/features/auth/routes/authRoutes.js'
 import jwtAuthenticate from './src/middleware/jwtmiddleware.js'
 
 const app=express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Fix for __dirname when using ES modules
 const __filename=fileURLToPath(import.meta.url);
@@ -24,27 +24,25 @@ app.use(express.json());
 app.use(express.static(publicPath));
 app.use(express.urlencoded({ extended: true }));
 
+// Return malformed JSON as an API error instead of Express' HTML stack trace.
+app.use((error, req, res, next) => {
+  if (error instanceof SyntaxError && error.status === 400 && 'body' in error) {
+    return res.status(400).json({
+      success: false,
+      message: 'Request body must be valid JSON.'
+    });
+  }
+  next(error);
+});
 
 
-// // Authentication Routes
-// app.use("/",authRoutes);
-// app.use("/api/auth",authRoutes);
 
-// app.get("/test-jwt",jwtAuthenticate,(req,res)=>{
-//     res.json({
-//         success:true,
-//         user:req.user
-//     });
-// })
-
-// //Testing the frontend(auth)
-// app.get("/test-frontend",(req,res)=>{
-//     res.render("auth/auth");
-// })
+// Authentication Routes
+app.use("/",authRoutes);
 
 // ─── Site-wide constants ─────────────────────────────────────────────────────
 const site = {
-  name:    'Enterprise Store',
+  name:    'Kishor Enterprises',
   tagline: 'Official Electronics Store',
   phone:   '9963657799',
   wa:      'https://wa.me/919963657799',
@@ -89,18 +87,18 @@ app.get('/home', (req, res) => {
 // =====================================================================
 
 // Auth — combined /auth page + aliases
-app.get('/auth', (req, res) => {
-  res.render('pages/auth/auth', { title: `Sign In — ${site.name}`, site });
-});
-app.get('/login', (req, res) => {
-  res.render('pages/auth/auth', { title: `Login — ${site.name}`, site });
-});
-app.get('/signup', (req, res) => {
-  res.render('pages/auth/auth', { title: `Create Account — ${site.name}`, site });
-});
-app.get('/forgot-password', stub('Forgot Password'));
-app.get('/otp',             stub('OTP Verification'));
-app.get('/reset-password',  stub('Reset Password'));
+// app.get('/auth', (req, res) => {
+//   res.render('pages/auth/auth', { title: `Sign In — ${site.name}`, site });
+// });
+// app.get('/login', (req, res) => {
+//   res.render('pages/auth/auth', { title: `Login — ${site.name}`, site });
+// });
+// app.get('/signup', (req, res) => {
+//   res.render('pages/auth/auth', { title: `Create Account — ${site.name}`, site });
+// });
+// app.get('/forgot-password', stub('Forgot Password'));
+// app.get('/otp',             stub('OTP Verification'));
+// app.get('/reset-password',  stub('Reset Password'));
 
 // Products — real category page (header + strip + content area)
 app.get('/products', (req, res) => {
@@ -145,7 +143,6 @@ app.get('/product/:id', (req, res) => {
 // Shopping
 app.get('/cart',     stub('Shopping Cart'));
 app.get('/checkout', stub('Checkout'));
-app.get('/wishlist', stub('Wishlist'));
 
 // Account
 app.get('/orders', (req, res) => {
@@ -181,9 +178,4 @@ app.use((req, res) => {
 // ─── Start ───────────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`\n  Enterprise Store  →  http://localhost:${PORT}\n`);
-  console.log('  Routes:');
-  console.log('  /         → Landing Page');
-  console.log('  /home     → Home Page');
-  console.log('  /login    → Stub (design pending)');
-  console.log('  /products → Stub (design pending)\n');
 });

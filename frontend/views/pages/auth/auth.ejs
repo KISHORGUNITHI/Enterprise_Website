@@ -28,8 +28,8 @@
           <circle cx="24" cy="22" r="3" fill="var(--color-accent-500)"/>
         </svg>
         <div>
-          <p class="auth-split__brand-name">Enterprise Store</p>
-          <p class="auth-split__brand-tag">Official Electronics Store</p>
+          <p class="auth-split__brand-name">Kishor Enterprises</p>
+          <p class="auth-split__brand-tag">Your own Local store</p>
         </div>
       </a>
 
@@ -41,7 +41,7 @@
           Mobiles, TVs, ACs, Refrigerators and more — all with official warranty and 0% EMI.
         </p>
         <ul class="auth-split__perks">
-          <li><span class="auth-split__perk-dot"></span> Official brand warranty on every product</li>
+          <li><span class="auth-split__perk-dot"></span> Official Brand Warranty</li>
           <li><span class="auth-split__perk-dot"></span> 0% Interest EMI via TVS Credit &amp; Bajaj Finserv</li>
           <li><span class="auth-split__perk-dot"></span> Free data transfer at our store</li>
           <li><span class="auth-split__perk-dot"></span> Best price guarantee</li>
@@ -58,7 +58,7 @@
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <polyline points="10 12 6 8 10 4"/>
       </svg>
-      Back to Home
+      Back to Landing Page
     </a>
 
     <!-- Mobile logo (only visible on small screens) -->
@@ -69,12 +69,14 @@
         <circle cx="24" cy="22" r="3" fill="var(--color-accent-500)"/>
       </svg>
       <div>
-        <p class="auth-page__logo-name">Enterprise Store</p>
-        <p class="auth-page__logo-sub">Official Electronics Store</p>
+        <p class="auth-page__logo-name">Kishor Enterprises</p>
+        <p class="auth-page__logo-sub">Your own Local store</p>
       </div>
     </a>
 
     <div class="auth-card">
+
+      <p class="auth-form__error" id="authServerMessage" role="alert" hidden></p>
 
       <!-- Tab switcher -->
       <div class="auth-tabs" role="tablist" aria-label="Authentication options">
@@ -108,16 +110,16 @@
         <form class="auth-form" id="loginForm" novalidate>
 
           <div class="auth-form__group">
-            <label class="auth-form__label" for="loginIdentifier">Email or Phone Number</label>
+            <label class="auth-form__label" for="loginIdentifier">Email Address</label>
             <div class="auth-form__field" id="identifierField">
-              <input type="text" id="loginIdentifier" name="identifier"
+              <input type="email" id="loginIdentifier" name="email"
                 class="auth-form__input"
-                placeholder="you@example.com or 98765 43210"
-                autocomplete="username" autocapitalize="none" spellcheck="false"/>
+                placeholder="you@example.com"
+                autocomplete="email" autocapitalize="none" spellcheck="false"/>
             </div>
             <span class="auth-form__error" id="identifierError" aria-live="polite" hidden>
               <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0a6 6 0 100 12A6 6 0 006 0zm0 9a.75.75 0 110-1.5A.75.75 0 016 9zm.75-3.75a.75.75 0 01-1.5 0V3.75a.75.75 0 011.5 0v1.5z"/></svg>
-              Please enter your email or phone number.
+              Please enter a valid email address.
             </span>
           </div>
 
@@ -153,7 +155,7 @@
 
         <div class="auth-card__heading">
           <h1 class="auth-card__title">Create account</h1>
-          <p class="auth-card__subtitle">Join Enterprise Store today.</p>
+          <p class="auth-card__subtitle">Join Kishor Enterprises today.</p>
         </div>
 
         <form class="auth-form" id="registerForm" novalidate>
@@ -161,7 +163,7 @@
           <div class="auth-form__group">
             <label class="auth-form__label" for="regName">Full Name</label>
             <div class="auth-form__field" id="nameField">
-              <input type="text" id="regName" name="name" class="auth-form__input" placeholder="Your full name" autocomplete="name"/>
+              <input type="text" id="regName" name="username" class="auth-form__input" placeholder="Your full name" autocomplete="name"/>
             </div>
             <span class="auth-form__error" id="nameError" aria-live="polite" hidden>
               <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0a6 6 0 100 12A6 6 0 006 0zm0 9a.75.75 0 110-1.5A.75.75 0 016 9zm.75-3.75a.75.75 0 01-1.5 0V3.75a.75.75 0 011.5 0v1.5z"/></svg>
@@ -184,7 +186,7 @@
             <label class="auth-form__label" for="regPhone">Phone Number</label>
             <div class="auth-form__field" id="phoneField">
               <span class="auth-form__prefix">+91</span>
-              <input type="tel" id="regPhone" name="phone" class="auth-form__input" placeholder="98765 43210" maxlength="10" inputmode="numeric" autocomplete="tel-national"/>
+              <input type="tel" id="regPhone" name="phone_number" class="auth-form__input" placeholder="98765 43210" maxlength="10" inputmode="numeric" autocomplete="tel-national"/>
             </div>
             <span class="auth-form__error" id="phoneError" aria-live="polite" hidden>
               <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0a6 6 0 100 12A6 6 0 006 0zm0 9a.75.75 0 110-1.5A.75.75 0 016 9zm.75-3.75a.75.75 0 01-1.5 0V3.75a.75.75 0 011.5 0v1.5z"/></svg>
@@ -328,6 +330,52 @@
     errEl.hidden = true;
   }
 
+  let serverMessageTimer;
+
+  function showServerMessage(message) {
+    const messageEl = document.getElementById('authServerMessage');
+    if (!messageEl) return;
+
+    clearTimeout(serverMessageTimer);
+    messageEl.textContent = message;
+    messageEl.hidden = !message;
+
+    if (message) {
+      serverMessageTimer = setTimeout(() => {
+        messageEl.hidden = true;
+        messageEl.textContent = '';
+      }, 3000);
+    }
+  }
+
+  async function submitAuth(path, body) {
+    let response;
+    try {
+      response = await fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify(body),
+      });
+    } catch (_) {
+      throw new Error('No internet connection. Please check your network and try again.');
+    }
+    const payload = await response.json().catch(() => null);
+    if (!response.ok || !payload?.success) {
+      throw new Error(payload?.message || 'Unable to complete your request. Please try again.');
+    }
+    return payload;
+  }
+
+  function redirectAfterAuth() {
+    const pendingRoute = localStorage.getItem('pendingRoute');
+    localStorage.removeItem('pendingRoute');
+    const destination = pendingRoute && pendingRoute.startsWith('/') && !pendingRoute.startsWith('//')
+      ? pendingRoute
+      : '/home';
+    window.location.assign(destination);
+  }
+
   // Validate a field only if it has been touched OR forceAll is true
   function validateField(inputId, fieldId, errorId, rule, forceAll) {
     const input = document.getElementById(inputId);
@@ -343,24 +391,35 @@
   const loginPas = document.getElementById('loginPassword');
 
   // Only validate on blur if user touched the field
-  loginId  && loginId.addEventListener('blur',  () => { markTouched('loginIdentifier'); validateField('loginIdentifier', 'identifierField', 'identifierError', v => v.trim().length > 0, false); });
+  loginId  && loginId.addEventListener('blur',  () => { markTouched('loginIdentifier'); validateField('loginIdentifier', 'identifierField', 'identifierError', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()), false); });
   loginPas && loginPas.addEventListener('blur', () => { markTouched('loginPassword');   validateField('loginPassword',   'loginPasswordField',  'loginPasswordError',  v => v.length > 0, false); });
 
   // Clear error as soon as field becomes valid (real-time after touch)
-  loginId  && loginId.addEventListener('input',  () => { if (touched.has('loginIdentifier') && loginId.value.trim().length > 0)  setFieldState('identifierField', 'identifierError', true); });
+  loginId  && loginId.addEventListener('input',  () => { if (touched.has('loginIdentifier')) validateField('loginIdentifier', 'identifierField', 'identifierError', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()), true); });
   loginPas && loginPas.addEventListener('input', () => { if (touched.has('loginPassword')   && loginPas.value.length > 0)          setFieldState('loginPasswordField',  'loginPasswordError',  true); });
 
-  document.getElementById('loginForm') && document.getElementById('loginForm').addEventListener('submit', function (e) {
+  document.getElementById('loginForm') && document.getElementById('loginForm').addEventListener('submit', async function (e) {
     e.preventDefault();
+    showServerMessage('');
     // Force validate all fields on submit
     ['loginIdentifier', 'loginPassword'].forEach(id => markTouched(id));
-    const ok1 = validateField('loginIdentifier', 'identifierField',     'identifierError',     v => v.trim().length > 0, true);
+    const ok1 = validateField('loginIdentifier', 'identifierField',     'identifierError',     v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()), true);
     const ok2 = validateField('loginPassword',   'loginPasswordField',  'loginPasswordError',  v => v.length > 0,        true);
     if (ok1 && ok2) {
       const btn = document.getElementById('loginBtn');
       if (btn) { btn.disabled = true; btn.textContent = 'Signing in…'; }
-      // Future: POST /api/auth/login
-      setTimeout(() => { window.location.href = '/home'; }, 400);
+      try {
+        const data = await submitAuth('/login', {
+          email: loginId.value.trim().toLowerCase(),
+          password: loginPas.value,
+        });
+        if (data?.data?.safeuser) localStorage.setItem('authUser', JSON.stringify(data.data.safeuser));
+        redirectAfterAuth();
+      } catch (error) {
+        showServerMessage(error.message);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Login'; }
+      }
     }
   });
 
@@ -392,8 +451,9 @@
     });
   });
 
-  document.getElementById('registerForm') && document.getElementById('registerForm').addEventListener('submit', function (e) {
+  document.getElementById('registerForm') && document.getElementById('registerForm').addEventListener('submit', async function (e) {
     e.preventDefault();
+    showServerMessage('');
     regBlurs.forEach(([id]) => markTouched(id));
     const results = regBlurs.map(([inputId, fieldId, errorId, rule]) => {
       const input = document.getElementById(inputId);
@@ -404,8 +464,21 @@
     if (results.every(Boolean)) {
       const btn = document.getElementById('registerBtn');
       if (btn) { btn.disabled = true; btn.textContent = 'Creating account…'; }
-      // Future: POST /api/auth/register
-      setTimeout(() => { window.location.href = '/home'; }, 400);
+      try {
+        const data = await submitAuth('/register', {
+          username: regName.value.trim(),
+          email: regEmail.value.trim().toLowerCase(),
+          phone_number: regPhone.value,
+          password: regPass.value,
+          confirmPassword: regConf.value,
+        });
+        if (data?.data?.safeuser) localStorage.setItem('authUser', JSON.stringify(data.data.safeuser));
+        redirectAfterAuth();
+      } catch (error) {
+        showServerMessage(error.message);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
+      }
     }
   });
 

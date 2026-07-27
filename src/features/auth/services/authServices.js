@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
-import {UserRepository} from "../Repositories/userRepository.js"
+import {UserRepository} from "../repositories/userRepository.js"
 import "dotenv/config"
 
 export class RegisterService{

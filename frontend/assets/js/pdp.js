@@ -66,8 +66,6 @@
   const relPrev   = document.getElementById('pdpRelPrev');
   const relNext   = document.getElementById('pdpRelNext');
   const relViewport = document.getElementById('pdpRelViewport');
-  const wishlistBtn = document.getElementById('pdpWishlist');
-
   // Track state
   let selectedColor   = 0;
   let selectedVariants = {};
@@ -145,11 +143,6 @@
     }
   }
 
-  // Wishlist toggle
-  wishlistBtn && wishlistBtn.addEventListener('click', () => {
-    const isActive = wishlistBtn.classList.toggle('active');
-    wishlistBtn.setAttribute('aria-label', isActive ? 'Remove from wishlist' : 'Add to wishlist');
-  });
 
   // ─── Variants ─────────────────────────────────────────────────────────────
   if (variantsEl && product.variants.length) {
@@ -352,10 +345,9 @@
           </div>
         </div>
         <div class="plp-card__footer">
-          <button class="btn btn--primary plp-card__cta"
-            onclick="showLoginRequiredModal('/product/${p.id}')">
+          <a href="/product/${p.id}" class="btn btn--primary plp-card__cta">
             View Details
-          </button>
+          </a>
         </div>
       </article>`
     ).join('');
@@ -385,11 +377,9 @@
   }
 
   // ─── Buy Now + Add to Cart ────────────────────────────────────────────────
-  document.querySelectorAll('[data-action="buy-now"], [data-action="add-cart"]').forEach(btn => {
+  document.querySelectorAll('[data-action="buy-now"]').forEach(btn => {
     btn.addEventListener('click', () => {
-      if (typeof showLoginRequiredModal === 'function') {
-        showLoginRequiredModal('/checkout');
-      }
+      window.location.href = '/checkout';
     });
   });
 

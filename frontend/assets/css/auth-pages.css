@@ -194,6 +194,27 @@
   margin-top: calc(-1 * var(--space-1));
 }
 
+/* The component's display:flex rule overrides the browser's [hidden] rule. */
+.auth-form__error[hidden] {
+  display: none;
+}
+
+/* Server errors are displayed as a page-level alert at the top center. */
+#authServerMessage:not([hidden]) {
+  position: fixed;
+  top: var(--space-6);
+  left: 50%;
+  z-index: var(--z-toast);
+  width: min(calc(100% - (2 * var(--space-4))), 420px);
+  padding: var(--space-3) var(--space-4);
+  margin: 0;
+  border: 1px solid var(--color-error-500);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  box-shadow: var(--shadow-lg);
+  transform: translateX(-50%);
+}
+
 .auth-form__error svg {
   width: 12px;
   height: 12px;
@@ -559,4 +580,40 @@
   .auth-split .auth-card { padding: var(--space-4) var(--space-3); }
   .auth-form__input { font-size: var(--text-sm); height: 42px; }
   .auth-form__submit { height: 44px; font-size: var(--text-sm); }
+}
+
+/* Keep the sign-in experience as one readable column on phones and tablets.
+   The previous 768px breakpoint left 769–900px screens with two narrow halves. */
+@media (max-width: 900px) {
+  .auth-body--split {
+    align-items: flex-start;
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .auth-split {
+    grid-template-columns: minmax(0, 1fr);
+    width: min(100%, 520px);
+    min-height: auto;
+    border-radius: var(--radius-2xl);
+  }
+
+  .auth-split__brand { display: none; }
+
+  .auth-split__form-side {
+    min-width: 0;
+    padding: var(--space-6);
+    overflow: visible;
+  }
+
+  .auth-page__logo--mobile { display: flex; }
+  .auth-split .auth-card { min-width: 0; max-width: 100%; }
+  .auth-tabs,
+  .auth-panel,
+  .auth-form,
+  .auth-form__field { min-width: 0; max-width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .auth-body--split { padding: var(--space-4) var(--space-3); }
+  .auth-split__form-side { padding: var(--space-5) var(--space-3); }
 }

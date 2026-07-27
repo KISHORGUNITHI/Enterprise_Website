@@ -28,9 +28,6 @@
   <link rel="stylesheet" href="/assets/css/footer.css"/>
   <link rel="stylesheet" href="/assets/css/home-footer.css"/>
 
-  <!-- Auth modal -->
-  <link rel="stylesheet" href="/assets/css/login-required-modal.css"/>
-
   <!-- Responsive last -->
   <link rel="stylesheet" href="/assets/css/responsive.css"/>
 </head>
@@ -53,11 +50,6 @@
 
           <div class="pdp-gallery__main-wrap" id="pdpMainWrap">
             <span class="pdp-gallery__badge" id="pdpBadge">Sale</span>
-            <button class="pdp-gallery__wishlist" id="pdpWishlist" aria-label="Add to wishlist">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/>
-              </svg>
-            </button>
             <!-- JS injects SVG placeholder here -->
             <div class="pdp-gallery__main-img" id="pdpMainImg"></div>
           </div>
@@ -207,9 +199,6 @@
   <%# Footer %>
   <%- include('../../partials/home-footer') %>
 
-  <!-- Auth modal -->
-  <%- include('../../partials/login-required-modal') %>
-
   <!-- Data (must load before pdp.js) -->
   <script src="/assets/data/product-data.js"></script>
   <script src="/assets/data/category-plp-data.js"></script>
@@ -217,7 +206,6 @@
   <!-- JS -->
   <script src="/assets/js/category-header.js" defer></script>
   <script src="/assets/js/pdp.js"             defer></script>
-  <script src="/assets/js/auth-guard.js"       defer></script>
 
 </body>
 </html>

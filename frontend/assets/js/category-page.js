@@ -105,12 +105,6 @@
       <article class="plp-card" role="listitem" aria-label="${p.brand} ${p.name}">
         <div class="plp-card__image-wrap">
           ${p.badge ? `<span class="plp-card__badge plp-card__badge--${p.badgeType}">${p.badge}</span>` : ''}
-          <button class="plp-card__wishlist" aria-label="Add to wishlist"
-            onclick="showLoginRequiredModal('${route}')">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/>
-            </svg>
-          </button>
           <div class="plp-card__image-placeholder" aria-hidden="true">
             ${placeholder(p.color || '#1e3d8f')}
           </div>
@@ -130,10 +124,9 @@
           ${emi}
         </div>
         <div class="plp-card__footer">
-          <button class="btn btn--primary plp-card__cta"
-            onclick="showLoginRequiredModal('${route}')">
+          <a href="${route}" class="btn btn--primary plp-card__cta">
             View Details
-          </button>
+          </a>
         </div>
       </article>`;
   }
