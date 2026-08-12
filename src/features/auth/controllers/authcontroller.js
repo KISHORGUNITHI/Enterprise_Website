@@ -1,7 +1,8 @@
-import { RegisterService, LoginService } from "../services/authServices.js"
+import { RegisterService, LoginService, LogoutService } from "../services/authServices.js"
 
 const registerService = new RegisterService();
-const loginService    = new LoginService();
+const loginService = new LoginService();
+const logoutService = new LogoutService();
 
 // Shared cookie options — httpOnly so JS can't touch it
 const COOKIE_NAME = 'authToken';
@@ -14,7 +15,6 @@ const cookieOptions = {
 };
 
 export class AuthController {
-
   async register(req, res) {
     try {
       const result = await registerService.registerUser(req.body);
@@ -65,7 +65,6 @@ export class AuthController {
   }
 
   logout(req, res) {
-    res.clearCookie(COOKIE_NAME, { path: '/' });
-    return res.json({ success: true });
+    const result = logoutService.logoutUser();
   }
 }

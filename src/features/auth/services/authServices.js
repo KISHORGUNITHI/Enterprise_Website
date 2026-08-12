@@ -90,5 +90,8 @@ export class LoginService{
     }
 }
 export class LogoutService{
-    
+    logoutUser(){
+        res.clearCookie(COOKIE_NAME, { path: '/' });
+        return res.json({ success: true });
+    }
 }
