@@ -3,6 +3,7 @@ import path from 'path';
 import {fileURLToPath} from 'url';
 import "dotenv/config"
 import authRoutes from './src/features/auth/routes/authRoutes.js'
+import profileRoutes from './src/features/profile/routes/profileRoutes.js'
 import jwtAuthenticate from './src/middleware/jwtmiddleware.js'
 
 const app=express();
@@ -35,10 +36,11 @@ app.use((error, req, res, next) => {
   next(error);
 });
 
-
-
 // Authentication Routes
 app.use("/",authRoutes);
+
+// Profile API Routes
+app.use("/api", profileRoutes);
 
 // ─── Site-wide constants ─────────────────────────────────────────────────────
 const site = {
@@ -151,7 +153,21 @@ app.get('/orders', (req, res) => {
     site,
   });
 });
-app.get('/profile', stub('My Profile'));
+app.get('/profile', (req, res) => {
+  res.render('pages/account/profile', {
+    title: `My Profile — ${site.name}`,
+    site,
+    user: null,
+  });
+});
+
+app.get('/profile/addresses', (req, res) => {
+  res.render('pages/account/profile', {
+    title: `Manage Addresses — ${site.name}`,
+    site,
+    user: null,
+  });
+});
 
 // =====================================================================
 //  404

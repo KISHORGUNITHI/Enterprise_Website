@@ -1,31 +1,57 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
-  url=env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 datasource db {
   provider = "postgresql"
 }
-//Roles
-enum Role{
+
+model User {
+  id            String   @id @default(cuid())
+  username      String
+  email         String   @unique
+  password_hash String
+  gender        Gender?
+  role          Role     @default(USER)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  phone_number  String   @unique
+
+  addresses     Address[]
+}
+
+enum Gender{
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum Role {
   USER
   ADMIN
 }
 
-//User Model
-model User{
-  id String @id @default(cuid())
-  username String
-  email String @unique
-  phone_number String @unique
-  password_hash String
-  role Role @default(USER)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-}
+model Address {
+  id             String   @id @default(cuid())
+  user_id        String
 
+  full_name      String
+  phone_number   String
+  address_line_1 String
+  address_line_2 String?
+  city           String
+  state          String
+  postal_code    String
+  country        String
+  landmark       String?
+  is_default     Boolean  @default(false)
+
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  user           User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+}

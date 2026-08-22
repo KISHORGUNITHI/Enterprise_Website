@@ -65,6 +65,11 @@ export class AuthController {
   }
 
   logout(req, res) {
-    const result = logoutService.logoutUser();
+    res.clearCookie(COOKIE_NAME, { path: '/' });
+    return res.status(200).json({
+      success: true,
+      message: 'Logged out successfully',
+    });
   }
 }
+
