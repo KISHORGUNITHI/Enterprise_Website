@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= title %></title>
+  <link rel="icon" type="image/svg+xml" href="/public/icons/favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+  <!-- Foundation -->
+  <link rel="stylesheet" href="/assets/css/variables.css"/>
+  <link rel="stylesheet" href="/assets/css/base.css"/>
+  <link rel="stylesheet" href="/assets/css/utilities.css"/>
+
+  <!-- Header -->
+  <link rel="stylesheet" href="/assets/css/home-header.css"/>
+  <link rel="stylesheet" href="/assets/css/category-header.css"/>
+
+  <!-- Footer -->
+  <link rel="stylesheet" href="/assets/css/footer.css"/>
+  <link rel="stylesheet" href="/assets/css/home-footer.css"/>
+
+  <!-- Profile page -->
+  <link rel="stylesheet" href="/assets/css/profile.css"/>
+
+  <!-- Responsive -->
+  <link rel="stylesheet" href="/assets/css/responsive.css"/>
+</head>
+
+<body>
+
+  <%- include('../../partials/category-header') %>
+
+  <main class="profile-page" id="main-content">
+    <div class="profile-page__container">
+
+      <!-- Breadcrumb navigation -->
+      <nav class="profile-breadcrumb" aria-label="Breadcrumb">
+        <ol class="profile-breadcrumb__list">
+          <li class="profile-breadcrumb__item"><a href="/home" class="profile-breadcrumb__link">Home</a></li>
+          <li class="profile-breadcrumb__separator" aria-hidden="true">/</li>
+          <li class="profile-breadcrumb__item"><a href="/profile" class="profile-breadcrumb__link">My Account</a></li>
+          <li class="profile-breadcrumb__separator" aria-hidden="true">/</li>
+          <li class="profile-breadcrumb__item profile-breadcrumb__item--active" id="breadcrumbActiveSection" aria-current="page">Profile Information</li>
+        </ol>
+      </nav>
+
+      <div class="profile-layout">
+
+        <!-- ══════════════════════════════════════════
+             LEFT SIDEBAR — User Card + Navigation
+        ══════════════════════════════════════════ -->
+        <aside class="profile-sidebar" aria-label="Account navigation">
+
+          <!-- User card -->
+          <div class="profile-user-card">
+            <div class="profile-user-card__avatar" aria-hidden="true">
+              <svg viewBox="0 0 48 48" fill="none" class="profile-user-card__avatar-svg">
+                <circle cx="24" cy="24" r="24" fill="#FBBF24"/>
+                <!-- Hair / Head -->
+                <path d="M14 20C14 14.477 18.477 10 24 10C29.523 10 34 14.477 34 20C34 23.5 32 26 29 27.5V30H19V27.5C16 26 14 23.5 14 20Z" fill="#D97706"/>
+                <circle cx="24" cy="21" r="8" fill="#FDE68A"/>
+                <path d="M19 18C19 15 21 13 24 13C27 13 29 15 29 18" stroke="#D97706" stroke-width="2" stroke-linecap="round"/>
+                <!-- Body / Shirt -->
+                <path d="M10 42C10 34.268 16.268 28 24 28C31.732 28 38 34.268 38 42H10Z" fill="#2563EB"/>
+                <path d="M20 28L24 33L28 28" fill="#FDE68A"/>
+              </svg>
+            </div>
+            <div class="profile-user-card__info">
+              <span class="profile-user-card__greeting">Hello,</span>
+              <h2 class="profile-user-card__name" id="sidebarUserName"><%= (typeof user !== 'undefined' && user?.username) ? user.username : '—' %></h2>
+            </div>
+          </div>
+
+          <!-- Account navigation card -->
+          <nav class="profile-nav-card" aria-label="Account Menu">
+
+            <!-- My Orders -->
+            <div class="profile-nav-group">
+              <a href="/orders" class="profile-nav-header-link" id="navMyOrdersLink">
+                <div class="profile-nav-header-link__left">
+                  <span class="profile-nav-icon profile-nav-icon--orders" aria-hidden="true">
+                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="14" height="15" rx="2.5"/>
+                      <path d="M7 8h6M7 12h4"/>
+                      <path d="M10 3v2"/>
+                    </svg>
+                  </span>
+                  <span class="profile-nav-group__title">MY ORDERS</span>
+                </div>
+                <svg class="profile-nav-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="6 12 10 8 6 4"/>
+                </svg>
+              </a>
+            </div>
+
+            <div class="profile-nav-divider" role="separator"></div>
+
+            <!-- Account Settings -->
+            <div class="profile-nav-group">
+              <div class="profile-nav-group__header">
+                <span class="profile-nav-icon profile-nav-icon--account" aria-hidden="true">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 10a3.5 3.5 0 100-7 3.5 3.5 0 000 7z"/>
+                    <path d="M3.5 17.5c0-2.8 2.9-5 6.5-5s6.5 2.2 6.5 5"/>
+                  </svg>
+                </span>
+                <span class="profile-nav-group__title">ACCOUNT SETTINGS</span>
+              </div>
+              <div class="profile-nav-items">
+                <button type="button" class="profile-nav-item active" data-tab="profile-info" id="tabBtnProfileInfo" role="tab" aria-selected="true" aria-controls="profileInfoSection">
+                  Profile Information
+                </button>
+                <button type="button" class="profile-nav-item" data-tab="manage-addresses" id="tabBtnManageAddresses" role="tab" aria-selected="false" aria-controls="manageAddressesSection">
+                  Manage Addresses
+                </button>
+              </div>
+            </div>
+
+            <div class="profile-nav-divider" role="separator"></div>
+
+            <!-- Payments -->
+            <div class="profile-nav-group">
+              <div class="profile-nav-group__header">
+                <span class="profile-nav-icon profile-nav-icon--payments" aria-hidden="true">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2.5" y="4.5" width="15" height="11" rx="2"/>
+                    <path d="M2.5 8.5h15"/>
+                    <circle cx="6" cy="12" r="1" fill="currentColor"/>
+                  </svg>
+                </span>
+                <span class="profile-nav-group__title">PAYMENTS</span>
+              </div>
+              <div class="profile-nav-items">
+                <div class="profile-nav-item profile-nav-item--static" tabindex="0">
+                  <span>Gift Cards</span>
+                  <span class="profile-nav-badge">₹0</span>
+                </div>
+                <div class="profile-nav-item profile-nav-item--static" tabindex="0">
+                  <span>Saved UPI</span>
+                </div>
+                <div class="profile-nav-item profile-nav-item--static" tabindex="0">
+                  <span>Saved Cards</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="profile-nav-divider" role="separator"></div>
+
+            <!-- Logout action -->
+            <div class="profile-nav-group profile-nav-group--logout">
+              <button type="button" class="profile-nav-item profile-nav-item--logout" id="profileSidebarLogoutBtn">
+                <svg class="profile-nav-logout-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M7.5 3.5H4a1.5 1.5 0 00-1.5 1.5v10A1.5 1.5 0 004 16.5h3.5"/>
+                  <polyline points="13.5 13.5 17.5 10 13.5 6.5"/>
+                  <line x1="17.5" y1="10" x2="6.5" y2="10"/>
+                </svg>
+                <span>Logout</span>
+              </button>
+            </div>
+
+          </nav>
+
+        </aside>
+
+
+        <!-- ══════════════════════════════════════════
+             RIGHT MAIN CONTENT AREA
+        ══════════════════════════════════════════ -->
+        <section class="profile-main" aria-live="polite">
+
+          <!-- Global alert message box -->
+          <div class="profile-alert" id="profileAlert" role="alert" hidden>
+            <div class="profile-alert__icon" id="profileAlertIcon" aria-hidden="true"></div>
+            <div class="profile-alert__text" id="profileAlertText"></div>
+            <button type="button" class="profile-alert__close" id="profileAlertClose" aria-label="Dismiss message">&times;</button>
+          </div>
+
+          <!-- ──────────────────────────────────────────
+               TAB 1: PROFILE INFORMATION
+          ────────────────────────────────────────── -->
+          <div class="profile-tab-content active" id="profileInfoSection" role="tabpanel" aria-labelledby="tabBtnProfileInfo">
+
+            <!-- Personal Information Card -->
+            <div class="profile-card profile-card--personal">
+              <div class="profile-card__header">
+                <h3 class="profile-card__title">Personal Information</h3>
+                <button type="button" class="profile-action-btn" id="editPersonalBtn" aria-label="Edit Personal Information">
+                  Edit
+                </button>
+              </div>
+
+              <form id="personalInfoForm" class="profile-form" novalidate>
+                <!-- Full Name -->
+                <div class="profile-form-group">
+                  <label class="profile-label" for="profileFullName">
+                    Full Name
+                  </label>
+                  <div class="profile-input-wrap">
+                    <input
+                      type="text"
+                      id="profileFullName"
+                      name="username"
+                      class="profile-input"
+                      value="<%= (typeof user !== 'undefined' && user?.username) ? user.username : '' %>"
+                      placeholder="Loading full name…"
+                      autocomplete="name"
+                      disabled
+                      required
+                    />
+                  </div>
+                  <span class="profile-field-error" id="fullNameError" hidden>Please enter a valid full name (at least 2 characters).</span>
+                </div>
+
+                <!-- Gender -->
+                <div class="profile-form-group">
+                  <span class="profile-label" id="genderGroupLabel">Your Gender</span>
+                  <div class="profile-gender-options" role="radiogroup" aria-labelledby="genderGroupLabel">
+                    <label class="profile-radio-label">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="MALE"
+                        class="profile-radio"
+                        disabled
+                        <%= (typeof user !== 'undefined' && (user?.gender === 'MALE' || user?.gender === 'male')) ? 'checked' : '' %>
+                      />
+                      <span class="profile-radio-custom" aria-hidden="true"></span>
+                      <span class="profile-radio-text">Male</span>
+                    </label>
+
+                    <label class="profile-radio-label">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="FEMALE"
+                        class="profile-radio"
+                        disabled
+                        <%= (typeof user !== 'undefined' && (user?.gender === 'FEMALE' || user?.gender === 'female')) ? 'checked' : '' %>
+                      />
+                      <span class="profile-radio-custom" aria-hidden="true"></span>
+                      <span class="profile-radio-text">Female</span>
+                    </label>
+
+                    <label class="profile-radio-label">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="OTHER"
+                        class="profile-radio"
+                        disabled
+                        <%= (typeof user !== 'undefined' && (user?.gender === 'OTHER' || user?.gender === 'other')) ? 'checked' : '' %>
+                      />
+                      <span class="profile-radio-custom" aria-hidden="true"></span>
+                      <span class="profile-radio-text">Other</span>
+                    </label>
+
+                    <label class="profile-radio-label">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="PREFER_NOT_TO_SAY"
+                        class="profile-radio"
+                        disabled
+                        <%= (typeof user !== 'undefined' && (user?.gender === 'PREFER_NOT_TO_SAY' || user?.gender === 'prefer_not_to_say')) ? 'checked' : '' %>
+                      />
+                      <span class="profile-radio-custom" aria-hidden="true"></span>
+                      <span class="profile-radio-text">Prefer not to say</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Action buttons (visible during edit mode) -->
+                <div class="profile-form-actions" id="personalActions" hidden>
+                  <button type="submit" class="btn btn--primary profile-btn-submit" id="savePersonalBtn">
+                    <span class="profile-btn-text">Save</span>
+                    <span class="profile-btn-spinner" aria-hidden="true" hidden></span>
+                  </button>
+                  <button type="button" class="btn btn--outline profile-btn-cancel" id="cancelPersonalBtn">
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Email Address Card -->
+            <div class="profile-card profile-card--readonly">
+              <div class="profile-card__header">
+                <h3 class="profile-card__title">Email Address</h3>
+                <button type="button" class="profile-action-btn profile-action-btn--disabled" id="editEmailBtn" title="Email address editing will be supported in a future update." aria-disabled="true">
+                  Edit
+                </button>
+              </div>
+              <div class="profile-form-group">
+                <div class="profile-input-wrap">
+                  <input
+                    type="email"
+                    id="profileEmail"
+                    class="profile-input profile-input--readonly"
+                    value="<%= (typeof user !== 'undefined' && user?.email) ? user.email : '' %>"
+                    placeholder="Loading email…"
+                    readonly
+                    disabled
+                    aria-label="Email Address"
+                  />
+                </div>
+                <p class="profile-field-note">Your verified email address is linked to your Enterprise account.</p>
+              </div>
+            </div>
+
+            <!-- Mobile Number Card -->
+            <div class="profile-card profile-card--readonly">
+              <div class="profile-card__header">
+                <h3 class="profile-card__title">Mobile Number</h3>
+                <button type="button" class="profile-action-btn profile-action-btn--disabled" id="editPhoneBtn" title="Mobile number editing will be supported in a future update." aria-disabled="true">
+                  Edit
+                </button>
+              </div>
+              <div class="profile-form-group">
+                <div class="profile-input-wrap">
+                  <input
+                    type="tel"
+                    id="profilePhone"
+                    class="profile-input profile-input--readonly"
+                    value="<%= (typeof user !== 'undefined' && user?.phone_number) ? user.phone_number : '' %>"
+                    placeholder="Loading mobile number…"
+                    readonly
+                    disabled
+                    aria-label="Mobile Number"
+                  />
+                </div>
+                <p class="profile-field-note">Used for OTP verification and order delivery updates.</p>
+              </div>
+            </div>
+
+            <!-- FAQs Section -->
+            <div class="profile-faqs-card">
+              <h4 class="profile-faqs-title">FAQs</h4>
+              <div class="profile-faq-list">
+                <div class="profile-faq-item">
+                  <p class="profile-faq-question">What happens when I update my email address (or mobile number)?</p>
+                  <p class="profile-faq-answer">Your login email or phone number will be updated. You will receive all future communications, invoices, and OTP verifications on your new contact details.</p>
+                </div>
+                <div class="profile-faq-item">
+                  <p class="profile-faq-question">When will my Enterprise Store account be updated with new details?</p>
+                  <p class="profile-faq-answer">Personal information changes reflect immediately across your active session and future order invoices.</p>
+                </div>
+                <div class="profile-faq-item">
+                  <p class="profile-faq-question">What happens to my existing orders when I update personal info?</p>
+                  <p class="profile-faq-answer">Active in-transit shipments will still be delivered to the address and contact specified at checkout time.</p>
+                </div>
+              </div>
+
+              <div class="profile-account-danger">
+                <button type="button" class="profile-danger-link" id="deactivateAccountBtn">Deactivate Account</button>
+                <button type="button" class="profile-danger-link profile-danger-link--delete" id="deleteAccountBtn">Delete Account</button>
+              </div>
+            </div>
+
+          </div>
+
+
+          <!-- ──────────────────────────────────────────
+               TAB 2: MANAGE ADDRESSES
+          ────────────────────────────────────────── -->
+          <div class="profile-tab-content" id="manageAddressesSection" role="tabpanel" aria-labelledby="tabBtnManageAddresses" hidden>
+
+            <div class="addresses-page-header">
+              <h3 class="profile-card__title">Manage Addresses</h3>
+            </div>
+
+            <!-- Add Address Card Button -->
+            <div class="address-add-trigger-card" id="addAddressTriggerCard">
+              <button type="button" class="address-add-btn" id="openAddAddressBtn">
+                <svg class="address-add-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="10" y1="4" x2="10" y2="16"/>
+                  <line x1="4" y1="10" x2="16" y2="10"/>
+                </svg>
+                <span class="address-add-text">ADD A NEW ADDRESS</span>
+              </button>
+            </div>
+
+            <!-- Address Add / Edit Form Panel (collapsible) -->
+            <div class="address-form-panel" id="addressFormPanel" hidden>
+              <div class="address-form-panel__header">
+                <h4 class="address-form-panel__title" id="addressFormTitle">ADD A NEW ADDRESS</h4>
+              </div>
+
+              <form id="addressForm" class="address-form" novalidate>
+                <input type="hidden" id="addressFormId" name="id" value=""/>
+
+                <!-- Grid Row 1: Full Name & Phone -->
+                <div class="address-form-grid address-form-grid--2">
+                  <div class="profile-form-group">
+                    <label class="profile-label" for="addrFullName">Full Name <span class="profile-req">*</span></label>
+                    <input type="text" id="addrFullName" name="full_name" class="profile-input" placeholder="e.g. Kishor Gunithi" required />
+                    <span class="profile-field-error" id="addrNameError" hidden>Please enter recipient's full name.</span>
+                  </div>
+                  <div class="profile-form-group">
+                    <label class="profile-label" for="addrPhone">10-digit Mobile Number <span class="profile-req">*</span></label>
+                    <input type="tel" id="addrPhone" name="phone_number" class="profile-input" placeholder="10-digit mobile number" maxlength="10" required />
+                    <span class="profile-field-error" id="addrPhoneError" hidden>Please enter a valid 10-digit mobile number.</span>
+                  </div>
+                </div>
+
+                <!-- Grid Row 2: Pincode & Locality / Landmark -->
+                <div class="address-form-grid address-form-grid--2">
+                  <div class="profile-form-group">
+                    <label class="profile-label" for="addrPincode">Pincode / Postal Code <span class="profile-req">*</span></label>
+                    <input type="text" id="addrPincode" name="postal_code" class="profile-input" placeholder="6-digit PIN code" maxlength="6" required />
+                    <span class="profile-field-error" id="addrPincodeError" hidden>Please enter a valid 6-digit PIN code.</span>
+                  </div>
+                  <div class="profile-form-group">
+                    <label class="profile-label" for="addrLocality">Locality / Landmark</label>
+                    <input type="text" id="addrLocality" name="landmark" class="profile-input" placeholder="Near landmark or locality (Optional)" />
+                  </div>
+                </div>
+
+                <!-- Address Line 1 -->
+                <div class="profile-form-group">
+                  <label class="profile-label" for="addrLine1">Address (Flat, House no., Building, Company, Apartment, Street) <span class="profile-req">*</span></label>
+                  <textarea id="addrLine1" name="address_line_1" class="profile-textarea" rows="3" placeholder="Flat, Street name, Area details" required></textarea>
+                  <span class="profile-field-error" id="addrLine1Error" hidden>Please enter the complete street address.</span>
+                </div>
+
+                <!-- Address Line 2 (Optional) -->
+                <div class="profile-form-group">
+                  <label class="profile-label" for="addrLine2">Address Line 2 (Floor, Wing, Suite — Optional)</label>
+                  <input type="text" id="addrLine2" name="address_line_2" class="profile-input" placeholder="Apartment / Unit / Suite (Optional)" />
+                </div>
+
+                <!-- Grid Row 3: City & State -->
+                <div class="address-form-grid address-form-grid--2">
+                  <div class="profile-form-group">
+                    <label class="profile-label" for="addrCity">City / District / Town <span class="profile-req">*</span></label>
+                    <input type="text" id="addrCity" name="city" class="profile-input" placeholder="City" required />
+                    <span class="profile-field-error" id="addrCityError" hidden>Please enter the city.</span>
+                  </div>
+                  <div class="profile-form-group">
+                    <label class="profile-label" for="addrState">State <span class="profile-req">*</span></label>
+                    <select id="addrState" name="state" class="profile-select" required>
+                      <option value="" disabled selected>-- Select State --</option>
+                      <option value="Andhra Pradesh">Andhra Pradesh</option>
+                      <option value="Telangana">Telangana</option>
+                      <option value="Karnataka">Karnataka</option>
+                      <option value="Tamil Nadu">Tamil Nadu</option>
+                      <option value="Maharashtra">Maharashtra</option>
+                      <option value="Delhi">Delhi</option>
+                      <option value="Gujarat">Gujarat</option>
+                      <option value="Kerala">Kerala</option>
+                      <option value="West Bengal">West Bengal</option>
+                      <option value="Uttar Pradesh">Uttar Pradesh</option>
+                      <option value="Rajasthan">Rajasthan</option>
+                      <option value="Madhya Pradesh">Madhya Pradesh</option>
+                      <option value="Punjab">Punjab</option>
+                      <option value="Haryana">Haryana</option>
+                      <option value="Bihar">Bihar</option>
+                      <option value="Odisha">Odisha</option>
+                      <option value="Assam">Assam</option>
+                      <option value="Goa">Goa</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    <span class="profile-field-error" id="addrStateError" hidden>Please select a state.</span>
+                  </div>
+                </div>
+
+                <!-- Country -->
+                <div class="profile-form-group">
+                  <label class="profile-label" for="addrCountry">Country</label>
+                  <input type="text" id="addrCountry" name="country" class="profile-input" value="India" readonly />
+                </div>
+
+                <!-- Address Type Pills -->
+                <div class="profile-form-group">
+                  <span class="profile-label" id="addrTypeLabel">Address Type</span>
+                  <div class="address-type-group" role="radiogroup" aria-labelledby="addrTypeLabel">
+                    <label class="address-type-label">
+                      <input type="radio" name="address_type" value="HOME" class="address-type-radio" checked />
+                      <span class="address-type-pill">
+                        <svg class="address-type-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                          <path d="M2 6.5L8 2l6 4.5V14a1 1 0 01-1 1H3a1 1 0 01-1-1V6.5z"/>
+                        </svg>
+                        Home (All day delivery)
+                      </span>
+                    </label>
+
+                    <label class="address-type-label">
+                      <input type="radio" name="address_type" value="WORK" class="address-type-radio" />
+                      <span class="address-type-pill">
+                        <svg class="address-type-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                          <rect x="2" y="4" width="12" height="10" rx="1.5"/>
+                          <path d="M5 4V2.5A1.5 1.5 0 016.5 1h3A1.5 1.5 0 0111 2.5V4"/>
+                        </svg>
+                        Work (Delivery between 10 AM - 5 PM)
+                      </span>
+                    </label>
+
+                    <label class="address-type-label">
+                      <input type="radio" name="address_type" value="OTHER" class="address-type-radio" />
+                      <span class="address-type-pill">
+                        <svg class="address-type-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                          <circle cx="8" cy="8" r="6"/>
+                          <path d="M8 5v3l2 2"/>
+                        </svg>
+                        Other
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Make Default Checkbox -->
+                <div class="profile-checkbox-group">
+                  <label class="profile-checkbox-label">
+                    <input type="checkbox" id="addrIsDefault" name="is_default" class="profile-checkbox" />
+                    <span class="profile-checkbox-custom" aria-hidden="true"></span>
+                    <span class="profile-checkbox-text">Make this my default delivery address</span>
+                  </label>
+                </div>
+
+                <!-- Form Action Buttons -->
+                <div class="address-form-actions">
+                  <button type="submit" class="btn btn--primary profile-btn-submit" id="saveAddressBtn">
+                    <span class="profile-btn-text">SAVE ADDRESS</span>
+                    <span class="profile-btn-spinner" aria-hidden="true" hidden></span>
+                  </button>
+                  <button type="button" class="btn btn--outline profile-btn-cancel" id="cancelAddressBtn">
+                    CANCEL
+                  </button>
+                </div>
+
+              </form>
+            </div>
+
+            <!-- Address Cards List (Populated dynamically by profile.js) -->
+            <div class="addresses-list" id="addressesList" role="region" aria-label="Saved Addresses" aria-live="polite">
+              <!-- Rendered via JS from backend or local seed data -->
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+
+    </div>
+  </main>
+
+  <%- include('../../partials/home-footer') %>
+
+  <!-- Page Scripts -->
+  <script src="/assets/js/category-header.js" defer></script>
+  <script src="/assets/js/profile.js" defer></script>
+
+</body>
+</html>
