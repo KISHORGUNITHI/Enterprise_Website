@@ -386,7 +386,15 @@
             <div class="address-form-panel" id="addressFormPanel" hidden>
               <div class="address-form-panel__header">
                 <h4 class="address-form-panel__title" id="addressFormTitle">ADD A NEW ADDRESS</h4>
+                <button type="button" class="address-location-btn" id="useCurrentLocationBtn" title="Use current location" aria-label="Use current location">
+                  <svg class="address-location-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/>
+                    <circle cx="12" cy="10" r="2.5"/>
+                  </svg>
+                  <span>USE CURRENT LOCATION</span>
+                </button>
               </div>
+              <p class="address-location-status" id="addressLocationStatus" role="status" aria-live="polite" hidden></p>
 
               <form id="addressForm" class="address-form" novalidate>
                 <input type="hidden" id="addressFormId" name="id" value=""/>

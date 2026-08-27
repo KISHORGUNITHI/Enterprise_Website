@@ -74,6 +74,8 @@
   const openAddAddressBtn     = document.getElementById('openAddAddressBtn');
   const addressFormPanel      = document.getElementById('addressFormPanel');
   const addressFormTitle      = document.getElementById('addressFormTitle');
+  const useCurrentLocationBtn = document.getElementById('useCurrentLocationBtn');
+  const addressLocationStatus = document.getElementById('addressLocationStatus');
   const addressForm           = document.getElementById('addressForm');
   const cancelAddressBtn      = document.getElementById('cancelAddressBtn');
   const addressesList         = document.getElementById('addressesList');
@@ -511,6 +513,7 @@
     if (!addressFormPanel || !addAddressTriggerCard) return;
 
     clearAddressErrors();
+    clearLocationStatus();
     addressForm.reset();
 
     if (addr) {
@@ -547,7 +550,102 @@
     addressFormPanel.setAttribute('hidden', '');
     addAddressTriggerCard.removeAttribute('hidden');
     clearAddressErrors();
+    clearLocationStatus();
     addressForm.reset();
+  }
+
+  function setLocationStatus(message, type = '') {
+    if (!addressLocationStatus) return;
+    addressLocationStatus.textContent = message;
+    addressLocationStatus.classList.toggle('address-location-status--error', type === 'error');
+    if (message) addressLocationStatus.removeAttribute('hidden');
+    else addressLocationStatus.setAttribute('hidden', '');
+  }
+
+  function clearLocationStatus() {
+    setLocationStatus('');
+  }
+
+  function getCurrentPosition() {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error('Location is not supported by this browser.'));
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000,
+      });
+    });
+  }
+
+  async function useCurrentLocation() {
+    if (!useCurrentLocationBtn) return;
+
+    useCurrentLocationBtn.disabled = true;
+    setLocationStatus('Getting your current location...');
+
+    try {
+      const position = await getCurrentPosition();
+      const { latitude, longitude } = position.coords;
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}&addressdetails=1&accept-language=en`, {
+        headers: { 'Accept': 'application/json' },
+      });
+
+      if (!response.ok) throw new Error('Unable to find the address for this location.');
+      const result = await response.json();
+      const address = result.address || {};
+      
+      // Build a smart Address Line 1 from available local components
+      const localParts = [
+        address.house_number,
+        address.building,
+        address.road,
+        address.pedestrian,
+        address.neighbourhood || address.residential,
+        address.suburb,
+        address.hamlet
+      ].filter(Boolean);
+      
+      // Deduplicate parts to avoid repetitive address lines
+      const uniqueLocalParts = [...new Set(localParts)];
+      
+      let finalAddressLine = uniqueLocalParts.join(', ');
+      
+      // If we couldn't build a good address line, fall back to display name up to the city
+      if (!finalAddressLine || finalAddressLine.length < 5) {
+          const parts = (result.display_name || '').split(',').map(s => s.trim());
+          // usually the last 3-4 parts are city, state, postcode, country
+          finalAddressLine = parts.slice(0, Math.max(1, parts.length - 4)).join(', ');
+      }
+
+      addrLine1.value = finalAddressLine || result.display_name || '';
+      addrLocality.value = address.suburb || address.neighbourhood || address.residential || address.city_district || '';
+      addrCity.value = address.city || address.town || address.village || address.county || address.state_district || '';
+      
+      const matchingState = Array.from(addrState.options).find(option => option.value.toLowerCase() === (address.state || '').toLowerCase());
+      addrState.value = matchingState ? matchingState.value : '';
+      addrCountry.value = address.country || 'India';
+      
+      // Attempt to extract pincode from address.postcode OR display_name fallback
+      let postalCode = address.postcode || '';
+      if (!postalCode && result.display_name) {
+          const pinMatch = result.display_name.match(/\b\d{6}\b/);
+          if (pinMatch) postalCode = pinMatch[0];
+      }
+      addrPincode.value = postalCode;
+
+      setLocationStatus('Location added. Please review the details before saving.');
+    } catch (error) {
+      const message = error.code === 1
+        ? 'Location permission was denied. Please allow access and try again.'
+        : (error.message || 'Unable to use your current location.');
+      setLocationStatus(message, 'error');
+    } finally {
+      useCurrentLocationBtn.disabled = false;
+    }
   }
 
   function clearAddressErrors() {
@@ -558,8 +656,9 @@
 
   openAddAddressBtn && openAddAddressBtn.addEventListener('click', () => openAddressForm(null));
   cancelAddressBtn && cancelAddressBtn.addEventListener('click', closeAddressForm);
+  useCurrentLocationBtn && useCurrentLocationBtn.addEventListener('click', useCurrentLocation);
 
-  addressForm && addressForm.addEventListener('submit', (e) => {
+  addressForm && addressForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearAddressErrors();
 
@@ -621,27 +720,68 @@
     };
 
     const isEdit = Boolean(id);
+    const submitBtn = document.getElementById('saveAddressBtn');
+    const spinner = submitBtn ? submitBtn.querySelector('.profile-btn-spinner') : null;
+    const btnText = submitBtn ? submitBtn.querySelector('.profile-btn-text') : null;
 
-    if (isEdit) {
-      addresses = addresses.map(a => {
-        if (a.id === id) return { ...a, ...payload, id };
-        return a;
-      });
-    } else {
-      const newId = 'addr_' + Date.now();
-      addresses.unshift({ ...payload, id: newId });
+    if (submitBtn) submitBtn.disabled = true;
+    if (spinner) spinner.removeAttribute('hidden');
+    if (btnText) btnText.textContent = 'SAVING...';
+
+    try {
+        if (isEdit) {
+          // Editing locally for now since backend doesn't support PUT
+          addresses = addresses.map(a => {
+            if (a.id === id) return { ...a, ...payload, id };
+            return a;
+          });
+          if (isDefault) {
+            addresses.forEach(a => { a.is_default = (a.id === id); });
+          }
+          setStoredAddresses(addresses);
+          renderAddresses();
+          closeAddressForm();
+          showAlert('Address updated successfully.', 'success');
+        } else {
+          const response = await fetch('/api/profile/address', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify(payload),
+          });
+
+          if (response.status === 401) {
+            showAlert('Session expired. Please sign in to add an address.', 'error');
+            setTimeout(() => { window.location.href = '/login'; }, 1200);
+            return;
+          }
+
+          const result = await response.json();
+          if (response.ok && result.success) {
+             const newAddr = result.data;
+             addresses.unshift(newAddr);
+             if (isDefault) {
+                addresses.forEach(a => { a.is_default = (a.id === newAddr.id); });
+             }
+             setStoredAddresses(addresses);
+             renderAddresses();
+             closeAddressForm();
+             showAlert('New address added successfully.', 'success');
+          } else {
+             showAlert(result?.message || 'Failed to add address.', 'error');
+          }
+        }
+    } catch (error) {
+        console.error('Error saving address:', error);
+        showAlert('Unable to connect to the server.', 'error');
+    } finally {
+        if (submitBtn) submitBtn.disabled = false;
+        if (spinner) spinner.setAttribute('hidden', '');
+        if (btnText) btnText.textContent = 'SAVE ADDRESS';
     }
-
-    if (isDefault) {
-      const activeId = id || addresses[0]?.id;
-      addresses.forEach(a => { a.is_default = (a.id === activeId); });
-    }
-
-    setStoredAddresses(addresses);
-    renderAddresses();
-    closeAddressForm();
-
-    showAlert(isEdit ? 'Address updated successfully.' : 'New address added successfully.', 'success');
   });
 
   addressesList && addressesList.addEventListener('click', (e) => {
@@ -692,12 +832,36 @@
       });
   });
 
+  async function fetchAddresses() {
+    try {
+      const response = await fetch('/api/profile/addresses', {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        credentials: 'same-origin',
+      });
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+           addresses = result.data;
+           setStoredAddresses(addresses);
+           renderAddresses();
+           return;
+        }
+      }
+    } catch (e) {
+      console.error('Error fetching addresses from server:', e);
+    }
+    
+    // Fallback to local storage if API fails
+    addresses = getStoredAddresses();
+    renderAddresses();
+  }
 
   // ═════════════════════════════════════════════════════════════════════════
   // 6. INITIALIZE
   // ═════════════════════════════════════════════════════════════════════════
 
   fetchProfileData();
-  renderAddresses();
+  fetchAddresses();
 
 })();
