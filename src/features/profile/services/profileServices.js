@@ -1,8 +1,10 @@
 import { UserRepository } from "../repositories/userRepository.js";
+import { AddressRepository } from "../repositories/addressRepository.js";
 
 export class ProfileService {
   constructor() {
     this.userRepository = new UserRepository();
+    this.addressRepository = new AddressRepository();
   }
 
   async getUser(id) {
@@ -21,5 +23,13 @@ export class ProfileService {
     }
     const { password_hash, ...safeUser } = userData;
     return safeUser;
+  }
+  
+  async createAddress(userId, addressData) {
+      return await this.addressRepository.createAddress(userId, addressData);
+  }
+
+  async getAddresses(userId) {
+      return await this.addressRepository.getAddresses(userId);
   }
 }

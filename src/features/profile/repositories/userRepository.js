@@ -1,17 +1,17 @@
 import prisma from "../../../config/prisma.js"
 
-export class UserRepository{
-    async findById(id){
+export class UserRepository {
+    async findById(id) {
         return prisma.user.findUnique({
-            where:{
+            where: {
                 id
             }
         });
     }
 
-    async updateUser(id,data){
+    async updateUser(id, data) {
         return prisma.user.update({
-            where:{
+            where: {
                 id
             },
             data
