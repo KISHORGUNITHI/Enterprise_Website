@@ -1,6 +1,9 @@
 /**
  * category-page.js — Category PLP interactions.
  * Handles: filter groups collapse, mobile bottom sheet, sort, pagination, product rendering.
+ * Hybrid Architecture:
+ * - Mobiles: Fetched live from backend API (PostgreSQL + Cloudinary)
+ * - Other categories (TV, AC, Home Theatre, Kitchen, Refrigerator): Read from window.categoryPlpData
  */
 
 (function () {
@@ -71,6 +74,8 @@
   const SLUG       = document.getElementById('plpRoot')?.dataset.slug || 'mobiles';
   const PER_PAGE   = 8;
   let   currentPage = 1;
+  let   isApiLoading = false;
+  let   apiError = null;
 
   function fmt(n) {
     return '₹' + n.toLocaleString('en-IN');
@@ -97,16 +102,25 @@
   }
 
   function buildCard(p) {
-    const route = `/product/${p.id}`;
+    const route = `/product/${p.slug || p.id}`;
     const emi   = p.salePrice > 5000
       ? `<p class="plp-card__emi">EMI from ₹${Math.ceil(p.salePrice / 12).toLocaleString('en-IN')}/mo</p>`
       : '';
+
+    const imageContent = p.imageUrl
+      ? `<img src="${p.imageUrl}" alt="${p.brand} ${p.name}" class="plp-card__img" loading="lazy" />`
+      : placeholder(p.color || '#1e3d8f');
+
+    const isAvailable = p.availability ? p.availability === 'AVAILABLE' : true;
+    const badgeText = p.badge || (isAvailable ? 'In Stock' : 'Out of Stock');
+    const badgeCls  = p.badgeType ? `plp-card__badge--${p.badgeType}` : (isAvailable ? 'plp-card__badge--success' : 'plp-card__badge--primary');
+
     return `
       <article class="plp-card" role="listitem" aria-label="${p.brand} ${p.name}">
         <div class="plp-card__image-wrap">
-          ${p.badge ? `<span class="plp-card__badge plp-card__badge--${p.badgeType}">${p.badge}</span>` : ''}
+          <span class="plp-card__badge ${badgeCls}">${badgeText}</span>
           <div class="plp-card__image-placeholder" aria-hidden="true">
-            ${placeholder(p.color || '#1e3d8f')}
+            ${imageContent}
           </div>
         </div>
         <div class="plp-card__body">
@@ -118,8 +132,8 @@
           </div>
           <div class="plp-card__price">
             <span class="plp-card__price-sale">${fmt(p.salePrice)}</span>
-            <span class="plp-card__price-original">${fmt(p.originalPrice)}</span>
-            <span class="plp-card__price-discount">${p.discount}% off</span>
+            ${p.originalPrice && p.originalPrice > p.salePrice ? `<span class="plp-card__price-original">${fmt(p.originalPrice)}</span>` : ''}
+            ${p.discount && p.discount > 0 ? `<span class="plp-card__price-discount">${p.discount}% off</span>` : ''}
           </div>
           ${emi}
         </div>
@@ -167,7 +181,7 @@
     if (sort === 'price-asc')   result.sort((a,b) => a.salePrice - b.salePrice);
     if (sort === 'price-desc')  result.sort((a,b) => b.salePrice - a.salePrice);
     if (sort === 'rating')      result.sort((a,b) => b.rating - a.rating);
-    if (sort === 'newest')      result.sort((a,b) => b.id - a.id);
+    if (sort === 'newest')      result.sort((a,b) => (b.id > a.id ? 1 : -1));
     if (sort === 'discount')    result.sort((a,b) => b.discount - a.discount);
 
     return result;
@@ -228,6 +242,31 @@
 
   function renderProducts() {
     if (!grid) return;
+
+    if (isApiLoading) {
+      if (countEl) countEl.textContent = 'Loading products…';
+      grid.innerHTML = `
+        <div class="plp-empty" style="grid-column: 1 / -1; min-height: 240px;">
+          <p class="plp-empty__title" style="color:var(--color-text-secondary); font-size:var(--text-base);">
+            Fetching products from database…
+          </p>
+        </div>`;
+      if (paginEl) paginEl.innerHTML = '';
+      return;
+    }
+
+    if (apiError) {
+      if (countEl) countEl.textContent = 'Unable to load products';
+      grid.innerHTML = `
+        <div class="plp-empty" style="grid-column: 1 / -1;">
+          <h3 class="plp-empty__title">Unable to load products</h3>
+          <p class="plp-empty__desc">${apiError}</p>
+          <button class="btn btn--outline" onclick="window.location.reload()">Retry</button>
+        </div>`;
+      if (paginEl) paginEl.innerHTML = '';
+      return;
+    }
+
     const filtered = getFilteredProducts();
     const total    = filtered.length;
     const start    = (currentPage - 1) * PER_PAGE;
@@ -239,7 +278,7 @@
 
     if (total === 0) {
       grid.innerHTML = `
-        <div class="plp-empty">
+        <div class="plp-empty" style="grid-column: 1 / -1;">
           <div class="plp-empty__icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
@@ -259,16 +298,74 @@
     renderPagination(total);
   }
 
-  // ─── Init render ──────────────────────────────────────────────────────────
-  // Defer until data is available (data script loads before this one)
-  if (window.categoryPlpData) {
+  // ─── Mobile Category API Fetch ────────────────────────────────────────────
+  async function loadMobileCategoryFromApi() {
+    isApiLoading = true;
+    apiError = null;
     renderProducts();
-  } else {
-    document.addEventListener('DOMContentLoaded', renderProducts);
+
+    try {
+      const res = await fetch('/api/products/category/mobiles');
+      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+      const json = await res.json();
+
+      if (json.success && Array.isArray(json.data)) {
+        window.categoryPlpData = window.categoryPlpData || {};
+        window.categoryPlpData.mobiles = json.data.map(p => {
+          const primaryImg = p.productImages?.find(img => img.isPrimary)?.imageUrl
+            || p.productImages?.[0]?.imageUrl
+            || '';
+          const price = parseFloat(p.price) || 0;
+          const isAvailable = p.availability === 'AVAILABLE';
+
+          return {
+            id: p.slug || p.id,
+            slug: p.slug,
+            dbId: p.id,
+            brand: p.brand,
+            name: p.name,
+            description: p.description,
+            rating: 4.8,
+            reviews: 1240,
+            originalPrice: price,
+            salePrice: price,
+            discount: 0,
+            availability: p.availability,
+            badge: isAvailable ? 'In Stock' : 'Out of Stock',
+            badgeType: isAvailable ? 'success' : 'primary',
+            color: '#1e3d8f',
+            imageUrl: primaryImg,
+          };
+        });
+      } else {
+        throw new Error(json.message || 'Failed to load mobile products');
+      }
+    } catch (err) {
+      console.error('Error fetching mobile products from backend:', err);
+      apiError = 'Could not load mobile products from database. Please try again.';
+    } finally {
+      isApiLoading = false;
+      renderProducts();
+    }
   }
 
-  // Filter change listeners
-  document.querySelectorAll('.plp-filter-option input, .plp-filter-rating__option input, .plp-filter-discount input')
-    .forEach(el => el.addEventListener('change', () => { currentPage = 1; renderProducts(); }));
+  // ─── Init render ──────────────────────────────────────────────────────────
+  function init() {
+    if (SLUG === 'mobiles' || SLUG === 'mobile') {
+      loadMobileCategoryFromApi();
+    } else {
+      renderProducts();
+    }
+
+    // Filter change listeners
+    document.querySelectorAll('.plp-filter-option input, .plp-filter-rating__option input, .plp-filter-discount input')
+      .forEach(el => el.addEventListener('change', () => { currentPage = 1; renderProducts(); }));
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 
 })();
