@@ -14,11 +14,11 @@
   'use strict';
 
   const STORAGE_KEY_ADDRESSES = 'userAddresses';
-  const STORAGE_KEY_PENDING   = 'pendingRoute';
+  const STORAGE_KEY_PENDING = 'pendingRoute';
 
   // ─── Global Alert Helper ──────────────────────────────────────────────────
-  const alertBox   = document.getElementById('profileAlert');
-  const alertText  = document.getElementById('profileAlertText');
+  const alertBox = document.getElementById('profileAlert');
+  const alertText = document.getElementById('profileAlertText');
   const alertClose = document.getElementById('profileAlertClose');
 
   let alertTimeout = null;
@@ -41,6 +41,66 @@
 
   alertClose && alertClose.addEventListener('click', hideAlert);
 
+  // ─── Top-Right Toast Notification (Mobile Responsive) ─────────────────────
+  function showRightToast(message) {
+    let toast = document.getElementById('top-right-toast');
+    if (!toast) {
+      // Inject CSS for responsive toast
+      const style = document.createElement('style');
+      style.textContent = `
+        #top-right-toast {
+          position: fixed;
+          top: 90px;
+          right: 20px;
+          background: #1a1a1a;
+          color: #fff;
+          padding: 12px 20px;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          z-index: 9999;
+          transform: translateX(150%);
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          font-family: Inter, sans-serif;
+          font-weight: 500;
+          font-size: 14px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          max-width: 350px;
+        }
+        #top-right-toast.show {
+          transform: translateX(0);
+        }
+        @media (max-width: 768px) {
+          #top-right-toast {
+            top: 75px;
+            right: 16px;
+            width: calc(100vw - 32px);
+            max-width: none;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+
+      toast = document.createElement('div');
+      toast.id = 'top-right-toast';
+      toast.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> <span class="toast-msg"></span>`;
+      document.body.appendChild(toast);
+    }
+    toast.querySelector('.toast-msg').textContent = message;
+
+    // trigger animation
+    requestAnimationFrame(() => {
+      toast.classList.add('show');
+    });
+
+    // hide after 3 seconds
+    if (toast.hideTimeout) clearTimeout(toast.hideTimeout);
+    toast.hideTimeout = setTimeout(() => {
+      toast.classList.remove('show');
+    }, 3000);
+  }
+
   // ─── DOM References ───────────────────────────────────────────────────────
   const sidebarUserName = document.getElementById('sidebarUserName');
 
@@ -48,20 +108,20 @@
   const breadcrumbActive = document.getElementById('breadcrumbActiveSection');
 
   // Tabs
-  const tabBtnProfileInfo      = document.getElementById('tabBtnProfileInfo');
-  const tabBtnManageAddresses  = document.getElementById('tabBtnManageAddresses');
-  const profileInfoSection     = document.getElementById('profileInfoSection');
+  const tabBtnProfileInfo = document.getElementById('tabBtnProfileInfo');
+  const tabBtnManageAddresses = document.getElementById('tabBtnManageAddresses');
+  const profileInfoSection = document.getElementById('profileInfoSection');
   const manageAddressesSection = document.getElementById('manageAddressesSection');
 
   // Personal Info Form
-  const personalInfoForm  = document.getElementById('personalInfoForm');
-  const profileFullName   = document.getElementById('profileFullName');
-  const editPersonalBtn   = document.getElementById('editPersonalBtn');
+  const personalInfoForm = document.getElementById('personalInfoForm');
+  const profileFullName = document.getElementById('profileFullName');
+  const editPersonalBtn = document.getElementById('editPersonalBtn');
   const cancelPersonalBtn = document.getElementById('cancelPersonalBtn');
-  const savePersonalBtn   = document.getElementById('savePersonalBtn');
-  const personalActions   = document.getElementById('personalActions');
-  const fullNameError     = document.getElementById('fullNameError');
-  const genderRadios      = document.querySelectorAll('input[name="gender"]');
+  const savePersonalBtn = document.getElementById('savePersonalBtn');
+  const personalActions = document.getElementById('personalActions');
+  const fullNameError = document.getElementById('fullNameError');
+  const genderRadios = document.querySelectorAll('input[name="gender"]');
 
   // Read-only contact inputs
   const profileEmail = document.getElementById('profileEmail');
@@ -71,35 +131,35 @@
 
   // Address Panel
   const addAddressTriggerCard = document.getElementById('addAddressTriggerCard');
-  const openAddAddressBtn     = document.getElementById('openAddAddressBtn');
-  const addressFormPanel      = document.getElementById('addressFormPanel');
-  const addressFormTitle      = document.getElementById('addressFormTitle');
+  const openAddAddressBtn = document.getElementById('openAddAddressBtn');
+  const addressFormPanel = document.getElementById('addressFormPanel');
+  const addressFormTitle = document.getElementById('addressFormTitle');
   const useCurrentLocationBtn = document.getElementById('useCurrentLocationBtn');
   const addressLocationStatus = document.getElementById('addressLocationStatus');
-  const addressForm           = document.getElementById('addressForm');
-  const cancelAddressBtn      = document.getElementById('cancelAddressBtn');
-  const addressesList         = document.getElementById('addressesList');
+  const addressForm = document.getElementById('addressForm');
+  const cancelAddressBtn = document.getElementById('cancelAddressBtn');
+  const addressesList = document.getElementById('addressesList');
 
   // Address Form Inputs
   const addressFormId = document.getElementById('addressFormId');
-  const addrFullName  = document.getElementById('addrFullName');
-  const addrPhone     = document.getElementById('addrPhone');
-  const addrPincode   = document.getElementById('addrPincode');
-  const addrLocality  = document.getElementById('addrLocality');
-  const addrLine1     = document.getElementById('addrLine1');
-  const addrLine2     = document.getElementById('addrLine2');
-  const addrCity      = document.getElementById('addrCity');
-  const addrState     = document.getElementById('addrState');
-  const addrCountry   = document.getElementById('addrCountry');
+  const addrFullName = document.getElementById('addrFullName');
+  const addrPhone = document.getElementById('addrPhone');
+  const addrPincode = document.getElementById('addrPincode');
+  const addrLocality = document.getElementById('addrLocality');
+  const addrLine1 = document.getElementById('addrLine1');
+  const addrLine2 = document.getElementById('addrLine2');
+  const addrCity = document.getElementById('addrCity');
+  const addrState = document.getElementById('addrState');
+  const addrCountry = document.getElementById('addrCountry');
   const addrIsDefault = document.getElementById('addrIsDefault');
 
   // Address Error Spans
-  const addrNameError    = document.getElementById('addrNameError');
-  const addrPhoneError   = document.getElementById('addrPhoneError');
+  const addrNameError = document.getElementById('addrNameError');
+  const addrPhoneError = document.getElementById('addrPhoneError');
   const addrPincodeError = document.getElementById('addrPincodeError');
-  const addrLine1Error   = document.getElementById('addrLine1Error');
-  const addrCityError    = document.getElementById('addrCityError');
-  const addrStateError   = document.getElementById('addrStateError');
+  const addrLine1Error = document.getElementById('addrLine1Error');
+  const addrCityError = document.getElementById('addrCityError');
+  const addrStateError = document.getElementById('addrStateError');
 
   // Sidebar Logout
   const profileSidebarLogoutBtn = document.getElementById('profileSidebarLogoutBtn');
@@ -144,16 +204,16 @@
       const result = await response.json();
       if (result && result.success && result.data) {
         currentUserData = {
-          username:     result.data.username || '',
-          email:        result.data.email || '',
+          username: result.data.username || '',
+          email: result.data.email || '',
           phone_number: result.data.phone_number || '',
-          gender:       result.data.gender || null,
+          gender: result.data.gender || null,
         };
 
         // Cache user info in localStorage for other client components
         try {
           localStorage.setItem('authUser', JSON.stringify(result.data));
-        } catch (e) {}
+        } catch (e) { }
 
         populateProfileUI(currentUserData);
       } else {
@@ -168,15 +228,15 @@
         if (cached) {
           const parsed = JSON.parse(cached);
           currentUserData = {
-            username:     parsed.username || '',
-            email:        parsed.email || '',
+            username: parsed.username || '',
+            email: parsed.email || '',
             phone_number: parsed.phone_number || '',
-            gender:       parsed.gender || null,
+            gender: parsed.gender || null,
           };
           populateProfileUI(currentUserData);
           return;
         }
-      } catch (e) {}
+      } catch (e) { }
 
       showAlert('Unable to load profile data from server. Please refresh or try again.', 'error');
     }
@@ -360,7 +420,7 @@
           const parsed = cached ? JSON.parse(cached) : {};
           parsed.username = currentUserData.username;
           localStorage.setItem('authUser', JSON.stringify(parsed));
-        } catch (e) {}
+        } catch (e) { }
 
         // Exit edit mode
         isEditingPersonal = false;
@@ -435,14 +495,14 @@
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
-    } catch (e) {}
+    } catch (e) { }
     return DEFAULT_ADDRESSES;
   }
 
   function setStoredAddresses(addrList) {
     try {
       localStorage.setItem(STORAGE_KEY_ADDRESSES, JSON.stringify(addrList));
-    } catch (e) {}
+    } catch (e) { }
   }
 
   let addresses = getStoredAddresses();
@@ -519,15 +579,15 @@
     if (addr) {
       addressFormTitle.textContent = 'EDIT ADDRESS';
       addressFormId.value = addr.id || '';
-      addrFullName.value  = addr.full_name || '';
-      addrPhone.value     = addr.phone_number || '';
-      addrPincode.value   = addr.postal_code || '';
-      addrLocality.value  = addr.landmark || '';
-      addrLine1.value     = addr.address_line_1 || '';
-      addrLine2.value     = addr.address_line_2 || '';
-      addrCity.value      = addr.city || '';
-      addrState.value     = addr.state || '';
-      addrCountry.value   = addr.country || 'India';
+      addrFullName.value = addr.full_name || '';
+      addrPhone.value = addr.phone_number || '';
+      addrPincode.value = addr.postal_code || '';
+      addrLocality.value = addr.landmark || '';
+      addrLine1.value = addr.address_line_1 || '';
+      addrLine2.value = addr.address_line_2 || '';
+      addrCity.value = addr.city || '';
+      addrState.value = addr.state || '';
+      addrCountry.value = addr.country || 'India';
       addrIsDefault.checked = Boolean(addr.is_default);
 
       const targetType = (addr.address_type || 'HOME').toUpperCase();
@@ -597,7 +657,7 @@
       if (!response.ok) throw new Error('Unable to find the address for this location.');
       const result = await response.json();
       const address = result.address || {};
-      
+
       // Build a smart Address Line 1 from available local components
       const localParts = [
         address.house_number,
@@ -608,32 +668,32 @@
         address.suburb,
         address.hamlet
       ].filter(Boolean);
-      
+
       // Deduplicate parts to avoid repetitive address lines
       const uniqueLocalParts = [...new Set(localParts)];
-      
+
       let finalAddressLine = uniqueLocalParts.join(', ');
-      
+
       // If we couldn't build a good address line, fall back to display name up to the city
       if (!finalAddressLine || finalAddressLine.length < 5) {
-          const parts = (result.display_name || '').split(',').map(s => s.trim());
-          // usually the last 3-4 parts are city, state, postcode, country
-          finalAddressLine = parts.slice(0, Math.max(1, parts.length - 4)).join(', ');
+        const parts = (result.display_name || '').split(',').map(s => s.trim());
+        // usually the last 3-4 parts are city, state, postcode, country
+        finalAddressLine = parts.slice(0, Math.max(1, parts.length - 4)).join(', ');
       }
 
       addrLine1.value = finalAddressLine || result.display_name || '';
       addrLocality.value = address.suburb || address.neighbourhood || address.residential || address.city_district || '';
       addrCity.value = address.city || address.town || address.village || address.county || address.state_district || '';
-      
+
       const matchingState = Array.from(addrState.options).find(option => option.value.toLowerCase() === (address.state || '').toLowerCase());
       addrState.value = matchingState ? matchingState.value : '';
       addrCountry.value = address.country || 'India';
-      
+
       // Attempt to extract pincode from address.postcode OR display_name fallback
       let postalCode = address.postcode || '';
       if (!postalCode && result.display_name) {
-          const pinMatch = result.display_name.match(/\b\d{6}\b/);
-          if (pinMatch) postalCode = pinMatch[0];
+        const pinMatch = result.display_name.match(/\b\d{6}\b/);
+        if (pinMatch) postalCode = pinMatch[0];
       }
       addrPincode.value = postalCode;
 
@@ -729,8 +789,25 @@
     if (btnText) btnText.textContent = 'SAVING...';
 
     try {
-        if (isEdit) {
-          // Editing locally for now since backend doesn't support PUT
+      if (isEdit) {
+        const response = await fetch(`/api/profile/address/${id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify(payload),
+        });
+
+        if (response.status === 401) {
+          showAlert('Session expired. Please sign in to update an address.', 'error');
+          setTimeout(() => { window.location.href = '/login'; }, 1200);
+          return;
+        }
+
+        const result = await response.json();
+        if (response.ok && result.success) {
           addresses = addresses.map(a => {
             if (a.id === id) return { ...a, ...payload, id };
             return a;
@@ -741,46 +818,49 @@
           setStoredAddresses(addresses);
           renderAddresses();
           closeAddressForm();
-          showAlert('Address updated successfully.', 'success');
+          showRightToast('Address Updated Successfully!');
         } else {
-          const response = await fetch('/api/profile/address', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify(payload),
-          });
-
-          if (response.status === 401) {
-            showAlert('Session expired. Please sign in to add an address.', 'error');
-            setTimeout(() => { window.location.href = '/login'; }, 1200);
-            return;
-          }
-
-          const result = await response.json();
-          if (response.ok && result.success) {
-             const newAddr = result.data;
-             addresses.unshift(newAddr);
-             if (isDefault) {
-                addresses.forEach(a => { a.is_default = (a.id === newAddr.id); });
-             }
-             setStoredAddresses(addresses);
-             renderAddresses();
-             closeAddressForm();
-             showAlert('New address added successfully.', 'success');
-          } else {
-             showAlert(result?.message || 'Failed to add address.', 'error');
-          }
+          showRightToast(result?.message || 'Failed to update address.', 'error');
         }
+      } else {
+        const response = await fetch('/api/profile/address', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify(payload),
+        });
+
+        if (response.status === 401) {
+          showAlert('Session expired. Please sign in to add an address.', 'error');
+          setTimeout(() => { window.location.href = '/login'; }, 1200);
+          return;
+        }
+
+        const result = await response.json();
+        if (response.ok && result.success) {
+          const newAddr = result.data;
+          addresses.unshift(newAddr);
+          if (isDefault) {
+            addresses.forEach(a => { a.is_default = (a.id === newAddr.id); });
+          }
+          setStoredAddresses(addresses);
+          renderAddresses();
+          closeAddressForm();
+          showRightToast('Address Added Successfully!');
+        } else {
+          showAlert(result?.message || 'Failed to add address.', 'error');
+        }
+      }
     } catch (error) {
-        console.error('Error saving address:', error);
-        showAlert('Unable to connect to the server.', 'error');
+      console.error('Error saving address:', error);
+      showAlert('Unable to connect to the server.', 'error');
     } finally {
-        if (submitBtn) submitBtn.disabled = false;
-        if (spinner) spinner.setAttribute('hidden', '');
-        if (btnText) btnText.textContent = 'SAVE ADDRESS';
+      if (submitBtn) submitBtn.disabled = false;
+      if (spinner) spinner.setAttribute('hidden', '');
+      if (btnText) btnText.textContent = 'SAVE ADDRESS';
     }
   });
 
@@ -874,16 +954,16 @@
       if (response.ok) {
         const result = await response.json();
         if (result.success && result.data) {
-           addresses = result.data;
-           setStoredAddresses(addresses);
-           renderAddresses();
-           return;
+          addresses = result.data;
+          setStoredAddresses(addresses);
+          renderAddresses();
+          return;
         }
       }
     } catch (e) {
       console.error('Error fetching addresses from server:', e);
     }
-    
+
     // Fallback to local storage if API fails
     addresses = getStoredAddresses();
     renderAddresses();

@@ -12,4 +12,5 @@ router.get('/login', (req, res) => {
     res.render("pages/auth/auth");
 });
 
+
 export default router;

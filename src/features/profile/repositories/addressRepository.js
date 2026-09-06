@@ -51,4 +51,48 @@ export class AddressRepository {
             }
         });
     }
+
+    async updateAddress(userId, addressId, addressData) {
+        const address = await prisma.address.findFirst({
+            where: {
+                id: addressId,
+                user_id: userId
+            }
+        });
+        
+        if (!address) {
+            throw new Error("Address not found or not authorized");
+        }
+
+        const {
+            full_name,
+            phone_number,
+            postal_code,
+            landmark,
+            address_line_1,
+            address_line_2,
+            city,
+            state,
+            country,
+            is_default
+        } = addressData;
+
+        return await prisma.address.update({
+            where: {
+                id: addressId
+            },
+            data: {
+                full_name,
+                phone_number,
+                postal_code,
+                landmark,
+                address_line_1,
+                address_line_2,
+                city,
+                state,
+                country,
+                is_default
+            }
+        });
+    }
 }
