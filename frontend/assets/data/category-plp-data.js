@@ -6,20 +6,8 @@
 
 const categoryPlpData = {
 
-  mobiles: [
-    { id: 201, brand: 'Samsung',  name: 'Galaxy S24 Ultra 5G',      rating: 4.8, reviews: 3240, originalPrice: 134999, salePrice: 119999, discount: 11, badge: 'Bestseller', badgeType: 'primary', color: '#1e3d8f' },
-    { id: 202, brand: 'Apple',    name: 'iPhone 15 Pro Max',         rating: 4.9, reviews: 4820, originalPrice: 159900, salePrice: 149900, discount:  6, badge: 'Top Rated',  badgeType: 'accent',  color: '#374151' },
-    { id: 203, brand: 'Samsung',  name: 'Galaxy S24+',               rating: 4.7, reviews: 1820, originalPrice:  99999, salePrice:  89999, discount: 10, badge: 'New',        badgeType: 'primary', color: '#1e3d8f' },
-    { id: 204, brand: 'Apple',    name: 'iPhone 15',                 rating: 4.8, reviews: 3200, originalPrice: 109900, salePrice:  99900, discount:  9, badge: 'Popular',   badgeType: 'accent',  color: '#374151' },
-    { id: 205, brand: 'OnePlus',  name: 'OnePlus 12 5G',             rating: 4.7, reviews: 1870, originalPrice:  64999, salePrice:  56999, discount: 12, badge: null,        badgeType: 'primary', color: '#dc2626' },
-    { id: 206, brand: 'OnePlus',  name: 'OnePlus Nord 3',            rating: 4.5, reviews:  980, originalPrice:  33999, salePrice:  29999, discount: 12, badge: 'Value',     badgeType: 'success', color: '#dc2626' },
-    { id: 207, brand: 'Xiaomi',   name: 'Redmi Note 13 Pro+',        rating: 4.4, reviews: 2100, originalPrice:  31999, salePrice:  26999, discount: 16, badge: 'Trending',  badgeType: 'accent',  color: '#f97316' },
-    { id: 208, brand: 'Google',   name: 'Pixel 8 Pro',               rating: 4.7, reviews: 1230, originalPrice:  89999, salePrice:  79999, discount: 11, badge: 'AI Camera', badgeType: 'success', color: '#16a34a' },
-    { id: 209, brand: 'Realme',   name: 'Realme GT 5 Pro',           rating: 4.3, reviews:  760, originalPrice:  35999, salePrice:  29999, discount: 17, badge: null,        badgeType: 'primary', color: '#f97316' },
-    { id: 210, brand: 'Vivo',     name: 'Vivo V29 Pro',              rating: 4.4, reviews:  890, originalPrice:  39999, salePrice:  34999, discount: 13, badge: null,        badgeType: 'accent',  color: '#6366f1' },
-    { id: 211, brand: 'OPPO',     name: 'OPPO Reno 11 Pro',          rating: 4.3, reviews:  540, originalPrice:  35999, salePrice:  30999, discount: 14, badge: null,        badgeType: 'primary', color: '#0ea5e9' },
-    { id: 212, brand: 'Xiaomi',   name: 'Xiaomi 13 Pro',             rating: 4.6, reviews:  870, originalPrice:  79999, salePrice:  69999, discount: 13, badge: null,        badgeType: 'accent',  color: '#f97316' },
-  ],
+  // Mobiles data is fetched live from the backend API (PostgreSQL + Cloudinary)
+  mobiles: [],
 
   tvs: [
     { id: 301, brand: 'Samsung',  name: 'Neo QLED 8K 75"',           rating: 4.8, reviews:  320, originalPrice: 349999, salePrice: 299999, discount: 14, badge: 'Premium',  badgeType: 'primary', color: '#1e3d8f' },

@@ -4,6 +4,7 @@ import {fileURLToPath} from 'url';
 import "dotenv/config"
 import authRoutes from './src/features/auth/routes/authRoutes.js'
 import profileRoutes from './src/features/profile/routes/profileRoutes.js'
+import productRoutes from './src/features/products/routes/productRoutes.js'
 import jwtAuthenticate from './src/middleware/jwtmiddleware.js'
 
 const app=express();
@@ -41,6 +42,9 @@ app.use("/",authRoutes);
 
 // Profile API Routes
 app.use("/api", profileRoutes);
+
+// Product API Routes
+app.use("/api", productRoutes);
 
 // ─── Site-wide constants ─────────────────────────────────────────────────────
 const site = {

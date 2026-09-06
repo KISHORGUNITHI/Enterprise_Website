@@ -73,6 +73,14 @@
   height: 100%;
 }
 
+.pdp-gallery__img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  padding: var(--space-4);
+  transition: transform 0.35s var(--ease-out);
+}
+
 .pdp-gallery__main-wrap:hover .pdp-gallery__main-img {
   transform: scale(1.06);
 }
@@ -139,6 +147,7 @@
 }
 
 .pdp-gallery__thumb svg { width: 100%; height: 100%; }
+.pdp-gallery__thumb img { width: 100%; height: 100%; object-fit: contain; }
 
 .pdp-gallery__thumb:hover {
   border-color: var(--color-primary-400);
