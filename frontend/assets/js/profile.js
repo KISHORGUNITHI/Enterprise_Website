@@ -784,7 +784,7 @@
     }
   });
 
-  addressesList && addressesList.addEventListener('click', (e) => {
+  addressesList && addressesList.addEventListener('click', async (e) => {
     const btn = e.target.closest('button[data-action]');
     if (!btn) return;
 
@@ -800,16 +800,48 @@
       const confirmed = window.confirm(`Are you sure you want to delete the address for ${targetAddr.full_name}?`);
       if (!confirmed) return;
 
-      const wasDefault = Boolean(targetAddr.is_default);
-      addresses = addresses.filter(a => a.id !== id);
+      const btnText = btn.textContent;
+      btn.textContent = '...';
+      btn.disabled = true;
 
-      if (wasDefault && addresses.length > 0) {
-        addresses[0].is_default = true;
+      try {
+        const response = await fetch(`/api/profile/address/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Accept': 'application/json',
+          },
+          credentials: 'same-origin',
+        });
+
+        if (response.status === 401) {
+          showAlert('Session expired. Please sign in again.', 'error');
+          setTimeout(() => { window.location.href = '/login'; }, 1200);
+          return;
+        }
+
+        const result = await response.json();
+        if (response.ok && result.success) {
+          const wasDefault = Boolean(targetAddr.is_default);
+          addresses = addresses.filter(a => a.id !== id);
+
+          if (wasDefault && addresses.length > 0) {
+            addresses[0].is_default = true;
+          }
+
+          setStoredAddresses(addresses);
+          renderAddresses();
+          showAlert('Address deleted successfully.', 'success');
+        } else {
+          showAlert(result?.message || 'Failed to delete address.', 'error');
+          btn.textContent = btnText;
+          btn.disabled = false;
+        }
+      } catch (error) {
+        console.error('Error deleting address:', error);
+        showAlert('Unable to connect to the server.', 'error');
+        btn.textContent = btnText;
+        btn.disabled = false;
       }
-
-      setStoredAddresses(addresses);
-      renderAddresses();
-      showAlert('Address deleted successfully.', 'success');
     } else if (action === 'set-default') {
       addresses.forEach(a => { a.is_default = (a.id === id); });
       setStoredAddresses(addresses);
