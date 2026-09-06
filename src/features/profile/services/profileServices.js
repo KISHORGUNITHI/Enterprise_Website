@@ -36,4 +36,8 @@ export class ProfileService {
   async deleteAddress(userId, addressId) {
       return await this.addressRepository.deleteAddress(userId, addressId);
   }
+
+  async updateAddress(userId, addressId, addressData) {
+      return await this.addressRepository.updateAddress(userId, addressId, addressData);
+  }
 }

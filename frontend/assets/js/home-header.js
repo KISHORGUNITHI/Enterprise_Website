@@ -119,7 +119,7 @@
   // ─── Location button ─────────────────────────────────────────────────────
   if (locBtn) {
     locBtn.addEventListener('click', () => {
-      window.location.href = '/profile/addresses';
+      window.location.href = '/profile#addresses';
     });
 
     // Fetch user's address to display
