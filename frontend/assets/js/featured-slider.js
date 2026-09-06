@@ -88,13 +88,10 @@
         </div>
 
         <div class="product-card__footer">
-          <button
-            <a href="/products/${p.id}" class="btn btn--primary product-card__cta"
-              aria-label="View ${p.name}"
-            >
-              View Product
-            </a>
-          </button>
+          <a href="/products/${p.id}" class="btn btn--primary product-card__cta"
+            aria-label="View ${p.name}">
+            View Product
+          </a>
         </div>
 
       </article>
