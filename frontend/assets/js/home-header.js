@@ -117,7 +117,30 @@
   }
 
   // ─── Location button ─────────────────────────────────────────────────────
-  locBtn && locBtn.addEventListener('click', () => locBtn.focus());
+  if (locBtn) {
+    locBtn.addEventListener('click', () => {
+      window.location.href = '/profile/addresses';
+    });
+
+    // Fetch user's address to display
+    fetch('/api/profile/addresses')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data && data.data.length > 0) {
+          const address = data.data.find(a => a.is_default) || data.data[0];
+          
+          // Format as City, Postal Code or Address Line 1
+          const displayText = address.city ? `${address.city}, ${address.postal_code || ''}`.replace(/,\s*$/, '') : address.address_line_1;
+          
+          const locFull = document.querySelector('.hdr__loc-full');
+          const locShort = document.querySelector('.hdr__loc-short');
+          
+          if (locFull && displayText) locFull.textContent = displayText;
+          if (locShort && address.city) locShort.textContent = `📍 ${address.city}`;
+        }
+      })
+      .catch(err => console.error("Error fetching location:", err));
+  }
 
   // ─── Bind scroll / resize ─────────────────────────────────────────────────
   window.addEventListener('scroll', () => {

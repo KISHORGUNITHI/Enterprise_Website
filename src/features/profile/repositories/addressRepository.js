@@ -42,4 +42,13 @@ export class AddressRepository {
             }
         });
     }
+
+    async deleteAddress(userId, addressId) {
+        return await prisma.address.deleteMany({
+            where: {
+                id: addressId,
+                user_id: userId
+            }
+        });
+    }
 }
