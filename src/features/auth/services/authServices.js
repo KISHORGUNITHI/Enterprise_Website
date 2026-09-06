@@ -46,8 +46,18 @@ export class RegisterService{
         }
     }
     validatePassword(password){
-        if(password.length<8){
-            throw new Error("Password must alteast 8 character long");
+        if(!password || password.length < 8){
+            throw new Error("Password must contain at least 8 characters");
+        }
+        const hasUpper = /[A-Z]/.test(password);
+        const hasLower = /[a-z]/.test(password);
+        const hasNumber = /[0-9]/.test(password);
+        if(!hasUpper || !hasLower || !hasNumber){
+            throw new Error("Password must contain uppercase, lowercase letters, and numbers");
+        }
+        const hasSpecial = /[^A-Za-z0-9]/.test(password);
+        if(password.length < 12 && !hasSpecial){
+            throw new Error("If less than 12 characters, password must contain a special character");
         }
     }
     generateToken(userId){

@@ -203,9 +203,23 @@
                 <svg class="eye-hide" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;"><path d="M13.359 11.238C13.75 10.546 14 9.797 14 9c0-2.21-1.79-4-4-4-.797 0-1.546.25-2.238.641M3.78 3.78l12.44 12.44M8.682 8.682A3.5 3.5 0 0010 10.5M1 1l18 18M9 15.93A9.006 9.006 0 011 10s3.5-6 9-6c1.036 0 2.03.175 2.952.488"/></svg>
               </button>
             </div>
+            <div class="password-requirements" id="passwordRequirements" aria-live="polite">
+              <div class="password-req" id="req-length">
+                <span class="password-req__icon" aria-hidden="true">&#10005;</span>
+                <span>Must contain at least 8 characters</span>
+              </div>
+              <div class="password-req" id="req-casing-numbers">
+                <span class="password-req__icon" aria-hidden="true">&#10005;</span>
+                <span>Must contain uppercase, lowercase letters, and numbers</span>
+              </div>
+              <div class="password-req" id="req-special">
+                <span class="password-req__icon" aria-hidden="true">&#10005;</span>
+                <span>If less than 12 characters, must contain a special character</span>
+              </div>
+            </div>
             <span class="auth-form__error" id="regPasswordError" aria-live="polite" hidden>
               <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0a6 6 0 100 12A6 6 0 006 0zm0 9a.75.75 0 110-1.5A.75.75 0 016 9zm.75-3.75a.75.75 0 01-1.5 0V3.75a.75.75 0 011.5 0v1.5z"/></svg>
-              Password must be at least 8 characters.
+              Please fulfill all password requirements.
             </span>
           </div>
 
@@ -423,18 +437,58 @@
     }
   });
 
+  // ─── Password live requirements validation ────────────────────────────────
+  function checkPasswordRules(password) {
+    const val = password || '';
+    const isLength = val.length >= 8;
+    const isCasingNumbers = /[a-z]/.test(val) && /[A-Z]/.test(val) && /[0-9]/.test(val);
+    const isSpecial = val.length >= 12 || (/[^A-Za-z0-9]/.test(val) && val.length > 0);
+
+    return {
+      isLength,
+      isCasingNumbers,
+      isSpecial,
+      isValid: isLength && isCasingNumbers && isSpecial
+    };
+  }
+
+  function updatePasswordRequirementsUI(password) {
+    const rules = checkPasswordRules(password);
+
+    const updateReq = (elId, valid) => {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      el.classList.toggle('is-valid', valid);
+      const icon = el.querySelector('.password-req__icon');
+      if (icon) {
+        icon.innerHTML = valid ? '&#10003;' : '&#10005;';
+      }
+    };
+
+    updateReq('req-length', rules.isLength);
+    updateReq('req-casing-numbers', rules.isCasingNumbers);
+    updateReq('req-special', rules.isSpecial);
+
+    return rules.isValid;
+  }
+
   // ─── Register validation ──────────────────────────────────────────────────
   const regName  = document.getElementById('regName');
   const regEmail = document.getElementById('regEmail');
   const regPass  = document.getElementById('regPassword');
   const regConf  = document.getElementById('regConfirm');
 
+  // Live update requirements as user types
+  regPass && regPass.addEventListener('input', () => {
+    updatePasswordRequirementsUI(regPass.value);
+  });
+
   // Blur handlers
   const regBlurs = [
     ['regName',     'nameField',        'nameError',        v => v.trim().length > 1],
     ['regEmail',    'emailField',       'emailError',       v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())],
     ['regPhone',    'phoneField',       'phoneError',       v => v.replace(/\D/g,'').length === 10],
-    ['regPassword', 'regPasswordField', 'regPasswordError', v => v.length >= 8],
+    ['regPassword', 'regPasswordField', 'regPasswordError', v => checkPasswordRules(v).isValid],
     ['regConfirm',  'confirmField',     'confirmError',     v => v === (regPass ? regPass.value : '') && v.length > 0],
   ];
 
