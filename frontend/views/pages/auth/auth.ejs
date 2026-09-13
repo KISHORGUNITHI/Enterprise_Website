@@ -226,12 +226,26 @@
                   </svg>
                 </button>
               </div>
+              <div class="password-requirements" id="passwordRequirements" aria-live="polite">
+                <div class="password-req" id="req-length">
+                  <span class="password-req__icon" aria-hidden="true">&#10005;</span>
+                  <span>Must contain at least 8 characters</span>
+                </div>
+                <div class="password-req" id="req-casing-numbers">
+                  <span class="password-req__icon" aria-hidden="true">&#10005;</span>
+                  <span>Must contain uppercase, lowercase letters, and numbers</span>
+                </div>
+                <div class="password-req" id="req-special">
+                  <span class="password-req__icon" aria-hidden="true">&#10005;</span>
+                  <span>If less than 12 characters, must contain a special character</span>
+                </div>
+              </div>
               <span class="auth-form__error" id="regPasswordError" aria-live="polite" hidden>
                 <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
                   <path
                     d="M6 0a6 6 0 100 12A6 6 0 006 0zm0 9a.75.75 0 110-1.5A.75.75 0 016 9zm.75-3.75a.75.75 0 01-1.5 0V3.75a.75.75 0 011.5 0v1.5z" />
                 </svg>
-                Password must be at least 8 characters.
+                Please fulfill all password requirements.
               </span>
             </div>
 
@@ -347,7 +361,6 @@
       });
 
       // ─── Validation helpers ───────────────────────────────────────────────────
-      // Tracks which fields the user has touched
       const touched = new Set();
 
       function markTouched(inputId) { touched.add(inputId); }
@@ -415,11 +428,10 @@
         window.location.assign(destination);
       }
 
-      // Validate a field only if it has been touched OR forceAll is true
       function validateField(inputId, fieldId, errorId, rule, forceAll) {
         const input = document.getElementById(inputId);
         if (!input) return true;
-        if (!forceAll && !touched.has(inputId)) return true; // not touched yet → skip
+        if (!forceAll && !touched.has(inputId)) return true;
         const valid = rule(input.value);
         setFieldState(fieldId, errorId, valid);
         return valid;
@@ -429,18 +441,15 @@
       const loginId = document.getElementById('loginIdentifier');
       const loginPas = document.getElementById('loginPassword');
 
-      // Only validate on blur if user touched the field
       loginId && loginId.addEventListener('blur', () => { markTouched('loginIdentifier'); validateField('loginIdentifier', 'identifierField', 'identifierError', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()), false); });
       loginPas && loginPas.addEventListener('blur', () => { markTouched('loginPassword'); validateField('loginPassword', 'loginPasswordField', 'loginPasswordError', v => v.length > 0, false); });
 
-      // Clear error as soon as field becomes valid (real-time after touch)
       loginId && loginId.addEventListener('input', () => { if (touched.has('loginIdentifier')) validateField('loginIdentifier', 'identifierField', 'identifierError', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()), true); });
       loginPas && loginPas.addEventListener('input', () => { if (touched.has('loginPassword') && loginPas.value.length > 0) setFieldState('loginPasswordField', 'loginPasswordError', true); });
 
       document.getElementById('loginForm') && document.getElementById('loginForm').addEventListener('submit', async function (e) {
         e.preventDefault();
         showServerMessage('');
-        // Force validate all fields on submit
         ['loginIdentifier', 'loginPassword'].forEach(id => markTouched(id));
         const ok1 = validateField('loginIdentifier', 'identifierField', 'identifierError', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()), true);
         const ok2 = validateField('loginPassword', 'loginPasswordField', 'loginPasswordError', v => v.length > 0, true);
@@ -462,18 +471,56 @@
         }
       });
 
+      // ─── Password live requirements validation ────────────────────────────────
+      function checkPasswordRules(password) {
+        const val = password || '';
+        const isLength = val.length >= 8;
+        const isCasingNumbers = /[a-z]/.test(val) && /[A-Z]/.test(val) && /[0-9]/.test(val);
+        const isSpecial = val.length >= 12 || (/[^A-Za-z0-9]/.test(val) && val.length > 0);
+
+        return {
+          isLength,
+          isCasingNumbers,
+          isSpecial,
+          isValid: isLength && isCasingNumbers && isSpecial
+        };
+      }
+
+      function updatePasswordRequirementsUI(password) {
+        const rules = checkPasswordRules(password);
+
+        const updateReq = (elId, valid) => {
+          const el = document.getElementById(elId);
+          if (!el) return;
+          el.classList.toggle('is-valid', valid);
+          const icon = el.querySelector('.password-req__icon');
+          if (icon) {
+            icon.innerHTML = valid ? '&#10003;' : '&#10005;';
+          }
+        };
+
+        updateReq('req-length', rules.isLength);
+        updateReq('req-casing-numbers', rules.isCasingNumbers);
+        updateReq('req-special', rules.isSpecial);
+
+        return rules.isValid;
+      }
+
       // ─── Register validation ──────────────────────────────────────────────────
       const regName = document.getElementById('regName');
       const regEmail = document.getElementById('regEmail');
       const regPass = document.getElementById('regPassword');
       const regConf = document.getElementById('regConfirm');
 
-      // Blur handlers
+      regPass && regPass.addEventListener('input', () => {
+        updatePasswordRequirementsUI(regPass.value);
+      });
+
       const regBlurs = [
         ['regName', 'nameField', 'nameError', v => v.trim().length > 1],
         ['regEmail', 'emailField', 'emailError', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())],
         ['regPhone', 'phoneField', 'phoneError', v => v.replace(/\D/g, '').length === 10],
-        ['regPassword', 'regPasswordField', 'regPasswordError', v => v.length >= 8],
+        ['regPassword', 'regPasswordField', 'regPasswordError', v => checkPasswordRules(v).isValid],
         ['regConfirm', 'confirmField', 'confirmError', v => v === (regPass ? regPass.value : '') && v.length > 0],
       ];
 
@@ -483,7 +530,6 @@
           markTouched(inputId);
           validateField(inputId, fieldId, errorId, rule, false);
         });
-        // Real-time clear once valid after touch
         el && el.addEventListener('input', () => {
           if (touched.has(inputId) && rule(el.value)) setFieldState(fieldId, errorId, true);
           else if (touched.has(inputId) && !rule(el.value)) setFieldState(fieldId, errorId, false);

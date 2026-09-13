@@ -125,9 +125,23 @@
             </svg>
           </button>
         </div>
+        <div class="password-requirements" id="passwordRequirements" aria-live="polite">
+          <div class="password-req" id="req-length">
+            <span class="password-req__icon" aria-hidden="true">&#10005;</span>
+            <span>Must contain at least 8 characters</span>
+          </div>
+          <div class="password-req" id="req-casing-numbers">
+            <span class="password-req__icon" aria-hidden="true">&#10005;</span>
+            <span>Must contain uppercase, lowercase letters, and numbers</span>
+          </div>
+          <div class="password-req" id="req-special">
+            <span class="password-req__icon" aria-hidden="true">&#10005;</span>
+            <span>If less than 12 characters, must contain a special character</span>
+          </div>
+        </div>
         <span class="auth-form__error" id="regPasswordError" hidden>
           <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0a6 6 0 100 12A6 6 0 006 0zm0 9a.75.75 0 110-1.5A.75.75 0 016 9zm.75-3.75a.75.75 0 01-1.5 0V3.75a.75.75 0 011.5 0v1.5z"/></svg>
-          Password must be at least 8 characters.
+          Please fulfill all password requirements.
         </span>
       </div>
 
@@ -216,17 +230,56 @@
     this.value = this.value.replace(/\D/g, '');
   });
 
-  // ── Blur validation ──────────────────────────────────────────────────────
+  // ─── Password live requirements validation ────────────────────────────────
+  function checkPasswordRules(password) {
+    const val = password || '';
+    const isLength = val.length >= 8;
+    const isCasingNumbers = /[a-z]/.test(val) && /[A-Z]/.test(val) && /[0-9]/.test(val);
+    const isSpecial = val.length >= 12 || (/[^A-Za-z0-9]/.test(val) && val.length > 0);
+
+    return {
+      isLength,
+      isCasingNumbers,
+      isSpecial,
+      isValid: isLength && isCasingNumbers && isSpecial
+    };
+  }
+
+  function updatePasswordRequirementsUI(password) {
+    const rules = checkPasswordRules(password);
+
+    const updateReq = (elId, valid) => {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      el.classList.toggle('is-valid', valid);
+      const icon = el.querySelector('.password-req__icon');
+      if (icon) {
+        icon.innerHTML = valid ? '&#10003;' : '&#10005;';
+      }
+    };
+
+    updateReq('req-length', rules.isLength);
+    updateReq('req-casing-numbers', rules.isCasingNumbers);
+    updateReq('req-special', rules.isSpecial);
+
+    return rules.isValid;
+  }
+
+  // ── Blur & live input validation ─────────────────────────────────────────
   const nameInput  = document.getElementById('regName');
   const emailInput = document.getElementById('regEmail');
   const phoneInput = document.getElementById('regPhone');
   const passInput  = document.getElementById('regPassword');
   const confInput  = document.getElementById('regConfirm');
 
+  passInput && passInput.addEventListener('input', () => {
+    updatePasswordRequirementsUI(passInput.value);
+  });
+
   nameInput.addEventListener('blur',  () => setFieldState(document.getElementById('nameField'),        document.getElementById('nameError'),        nameInput.value.trim().length > 1));
   emailInput.addEventListener('blur', () => setFieldState(document.getElementById('emailField'),       document.getElementById('emailError'),       /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim())));
   phoneInput.addEventListener('blur', () => setFieldState(document.getElementById('phoneField'),       document.getElementById('phoneError'),       phoneInput.value.replace(/\D/g,'').length === 10));
-  passInput.addEventListener('blur',  () => setFieldState(document.getElementById('regPasswordField'), document.getElementById('regPasswordError'), passInput.value.length >= 8));
+  passInput.addEventListener('blur',  () => setFieldState(document.getElementById('regPasswordField'), document.getElementById('regPasswordError'), checkPasswordRules(passInput.value).isValid));
   confInput.addEventListener('blur',  () => setFieldState(document.getElementById('confirmField'),     document.getElementById('confirmError'),     confInput.value === passInput.value && confInput.value.length > 0));
 
   // ── Submit ───────────────────────────────────────────────────────────────
@@ -236,7 +289,7 @@
       [document.getElementById('nameField'),        document.getElementById('nameError'),        nameInput.value.trim().length > 1],
       [document.getElementById('emailField'),       document.getElementById('emailError'),       /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim())],
       [document.getElementById('phoneField'),       document.getElementById('phoneError'),       phoneInput.value.replace(/\D/g,'').length === 10],
-      [document.getElementById('regPasswordField'), document.getElementById('regPasswordError'), passInput.value.length >= 8],
+      [document.getElementById('regPasswordField'), document.getElementById('regPasswordError'), checkPasswordRules(passInput.value).isValid],
       [document.getElementById('confirmField'),     document.getElementById('confirmError'),     confInput.value === passInput.value && confInput.value.length > 0],
     ];
     const allValid = checks.every(([field, errEl, isValid]) => { setFieldState(field, errEl, isValid); return isValid; });
