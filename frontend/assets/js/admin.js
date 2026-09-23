@@ -1,25 +1,16 @@
 /**
  * admin.js — Enterprise Store Admin Panel Interactive Logic
- * Handles real-time search, filters, modals, drawers, status updates, and mock mutations.
+ * Handles real-time API calls, search, filters, modals, drawers, and status updates.
+ * Pure API mode - No mock data fallback
  */
 
 (function () {
   'use strict';
 
-  // Check if using real API or mock data
-  const useApi = window.ADMIN_USE_API || false;
+  // =========================================================================
+  // API HELPER FUNCTIONS
+  // =========================================================================
 
-  // Ensure mock data is loaded
-  const data = window.adminMockData || {
-    stats: {},
-    banners: [],
-    products: [],
-    categories: [],
-    users: [],
-    orders: []
-  };
-
-  // API Helper Functions
   const API = {
     async fetch(endpoint, options = {}) {
       try {
@@ -138,94 +129,17 @@
     }
   };
 
-  // CRUD Wrapper Functions (auto-switch between API and mock)
-  const CRUD = {
-    async saveBanner(bannerData, bannerId = null) {
-      if (!useApi) {
-        if (bannerId) {
-          const idx = data.banners.findIndex(b => b.id === bannerId);
-          if (idx !== -1) data.banners[idx] = { ...data.banners[idx], ...bannerData };
-        } else {
-          data.banners.push({ id: Date.now().toString(), ...bannerData });
-        }
-        showAdminToast(`Banner ${bannerId ? 'updated' : 'created'} successfully`);
-        return { success: true };
-      }
-      try {
-        const res = bannerId 
-          ? await API.updateBanner(bannerId, bannerData)
-          : await API.createBanner(bannerData);
-        if (res.success) showAdminToast(`Banner ${bannerId ? 'updated' : 'created'} successfully`);
-        return res;
-      } catch (err) {
-        showAdminToast('Failed to save banner', 'error');
-        throw err;
-      }
-    },
-
-    async deleteBanner(bannerId) {
-      if (!useApi) {
-        data.banners = data.banners.filter(b => b.id !== bannerId);
-        showAdminToast('Banner deleted');
-        return { success: true };
-      }
-      try {
-        const res = await API.deleteBanner(bannerId);
-        if (res.success) showAdminToast('Banner deleted');
-        return res;
-      } catch (err) {
-        showAdminToast('Failed to delete banner', 'error');
-        throw err;
-      }
-    },
-
-    async saveProduct(productData, productId = null) {
-      if (!useApi) {
-        if (productId) {
-          const idx = data.products.findIndex(p => p.id === productId);
-          if (idx !== -1) data.products[idx] = { ...data.products[idx], ...productData };
-        } else {
-          data.products.push({ id: Date.now().toString(), ...productData });
-        }
-        showAdminToast(`Product ${productId ? 'updated' : 'created'} successfully`);
-        return { success: true };
-      }
-      try {
-        const res = productId 
-          ? await API.updateProduct(productId, productData)
-          : await API.createProduct(productData);
-        if (res.success) showAdminToast(`Product ${productId ? 'updated' : 'created'} successfully`);
-        return res;
-      } catch (err) {
-        showAdminToast('Failed to save product', 'error');
-        throw err;
-      }
-    },
-
-    async deleteProduct(productId) {
-      if (!useApi) {
-        data.products = data.products.filter(p => p.id !== productId);
-        showAdminToast('Product deleted');
-        return { success: true };
-      }
-      try {
-        const res = await API.deleteProduct(productId);
-        if (res.success) showAdminToast('Product deleted');
-        return res;
-      } catch (err) {
-        showAdminToast('Failed to delete product', 'error');
-        throw err;
-      }
-    }
-  };
-
-  /* =========================================================================
-     1. UTILITIES & TOAST NOTIFICATIONS
-     ========================================================================= */
+  // =========================================================================
+  // UTILITIES & TOAST NOTIFICATIONS
+  // =========================================================================
 
   function formatRupees(num) {
     if (typeof num !== 'number') num = Number(num) || 0;
     return '₹' + num.toLocaleString('en-IN');
+  }
+
+  function capitalize(str) {
+    return str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   }
 
   function showAdminToast(message, type = 'success') {
@@ -238,6 +152,9 @@
     let iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
     if (type === 'warning') {
       iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+    }
+    if (type === 'error') {
+      iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
     }
 
     toast.innerHTML = `${iconSvg}<span>${message}</span>`;
@@ -254,7 +171,7 @@
   }
 
   /* =========================================================================
-     2. MOBILE SIDEBAR NAVIGATION
+     MOBILE SIDEBAR NAVIGATION
      ========================================================================= */
 
   const sidebarToggleBtn = document.getElementById('adminSidebarToggle');
@@ -281,7 +198,7 @@
   }
 
   /* =========================================================================
-     2.1 USER PROFILE DROPDOWN & LOGOUT
+     USER PROFILE DROPDOWN & LOGOUT
      ========================================================================= */
 
   const userDropdownBtn = document.getElementById('adminUserDropdownBtn');
@@ -343,7 +260,7 @@
   });
 
   /* =========================================================================
-     3. MODAL & DRAWER CONTROLS
+     MODAL & DRAWER CONTROLS
      ========================================================================= */
 
   function openModal(modalId) {
@@ -393,81 +310,17 @@
   });
 
   /* =========================================================================
-     4. DASHBOARD VIEW CONTROLLER
+     DASHBOARD VIEW CONTROLLER
      ========================================================================= */
 
   function initDashboard() {
     const ordersTbody = document.getElementById('dashboardOrdersTableBody');
     const lowStockTbody = document.getElementById('dashboardLowStockTableBody');
 
-    if (!useApi) {
-      // Use mock data
-      if (ordersTbody) {
-        const recent = data.orders.slice(0, 5);
-        ordersTbody.innerHTML = recent.map(o => `
-          <tr>
-            <td><strong style="font-family:var(--font-mono); color:var(--color-primary-700);">${o.shortId}</strong></td>
-            <td>
-              <div style="font-weight:var(--font-semibold);">${o.customer.name}</div>
-              <div style="font-size:var(--text-xs); color:var(--color-text-muted);">${o.customer.phone}</div>
-            </td>
-            <td><strong>${formatRupees(o.totalAmount)}</strong></td>
-            <td>
-              <span class="order-status order-status--${o.status}">
-                <span class="order-status__dot"></span>
-                ${capitalize(o.status.replace(/_/g, ' '))}
-              </span>
-            </td>
-            <td style="font-size:var(--text-xs); color:var(--color-text-muted);">${o.date}</td>
-            <td>
-              <button type="button" class="admin-btn-action" data-view-order="${o.id}">
-                <span>View</span>
-              </button>
-            </td>
-          </tr>
-        `).join('');
-
-        ordersTbody.querySelectorAll('[data-view-order]').forEach(btn => {
-          btn.addEventListener('click', () => openOrderDrawer(btn.dataset.viewOrder));
-        });
-      }
-
-      if (lowStockTbody) {
-        const lowStock = data.products.filter(p => p.stock <= p.minStockThreshold);
-        lowStockTbody.innerHTML = lowStock.map(p => `
-          <tr>
-            <td>
-              <div style="font-weight:var(--font-semibold); line-height:1.2;">${p.name}</div>
-              <div style="font-size:var(--text-xs); color:var(--color-text-muted);">${p.category}</div>
-            </td>
-            <td>
-              <span style="font-weight:var(--font-bold); color:${p.stock === 0 ? 'var(--color-error-600)' : '#d97706'};">
-                ${p.stock} units
-              </span>
-            </td>
-            <td>
-              <span class="badge ${p.stock === 0 ? 'badge--accent' : 'badge--primary'}" style="${p.stock === 0 ? 'background:#fee2e2; color:#991b1b;' : 'background:#fef3c7; color:#b45309;'}">
-                ${p.status}
-              </span>
-            </td>
-            <td>
-              <button type="button" class="admin-btn-action" data-stock-product="${p.id}">
-                <span>Restock</span>
-              </button>
-            </td>
-          </tr>
-        `).join('');
-
-        lowStockTbody.querySelectorAll('[data-stock-product]').forEach(btn => {
-          btn.addEventListener('click', () => openStockModal(btn.dataset.stockProduct));
-        });
-      }
-      return;
-    }
-
-    // Use API data
+    // Fetch data from API
     Promise.all([API.getOrders({ limit: 5 }), API.getStats()])
       .then(([ordersRes, statsRes]) => {
+        // Populate orders table
         if (ordersTbody && ordersRes.data) {
           ordersTbody.innerHTML = ordersRes.data.map(o => `
             <tr>
@@ -518,50 +371,14 @@
           if (els.banners) els.banners.textContent = stats.activeBanners;
         }
       })
-      .catch(() => {
-        // Fall back to mock data
-        initDashboard_Mock();
+      .catch(err => {
+        showAdminToast('Failed to load dashboard data', 'error');
+        console.error('Dashboard error:', err);
       });
-  }
-
-  function initDashboard_Mock() {
-    // Fallback mock implementation - same as original
-    const ordersTbody = document.getElementById('dashboardOrdersTableBody');
-    const lowStockTbody = document.getElementById('dashboardLowStockTableBody');
-    
-    if (ordersTbody) {
-      const recent = data.orders.slice(0, 5);
-      ordersTbody.innerHTML = recent.map(o => `
-        <tr>
-          <td><strong style="font-family:var(--font-mono); color:var(--color-primary-700);">${o.shortId}</strong></td>
-          <td>
-            <div style="font-weight:var(--font-semibold);">${o.customer.name}</div>
-            <div style="font-size:var(--text-xs); color:var(--color-text-muted);">${o.customer.phone}</div>
-          </td>
-          <td><strong>${formatRupees(o.totalAmount)}</strong></td>
-          <td>
-            <span class="order-status order-status--${o.status}">
-              <span class="order-status__dot"></span>
-              ${capitalize(o.status.replace(/_/g, ' '))}
-            </span>
-          </td>
-          <td style="font-size:var(--text-xs); color:var(--color-text-muted);">${o.date}</td>
-          <td>
-            <button type="button" class="admin-btn-action" data-view-order="${o.id}">
-              <span>View</span>
-            </button>
-          </td>
-        </tr>
-      `).join('');
-
-      ordersTbody.querySelectorAll('[data-view-order]').forEach(btn => {
-        btn.addEventListener('click', () => openOrderDrawer(btn.dataset.viewOrder));
-      });
-    }
   }
 
   /* =========================================================================
-     5. BANNER MANAGEMENT VIEW CONTROLLER
+     BANNER MANAGEMENT VIEW CONTROLLER
      ========================================================================= */
 
   let currentBannerImage = '';
@@ -688,1344 +505,335 @@
 
     if (!grid) return;
 
-    const query = (searchInput?.value || '').trim().toLowerCase();
+    const query = (searchInput?.value || '').trim();
     const filterStatus = statusFilter?.value || 'all';
 
-    const filtered = data.banners.filter(b => {
-      const matchSearch = b.title.toLowerCase().includes(query) ||
-                          b.eyebrow.toLowerCase().includes(query) ||
-                          b.slug.toLowerCase().includes(query);
-      const matchStatus = filterStatus === 'all' || b.status === filterStatus;
-      return matchSearch && matchStatus;
-    });
+    showAdminToast('Loading banners...', 'info');
 
-    if (filtered.length === 0) {
-      grid.innerHTML = '';
-      if (emptyState) emptyState.style.display = 'flex';
-      return;
-    }
+    API.getBanners({ search: query, status: filterStatus !== 'all' ? filterStatus : undefined })
+      .then(res => {
+        if (!res.data || res.data.length === 0) {
+          grid.innerHTML = '';
+          if (emptyState) emptyState.style.display = 'flex';
+          return;
+        }
 
-    if (emptyState) emptyState.style.display = 'none';
+        if (emptyState) emptyState.style.display = 'none';
 
-    grid.innerHTML = filtered.map(b => `
-      <div class="admin-banner-card" data-id="${b.id}">
-        <!-- Visual Banner Header Preview -->
-        <div class="admin-banner-preview" style="background:${b.bgGradient || 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 60%, #2f52a0 100%)'};">
-          ${b.image ? `<img src="${b.image}" alt="${b.title}" class="admin-banner-preview__bg-img" onerror="this.style.display='none'"/>` : ''}
-          <div>
-            <span class="admin-banner-preview__eyebrow">${b.eyebrow}</span>
-            <h3 class="admin-banner-preview__title">${b.title}</h3>
-          </div>
-          <div style="display:flex; justify-content:space-between; align-items:flex-end;">
-            ${b.badge ? `<span class="admin-banner-preview__badge">${b.badge}</span>` : '<span></span>'}
-            <span style="font-size:var(--text-xs); background:rgba(0,0,0,0.4); padding:2px 8px; border-radius:var(--radius-sm);">
-              CTA: ${b.ctaText}
-            </span>
-          </div>
-        </div>
+        grid.innerHTML = res.data.map(b => `
+          <div class="admin-banner-card" data-id="${b.id}">
+            <!-- Visual Banner Header Preview -->
+            <div class="admin-banner-preview" style="background:${b.bgGradient || 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 60%, #2f52a0 100%)'};">
+              ${b.image ? `<img src="${b.image}" alt="${b.title}" class="admin-banner-preview__bg-img" onerror="this.style.display='none'"/>` : ''}
+              <div>
+                <span class="admin-banner-preview__eyebrow">${b.eyebrow}</span>
+                <h3 class="admin-banner-preview__title">${b.title}</h3>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                ${b.badge ? `<span class="admin-banner-preview__badge">${b.badge}</span>` : '<span></span>'}
+                <span style="font-size:var(--text-xs); background:rgba(0,0,0,0.4); padding:2px 8px; border-radius:var(--radius-sm);">
+                  CTA: ${b.ctaText}
+                </span>
+              </div>
+            </div>
 
-        <!-- Banner Card Body -->
-        <div class="admin-banner-card__details">
-          <p style="font-size:var(--text-xs); color:var(--color-text-muted); line-height:var(--leading-relaxed); margin:0;">
-            ${b.subtitle}
-          </p>
+            <!-- Banner Card Body -->
+            <div class="admin-banner-card__details">
+              <p style="font-size:var(--text-xs); color:var(--color-text-muted); line-height:var(--leading-relaxed); margin:0;">
+                ${b.subtitle}
+              </p>
 
-          <div class="admin-banner-card__slug-row">
-            <span style="color:var(--color-text-muted);">Destination Slug:</span>
-            <span class="admin-banner-slug-pill">/${b.slug}</span>
-          </div>
+              <div class="admin-banner-card__slug-row">
+                <span style="color:var(--color-text-muted);">Destination Slug:</span>
+                <span class="admin-banner-slug-pill">/${b.slug}</span>
+              </div>
 
-          <div class="admin-banner-card__slug-row">
-            <span style="color:var(--color-text-muted);">Visibility Status:</span>
-            <span class="badge ${b.status === 'Active' ? 'badge--success' : ''}" style="${b.status === 'Inactive' ? 'background:#f4f4f5; color:#71717a;' : ''}">
-              ${b.status}
-            </span>
-          </div>
+              <div class="admin-banner-card__slug-row">
+                <span style="color:var(--color-text-muted);">Visibility Status:</span>
+                <span class="badge ${b.status === 'ACTIVE' ? 'badge--success' : ''}" style="${b.status !== 'ACTIVE' ? 'background:#f4f4f5; color:#71717a;' : ''}">
+                  ${capitalize(b.status)}
+                </span>
+              </div>
 
-          <!-- Footer Actions -->
-          <div class="admin-banner-card__footer">
-            <button type="button" class="admin-btn-action" data-toggle-banner="${b.id}">
-              ${b.status === 'Active' ? 'Deactivate' : 'Activate'}
-            </button>
-            <div style="display:flex; gap:var(--space-2);">
-              <button type="button" class="admin-btn-action" data-edit-banner="${b.id}">Edit</button>
-              <button type="button" class="admin-btn-action admin-btn-action--danger" data-delete-banner="${b.id}">Delete</button>
+              <!-- Footer Actions -->
+              <div class="admin-banner-card__footer">
+                <button type="button" class="admin-btn-action" data-toggle-banner="${b.id}">
+                  ${b.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
+                </button>
+                <div style="display:flex; gap:var(--space-2);">
+                  <button type="button" class="admin-btn-action" data-edit-banner="${b.id}">Edit</button>
+                  <button type="button" class="admin-btn-action admin-btn-action--danger" data-delete-banner="${b.id}">Delete</button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-    `).join('');
+        `).join('');
 
-    // Attach listeners
-    grid.querySelectorAll('[data-edit-banner]').forEach(btn => {
-      btn.addEventListener('click', () => editBanner(btn.dataset.editBanner));
-    });
+        // Attach listeners
+        grid.querySelectorAll('[data-edit-banner]').forEach(btn => {
+          btn.addEventListener('click', () => editBanner(btn.dataset.editBanner));
+        });
 
-    grid.querySelectorAll('[data-toggle-banner]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const item = data.banners.find(x => x.id === btn.dataset.toggleBanner);
-        if (item) {
-          item.status = item.status === 'Active' ? 'Inactive' : 'Active';
-          renderBanners();
-          showAdminToast(`Banner "${item.title}" marked as ${item.status}.`);
-        }
+        grid.querySelectorAll('[data-toggle-banner]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            API.toggleBanner(btn.dataset.toggleBanner)
+              .then(res => {
+                showAdminToast(`Banner ${res.data.status === 'ACTIVE' ? 'activated' : 'deactivated'}`);
+                renderBanners();
+              })
+              .catch(() => showAdminToast('Failed to toggle banner', 'error'));
+          });
+        });
+
+        grid.querySelectorAll('[data-delete-banner]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to delete this banner?')) {
+              API.deleteBanner(btn.dataset.deleteBanner)
+                .then(() => {
+                  showAdminToast('Banner deleted');
+                  renderBanners();
+                })
+                .catch(() => showAdminToast('Failed to delete banner', 'error'));
+            }
+          });
+        });
+      })
+      .catch(err => {
+        showAdminToast('Failed to load banners', 'error');
+        grid.innerHTML = '';
       });
-    });
-
-    grid.querySelectorAll('[data-delete-banner]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const idx = data.banners.findIndex(x => x.id === btn.dataset.deleteBanner);
-        if (idx !== -1) {
-          const removed = data.banners.splice(idx, 1)[0];
-          renderBanners();
-          showAdminToast(`Banner "${removed.title}" deleted.`);
-        }
-      });
-    });
   }
 
   function resetBannerForm() {
     const form = document.getElementById('bannerForm');
     if (form) form.reset();
-    const idInput = document.getElementById('bannerFormId');
-    if (idInput) idInput.value = '';
-    const title = document.getElementById('bannerModalTitle');
-    if (title) title.textContent = 'Add New Banner';
     setBannerImage('');
+    document.getElementById('bannerTitleInput')?.focus();
   }
 
-  function editBanner(id) {
-    const banner = data.banners.find(b => b.id === id);
-    if (!banner) return;
-
-    document.getElementById('bannerFormId').value = banner.id;
-    document.getElementById('bannerEyebrow').value = banner.eyebrow;
-    document.getElementById('bannerTitle').value = banner.title;
-    document.getElementById('bannerSubtitle').value = banner.subtitle;
-    document.getElementById('bannerCtaText').value = banner.ctaText;
-    document.getElementById('bannerSlug').value = banner.slug;
-    document.getElementById('bannerBadge').value = banner.badge || '';
-    document.getElementById('bannerStatus').value = banner.status;
-
-    setBannerImage(banner.image || '');
-
-    document.getElementById('bannerModalTitle').textContent = 'Edit Banner';
-    openModal('bannerModal');
-  }
-
-  const saveBannerBtn = document.getElementById('saveBannerBtn');
-  if (saveBannerBtn) {
-    saveBannerBtn.addEventListener('click', () => {
-      const id = document.getElementById('bannerFormId').value;
-      const title = document.getElementById('bannerTitle').value.trim();
-      const eyebrow = document.getElementById('bannerEyebrow').value.trim();
-      const subtitle = document.getElementById('bannerSubtitle').value.trim();
-      const ctaText = document.getElementById('bannerCtaText').value.trim();
-      const slug = document.getElementById('bannerSlug').value.trim();
-      const badge = document.getElementById('bannerBadge').value.trim();
-      const status = document.getElementById('bannerStatus').value;
-
-      if (!title || !slug) {
-        alert('Please provide a banner title and target slug.');
-        return;
-      }
-
-      if (id) {
-        // Edit existing
-        const banner = data.banners.find(b => b.id === id);
-        if (banner) {
-          Object.assign(banner, { 
-            title, 
-            eyebrow, 
-            subtitle, 
-            ctaText, 
-            slug, 
-            badge, 
-            status,
-            image: currentBannerImage 
-          });
-          showAdminToast('Banner updated successfully.');
+  function editBanner(bannerId) {
+    API.getBanners()
+      .then(res => {
+        const banner = res.data?.find(b => b.id === bannerId);
+        if (!banner) {
+          showAdminToast('Banner not found', 'error');
+          return;
         }
-      } else {
-        // Add new
-        const newBanner = {
-          id: 'BNR-' + String(data.banners.length + 1).padStart(3, '0'),
-          title,
-          eyebrow,
-          subtitle,
-          ctaText,
-          slug,
-          badge,
-          status,
-          image: currentBannerImage,
-          bgGradient: 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 60%, #2f52a0 100%)',
-          accentColor: '#f58500',
-          clicks: 0
-        };
-        data.banners.unshift(newBanner);
-        showAdminToast('New banner added successfully.');
-      }
 
-      closeModal('bannerModal');
-      renderBanners();
-    });
+        const form = document.getElementById('bannerForm');
+        if (form) {
+          document.getElementById('bannerTitleInput').value = banner.title;
+          document.getElementById('bannerEyebrowInput').value = banner.eyebrow;
+          document.getElementById('bannerSubtitleInput').value = banner.subtitle;
+          document.getElementById('bannerSlugInput').value = banner.slug;
+          document.getElementById('bannerCtaTextInput').value = banner.ctaText;
+          document.getElementById('bannerBadgeInput').value = banner.badge || '';
+          document.getElementById('bannerBgGradientInput').value = banner.bgGradient || '';
+          document.getElementById('bannerAccentColorInput').value = banner.accentColor || '#2563eb';
+          setBannerImage(banner.image || '');
+          form.dataset.bannerId = bannerId;
+        }
+        openModal('bannerModal');
+      })
+      .catch(err => showAdminToast('Failed to load banner details', 'error'));
   }
 
-  /* =========================================================================
-     6. PRODUCT & STOCK MANAGEMENT CONTROLLER
-     ========================================================================= */
+  // Banner form submission
+  const bannerForm = document.getElementById('bannerForm');
+  if (bannerForm) {
+    bannerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-  let currentProductImages = [];
-
-  function renderProductGallery() {
-    const grid = document.getElementById('productGalleryGrid');
-    const empty = document.getElementById('productGalleryEmpty');
-    const count = document.getElementById('productImagesCount');
-
-    if (count) {
-      count.textContent = `${currentProductImages.length} image${currentProductImages.length === 1 ? '' : 's'}`;
-    }
-
-    if (!grid || !empty) return;
-
-    if (currentProductImages.length === 0) {
-      grid.innerHTML = '';
-      empty.style.display = 'flex';
-      return;
-    }
-
-    empty.style.display = 'none';
-
-    // Ensure at least one primary image exists
-    const hasPrimary = currentProductImages.some(x => x.isPrimary);
-    if (!hasPrimary && currentProductImages.length > 0) {
-      currentProductImages[0].isPrimary = true;
-    }
-
-    grid.innerHTML = currentProductImages.map((img, idx) => `
-      <div class="admin-gallery-thumb ${img.isPrimary ? 'admin-gallery-thumb--primary' : ''}">
-        ${img.isPrimary ? `<span class="admin-thumb-primary-tag">★ Cover</span>` : ''}
-        <img src="${img.url}" alt="Product Preview ${idx + 1}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%2394a3b8\\' stroke-width=\\'2\\'><rect x=\\'3\\' y=\\'3\\' width=\\'18\\' height=\\'18\\' rx=\\'2\\'/><circle cx=\\'8.5\\' cy=\\'8.5\\' r=\\'1.5\\'/><polyline points=\\'21 15 16 10 5 21\\'/></svg>'"/>
-        <div class="admin-gallery-thumb__actions">
-          ${!img.isPrimary ? `<button type="button" class="admin-thumb-btn-cover" data-make-cover="${idx}">Set Cover</button>` : '<div></div>'}
-          <button type="button" class="admin-thumb-btn-delete" data-remove-img="${idx}" title="Delete image">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
-        </div>
-      </div>
-    `).join('');
-
-    // Attach cover and delete handlers
-    grid.querySelectorAll('[data-make-cover]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const index = Number(btn.dataset.makeCover);
-        currentProductImages.forEach((item, i) => {
-          item.isPrimary = (i === index);
-        });
-        renderProductGallery();
-      });
-    });
-
-    grid.querySelectorAll('[data-remove-img]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const index = Number(btn.dataset.removeImg);
-        const wasPrimary = currentProductImages[index]?.isPrimary;
-        currentProductImages.splice(index, 1);
-        if (wasPrimary && currentProductImages.length > 0) {
-          currentProductImages[0].isPrimary = true;
-        }
-        renderProductGallery();
-      });
-    });
-  }
-
-  function addProductImage(url) {
-    if (!url) return;
-    const isFirst = currentProductImages.length === 0;
-    currentProductImages.push({
-      url,
-      isPrimary: isFirst
-    });
-    renderProductGallery();
-  }
-
-  function setupProductImageControls() {
-    // Tab switcher
-    const tabs = document.querySelectorAll('[data-img-tab^="product-"]');
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => {
-          t.classList.remove('active');
-          t.setAttribute('aria-selected', 'false');
-        });
-        tab.classList.add('active');
-        tab.setAttribute('aria-selected', 'true');
-
-        const tabType = tab.getAttribute('data-img-tab');
-        const filePanel = document.getElementById('productFilePanel');
-        const urlPanel = document.getElementById('productUrlPanel');
-        if (tabType === 'product-file') {
-          if (filePanel) filePanel.style.display = 'block';
-          if (urlPanel) urlPanel.style.display = 'none';
-        } else {
-          if (filePanel) filePanel.style.display = 'none';
-          if (urlPanel) urlPanel.style.display = 'block';
-        }
-      });
-    });
-
-    // File input (multiple local files)
-    const fileInput = document.getElementById('productFileInput');
-    if (fileInput) {
-      fileInput.addEventListener('change', (e) => {
-        const files = Array.from(e.target.files || []);
-        if (files.length === 0) return;
-
-        files.forEach(file => {
-          if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-              addProductImage(ev.target.result);
-            };
-            reader.readAsDataURL(file);
-          }
-        });
-        fileInput.value = '';
-      });
-    }
-
-    // Drag and drop for product dropzone
-    const dropzone = document.getElementById('productDropzone');
-    if (dropzone) {
-      ['dragenter', 'dragover'].forEach(evtName => {
-        dropzone.addEventListener(evtName, (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          dropzone.classList.add('dragover');
-        });
-      });
-      ['dragleave', 'drop'].forEach(evtName => {
-        dropzone.addEventListener(evtName, (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          dropzone.classList.remove('dragover');
-        });
-      });
-      dropzone.addEventListener('drop', (e) => {
-        const files = Array.from(e.dataTransfer?.files || []);
-        files.forEach(file => {
-          if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-              addProductImage(ev.target.result);
-            };
-            reader.readAsDataURL(file);
-          }
-        });
-      });
-    }
-
-    // Online URL input & button
-    const addUrlBtn = document.getElementById('productAddUrlBtn');
-    const urlInput = document.getElementById('productImageUrlInput');
-    if (addUrlBtn && urlInput) {
-      const handleAddUrl = () => {
-        const val = urlInput.value.trim();
-        if (val) {
-          addProductImage(val);
-          urlInput.value = '';
-        }
+      const bannerId = bannerForm.dataset.bannerId;
+      const bannerData = {
+        title: document.getElementById('bannerTitleInput').value,
+        eyebrow: document.getElementById('bannerEyebrowInput').value,
+        subtitle: document.getElementById('bannerSubtitleInput').value,
+        slug: document.getElementById('bannerSlugInput').value,
+        ctaText: document.getElementById('bannerCtaTextInput').value,
+        badge: document.getElementById('bannerBadgeInput').value || null,
+        image: currentBannerImage || '',
+        bgGradient: document.getElementById('bannerBgGradientInput').value,
+        accentColor: document.getElementById('bannerAccentColorInput').value,
+        status: 'ACTIVE'
       };
 
-      addUrlBtn.addEventListener('click', handleAddUrl);
-      urlInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          handleAddUrl();
+      try {
+        if (bannerId) {
+          await API.updateBanner(bannerId, bannerData);
+          showAdminToast('Banner updated successfully');
+        } else {
+          await API.createBanner(bannerData);
+          showAdminToast('Banner created successfully');
         }
-      });
-    }
-  }
-
-  function renderProducts() {
-    const tbody = document.getElementById('productsTableBody');
-    const emptyState = document.getElementById('productsEmptyState');
-    const searchInput = document.getElementById('productSearchInput');
-    const catFilter = document.getElementById('productCategoryFilter');
-    const stockFilter = document.getElementById('productStockFilter');
-    const countDisplay = document.getElementById('productsCountDisplay');
-
-    if (!tbody) return;
-
-    const query = (searchInput?.value || '').trim().toLowerCase();
-    const cat = catFilter?.value || 'all';
-    const stockStatus = stockFilter?.value || 'all';
-
-    const filtered = data.products.filter(p => {
-      const matchQuery = p.name.toLowerCase().includes(query) ||
-                         p.brand.toLowerCase().includes(query) ||
-                         p.category.toLowerCase().includes(query) ||
-                         p.slug.toLowerCase().includes(query);
-      const matchCat = cat === 'all' || p.category === cat;
-      const matchStock = stockStatus === 'all' || p.status === stockStatus;
-      return matchQuery && matchCat && matchStock;
-    });
-
-    if (countDisplay) countDisplay.textContent = filtered.length;
-
-    if (filtered.length === 0) {
-      tbody.innerHTML = '';
-      if (emptyState) emptyState.style.display = 'flex';
-      return;
-    }
-
-    if (emptyState) emptyState.style.display = 'none';
-
-    tbody.innerHTML = filtered.map(p => {
-      let stockBadgeClass = 'badge--success';
-      let stockColor = '#16a34a';
-      if (p.status === 'Low Stock') {
-        stockBadgeClass = 'badge--accent';
-        stockColor = '#d97706';
-      } else if (p.status === 'Out of Stock') {
-        stockBadgeClass = '';
-        stockColor = '#dc2626';
-      }
-
-      const primaryImg = p.primaryImage || 
-                         (Array.isArray(p.images) && (p.images.find(x => x.isPrimary)?.url || p.images[0]?.url || (typeof p.images[0] === 'string' ? p.images[0] : null))) || 
-                         p.image || null;
-
-      const imgHtml = primaryImg 
-        ? `<img src="${primaryImg}" alt="${p.name}" class="admin-cell-product__thumb-img" onerror="this.parentElement.innerHTML='<svg viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'1.75\\'><rect x=\\'5\\' y=\\'2\\' width=\\'14\\' height=\\'20\\' rx=\\'2\\' ry=\\'2\\'></rect><line x1=\\'12\\' y1=\\'18\\' x2=\\'12.01\\' y2=\\'18\\'></line></svg>'"/>`
-        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-             <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-             <line x1="12" y1="18" x2="12.01" y2="18"></line>
-           </svg>`;
-
-      return `
-        <tr data-product-id="${p.id}">
-          <td>
-            <div class="admin-cell-product">
-              <div class="admin-cell-product__img">
-                ${imgHtml}
-              </div>
-              <div class="admin-cell-product__info">
-                <div class="admin-cell-product__name">${p.name}</div>
-                <div class="admin-cell-product__brand">Brand: ${p.brand} &bull; /${p.slug}</div>
-              </div>
-            </div>
-          </td>
-          <td>
-            <span style="font-weight:var(--font-medium); color:var(--color-text-secondary);">${p.category}</span>
-          </td>
-          <td>
-            <strong>${formatRupees(p.price)}</strong>
-          </td>
-          <td>
-            <div style="display:flex; align-items:center; gap:var(--space-2);">
-              <span style="width:8px; height:8px; border-radius:50%; background:${stockColor};"></span>
-              <span style="font-weight:var(--font-bold);">${p.stock} units</span>
-            </div>
-          </td>
-          <td>
-            <span class="badge ${stockBadgeClass}" style="${p.status === 'Out of Stock' ? 'background:#fee2e2; color:#991b1b;' : ''}">
-              ${p.status}
-            </span>
-          </td>
-          <td>
-            <button type="button" class="admin-btn-action" data-toggle-avail="${p.id}" style="font-size:11px;">
-              ${p.availability === 'AVAILABLE' ? '🟢 Visible' : '🔴 Hidden'}
-            </button>
-          </td>
-          <td>
-            <div class="admin-actions-cell">
-              <button type="button" class="admin-btn-action" data-edit-product="${p.id}">Edit</button>
-              <button type="button" class="admin-btn-action" data-stock-product="${p.id}">Stock</button>
-              <button type="button" class="admin-btn-action admin-btn-action--danger" data-delete-product="${p.id}">Delete</button>
-            </div>
-          </td>
-        </tr>
-      `;
-    }).join('');
-
-    // Wire action buttons
-    tbody.querySelectorAll('[data-edit-product]').forEach(btn => {
-      btn.addEventListener('click', () => editProduct(btn.dataset.editProduct));
-    });
-
-    tbody.querySelectorAll('[data-stock-product]').forEach(btn => {
-      btn.addEventListener('click', () => openStockModal(btn.dataset.stockProduct));
-    });
-
-    tbody.querySelectorAll('[data-toggle-avail]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const prod = data.products.find(x => x.id === btn.dataset.toggleAvail);
-        if (prod) {
-          prod.availability = prod.availability === 'AVAILABLE' ? 'NOT_AVAILABLE' : 'AVAILABLE';
-          renderProducts();
-          showAdminToast(`Product availability updated for ${prod.name}`);
-        }
-      });
-    });
-
-    tbody.querySelectorAll('[data-delete-product]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const idx = data.products.findIndex(x => x.id === btn.dataset.deleteProduct);
-        if (idx !== -1) {
-          const removed = data.products.splice(idx, 1)[0];
-          renderProducts();
-          showAdminToast(`Product "${removed.name}" removed.`);
-        }
-      });
-    });
-  }
-
-  function resetProductForm() {
-    const form = document.getElementById('productForm');
-    if (form) form.reset();
-    const idInput = document.getElementById('productFormId');
-    if (idInput) idInput.value = '';
-    const title = document.getElementById('productModalTitle');
-    if (title) title.textContent = 'Add New Product';
-    currentProductImages = [];
-    renderProductGallery();
-    const urlInput = document.getElementById('productImageUrlInput');
-    if (urlInput) urlInput.value = '';
-    const fileInput = document.getElementById('productFileInput');
-    if (fileInput) fileInput.value = '';
-  }
-
-  function editProduct(id) {
-    const prod = data.products.find(p => p.id === id);
-    if (!prod) return;
-
-    document.getElementById('productFormId').value = prod.id;
-    document.getElementById('productName').value = prod.name;
-    document.getElementById('productBrand').value = prod.brand;
-    document.getElementById('productCategory').value = prod.category;
-    document.getElementById('productPrice').value = prod.price;
-    document.getElementById('productStock').value = prod.stock;
-    document.getElementById('productSlug').value = prod.slug;
-    document.getElementById('productAvailability').value = prod.availability;
-    document.getElementById('productDescription').value = prod.description || '';
-
-    // Populate images
-    if (Array.isArray(prod.images) && prod.images.length > 0) {
-      currentProductImages = prod.images.map(img => {
-        if (typeof img === 'string') {
-          return { url: img, isPrimary: img === prod.primaryImage };
-        }
-        return { url: img.url, isPrimary: !!img.isPrimary };
-      });
-    } else if (prod.primaryImage || prod.image) {
-      currentProductImages = [{ url: prod.primaryImage || prod.image, isPrimary: true }];
-    } else {
-      currentProductImages = [];
-    }
-
-    renderProductGallery();
-
-    document.getElementById('productModalTitle').textContent = 'Edit Product Details';
-    openModal('productModal');
-  }
-
-  const saveProductBtn = document.getElementById('saveProductBtn');
-  if (saveProductBtn) {
-    saveProductBtn.addEventListener('click', () => {
-      const id = document.getElementById('productFormId').value;
-      const name = document.getElementById('productName').value.trim();
-      const brand = document.getElementById('productBrand').value.trim();
-      const category = document.getElementById('productCategory').value;
-      const price = Number(document.getElementById('productPrice').value) || 0;
-      const stock = Number(document.getElementById('productStock').value) || 0;
-      const slug = document.getElementById('productSlug').value.trim();
-      const availability = document.getElementById('productAvailability').value;
-      const description = document.getElementById('productDescription').value.trim();
-
-      if (!name || !brand || !slug || price <= 0) {
-        alert('Please fill in product name, brand, price and slug.');
-        return;
-      }
-
-      let status = 'In Stock';
-      if (stock === 0) status = 'Out of Stock';
-      else if (stock < 5) status = 'Low Stock';
-
-      const primaryImgUrl = currentProductImages.find(x => x.isPrimary)?.url || currentProductImages[0]?.url || '';
-      const productImages = currentProductImages.map(x => ({ url: x.url, isPrimary: !!x.isPrimary }));
-
-      if (id) {
-        const prod = data.products.find(p => p.id === id);
-        if (prod) {
-          Object.assign(prod, { 
-            name, 
-            brand, 
-            category, 
-            price, 
-            stock, 
-            slug, 
-            availability, 
-            description, 
-            status,
-            images: productImages,
-            primaryImage: primaryImgUrl
-          });
-          showAdminToast(`Product "${prod.name}" updated successfully.`);
-        }
-      } else {
-        const newProduct = {
-          id: 'PRD-' + String(100 + data.products.length + 1),
-          name,
-          brand,
-          category,
-          price,
-          originalPrice: price,
-          stock,
-          minStockThreshold: 4,
-          status,
-          availability,
-          slug,
-          rating: 5.0,
-          description,
-          images: productImages,
-          primaryImage: primaryImgUrl
-        };
-        data.products.unshift(newProduct);
-        showAdminToast(`New product "${name}" added to catalogue.`);
-      }
-
-      closeModal('productModal');
-      renderProducts();
-    });
-  }
-
-  // Stock Modal operations
-  function openStockModal(id) {
-    const prod = data.products.find(p => p.id === id);
-    if (!prod) return;
-
-    document.getElementById('stockProductId').value = prod.id;
-    document.getElementById('stockProductName').textContent = `${prod.name} (${prod.brand})`;
-    document.getElementById('stockQuantityInput').value = prod.stock;
-    document.getElementById('stockStatusSelect').value = prod.status;
-
-    openModal('stockModal');
-  }
-
-  const stockIncBtn = document.getElementById('stockIncBtn');
-  const stockDecBtn = document.getElementById('stockDecBtn');
-  const stockQtyInput = document.getElementById('stockQuantityInput');
-
-  if (stockIncBtn && stockQtyInput) {
-    stockIncBtn.addEventListener('click', () => {
-      stockQtyInput.value = Number(stockQtyInput.value) + 1;
-      updateStockStatusAuto();
-    });
-  }
-  if (stockDecBtn && stockQtyInput) {
-    stockDecBtn.addEventListener('click', () => {
-      const val = Number(stockQtyInput.value);
-      if (val > 0) stockQtyInput.value = val - 1;
-      updateStockStatusAuto();
-    });
-  }
-
-  function updateStockStatusAuto() {
-    const val = Number(stockQtyInput.value) || 0;
-    const select = document.getElementById('stockStatusSelect');
-    if (!select) return;
-    if (val === 0) select.value = 'Out of Stock';
-    else if (val < 5) select.value = 'Low Stock';
-    else select.value = 'In Stock';
-  }
-
-  if (stockQtyInput) {
-    stockQtyInput.addEventListener('input', updateStockStatusAuto);
-  }
-
-  const saveStockBtn = document.getElementById('saveStockBtn');
-  if (saveStockBtn) {
-    saveStockBtn.addEventListener('click', () => {
-      const id = document.getElementById('stockProductId').value;
-      const stock = Number(document.getElementById('stockQuantityInput').value) || 0;
-      const status = document.getElementById('stockStatusSelect').value;
-
-      const prod = data.products.find(p => p.id === id);
-      if (prod) {
-        prod.stock = stock;
-        prod.status = status;
-        if (stock === 0) prod.availability = 'NOT_AVAILABLE';
-        showAdminToast(`Stock updated to ${stock} units for "${prod.name}"`);
-        closeModal('stockModal');
-        renderProducts();
-        initDashboard();
+        closeModal('bannerModal');
+        resetBannerForm();
+        delete bannerForm.dataset.bannerId;
+        renderBanners();
+      } catch (err) {
+        showAdminToast('Failed to save banner', 'error');
       }
     });
   }
 
   /* =========================================================================
-     7. REGISTERED USERS CONTROLLER
+     SEARCH & FILTER LISTENERS
      ========================================================================= */
 
-  function renderUsers() {
-    const tbody = document.getElementById('usersTableBody');
-    const emptyState = document.getElementById('usersEmptyState');
-    const searchInput = document.getElementById('userSearchInput');
-    const roleFilter = document.getElementById('userRoleFilter');
-    const countDisplay = document.getElementById('usersCountDisplay');
+  const bannerSearchInput = document.getElementById('bannerSearchInput');
+  const bannerStatusFilter = document.getElementById('bannerStatusFilter');
 
-    if (!tbody) return;
-
-    const query = (searchInput?.value || '').trim().toLowerCase();
-    const role = roleFilter?.value || 'all';
-
-    const filtered = data.users.filter(u => {
-      const matchQuery = u.name.toLowerCase().includes(query) ||
-                         u.email.toLowerCase().includes(query) ||
-                         u.phone.toLowerCase().includes(query);
-      const matchRole = role === 'all' || u.role === role;
-      return matchQuery && matchRole;
-    });
-
-    if (countDisplay) countDisplay.textContent = filtered.length;
-
-    if (filtered.length === 0) {
-      tbody.innerHTML = '';
-      if (emptyState) emptyState.style.display = 'flex';
-      return;
-    }
-
-    if (emptyState) emptyState.style.display = 'none';
-
-    tbody.innerHTML = filtered.map(u => {
-      const initials = u.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-      return `
-        <tr data-user-id="${u.id}">
-          <td>
-            <div class="admin-cell-user">
-              <div class="admin-cell-user__avatar">${initials}</div>
-              <div>
-                <strong style="color:var(--color-text-primary);">${u.name}</strong>
-                <div style="font-size:var(--text-xs); color:var(--color-text-muted);">${u.gender || 'Not specified'}</div>
-              </div>
-            </div>
-          </td>
-          <td><span style="font-family:var(--font-mono); font-size:var(--text-xs);">${u.email}</span></td>
-          <td>${u.phone}</td>
-          <td>
-            <span class="badge ${u.role === 'ADMIN' ? 'badge--accent' : 'badge--primary'}">
-              ${u.role}
-            </span>
-          </td>
-          <td style="font-size:var(--text-xs); color:var(--color-text-muted);">${u.joinedDate}</td>
-          <td><strong>${u.ordersCount}</strong> orders</td>
-          <td>
-            <span class="badge badge--success">${u.status}</span>
-          </td>
-          <td>
-            <button type="button" class="admin-btn-action" data-view-user="${u.id}">
-              <span>View Profile</span>
-            </button>
-          </td>
-        </tr>
-      `;
-    }).join('');
-
-    tbody.querySelectorAll('[data-view-user]').forEach(btn => {
-      btn.addEventListener('click', () => openUserDrawer(btn.dataset.viewUser));
+  if (bannerSearchInput || bannerStatusFilter) {
+    [bannerSearchInput, bannerStatusFilter].forEach(el => {
+      if (el) {
+        el.addEventListener('change', renderBanners);
+        el.addEventListener('keyup', () => {
+          clearTimeout(window.bannerSearchTimeout);
+          window.bannerSearchTimeout = setTimeout(renderBanners, 300);
+        });
+      }
     });
   }
 
+  /* =========================================================================
+     USER DRAWER
+     ========================================================================= */
+
   function openUserDrawer(userId) {
-    const user = data.users.find(u => u.id === userId);
-    if (!user) return;
+    const drawer = document.getElementById('userDetailDrawer');
+    if (!drawer) return;
 
-    const drawerBody = document.getElementById('userDrawerBody');
-    const drawer = document.getElementById('userDrawer');
-    const overlay = document.getElementById('userDrawerOverlay');
-
-    if (!drawerBody || !drawer || !overlay) return;
-
-    const initials = user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-
-    drawerBody.innerHTML = `
-      <!-- User Summary Card -->
-      <div style="display:flex; align-items:center; gap:var(--space-4); padding:var(--space-4); background:var(--color-bg-secondary); border-radius:var(--radius-xl); border:1px solid var(--color-border-light);">
-        <div style="width:52px; height:52px; border-radius:50%; background:var(--color-primary-700); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:var(--font-bold); font-size:var(--text-lg);">
-          ${initials}
-        </div>
-        <div>
-          <h4 style="font-size:var(--text-lg); font-weight:var(--font-bold); margin:0;">${user.name}</h4>
-          <span style="font-size:var(--text-xs); color:var(--color-text-muted);">Customer ID: ${user.id}</span>
-        </div>
-      </div>
-
-      <!-- Account Details -->
-      <div>
-        <h5 style="font-size:var(--text-xs); font-weight:var(--font-bold); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:var(--tracking-wider); margin-bottom:var(--space-3);">
-          Contact & Profile
-        </h5>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); font-size:var(--text-sm);">
-          <div>
-            <span style="color:var(--color-text-muted); font-size:var(--text-xs); display:block;">Email Address</span>
-            <strong>${user.email}</strong>
-          </div>
-          <div>
-            <span style="color:var(--color-text-muted); font-size:var(--text-xs); display:block;">Phone Number</span>
-            <strong>${user.phone}</strong>
-          </div>
-          <div>
-            <span style="color:var(--color-text-muted); font-size:var(--text-xs); display:block;">Account Role</span>
-            <span class="badge ${user.role === 'ADMIN' ? 'badge--accent' : 'badge--primary'}">${user.role}</span>
-          </div>
-          <div>
-            <span style="color:var(--color-text-muted); font-size:var(--text-xs); display:block;">Date Registered</span>
-            <strong>${user.joinedDate}</strong>
-          </div>
-        </div>
-      </div>
-
-      <!-- Purchasing Activity -->
-      <div>
-        <h5 style="font-size:var(--text-xs); font-weight:var(--font-bold); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:var(--tracking-wider); margin-bottom:var(--space-3);">
-          Purchasing Activity
-        </h5>
-        <div style="display:flex; gap:var(--space-4);">
-          <div style="flex:1; padding:var(--space-4); background:var(--color-bg-secondary); border-radius:var(--radius-lg); border:1px solid var(--color-border-light);">
-            <span style="font-size:var(--text-xs); color:var(--color-text-muted);">Total Completed Orders</span>
-            <div style="font-size:var(--text-2xl); font-weight:var(--font-extrabold); color:var(--color-primary-700);">${user.ordersCount}</div>
-          </div>
-          <div style="flex:1; padding:var(--space-4); background:var(--color-bg-secondary); border-radius:var(--radius-lg); border:1px solid var(--color-border-light);">
-            <span style="font-size:var(--text-xs); color:var(--color-text-muted);">Lifetime Spend</span>
-            <div style="font-size:var(--text-2xl); font-weight:var(--font-extrabold); color:var(--color-accent-600);">${user.totalSpent}</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Saved Delivery Addresses -->
-      <div>
-        <h5 style="font-size:var(--text-xs); font-weight:var(--font-bold); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:var(--tracking-wider); margin-bottom:var(--space-3);">
-          Saved Addresses (${user.addresses.length})
-        </h5>
-        ${user.addresses.length === 0 ? '<p style="font-size:var(--text-xs); color:var(--color-text-muted);">No addresses saved yet.</p>' : user.addresses.map(a => `
-          <div style="padding:var(--space-3) var(--space-4); background:var(--color-bg-secondary); border-radius:var(--radius-lg); border:1px solid var(--color-border-light); margin-bottom:var(--space-2); font-size:var(--text-sm);">
-            <strong style="color:var(--color-primary-700);">${a.name}</strong>
-            <p style="margin:4px 0 0 0; color:var(--color-text-secondary);">${a.line1}, ${a.city}, ${a.state} — ${a.pincode}</p>
-          </div>
-        `).join('')}
-      </div>
-    `;
-
-    drawer.classList.add('open');
-    overlay.classList.add('open');
+    API.getUserDetail(userId)
+      .then(res => {
+        const user = res.data;
+        const content = document.getElementById('userDetailContent');
+        if (content) {
+          content.innerHTML = `
+            <div class="admin-drawer-detail">
+              <div class="admin-detail-group">
+                <label class="admin-detail-label">Username</label>
+                <p>${user.username}</p>
+              </div>
+              <div class="admin-detail-group">
+                <label class="admin-detail-label">Email</label>
+                <p>${user.email}</p>
+              </div>
+              <div class="admin-detail-group">
+                <label class="admin-detail-label">Phone</label>
+                <p>${user.phone_number || 'N/A'}</p>
+              </div>
+              <div class="admin-detail-group">
+                <label class="admin-detail-label">Role</label>
+                <p>${user.role}</p>
+              </div>
+              <div class="admin-detail-group">
+                <label class="admin-detail-label">Joined</label>
+                <p>${new Date(user.createdAt).toLocaleDateString()}</p>
+              </div>
+            </div>
+          `;
+        }
+        drawer.classList.add('open');
+      })
+      .catch(err => showAdminToast('Failed to load user details', 'error'));
   }
 
   function closeUserDrawer() {
-    const drawer = document.getElementById('userDrawer');
-    const overlay = document.getElementById('userDrawerOverlay');
+    const drawer = document.getElementById('userDetailDrawer');
     if (drawer) drawer.classList.remove('open');
-    if (overlay) overlay.classList.remove('open');
   }
-
-  const userDrawerCloseBtn = document.getElementById('userDrawerClose');
-  const userDrawerOverlay = document.getElementById('userDrawerOverlay');
-  if (userDrawerCloseBtn) userDrawerCloseBtn.addEventListener('click', closeUserDrawer);
-  if (userDrawerOverlay) userDrawerOverlay.addEventListener('click', closeUserDrawer);
 
   /* =========================================================================
-     8. ORDER MANAGEMENT CONTROLLER
+     ORDER DRAWER
      ========================================================================= */
 
-  let currentOrderFilter = 'all';
-
-  function renderOrders() {
-    const tbody = document.getElementById('ordersTableBody');
-    const emptyState = document.getElementById('ordersEmptyState');
-    const searchInput = document.getElementById('orderSearchInput');
-    const countDisplay = document.getElementById('ordersCountDisplay');
-
-    if (!tbody) return;
-
-    const query = (searchInput?.value || '').trim().toLowerCase();
-
-    const filtered = data.orders.filter(o => {
-      const matchQuery = o.id.toLowerCase().includes(query) ||
-                         o.shortId.toLowerCase().includes(query) ||
-                         o.customer.name.toLowerCase().includes(query) ||
-                         o.customer.phone.includes(query);
-      const matchFilter = currentOrderFilter === 'all' || o.status === currentOrderFilter;
-      return matchQuery && matchFilter;
-    });
-
-    if (countDisplay) countDisplay.textContent = filtered.length;
-
-    if (filtered.length === 0) {
-      tbody.innerHTML = '';
-      if (emptyState) emptyState.style.display = 'flex';
-      return;
-    }
-
-    if (emptyState) emptyState.style.display = 'none';
-
-    tbody.innerHTML = filtered.map(o => {
-      const itemsSummary = o.items.map(i => `${i.name} (x${i.quantity})`).join(', ');
-
-      return `
-        <tr data-order-id="${o.id}">
-          <td>
-            <strong style="font-family:var(--font-mono); color:var(--color-primary-700);">${o.shortId}</strong>
-            <div style="font-size:11px; color:var(--color-text-muted);">${o.id}</div>
-          </td>
-          <td>
-            <strong>${o.customer.name}</strong>
-            <div style="font-size:var(--text-xs); color:var(--color-text-muted);">${o.customer.phone}</div>
-          </td>
-          <td style="max-width:240px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${itemsSummary}">
-            ${itemsSummary}
-          </td>
-          <td><strong>${formatRupees(o.totalAmount)}</strong></td>
-          <td>
-            <span style="font-size:var(--text-xs);">${o.paymentMethod}</span>
-            <div style="font-size:11px; color:${o.paymentStatus === 'Paid' ? 'var(--color-success-600)' : 'var(--color-accent-600)'}; font-weight:var(--font-bold);">
-              ${o.paymentStatus}
-            </div>
-          </td>
-          <td>
-            <span class="order-status order-status--${o.status}">
-              <span class="order-status__dot"></span>
-              ${capitalize(o.status.replace(/_/g, ' '))}
-            </span>
-          </td>
-          <td style="font-size:var(--text-xs); color:var(--color-text-muted);">${o.date}</td>
-          <td>
-            <button type="button" class="admin-btn-action" data-view-order="${o.id}">
-              <span>View & Manage</span>
-            </button>
-          </td>
-        </tr>
-      `;
-    }).join('');
-
-    tbody.querySelectorAll('[data-view-order]').forEach(btn => {
-      btn.addEventListener('click', () => openOrderDrawer(btn.dataset.viewOrder));
-    });
-  }
-
   function openOrderDrawer(orderId) {
-    const order = data.orders.find(o => o.id === orderId);
-    if (!order) return;
+    const drawer = document.getElementById('orderDetailDrawer');
+    if (!drawer) return;
 
-    const drawerBody = document.getElementById('orderDrawerBody');
-    const drawer = document.getElementById('orderDrawer');
-    const overlay = document.getElementById('orderDrawerOverlay');
-
-    if (!drawerBody || !drawer || !overlay) return;
-
-    drawerBody.innerHTML = `
-      <!-- Order Top Summary -->
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; padding:var(--space-4); background:var(--color-bg-secondary); border-radius:var(--radius-xl); border:1px solid var(--color-border-light);">
-        <div>
-          <span style="font-family:var(--font-mono); font-weight:var(--font-extrabold); font-size:var(--text-lg); color:var(--color-primary-700);">${order.shortId}</span>
-          <div style="font-size:var(--text-xs); color:var(--color-text-muted);">Placed on ${order.date}</div>
-        </div>
-        <span class="order-status order-status--${order.status}">
-          <span class="order-status__dot"></span>
-          ${capitalize(order.status.replace(/_/g, ' '))}
-        </span>
-      </div>
-
-      <!-- Quick Status Updater -->
-      <div style="padding:var(--space-4); border:1.5px dashed var(--color-primary-300); border-radius:var(--radius-xl); background:var(--color-primary-50);">
-        <label class="admin-label" for="drawerStatusSelect" style="color:var(--color-primary-700);">Update Fulfillment Status</label>
-        <div style="display:flex; gap:var(--space-3);">
-          <select id="drawerStatusSelect" class="admin-form-select" style="background:#fff;">
-            <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
-            <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-            <option value="out_for_delivery" ${order.status === 'out_for_delivery' ? 'selected' : ''}>Out for Delivery</option>
-            <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
-            <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-          </select>
-          <button type="button" class="btn btn--primary btn--sm" id="updateOrderStatusBtn" data-order-id="${order.id}">
-            Update
-          </button>
-        </div>
-      </div>
-
-      <!-- Customer & Shipping -->
-      <div>
-        <h5 style="font-size:var(--text-xs); font-weight:var(--font-bold); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:var(--tracking-wider); margin-bottom:var(--space-3);">
-          Customer & Delivery Address
-        </h5>
-        <div style="padding:var(--space-4); background:var(--color-bg-secondary); border-radius:var(--radius-lg); border:1px solid var(--color-border-light); font-size:var(--text-sm);">
-          <strong>${order.customer.name}</strong>
-          <div style="color:var(--color-text-secondary); margin:4px 0;">Phone: ${order.customer.phone} &bull; ${order.customer.email}</div>
-          <div style="color:var(--color-text-muted); margin-top:var(--space-2);">
-            📍 ${order.shippingAddress}
-          </div>
-        </div>
-      </div>
-
-      <!-- Items Breakdown -->
-      <div>
-        <h5 style="font-size:var(--text-xs); font-weight:var(--font-bold); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:var(--tracking-wider); margin-bottom:var(--space-3);">
-          Order Items (${order.items.length})
-        </h5>
-        ${order.items.map(item => `
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:var(--space-3) 0; border-bottom:1px solid var(--color-border-light);">
-            <div>
-              <strong style="font-size:var(--text-sm);">${item.name}</strong>
-              <div style="font-size:var(--text-xs); color:var(--color-text-muted);">${item.variant} &bull; Qty: ${item.quantity}</div>
+    API.getOrderDetail(orderId)
+      .then(res => {
+        const order = res.data;
+        const content = document.getElementById('orderDetailContent');
+        if (content) {
+          content.innerHTML = `
+            <div class="admin-drawer-detail">
+              <div class="admin-detail-group">
+                <label class="admin-detail-label">Order ID</label>
+                <p>${order.id}</p>
+              </div>
+              <div class="admin-detail-group">
+                <label class="admin-detail-label">Customer</label>
+                <p>${order.user.username}</p>
+              </div>
+              <div class="admin-detail-group">
+                <label class="admin-detail-label">Amount</label>
+                <p>${formatRupees(order.totalAmount)}</p>
+              </div>
+              <div class="admin-detail-group">
+                <label class="admin-detail-label">Status</label>
+                <select id="orderStatusSelect" style="width:100%; padding:8px; border:1px solid var(--color-border);">
+                  <option value="PENDING" ${order.status === 'PENDING' ? 'selected' : ''}>Pending</option>
+                  <option value="CONFIRMED" ${order.status === 'CONFIRMED' ? 'selected' : ''}>Confirmed</option>
+                  <option value="SHIPPED" ${order.status === 'SHIPPED' ? 'selected' : ''}>Shipped</option>
+                  <option value="DELIVERED" ${order.status === 'DELIVERED' ? 'selected' : ''}>Delivered</option>
+                  <option value="CANCELLED" ${order.status === 'CANCELLED' ? 'selected' : ''}>Cancelled</option>
+                </select>
+                <button type="button" style="margin-top:8px; width:100%;" class="btn btn--primary" id="updateOrderStatusBtn">Update Status</button>
+              </div>
+              <div class="admin-detail-group">
+                <label class="admin-detail-label">Date</label>
+                <p>${new Date(order.createdAt).toLocaleDateString()}</p>
+              </div>
             </div>
-            <strong>${formatRupees(item.subtotal)}</strong>
-          </div>
-        `).join('')}
-      </div>
+          `;
 
-      <!-- Financial Calculation -->
-      <div style="background:var(--color-bg-secondary); padding:var(--space-4); border-radius:var(--radius-lg); border:1px solid var(--color-border-light); font-size:var(--text-sm);">
-        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-          <span style="color:var(--color-text-muted);">Subtotal</span>
-          <span>${formatRupees(order.subtotal)}</span>
-        </div>
-        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-          <span style="color:var(--color-text-muted);">Shipping Fee</span>
-          <span style="color:var(--color-success-600); font-weight:var(--font-semibold);">FREE</span>
-        </div>
-        <div style="display:flex; justify-content:space-between; padding-top:var(--space-2); border-top:1px solid var(--color-border-light); font-weight:var(--font-extrabold); font-size:var(--text-base);">
-          <span>Total Paid</span>
-          <span style="color:var(--color-primary-700);">${formatRupees(order.totalAmount)}</span>
-        </div>
-      </div>
-    `;
-
-  function updateOrderStatus(orderId, newStatus) {
-    if (!useApi) {
-      // Mock implementation
-      const order = data.orders.find(o => o.id === orderId);
-      if (order) {
-        order.status = newStatus;
-        showAdminToast(`Order ${order.shortId} status updated to "${capitalize(newStatus.replace(/_/g, ' '))}".`);
-        renderOrders();
-        initDashboard();
-      }
-      return;
-    }
-
-    // Use API
-    API.updateOrderStatus(orderId, newStatus)
-      .then((res) => {
-        if (res.success) {
-          showAdminToast(`Order status updated to ${newStatus.replace(/_/g, ' ')}`, 'success');
-          renderOrders();
-          initDashboard();
-          openOrderDrawer(orderId);
+          document.getElementById('updateOrderStatusBtn')?.addEventListener('click', () => {
+            const newStatus = document.getElementById('orderStatusSelect').value;
+            API.updateOrderStatus(orderId, newStatus)
+              .then(() => {
+                showAdminToast('Order status updated');
+                closeOrderDrawer();
+              })
+              .catch(() => showAdminToast('Failed to update order status', 'error'));
+          });
         }
+        drawer.classList.add('open');
       })
-      .catch(() => {
-        showAdminToast('Failed to update order status', 'error');
-      });
-  }
-
-    drawer.classList.add('open');
-    overlay.classList.add('open');
+      .catch(err => showAdminToast('Failed to load order details', 'error'));
   }
 
   function closeOrderDrawer() {
-    const drawer = document.getElementById('orderDrawer');
-    const overlay = document.getElementById('orderDrawerOverlay');
+    const drawer = document.getElementById('orderDetailDrawer');
     if (drawer) drawer.classList.remove('open');
-    if (overlay) overlay.classList.remove('open');
   }
 
-  const orderDrawerCloseBtn = document.getElementById('orderDrawerClose');
-  const orderDrawerOverlay = document.getElementById('orderDrawerOverlay');
-  if (orderDrawerCloseBtn) orderDrawerCloseBtn.addEventListener('click', closeOrderDrawer);
-  if (orderDrawerOverlay) orderDrawerOverlay.addEventListener('click', closeOrderDrawer);
-
-  // Status Filter Chips
-  const filterChipsContainer = document.getElementById('adminOrderFilterChips');
-  if (filterChipsContainer) {
-    filterChipsContainer.querySelectorAll('.orders-filter-chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        filterChipsContainer.querySelectorAll('.orders-filter-chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        currentOrderFilter = chip.dataset.filter;
-        renderOrders();
-      });
-    });
-  }
-
-  function capitalize(str) {
-    if (!str) return '';
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
-
-  /* =========================================================================
-     9. SEARCH & FILTER ATTACHMENTS
-     ========================================================================= */
-
-  // Global search redirect / filter
-  const globalSearch = document.getElementById('adminGlobalSearch');
-  if (globalSearch) {
-    globalSearch.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        const q = globalSearch.value.trim();
-        if (q) {
-          // If on products page, filter products, otherwise jump to products
-          if (window.location.pathname.includes('/admin/products')) {
-            const prodInput = document.getElementById('productSearchInput');
-            if (prodInput) {
-              prodInput.value = q;
-              renderProducts();
-            }
-          } else {
-            window.location.href = `/admin/products?q=${encodeURIComponent(q)}`;
-          }
-        }
-      }
-    });
-  }
-
-  // Banner filters
-  const bannerSearch = document.getElementById('bannerSearchInput');
-  const bannerStatus = document.getElementById('bannerStatusFilter');
-  if (bannerSearch) bannerSearch.addEventListener('input', renderBanners);
-  if (bannerStatus) bannerStatus.addEventListener('change', renderBanners);
-
-  // Product filters
-  const prodSearch = document.getElementById('productSearchInput');
-  const prodCat = document.getElementById('productCategoryFilter');
-  const prodStock = document.getElementById('productStockFilter');
-  const prodReset = document.getElementById('resetProductFiltersBtn');
-  if (prodSearch) prodSearch.addEventListener('input', renderProducts);
-  if (prodCat) prodCat.addEventListener('change', renderProducts);
-  if (prodStock) prodStock.addEventListener('change', renderProducts);
-  if (prodReset) {
-    prodReset.addEventListener('click', () => {
-      if (prodSearch) prodSearch.value = '';
-      if (prodCat) prodCat.value = 'all';
-      if (prodStock) prodStock.value = 'all';
-      renderProducts();
-    });
-  }
-
-  // User filters
-  const userSearch = document.getElementById('userSearchInput');
-  const userRole = document.getElementById('userRoleFilter');
-  const userReset = document.getElementById('resetUserFiltersBtn');
-  if (userSearch) userSearch.addEventListener('input', renderUsers);
-  if (userRole) userRole.addEventListener('change', renderUsers);
-  if (userReset) {
-    userReset.addEventListener('click', () => {
-      if (userSearch) userSearch.value = '';
-      if (userRole) userRole.value = 'all';
-      renderUsers();
-    });
-  }
-
-  // Order filters
-  const orderSearch = document.getElementById('orderSearchInput');
-  const orderReset = document.getElementById('resetOrderFiltersBtn');
-  if (orderSearch) orderSearch.addEventListener('input', renderOrders);
-  if (orderReset) {
-    orderReset.addEventListener('click', () => {
-      if (orderSearch) orderSearch.value = '';
-      currentOrderFilter = 'all';
-      if (filterChipsContainer) {
-        filterChipsContainer.querySelectorAll('.orders-filter-chip').forEach(c => c.classList.remove('active'));
-        const firstChip = filterChipsContainer.querySelector('[data-filter="all"]');
-        if (firstChip) firstChip.classList.add('active');
-      }
-      renderOrders();
-    });
-  }
-
-  /* =========================================================================
-     10. ADMIN USER HYDRATION & PROFILE MANAGEMENT
-     ========================================================================= */
-
-  function hydrateAdminUser() {
-    let authUser = null;
-    try {
-      const stored = localStorage.getItem('authUser');
-      if (stored) authUser = JSON.parse(stored);
-    } catch (e) { }
-
-    if (!authUser) return;
-
-    const username = authUser.username || authUser.name || 'Admin User';
-    const email = authUser.email || 'admin@enterprisestore.com';
-    const phone = authUser.phone_number || authUser.phone || '';
-    const role = authUser.role || 'ADMIN';
-    const initials = username.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'AU';
-
-    // Update Header
-    const hdrName = document.getElementById('headerUserName');
-    if (hdrName) hdrName.textContent = username;
-    const hdrRole = document.getElementById('headerUserRole');
-    if (hdrRole) hdrRole.textContent = role;
-    const hdrAvatar = document.getElementById('headerUserAvatar');
-    if (hdrAvatar) hdrAvatar.textContent = initials;
-
-    // Update Dropdown
-    const dropName = document.getElementById('dropdownUserName');
-    if (dropName) dropName.textContent = username;
-    const dropEmail = document.getElementById('dropdownUserEmail');
-    if (dropEmail) dropEmail.textContent = email;
-    const dropAvatar = document.getElementById('dropdownUserAvatar');
-    if (dropAvatar) dropAvatar.textContent = initials;
-
-    // Update Sidebar
-    const sideName = document.getElementById('sidebarUserName');
-    if (sideName) sideName.textContent = username;
-    const sideAvatar = document.getElementById('sidebarUserAvatar');
-    if (sideAvatar) sideAvatar.textContent = initials;
-
-    // Update Profile Page if present
-    const profName = document.getElementById('adminProfileDisplayName');
-    if (profName) profName.textContent = username;
-    const profEmail = document.getElementById('adminProfileDisplayEmail');
-    if (profEmail) profEmail.textContent = email;
-    const profAvatar = document.getElementById('adminProfileLargeAvatar');
-    if (profAvatar) profAvatar.textContent = initials;
-
-    const inputName = document.getElementById('adminFullNameInput');
-    if (inputName && !inputName.value) inputName.value = username;
-    const inputEmail = document.getElementById('adminEmailInput');
-    if (inputEmail && !inputEmail.value) inputEmail.value = email;
-    const inputPhone = document.getElementById('adminPhoneInput');
-    if (inputPhone && phone && (!inputPhone.value || inputPhone.value === '+91 99636 57799')) inputPhone.value = phone;
-  }
-
-  function initAdminProfilePage() {
-    // 1. Password Visibility Toggles
-    document.querySelectorAll('[data-toggle-pass]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetId = btn.getAttribute('data-toggle-pass');
-        const input = document.getElementById(targetId);
-        if (!input) return;
-        const isPass = input.type === 'password';
-        input.type = isPass ? 'text' : 'password';
-        btn.style.color = isPass ? 'var(--color-primary-600)' : 'var(--color-text-muted)';
-      });
-    });
-
-    // 2. Personal Info Form
-    const personalForm = document.getElementById('adminPersonalForm');
-    if (personalForm) {
-      personalForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const username = document.getElementById('adminFullNameInput')?.value.trim();
-        const email = document.getElementById('adminEmailInput')?.value.trim();
-        const phone = document.getElementById('adminPhoneInput')?.value.trim();
-
-        if (!username || !email) {
-          showAdminToast('Username and email cannot be blank.', 'warning');
-          return;
-        }
-
-        try {
-          let authUser = {};
-          const stored = localStorage.getItem('authUser');
-          if (stored) authUser = JSON.parse(stored);
-          authUser.username = username;
-          authUser.email = email;
-          authUser.phone_number = phone;
-          localStorage.setItem('authUser', JSON.stringify(authUser));
-          hydrateAdminUser();
-          showAdminToast('Admin profile details updated successfully!');
-        } catch (err) {
-          showAdminToast('Failed to save profile changes.', 'warning');
-        }
-      });
+  // Close drawer when clicking outside
+  document.addEventListener('click', (e) => {
+    const drawer = document.getElementById('orderDetailDrawer');
+    const userDrawer = document.getElementById('userDetailDrawer');
+    if (drawer && drawer.classList.contains('open') && !drawer.contains(e.target)) {
+      closeOrderDrawer();
     }
-
-    // 3. Password Live Validation & Form Submit
-    const newPassInput = document.getElementById('adminNewPass');
-    const confirmPassInput = document.getElementById('adminConfirmPass');
-    const chkLength = document.getElementById('chkLength');
-    const chkNumber = document.getElementById('chkNumber');
-    const chkMatch = document.getElementById('chkMatch');
-
-    function validatePasswordInputs() {
-      const val = newPassInput?.value || '';
-      const conf = confirmPassInput?.value || '';
-
-      const hasLen = val.length >= 8;
-      const hasNum = /\d/.test(val);
-      const matches = val.length > 0 && val === conf;
-
-      if (chkLength) {
-        chkLength.classList.toggle('admin-checklist-item--valid', hasLen);
-        chkLength.textContent = (hasLen ? '✓ ' : '● ') + 'At least 8 characters';
-      }
-      if (chkNumber) {
-        chkNumber.classList.toggle('admin-checklist-item--valid', hasNum);
-        chkNumber.textContent = (hasNum ? '✓ ' : '● ') + 'Contains a number';
-      }
-      if (chkMatch) {
-        chkMatch.classList.toggle('admin-checklist-item--valid', matches);
-        chkMatch.textContent = (matches ? '✓ ' : '● ') + 'Passwords match';
-      }
-
-      return hasLen && hasNum && matches;
-    }
-
-    if (newPassInput) newPassInput.addEventListener('input', validatePasswordInputs);
-    if (confirmPassInput) confirmPassInput.addEventListener('input', validatePasswordInputs);
-
-    const passForm = document.getElementById('adminPasswordForm');
-    if (passForm) {
-      passForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const curPass = document.getElementById('adminCurrentPass')?.value || '';
-        if (!curPass) {
-          showAdminToast('Please enter your current password.', 'warning');
-          return;
-        }
-
-        const valid = validatePasswordInputs();
-        if (!valid) {
-          showAdminToast('Please fulfill all password requirements.', 'warning');
-          return;
-        }
-
-        passForm.reset();
-        validatePasswordInputs();
-        showAdminToast('Password updated securely!');
-      });
-    }
-  }
-
-  // Keyboard shortcut Ctrl+K to focus search
-  document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
-      e.preventDefault();
-      const search = document.getElementById('adminGlobalSearch');
-      if (search) {
-        search.focus();
-        search.select();
-      }
+    if (userDrawer && userDrawer.classList.contains('open') && !userDrawer.contains(e.target)) {
+      closeUserDrawer();
     }
   });
 
   /* =========================================================================
-     11. INITIALIZATION
+     PAGE INITIALIZATION
      ========================================================================= */
 
   document.addEventListener('DOMContentLoaded', () => {
-    hydrateAdminUser();
-    initDashboard();
     setupBannerImageControls();
-    setupProductImageControls();
-    renderBanners();
-    renderProducts();
-    renderUsers();
-    renderOrders();
-    initAdminProfilePage();
+    
+    // Initialize page based on current path
+    const path = window.location.pathname;
+    if (path.includes('/admin/dashboard')) {
+      initDashboard();
+    } else if (path.includes('/admin/banners')) {
+      renderBanners();
+    }
   });
 
-}());
+})();
