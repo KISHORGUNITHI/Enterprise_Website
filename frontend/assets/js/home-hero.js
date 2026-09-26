@@ -1,9 +1,10 @@
 /**
  * home-hero.js — Home page banner carousel
- * Reads window.homeBannersData from home-banners.js
+ * Powered by Circular Doubly Linked List (CircularBannerList).
+ * Connects with Admin banners via GET /api/banners?category=all
  */
 
-(function () {
+(async function () {
   'use strict';
 
   const INTERVAL = 4500;
@@ -14,13 +15,22 @@
   const nextBtn  = document.getElementById('homeHeroNext');
   const sliderEl = document.getElementById('homeHeroSlider');
 
-  if (!track || !window.homeBannersData) return;
+  if (!track) return;
 
-  const banners = window.homeBannersData;
-  const total   = banners.length;
-  let current   = 0;
-  let timer     = null;
-  let paused    = false;
+  // Initialize Circular Doubly Linked List data structure
+  const bannerList = typeof window.CircularBannerList === 'function'
+    ? new window.CircularBannerList()
+    : {
+        items: [],
+        index: 0,
+        fromArray(arr) { this.items = arr; this.index = 0; return this; },
+        next() { this.index = (this.index + 1) % (this.items.length || 1); return { data: this.items[this.index] }; },
+        prev() { this.index = (this.index - 1 + this.items.length) % (this.items.length || 1); return { data: this.items[this.index] }; },
+        getCurrentIndex() { return this.index; },
+        goToIndex(i) { this.index = ((i % this.items.length) + this.items.length) % (this.items.length || 1); return { data: this.items[this.index] }; },
+        toArray() { return this.items; },
+        isEmpty() { return this.items.length === 0; }
+      };
 
   // ─── Inline SVG illustrations ─────────────────────────────────────────────
   const icons = {
@@ -48,10 +58,82 @@
       <path d="M75 110 L75 120" stroke="rgba(167,139,250,0.4)" stroke-width="2" stroke-linecap="round"/>
       <path d="M85 110 L85 120" stroke="rgba(167,139,250,0.4)" stroke-width="2" stroke-linecap="round"/>
     </svg>`,
+    ac: `<svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="80" cy="80" r="60" fill="rgba(96,165,250,0.1)" stroke="rgba(96,165,250,0.25)" stroke-width="1.5"/>
+      <rect x="30" y="56" width="100" height="48" rx="8" fill="rgba(255,255,255,0.06)" stroke="rgba(96,165,250,0.4)" stroke-width="2"/>
+      <line x1="42" y1="80" x2="118" y2="80" stroke="rgba(96,165,250,0.4)" stroke-width="2" stroke-linecap="round"/>
+      <line x1="42" y1="88" x2="118" y2="88" stroke="rgba(96,165,250,0.4)" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="116" cy="68" r="3" fill="#60a5fa"/>
+    </svg>`,
+    audio: `<svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="80" cy="80" r="60" fill="rgba(251,191,36,0.1)" stroke="rgba(251,191,36,0.25)" stroke-width="1.5"/>
+      <rect x="25" y="70" width="110" height="24" rx="6" fill="rgba(255,255,255,0.06)" stroke="rgba(251,191,36,0.4)" stroke-width="2"/>
+      <circle cx="48" cy="82" r="6" fill="rgba(251,191,36,0.6)"/>
+      <circle cx="112" cy="82" r="6" fill="rgba(251,191,36,0.6)"/>
+    </svg>`
   };
 
-  // ─── Build slides ──────────────────────────────────────────────────────────
+  // ─── Fetch live banners or fallback ───────────────────────────────────────
+  async function loadBanners() {
+    try {
+      const res = await fetch('/api/banners?category=all');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          const mapped = json.data.map(b => {
+            const rawSlug = (b.slug || 'all').toLowerCase();
+            let href = '/products';
+            let icon = 'deals';
+
+            if (rawSlug === 'mobiles' || rawSlug.includes('mobile')) {
+              href = '/products/mobiles';
+              icon = 'mobile';
+            } else if (rawSlug === 'tvs' || rawSlug.includes('tv')) {
+              href = '/products/tvs';
+              icon = 'tv';
+            } else if (rawSlug === 'acs' || rawSlug.includes('ac')) {
+              href = '/products/acs';
+              icon = 'ac';
+            } else if (rawSlug === 'home-theatres' || rawSlug.includes('theatre') || rawSlug.includes('audio')) {
+              href = '/products/home-theatres';
+              icon = 'audio';
+            } else if (rawSlug.startsWith('/')) {
+              href = rawSlug;
+            }
+
+            return {
+              id: b.id,
+              title: b.title,
+              eyebrow: b.eyebrow,
+              subtitle: b.subtitle || '',
+              badge: b.badge || 'Trending',
+              cta: { label: b.ctaText || 'Shop Now', href },
+              ctaAlt: { label: 'Explore Store', href: '/products' },
+              bg: b.bgGradient || 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 60%, #2f52a0 100%)',
+              accent: b.accentColor || '#f58500',
+              icon
+            };
+          });
+
+          bannerList.fromArray(mapped);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('Could not load dynamic banners, using local fallback:', e);
+    }
+
+    // Fallback to static mock banners if DB is offline
+    if (window.homeBannersData && window.homeBannersData.length > 0) {
+      bannerList.fromArray(window.homeBannersData);
+    }
+  }
+
+  // ─── Build slides from Circular Linked List ───────────────────────────────
   function buildSlides() {
+    const banners = bannerList.toArray();
+    if (!banners.length) return;
+
     track.innerHTML = banners.map((b, i) => `
       <div
         class="home-hero__slide${i === 0 ? ' active' : ''}"
@@ -59,17 +141,18 @@
         aria-label="Slide ${i + 1}: ${b.title}"
         aria-hidden="${i !== 0}"
         data-index="${i}"
+        data-banner-id="${b.id || ''}"
       >
         <div class="home-hero__slide-bg" style="background:${b.bg};"></div>
         <div class="home-hero__slide-overlay"></div>
 
         <div class="home-hero__content">
-          <div class="home-hero__badge">${b.badge}</div>
+          ${b.badge ? `<div class="home-hero__badge">${b.badge}</div>` : ''}
           <p class="home-hero__eyebrow">${b.eyebrow}</p>
           <h2 class="home-hero__title">${b.title}</h2>
           <p class="home-hero__subtitle">${b.subtitle}</p>
           <div class="home-hero__ctas">
-            <a href="${b.cta.href}" class="btn btn--accent btn--lg">
+            <a href="${b.cta.href}" class="btn btn--accent btn--lg" data-banner-cta="${b.id || ''}">
               ${b.cta.label}
               <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
@@ -82,15 +165,28 @@
         </div>
 
         <div class="home-hero__illustration" aria-hidden="true">
-          ${icons[b.icon] || ''}
+          ${icons[b.icon] || icons.deals}
         </div>
 
       </div>
     `).join('');
+
+    // Optional click analytics
+    track.querySelectorAll('[data-banner-cta]').forEach(ctaEl => {
+      ctaEl.addEventListener('click', () => {
+        const bid = ctaEl.dataset.bannerCta;
+        if (bid) {
+          fetch(`/api/banners/${encodeURIComponent(bid)}/click`, { method: 'POST' }).catch(() => {});
+        }
+      });
+    });
   }
 
   // ─── Build dots ────────────────────────────────────────────────────────────
   function buildDots() {
+    const banners = bannerList.toArray();
+    if (!dotsWrap || !banners.length) return;
+
     dotsWrap.innerHTML = banners.map((_, i) => `
       <button class="home-hero__dot${i === 0 ? ' active' : ''}"
         role="tab" aria-selected="${i === 0}"
@@ -99,47 +195,89 @@
     `).join('');
 
     dotsWrap.querySelectorAll('.home-hero__dot').forEach(d => {
-      d.addEventListener('click', () => { goTo(parseInt(d.dataset.dot)); resetTimer(); });
+      d.addEventListener('click', () => {
+        const idx = parseInt(d.dataset.dot, 10);
+        bannerList.goToIndex(idx);
+        renderCurrentSlide();
+        resetTimer();
+      });
     });
   }
 
-  // ─── Navigate ──────────────────────────────────────────────────────────────
-  function goTo(index) {
+  // ─── Render active slide using Circular Linked List current node ───────────
+  function renderCurrentSlide() {
+    const current = bannerList.getCurrentIndex();
     const slides = track.querySelectorAll('.home-hero__slide');
-    const dots   = dotsWrap.querySelectorAll('.home-hero__dot');
+    const dots   = dotsWrap ? dotsWrap.querySelectorAll('.home-hero__dot') : [];
 
-    slides[current].classList.remove('active');
-    slides[current].setAttribute('aria-hidden', 'true');
-    dots[current].classList.remove('active');
-    dots[current].setAttribute('aria-selected', 'false');
+    slides.forEach((s, idx) => {
+      const isActive = idx === current;
+      s.classList.toggle('active', isActive);
+      s.setAttribute('aria-hidden', String(!isActive));
+    });
 
-    current = (index + total) % total;
-
-    slides[current].classList.add('active');
-    slides[current].setAttribute('aria-hidden', 'false');
-    dots[current].classList.add('active');
-    dots[current].setAttribute('aria-selected', 'true');
+    if (dots.length) {
+      dots.forEach((d, idx) => {
+        const isActive = idx === current;
+        d.classList.toggle('active', isActive);
+        d.setAttribute('aria-selected', String(isActive));
+      });
+    }
 
     track.style.transform = `translateX(-${current * 100}%)`;
   }
 
-  prevBtn.addEventListener('click', () => { goTo(current - 1); resetTimer(); });
-  nextBtn.addEventListener('click', () => { goTo(current + 1); resetTimer(); });
+  let timer = null;
+  let paused = false;
 
-  sliderEl.addEventListener('mouseenter', () => { paused = true; });
-  sliderEl.addEventListener('mouseleave', () => { paused = false; });
+  // Next transition: advances circular linked list (tail -> head loop)
+  function stepNext() {
+    bannerList.next();
+    renderCurrentSlide();
+  }
 
-  // Touch swipe
-  let tx = 0;
-  sliderEl.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
-  sliderEl.addEventListener('touchend', e => {
-    const d = tx - e.changedTouches[0].clientX;
-    if (Math.abs(d) > 40) { d > 0 ? goTo(current + 1) : goTo(current - 1); resetTimer(); }
-  }, { passive: true });
+  // Prev transition: rewinds circular linked list (head -> tail loop)
+  function stepPrev() {
+    bannerList.prev();
+    renderCurrentSlide();
+  }
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      stepPrev();
+      resetTimer();
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      stepNext();
+      resetTimer();
+    });
+  }
+
+  if (sliderEl) {
+    sliderEl.addEventListener('mouseenter', () => { paused = true; });
+    sliderEl.addEventListener('mouseleave', () => { paused = false; });
+
+    // Touch swipe
+    let tx = 0;
+    sliderEl.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+    sliderEl.addEventListener('touchend', e => {
+      const d = tx - e.changedTouches[0].clientX;
+      if (Math.abs(d) > 40) {
+        d > 0 ? stepNext() : stepPrev();
+        resetTimer();
+      }
+    }, { passive: true });
+  }
 
   // ─── Auto-play ─────────────────────────────────────────────────────────────
   function startTimer() {
-    timer = setInterval(() => { if (!paused) goTo(current + 1); }, INTERVAL);
+    if (bannerList.toArray().length <= 1) return;
+    timer = setInterval(() => {
+      if (!paused) stepNext();
+    }, INTERVAL);
   }
 
   function resetTimer() {
@@ -148,30 +286,35 @@
   }
 
   // ─── Init ──────────────────────────────────────────────────────────────────
+  await loadBanners();
   buildSlides();
   buildDots();
+  renderCurrentSlide();
   startTimer();
 
   // Inject illustration styles once
-  const style = document.createElement('style');
-  style.textContent = `
-    .home-hero__illustration {
-      position: absolute;
-      right: max(var(--space-6), calc((100vw - var(--container-xl)) / 2 + var(--space-6)));
-      top: 50%;
-      transform: translateY(-50%);
-      width: 200px;
-      height: 200px;
-      opacity: 0;
-      transition: opacity 0.6s ease 0.4s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .home-hero__slide.active .home-hero__illustration { opacity: 1; }
-    .home-hero__illustration svg { width: 100%; height: 100%; }
-    @media(max-width:768px){ .home-hero__illustration { display: none; } }
-  `;
-  document.head.appendChild(style);
+  if (!document.getElementById('homeHeroIllustrationStyle')) {
+    const style = document.createElement('style');
+    style.id = 'homeHeroIllustrationStyle';
+    style.textContent = `
+      .home-hero__illustration {
+        position: absolute;
+        right: max(var(--space-6), calc((100vw - var(--container-xl)) / 2 + var(--space-6)));
+        top: 50%;
+        transform: translateY(-50%);
+        width: 200px;
+        height: 200px;
+        opacity: 0;
+        transition: opacity 0.6s ease 0.4s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .home-hero__slide.active .home-hero__illustration { opacity: 1; }
+      .home-hero__illustration svg { width: 100%; height: 100%; }
+      @media(max-width:768px){ .home-hero__illustration { display: none; } }
+    `;
+    document.head.appendChild(style);
+  }
 
 })();

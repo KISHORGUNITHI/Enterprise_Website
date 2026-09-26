@@ -197,4 +197,41 @@ export class OrderService {
     }
     return order;
   }
+
+  /**
+   * Cancel an active order for the authenticated user
+   */
+  async cancelOrder(userId, orderId, { reason } = {}) {
+    if (!userId) {
+      const error = new Error('Authentication required');
+      error.status = 401;
+      throw error;
+    }
+    const order = await this.orderRepository.getUserOrderById(userId, orderId);
+    if (!order) {
+      const error = new Error('Order not found or unauthorized');
+      error.status = 404;
+      throw error;
+    }
+
+    const currentStatus = (order.status || '').toUpperCase();
+    if (currentStatus === 'DELIVERED') {
+      const error = new Error('Delivered orders cannot be cancelled.');
+      error.status = 400;
+      throw error;
+    }
+
+    if (currentStatus === 'CANCELLED') {
+      const error = new Error('This order is already cancelled.');
+      error.status = 400;
+      throw error;
+    }
+
+    const cancelReason = (reason && reason.trim()) ? reason.trim() : 'Cancelled by customer';
+    return this.orderRepository.updateOrderStatus(order.id, 'CANCELLED', {
+      cancelReason,
+      cancelledBy: 'USER',
+      cancelledAt: new Date()
+    });
+  }
 }

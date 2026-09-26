@@ -130,10 +130,10 @@
       });
     },
 
-    async updateOrderStatus(orderId, status) {
+    async updateOrderStatus(orderId, status, cancelReason = null) {
       return this.fetch(`/orders/${orderId}/status`, {
         method: 'PATCH',
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status, cancelReason })
       });
     }
   };
@@ -403,7 +403,6 @@
 
   function initDashboard() {
     const ordersTbody = document.getElementById('dashboardOrdersTableBody');
-    const lowStockTbody = document.getElementById('dashboardLowStockTableBody');
 
     if (!useApi) {
       // Use mock data
@@ -434,37 +433,6 @@
 
         ordersTbody.querySelectorAll('[data-view-order]').forEach(btn => {
           btn.addEventListener('click', () => openOrderDrawer(btn.dataset.viewOrder));
-        });
-      }
-
-      if (lowStockTbody) {
-        const lowStock = data.products.filter(p => p.stock <= p.minStockThreshold);
-        lowStockTbody.innerHTML = lowStock.map(p => `
-          <tr>
-            <td>
-              <div style="font-weight:var(--font-semibold); line-height:1.2;">${p.name}</div>
-              <div style="font-size:var(--text-xs); color:var(--color-text-muted);">${p.category}</div>
-            </td>
-            <td>
-              <span style="font-weight:var(--font-bold); color:${p.stock === 0 ? 'var(--color-error-600)' : '#d97706'};">
-                ${p.stock} units
-              </span>
-            </td>
-            <td>
-              <span class="badge ${p.stock === 0 ? 'badge--accent' : 'badge--primary'}" style="${p.stock === 0 ? 'background:#fee2e2; color:#991b1b;' : 'background:#fef3c7; color:#b45309;'}">
-                ${p.status}
-              </span>
-            </td>
-            <td>
-              <button type="button" class="admin-btn-action" data-stock-product="${p.id}">
-                <span>Restock</span>
-              </button>
-            </td>
-          </tr>
-        `).join('');
-
-        lowStockTbody.querySelectorAll('[data-stock-product]').forEach(btn => {
-          btn.addEventListener('click', () => openStockModal(btn.dataset.stockProduct));
         });
       }
       return;
@@ -516,7 +484,6 @@
             totalUsers: document.getElementById('statTotalUsers') || document.getElementById('statRegisteredUsers'),
             totalOrders: document.getElementById('statTotalOrders'),
             revenue: document.getElementById('statTotalRevenue'),
-            lowStock: document.getElementById('statLowStockCount'),
             pending: document.getElementById('statPendingCount'),
             banners: document.getElementById('statActiveBanners')
           };
@@ -524,44 +491,8 @@
           if (els.totalUsers) els.totalUsers.textContent = stats.totalUsers;
           if (els.totalOrders) els.totalOrders.textContent = stats.totalOrders;
           if (els.revenue) els.revenue.textContent = formatRupees(stats.totalRevenue);
-          if (els.lowStock) els.lowStock.textContent = `${stats.lowStockProducts} Items`;
           if (els.pending) els.pending.textContent = `${stats.pendingOrders} Orders`;
           if (els.banners) els.banners.textContent = `${stats.activeBanners} Running`;
-        }
-
-        // Low stock products table
-        if (lowStockTbody) {
-          const lowStock = (data.products || []).filter(p => p.stock <= (p.minStockThreshold || 4));
-          if (lowStock.length === 0) {
-            lowStockTbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:var(--space-6); color:var(--color-text-muted); font-size:var(--text-xs);">All products are adequately stocked.</td></tr>`;
-          } else {
-            lowStockTbody.innerHTML = lowStock.map(p => `
-              <tr>
-                <td>
-                  <div style="font-weight:var(--font-semibold); line-height:1.2;">${p.name}</div>
-                  <div style="font-size:var(--text-xs); color:var(--color-text-muted);">${p.category}</div>
-                </td>
-                <td>
-                  <span style="font-weight:var(--font-bold); color:${p.stock === 0 ? 'var(--color-error-600)' : '#d97706'};">
-                    ${p.stock} units
-                  </span>
-                </td>
-                <td>
-                  <span class="badge ${p.stock === 0 ? 'badge--accent' : 'badge--primary'}" style="${p.stock === 0 ? 'background:#fee2e2; color:#991b1b;' : 'background:#fef3c7; color:#b45309;'}">
-                    ${p.status}
-                  </span>
-                </td>
-                <td>
-                  <button type="button" class="admin-btn-action" data-stock-product="${p.id}">
-                    <span>Restock</span>
-                  </button>
-                </td>
-              </tr>
-            `).join('');
-            lowStockTbody.querySelectorAll('[data-stock-product]').forEach(btn => {
-              btn.addEventListener('click', () => openStockModal(btn.dataset.stockProduct));
-            });
-          }
         }
       })
       .catch((err) => {
@@ -574,7 +505,6 @@
   function initDashboard_Mock() {
     // Fallback mock implementation - same as original
     const ordersTbody = document.getElementById('dashboardOrdersTableBody');
-    const lowStockTbody = document.getElementById('dashboardLowStockTableBody');
 
     if (ordersTbody) {
       const recent = data.orders.slice(0, 5);
@@ -766,6 +696,21 @@
       await loadLiveBanners();
     }
 
+    // Dynamically update filter counts with actual live numbers
+    if (statusFilter && Array.isArray(data.banners)) {
+      const totalCount = data.banners.length;
+      const activeCount = data.banners.filter(b => (b.status || '').toLowerCase() === 'active').length;
+      const inactiveCount = data.banners.filter(b => (b.status || '').toLowerCase() === 'inactive').length;
+
+      const optAll = statusFilter.querySelector('option[value="all"]');
+      const optActive = statusFilter.querySelector('option[value="Active"]');
+      const optInactive = statusFilter.querySelector('option[value="Inactive"]');
+
+      if (optAll) optAll.textContent = `All Banners (${totalCount})`;
+      if (optActive) optActive.textContent = `Active Only (${activeCount})`;
+      if (optInactive) optInactive.textContent = `Inactive Only (${inactiveCount})`;
+    }
+
     const query = (searchInput?.value || '').trim().toLowerCase();
     const filterStatus = statusFilter?.value || 'all';
 
@@ -773,7 +718,7 @@
       const matchSearch = (b.title || '').toLowerCase().includes(query) ||
                           (b.eyebrow || '').toLowerCase().includes(query) ||
                           (b.slug || '').toLowerCase().includes(query);
-      const matchStatus = filterStatus === 'all' || b.status === filterStatus;
+      const matchStatus = filterStatus === 'all' || (b.status || '').toLowerCase() === filterStatus.toLowerCase();
       return matchSearch && matchStatus;
     });
 
@@ -897,6 +842,29 @@
     const title = document.getElementById('bannerModalTitle');
     if (title) title.textContent = 'Add New Banner';
     setBannerImage('');
+    const catSel = document.getElementById('bannerCategorySelect');
+    if (catSel) catSel.value = 'all';
+    const slugInp = document.getElementById('bannerSlug');
+    if (slugInp) slugInp.value = 'all';
+  }
+
+  // Category select sync with slug input
+  const bannerCatSelect = document.getElementById('bannerCategorySelect');
+  const bannerSlugInput = document.getElementById('bannerSlug');
+  if (bannerCatSelect && bannerSlugInput) {
+    bannerCatSelect.addEventListener('change', () => {
+      if (bannerCatSelect.value !== 'custom') {
+        bannerSlugInput.value = bannerCatSelect.value;
+      }
+    });
+    bannerSlugInput.addEventListener('input', () => {
+      const val = bannerSlugInput.value.trim().toLowerCase();
+      if (['all', 'mobiles', 'tvs', 'acs', 'home-theatres'].includes(val)) {
+        bannerCatSelect.value = val;
+      } else {
+        bannerCatSelect.value = 'custom';
+      }
+    });
   }
 
   function editBanner(id) {
@@ -911,6 +879,16 @@
     document.getElementById('bannerSlug').value = banner.slug;
     document.getElementById('bannerBadge').value = banner.badge || '';
     document.getElementById('bannerStatus').value = banner.status;
+
+    const catSel = document.getElementById('bannerCategorySelect');
+    if (catSel) {
+      const lower = (banner.slug || '').toLowerCase();
+      if (['all', 'mobiles', 'tvs', 'acs', 'home-theatres'].includes(lower)) {
+        catSel.value = lower;
+      } else {
+        catSel.value = 'custom';
+      }
+    }
 
     setBannerImage(banner.image || '');
 
@@ -937,6 +915,16 @@
 
       if (useApi) {
         try {
+          const defaultThemes = {
+            mobiles: { bg: 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 55%, #2f52a0 100%)', accent: '#f58500' },
+            tvs: { bg: 'linear-gradient(135deg, #1a0d2e 0%, #3b1f6b 55%, #5a2ea0 100%)', accent: '#a78bfa' },
+            acs: { bg: 'linear-gradient(135deg, #0a1a30 0%, #0d3a6e 55%, #1e5aa0 100%)', accent: '#60a5fa' },
+            'home-theatres': { bg: 'linear-gradient(135deg, #10141f 0%, #1f2937 55%, #374151 100%)', accent: '#fbbf24' },
+            all: { bg: 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 60%, #2f52a0 100%)', accent: '#f58500' }
+          };
+          const theme = defaultThemes[slug.toLowerCase()] || defaultThemes['all'];
+          const existingBanner = id ? data.banners.find(b => b.id === id) : null;
+
           const bannerPayload = {
             title,
             eyebrow,
@@ -945,8 +933,8 @@
             slug,
             badge: badge || null,
             status: status === 'Active' ? 'ACTIVE' : 'INACTIVE',
-            bgGradient: 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 60%, #2f52a0 100%)',
-            accentColor: '#f58500'
+            bgGradient: existingBanner?.bgGradient || theme.bg,
+            accentColor: existingBanner?.accentColor || theme.accent
           };
           if (id) {
             await API.updateBanner(id, bannerPayload);
@@ -1636,10 +1624,44 @@
     try {
       const d = new Date(dateStr);
       if (isNaN(d.getTime())) return dateStr;
-      return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      return d.toLocaleDateString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
     } catch (e) {
       return dateStr;
     }
+  }
+
+  function formatAdminDateTimeIST(dateStr) {
+    if (!dateStr) return '—';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      }) + ' IST';
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
+  function escapeAdminHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   function formatAdminCurrency(amount) {
@@ -1977,10 +1999,38 @@
           };
         });
         liveOrdersLoaded = true;
+        updateOrderFilterCounts();
       }
     } catch (e) {
       console.warn('Could not load live orders from API:', e);
     }
+  }
+
+  function updateOrderFilterCounts() {
+    const counts = {
+      all: (data.orders || []).length,
+      processing: 0,
+      confirmed: 0,
+      out_for_delivery: 0,
+      delivered: 0,
+      cancelled: 0
+    };
+    (data.orders || []).forEach(o => {
+      const st = (o.status || '').toLowerCase();
+      if (counts[st] !== undefined) counts[st]++;
+    });
+
+    const setEl = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val;
+    };
+
+    setEl('filterCountAll', counts.all);
+    setEl('filterCountProcessing', counts.processing);
+    setEl('filterCountConfirmed', counts.confirmed);
+    setEl('filterCountOutForDelivery', counts.out_for_delivery);
+    setEl('filterCountDelivered', counts.delivered);
+    setEl('filterCountCancelled', counts.cancelled);
   }
 
   async function renderOrders() {
@@ -1994,6 +2044,8 @@
     if (useApi && !liveOrdersLoaded) {
       await loadLiveOrders();
     }
+
+    updateOrderFilterCounts();
 
     const query = (searchInput?.value || '').trim().toLowerCase();
 
@@ -2108,18 +2160,26 @@
               phone: o.user?.phone_number || '-'
             },
             items: (o.items || []).map(i => ({
+              productId: i.productId,
               name: i.productName || 'Product',
               variant: i.variantDescription || 'Standard',
               quantity: i.quantity || 1,
-              subtotal: parseFloat(i.lineTotal) || ((parseFloat(i.unitPrice) || 0) * (i.quantity || 1))
+              unitPrice: parseFloat(i.unitPrice) || 0,
+              subtotal: parseFloat(i.lineTotal) || ((parseFloat(i.unitPrice) || 0) * (i.quantity || 1)),
+              review: i.review || null
             })),
+            reviews: o.reviews || [],
             subtotal: parseFloat(o.subtotal) || parseFloat(o.totalAmount) || 0,
             totalAmount: parseFloat(o.totalAmount) || 0,
             paymentMethod: o.paymentMethod || 'Online',
             paymentStatus: o.paymentStatus || 'Paid',
             status: (o.status || 'PENDING').toLowerCase(),
             shippingAddress: o.shippingAddress || 'Registered Address',
-            date: formatAdminDate(o.createdAt)
+            cancelReason: o.cancelReason || null,
+            cancelledBy: o.cancelledBy || null,
+            cancelledAt: o.cancelledAt || null,
+            date: formatAdminDate(o.createdAt),
+            createdAt: o.createdAt
           };
         }
       } catch (e) {
@@ -2135,12 +2195,106 @@
 
     if (!drawerBody || !drawer || !overlay) return;
 
+    // Render Cancellation Banner if order was cancelled
+    let cancellationBannerHtml = '';
+    if (order.status === 'cancelled') {
+      const isUserCancel = (order.cancelledBy || '').toUpperCase() === 'USER';
+      const badgeLabel = isUserCancel ? 'Cancelled by Customer' : 'Cancelled by Store (Admin)';
+      const badgeColor = isUserCancel ? '#b45309' : '#b91c1c';
+      const badgeBg = isUserCancel ? '#fef3c7' : '#fee2e2';
+      const badgeBorder = isUserCancel ? '#fde68a' : '#fecaca';
+      const reasonText = order.cancelReason || (isUserCancel ? 'No reason provided by customer.' : 'Cancelled by store administrator.');
+      const formattedCancelTime = formatAdminDateTimeIST(order.cancelledAt || order.createdAt || order.date);
+
+      cancellationBannerHtml = `
+        <div style="padding:var(--space-3) var(--space-4); background:${badgeBg}; border:1px solid ${badgeBorder}; border-radius:var(--radius-lg); margin-top:var(--space-1);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:4px;">
+            <span style="display:inline-flex; align-items:center; gap:6px; font-weight:var(--font-bold); font-size:var(--text-xs); text-transform:uppercase; letter-spacing:0.5px; color:${badgeColor};">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+              ${badgeLabel}
+            </span>
+            <span style="font-size:11px; color:var(--color-text-muted);">
+              ${formattedCancelTime}
+            </span>
+          </div>
+          <div style="font-size:var(--text-xs); color:#1f2937;">
+            <strong>Cancellation Reason:</strong>
+            <span style="color:${isUserCancel ? '#92400e' : '#991b1b'}; font-weight:500;">"${escapeAdminHtml(reasonText)}"</span>
+          </div>
+        </div>
+      `;
+    }
+
+    // Render Review Section Content based on order fulfillment status
+    let reviewsHtml = '';
+    if (order.status === 'cancelled') {
+      const isUserCancel = (order.cancelledBy || '').toUpperCase() === 'USER';
+      const who = isUserCancel ? 'the customer' : 'the store administrator';
+      reviewsHtml = `
+        <div style="padding:var(--space-4); background:#fef2f2; border:1px solid #fecaca; border-radius:var(--radius-lg); color:#991b1b; font-size:var(--text-sm);">
+          <div style="display:flex; align-items:center; gap:var(--space-2); font-weight:var(--font-bold); margin-bottom:4px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            Order Cancelled
+          </div>
+          <p style="margin:0; font-size:var(--text-xs); color:#b91c1c;">
+            This order was cancelled by ${who}. Reviews cannot be submitted for cancelled orders.
+          </p>
+        </div>
+      `;
+    } else if (order.status === 'delivered') {
+      reviewsHtml = `
+        <div style="display:flex; flex-direction:column; gap:var(--space-3);">
+          ${order.items.map(item => {
+            if (item.review) {
+              const ratingNum = Math.min(5, Math.max(1, Math.round(item.review.rating || 0)));
+              const stars = '★'.repeat(ratingNum) + '☆'.repeat(5 - ratingNum);
+              return `
+                <div style="background:#ffffff; border:1px solid var(--color-border-light); border-left:4px solid var(--color-success-600); border-radius:var(--radius-lg); padding:var(--space-3) var(--space-4); box-shadow:var(--shadow-xs);">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <span style="font-weight:var(--font-bold); font-size:var(--text-sm); color:var(--color-text-primary);">${item.name}</span>
+                    <span style="color:#f59e0b; font-size:var(--text-sm); font-weight:var(--font-bold); letter-spacing:1px;" title="${item.review.rating} out of 5 stars">
+                      ${stars} <span style="font-size:var(--text-xs); color:var(--color-text-muted); font-weight:var(--font-normal);">(${item.review.rating}/5)</span>
+                    </span>
+                  </div>
+                  <p style="font-size:var(--text-sm); color:var(--color-text-secondary); margin:4px 0 6px 0; font-style:${item.review.comment ? 'normal' : 'italic'};">
+                    ${item.review.comment ? `"${item.review.comment}"` : 'No written feedback provided with this rating.'}
+                  </p>
+                  <div style="font-size:11px; color:var(--color-text-muted);">
+                    Reviewed by <strong>${order.customer.name}</strong> &bull; ${formatAdminDateTimeIST(item.review.createdAt)}
+                  </div>
+                </div>
+              `;
+            } else {
+              return `
+                <div style="background:var(--color-bg-secondary); border:1px dashed var(--color-border-light); border-radius:var(--radius-lg); padding:var(--space-3) var(--space-4); font-size:var(--text-xs); color:var(--color-text-muted); display:flex; justify-content:space-between; align-items:center;">
+                  <span>${item.name}</span>
+                  <span class="badge" style="background:#f3f4f6; color:#6b7280; font-size:11px;">No review submitted yet</span>
+                </div>
+              `;
+            }
+          }).join('')}
+        </div>
+      `;
+    } else {
+      reviewsHtml = `
+        <div style="padding:var(--space-4); background:var(--color-primary-50); border:1px solid var(--color-primary-200); border-radius:var(--radius-lg); color:var(--color-primary-900); font-size:var(--text-xs);">
+          <div style="display:flex; align-items:center; gap:var(--space-2); font-weight:var(--font-bold); margin-bottom:2px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Fulfillment In Progress
+          </div>
+          Customer review will unlock once order fulfillment status is marked as <strong>Delivered</strong>.
+        </div>
+      `;
+    }
+
+    const drawerFooter = document.getElementById('orderDrawerFooter');
+
     drawerBody.innerHTML = `
-      <!-- Order Top Summary -->
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; padding:var(--space-4); background:var(--color-bg-secondary); border-radius:var(--radius-xl); border:1px solid var(--color-border-light);">
+      <!-- Order Top Summary Card (Clean, unnested) -->
+      <div style="background:#ffffff; border-radius:var(--radius-xl); border:1px solid var(--color-border-light); padding:var(--space-4); display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-xs);">
         <div>
-          <span style="font-family:var(--font-mono); font-weight:var(--font-extrabold); font-size:var(--text-lg); color:var(--color-primary-700);">${order.shortId}</span>
-          <div style="font-size:var(--text-xs); color:var(--color-text-muted);">Placed on ${order.date}</div>
+          <span style="font-family:var(--font-mono); font-weight:var(--font-extrabold); font-size:var(--text-lg); color:var(--color-primary-700); letter-spacing:-0.5px;">${order.shortId}</span>
+          <div style="font-size:var(--text-xs); color:var(--color-text-muted); margin-top:2px;">Placed on ${formatAdminDateTimeIST(order.createdAt || order.date)}</div>
         </div>
         <span class="order-status order-status--${order.status}">
           <span class="order-status__dot"></span>
@@ -2148,33 +2302,20 @@
         </span>
       </div>
 
-      <!-- Quick Status Updater -->
-      <div style="padding:var(--space-4); border:1.5px dashed var(--color-primary-300); border-radius:var(--radius-xl); background:var(--color-primary-50);">
-        <label class="admin-label" for="drawerStatusSelect" style="color:var(--color-primary-700);">Update Fulfillment Status</label>
-        <div style="display:flex; gap:var(--space-3);">
-          <select id="drawerStatusSelect" class="admin-form-select" style="background:#fff;">
-            <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
-            <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-            <option value="out_for_delivery" ${order.status === 'out_for_delivery' ? 'selected' : ''}>Out for Delivery</option>
-            <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
-            <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-          </select>
-          <button type="button" class="btn btn--primary btn--sm" id="updateOrderStatusBtn" data-order-id="${order.id}">
-            Update
-          </button>
-        </div>
-      </div>
+      ${cancellationBannerHtml}
 
       <!-- Customer & Shipping -->
       <div>
         <h5 style="font-size:var(--text-xs); font-weight:var(--font-bold); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:var(--tracking-wider); margin-bottom:var(--space-3);">
           Customer & Delivery Address
         </h5>
-        <div style="padding:var(--space-4); background:var(--color-bg-secondary); border-radius:var(--radius-lg); border:1px solid var(--color-border-light); font-size:var(--text-sm);">
-          <strong>${order.customer.name}</strong>
-          <div style="color:var(--color-text-secondary); margin:4px 0;">Phone: ${order.customer.phone} &bull; ${order.customer.email}</div>
-          <div style="color:var(--color-text-muted); margin-top:var(--space-2);">
-            📍 ${order.shippingAddress}
+        <div style="padding:var(--space-4); background:#ffffff; border-radius:var(--radius-lg); border:1px solid var(--color-border-light); font-size:var(--text-sm); box-shadow:var(--shadow-xs);">
+          <strong style="font-size:var(--text-base); color:var(--color-text-primary); display:block; margin-bottom:4px;">${order.customer.name}</strong>
+          <div style="color:var(--color-text-secondary); margin-bottom:var(--space-2); font-size:var(--text-xs);">
+            <span>📞 ${order.customer.phone}</span> &bull; <span>✉️ ${order.customer.email}</span>
+          </div>
+          <div style="color:var(--color-text-secondary); padding-top:var(--space-2); border-top:1px dashed var(--color-border-light); font-size:var(--text-xs); display:flex; gap:6px;">
+            <span>📍</span> <span>${order.shippingAddress}</span>
           </div>
         </div>
       </div>
@@ -2184,40 +2325,166 @@
         <h5 style="font-size:var(--text-xs); font-weight:var(--font-bold); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:var(--tracking-wider); margin-bottom:var(--space-3);">
           Order Items (${order.items.length})
         </h5>
-        ${order.items.map(item => `
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:var(--space-3) 0; border-bottom:1px solid var(--color-border-light);">
-            <div>
-              <strong style="font-size:var(--text-sm);">${item.name}</strong>
-              <div style="font-size:var(--text-xs); color:var(--color-text-muted);">${item.variant} &bull; Qty: ${item.quantity}</div>
+        <div style="background:#ffffff; border-radius:var(--radius-lg); border:1px solid var(--color-border-light); padding:0 var(--space-4); box-shadow:var(--shadow-xs);">
+          ${order.items.map((item, idx) => `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:var(--space-3) 0; ${idx !== order.items.length - 1 ? 'border-bottom:1px solid var(--color-border-light);' : ''}">
+              <div>
+                <strong style="font-size:var(--text-sm); color:var(--color-text-primary);">${item.name}</strong>
+                <div style="font-size:var(--text-xs); color:var(--color-text-muted);">${item.variant} &bull; Qty: ${item.quantity}</div>
+              </div>
+              <strong style="font-size:var(--text-sm);">${formatRupees(item.subtotal)}</strong>
             </div>
-            <strong>${formatRupees(item.subtotal)}</strong>
-          </div>
-        `).join('')}
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Customer Reviews & Feedback Section (Directly After Order Items) -->
+      <div>
+        <h5 style="font-size:var(--text-xs); font-weight:var(--font-bold); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:var(--tracking-wider); margin-bottom:var(--space-3); display:flex; align-items:center; justify-content:space-between;">
+          <span>Customer Reviews & Feedback</span>
+          ${order.status === 'delivered' ? '<span class="badge badge--success" style="font-size:10px;">Delivered Order</span>' : (order.status === 'cancelled' ? '<span class="badge" style="font-size:10px; background:#fee2e2; color:#991b1b;">Cancelled</span>' : '<span class="badge badge--warning" style="font-size:10px;">In Fulfillment</span>')}
+        </h5>
+        ${reviewsHtml}
       </div>
 
       <!-- Financial Calculation -->
-      <div style="background:var(--color-bg-secondary); padding:var(--space-4); border-radius:var(--radius-lg); border:1px solid var(--color-border-light); font-size:var(--text-sm);">
-        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+      <div style="background:#ffffff; padding:var(--space-4); border-radius:var(--radius-lg); border:1px solid var(--color-border-light); font-size:var(--text-sm); box-shadow:var(--shadow-xs);">
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
           <span style="color:var(--color-text-muted);">Subtotal</span>
           <span>${formatRupees(order.subtotal)}</span>
         </div>
-        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
           <span style="color:var(--color-text-muted);">Shipping Fee</span>
           <span style="color:var(--color-success-600); font-weight:var(--font-semibold);">FREE</span>
         </div>
-        <div style="display:flex; justify-content:space-between; padding-top:var(--space-2); border-top:1px solid var(--color-border-light); font-weight:var(--font-extrabold); font-size:var(--text-base);">
+        <div style="display:flex; justify-content:space-between; padding-top:var(--space-3); border-top:1px solid var(--color-border-light); font-weight:var(--font-extrabold); font-size:var(--text-base);">
           <span>Total Paid</span>
           <span style="color:var(--color-primary-700);">${formatRupees(order.totalAmount)}</span>
         </div>
       </div>
     `;
 
+    // Populate dedicated sticky Drawer Footer with Status Action Bar (Custom Dropdown)
+    if (drawerFooter) {
+      drawerFooter.style.display = 'flex';
+
+      const statusMap = {
+        processing: { label: 'Processing', dot: 'status-dot-indicator--processing' },
+        confirmed: { label: 'Confirmed', dot: 'status-dot-indicator--confirmed' },
+        out_for_delivery: { label: 'Out for Delivery', dot: 'status-dot-indicator--out_for_delivery' },
+        delivered: { label: 'Delivered', dot: 'status-dot-indicator--delivered' },
+        cancelled: { label: 'Cancelled', dot: 'status-dot-indicator--cancelled' }
+      };
+
+      const currentStatusKey = (order.status || 'processing').toLowerCase();
+      const currentMeta = statusMap[currentStatusKey] || statusMap.processing;
+
+      drawerFooter.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <label style="font-size:11px; text-transform:uppercase; font-weight:var(--font-bold); color:var(--color-text-muted); letter-spacing:var(--tracking-wider); margin:0;">
+            Update Fulfillment Status
+          </label>
+          <span style="font-size:11px; color:var(--color-text-muted);">Current: <strong style="text-transform:capitalize; color:var(--color-text-primary);">${order.status.replace(/_/g, ' ')}</strong></span>
+        </div>
+        <div style="display:flex; gap:var(--space-2); align-items:center; position:relative;">
+          <!-- Hidden input keeping chosen value -->
+          <input type="hidden" id="drawerStatusSelect" value="${currentStatusKey}"/>
+
+          <!-- Custom Dropdown Container (No ugly OS popups or misaligned boxes) -->
+          <div class="admin-custom-select" id="drawerCustomSelect">
+            <button type="button" class="admin-custom-select__trigger" id="drawerCustomSelectTrigger" aria-haspopup="listbox" aria-expanded="false">
+              <span class="admin-custom-select__value" id="drawerCustomSelectValue">
+                <span class="status-dot-indicator ${currentMeta.dot}"></span>
+                <span>${currentMeta.label}</span>
+              </span>
+              <svg class="admin-custom-select__arrow" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+
+            <!-- Popup Menu positioned with exact 100% width -->
+            <div class="admin-custom-select__menu" id="drawerCustomSelectMenu" role="listbox">
+              ${Object.entries(statusMap).map(([val, info]) => `
+                <div class="admin-custom-select__option${val === currentStatusKey ? ' selected' : ''}" data-status-val="${val}" role="option" aria-selected="${val === currentStatusKey}">
+                  <span class="admin-custom-select__option-left">
+                    <span class="status-dot-indicator ${info.dot}"></span>
+                    <span>${info.label}</span>
+                  </span>
+                  ${val === currentStatusKey ? '<svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>' : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <button type="button" class="btn btn--primary btn--sm" id="updateOrderStatusBtn" data-order-id="${order.id}" style="height:42px; padding:0 var(--space-5); border-radius:var(--radius-md); font-weight:var(--font-semibold); white-space:nowrap;">
+            Update
+          </button>
+        </div>
+      `;
+
+      // Wire custom dropdown interactivity
+      const customSelect = document.getElementById('drawerCustomSelect');
+      const triggerBtn = document.getElementById('drawerCustomSelectTrigger');
+      const hiddenInput = document.getElementById('drawerStatusSelect');
+      const valueSpan = document.getElementById('drawerCustomSelectValue');
+      const options = customSelect?.querySelectorAll('.admin-custom-select__option');
+
+      if (customSelect && triggerBtn) {
+        triggerBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isOpen = customSelect.classList.toggle('open');
+          triggerBtn.setAttribute('aria-expanded', String(isOpen));
+        });
+
+        options?.forEach(opt => {
+          opt.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const val = opt.dataset.statusVal;
+            const meta = statusMap[val];
+            if (hiddenInput && meta) {
+              hiddenInput.value = val;
+              valueSpan.innerHTML = `
+                <span class="status-dot-indicator ${meta.dot}"></span>
+                <span>${meta.label}</span>
+              `;
+              options.forEach(o => {
+                const isSel = o === opt;
+                o.classList.toggle('selected', isSel);
+                o.setAttribute('aria-selected', String(isSel));
+                const checkIcon = o.querySelector('svg');
+                if (isSel && !checkIcon) {
+                  o.insertAdjacentHTML('beforeend', '<svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>');
+                } else if (!isSel && checkIcon) {
+                  checkIcon.remove();
+                }
+              });
+            }
+            customSelect.classList.remove('open');
+            triggerBtn.setAttribute('aria-expanded', 'false');
+          });
+        });
+
+        // Close on clicking outside
+        document.addEventListener('click', (e) => {
+          if (!customSelect.contains(e.target)) {
+            customSelect.classList.remove('open');
+            triggerBtn.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
+    }
+
     // Attach status update listener
     const updateBtn = document.getElementById('updateOrderStatusBtn');
     const selectEl = document.getElementById('drawerStatusSelect');
     if (updateBtn && selectEl) {
       updateBtn.addEventListener('click', () => {
-        updateOrderStatus(order.id, selectEl.value);
+        const chosenStatus = selectEl.value;
+        if (chosenStatus === 'cancelled' && order.status !== 'cancelled') {
+          openAdminCancelModal(order.id);
+        } else {
+          updateOrderStatus(order.id, chosenStatus);
+        }
       });
     }
 
@@ -2225,15 +2492,75 @@
     overlay.classList.add('open');
   }
 
-  async function updateOrderStatus(orderId, newStatus) {
+  let pendingCancelOrderId = null;
+
+  function openAdminCancelModal(orderId) {
+    pendingCancelOrderId = orderId;
+    const modal = document.getElementById('adminCancelReasonModal');
+    const presetSelect = document.getElementById('adminCancelPreset');
+    const customWrap = document.getElementById('adminCustomReasonWrap');
+    const customInput = document.getElementById('adminCustomCancelReason');
+
+    if (presetSelect) presetSelect.selectedIndex = 0;
+    if (customInput) customInput.value = '';
+    if (customWrap) customWrap.style.display = 'none';
+
+    if (modal) {
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+  }
+
+  function initAdminCancelModal() {
+    const modal = document.getElementById('adminCancelReasonModal');
+    const presetSelect = document.getElementById('adminCancelPreset');
+    const customWrap = document.getElementById('adminCustomReasonWrap');
+    const customInput = document.getElementById('adminCustomCancelReason');
+    const confirmBtn = document.getElementById('confirmAdminCancelBtn');
+
+    if (presetSelect && customWrap) {
+      presetSelect.addEventListener('change', () => {
+        if (presetSelect.value === 'OTHER') {
+          customWrap.style.display = 'block';
+          if (customInput) customInput.focus();
+        } else {
+          customWrap.style.display = 'none';
+        }
+      });
+    }
+
+    if (confirmBtn) {
+      confirmBtn.addEventListener('click', async () => {
+        if (!pendingCancelOrderId) return;
+
+        let reason = presetSelect ? presetSelect.value : '';
+        if (reason === 'OTHER') {
+          const customVal = customInput ? customInput.value.trim() : '';
+          if (!customVal) {
+            showAdminToast('Please provide a specific cancellation note.', 'warning');
+            if (customInput) customInput.focus();
+            return;
+          }
+          reason = customVal;
+        }
+
+        closeModal('adminCancelReasonModal');
+        await updateOrderStatus(pendingCancelOrderId, 'cancelled', reason);
+        pendingCancelOrderId = null;
+      });
+    }
+  }
+
+  async function updateOrderStatus(orderId, newStatus, cancelReason = null) {
     if (useApi) {
       try {
-        const res = await API.updateOrderStatus(orderId, newStatus.toUpperCase());
+        const res = await API.updateOrderStatus(orderId, newStatus.toUpperCase(), cancelReason);
         if (res.success) {
           showAdminToast(`Order status updated to ${newStatus.replace(/_/g, ' ')}`, 'success');
           await loadLiveOrders();
           renderOrders();
           initDashboard();
+          openOrderDrawer(orderId);
         }
       } catch (err) {
         showAdminToast(`Failed to update order status: ${err.message}`, 'error');
@@ -2245,6 +2572,11 @@
     const order = data.orders.find(o => o.id === orderId);
     if (order) {
       order.status = newStatus;
+      if (newStatus === 'cancelled') {
+        order.cancelReason = cancelReason || 'Cancelled by store administrator';
+        order.cancelledBy = 'ADMIN';
+        order.cancelledAt = new Date().toISOString();
+      }
       showAdminToast(`Order ${order.shortId} status updated to "${capitalize(newStatus.replace(/_/g, ' '))}".`);
       renderOrders();
       initDashboard();
@@ -2255,8 +2587,10 @@
   function closeOrderDrawer() {
     const drawer = document.getElementById('orderDrawer');
     const overlay = document.getElementById('orderDrawerOverlay');
+    const footer = document.getElementById('orderDrawerFooter');
     if (drawer) drawer.classList.remove('open');
     if (overlay) overlay.classList.remove('open');
+    if (footer) footer.style.display = 'none';
   }
 
   const orderDrawerCloseBtn = document.getElementById('orderDrawerClose');
@@ -2703,6 +3037,7 @@
     renderProducts();
     renderUsers();
     renderOrders();
+    initAdminCancelModal();
     initAdminProfilePage();
   });
 

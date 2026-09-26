@@ -73,4 +73,27 @@ export class OrderController {
       });
     }
   };
+
+  cancelOrder = async (req, res) => {
+    try {
+      const userId = req.user.userId || req.user.id;
+      const { id } = req.params;
+      const { reason } = req.body;
+
+      const order = await this.orderService.cancelOrder(userId, id, { reason });
+
+      return res.status(200).json({
+        success: true,
+        message: 'Order cancelled successfully.',
+        data: order,
+      });
+    } catch (error) {
+      console.error('Cancel order error:', error);
+      const status = error.status || 500;
+      return res.status(status).json({
+        success: false,
+        message: error.message || 'Internal server error while cancelling order.',
+      });
+    }
+  };
 }

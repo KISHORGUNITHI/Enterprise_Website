@@ -120,6 +120,45 @@
     </div>
   </aside>
 
+  <!-- ── Customer Cancellation Modal ── -->
+  <div class="orders-modal-backdrop" id="customerCancelModal" role="dialog" aria-modal="true" aria-labelledby="cancelModalTitle" aria-hidden="true" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); z-index:1000; align-items:center; justify-content:center; padding:16px;">
+    <div class="orders-modal" style="background:#ffffff; border-radius:16px; max-width:480px; width:100%; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); overflow:hidden; border:1px solid var(--color-border-light);">
+      <div style="padding:16px 20px; border-bottom:1px solid var(--color-border-light); display:flex; justify-content:space-between; align-items:center;">
+        <h3 id="cancelModalTitle" style="font-size:16px; font-weight:700; color:#b91c1c; margin:0; display:flex; align-items:center; gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+          Cancel Order
+        </h3>
+        <button type="button" id="closeCustomerCancelModalBtn" aria-label="Close" style="background:none; border:none; font-size:22px; line-height:1; cursor:pointer; color:var(--color-text-muted);">&times;</button>
+      </div>
+      <div style="padding:20px;">
+        <p style="font-size:13px; color:var(--color-text-secondary); margin-bottom:16px;">
+          Please select a reason for cancelling this order. Your feedback helps us improve our service and store fulfillment.
+        </p>
+
+        <div style="margin-bottom:14px;">
+          <label for="customerCancelReasonSelect" style="display:block; font-size:12px; font-weight:600; color:var(--color-text-primary); margin-bottom:6px;">Reason for Cancellation</label>
+          <select id="customerCancelReasonSelect" style="width:100%; padding:10px 12px; font-size:13px; border:1px solid var(--color-border-light); border-radius:8px; background:#fff; color:var(--color-text-primary);">
+            <option value="Ordered by mistake / Duplicate order">Ordered by mistake / Duplicate order</option>
+            <option value="Found a cheaper price elsewhere">Found a cheaper price elsewhere</option>
+            <option value="Estimated delivery date is too long">Estimated delivery date is too long</option>
+            <option value="Need to change shipping address or contact info">Need to change shipping address or contact info</option>
+            <option value="Changed my mind / No longer required">Changed my mind / No longer required</option>
+            <option value="OTHER">Other reason (Type custom message)</option>
+          </select>
+        </div>
+
+        <div id="customerCustomReasonWrap" style="display:none; margin-bottom:14px;">
+          <label for="customerCustomReasonInput" style="display:block; font-size:12px; font-weight:600; color:var(--color-text-primary); margin-bottom:6px;">Tell us more</label>
+          <textarea id="customerCustomReasonInput" rows="3" placeholder="Please specify why you are cancelling..." style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--color-border-light); border-radius:8px; box-sizing:border-box;"></textarea>
+        </div>
+      </div>
+      <div style="padding:14px 20px; background:var(--color-bg-secondary); border-top:1px solid var(--color-border-light); display:flex; justify-content:flex-end; gap:10px;">
+        <button type="button" class="btn btn--outline btn--sm" id="abortCustomerCancelBtn" style="font-size:12px; padding:6px 14px;">Keep Order</button>
+        <button type="button" class="btn btn--sm" id="confirmCustomerCancelBtn" style="background:#ef4444; color:#fff; border:none; font-size:12px; font-weight:600; padding:6px 14px; border-radius:6px; cursor:pointer;">Confirm Cancellation</button>
+      </div>
+    </div>
+  </div>
+
   <%- include('../../partials/home-footer') %>
 
   <!-- JS -->

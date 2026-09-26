@@ -12,6 +12,7 @@ import jwtAuthenticate from './src/middleware/jwtmiddleware.js'
 import adminGuard from './src/middleware/adminguard.js'
 import jwt from 'jsonwebtoken';
 import { isCategoryInactive } from './src/config/categoryConfig.js'
+import bannerRoutes from './src/features/banners/routes/bannerRoutes.js'
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -51,6 +52,9 @@ app.use("/api", profileRoutes);
 
 // Product API Routes
 app.use("/api", productRoutes);
+
+// Banner API Routes (public storefront)
+app.use("/api", bannerRoutes);
 
 // Orders API Routes
 app.use("/api", orderRoutes);

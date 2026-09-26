@@ -108,7 +108,7 @@ export class OrderRepository {
    * Get all orders for a specific user
    */
   async getUserOrders(userId) {
-    return prisma.order.findMany({
+    const orders = await prisma.order.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
       include: {
@@ -132,15 +132,55 @@ export class OrderRepository {
         },
       },
     });
+
+    const productIds = [];
+    orders.forEach(o => {
+      o.items?.forEach(i => {
+        if (i.productId) productIds.push(i.productId);
+      });
+    });
+
+    let reviews = [];
+    if (productIds.length > 0) {
+      reviews = await prisma.review.findMany({
+        where: {
+          userId,
+          productId: { in: [...new Set(productIds)] }
+        },
+        select: {
+          id: true,
+          productId: true,
+          rating: true,
+          comment: true,
+          createdAt: true
+        }
+      });
+    }
+
+    return orders.map(o => ({
+      ...o,
+      items: (o.items || []).map(i => {
+        const r = reviews.find(rev => rev.productId === i.productId);
+        return {
+          ...i,
+          review: r ? {
+            id: r.id,
+            rating: Number(r.rating),
+            comment: r.comment || '',
+            createdAt: r.createdAt
+          } : null
+        };
+      })
+    }));
   }
 
   /**
    * Get single order by ID for a specific user
    */
   async getUserOrderById(userId, orderId) {
-    return prisma.order.findFirst({
+    const order = await prisma.order.findFirst({
       where: {
-        id: orderId,
+        OR: [{ id: orderId }, { shortId: orderId }],
         userId,
       },
       include: {
@@ -163,6 +203,55 @@ export class OrderRepository {
           },
         },
       },
+    });
+
+    if (!order) return null;
+
+    const productIds = (order.items || []).map(i => i.productId).filter(Boolean);
+    let reviews = [];
+    if (productIds.length > 0) {
+      reviews = await prisma.review.findMany({
+        where: {
+          userId,
+          productId: { in: productIds }
+        },
+        select: {
+          id: true,
+          productId: true,
+          rating: true,
+          comment: true,
+          createdAt: true
+        }
+      });
+    }
+
+    return {
+      ...order,
+      items: (order.items || []).map(i => {
+        const r = reviews.find(rev => rev.productId === i.productId);
+        return {
+          ...i,
+          review: r ? {
+            id: r.id,
+            rating: Number(r.rating),
+            comment: r.comment || '',
+            createdAt: r.createdAt
+          } : null
+        };
+      })
+    };
+  }
+
+  /**
+   * Update order status (e.g. cancellation)
+   */
+  async updateOrderStatus(orderId, status, additionalData = {}) {
+    return prisma.order.update({
+      where: { id: orderId },
+      data: {
+        status,
+        ...additionalData
+      }
     });
   }
 }

@@ -83,8 +83,16 @@
           <input type="text" id="bannerCtaText" name="ctaText" class="admin-input" placeholder="Shop Now" required/>
         </div>
         <div class="admin-form-group">
-          <label class="admin-label" for="bannerSlug">Target Slug / Route</label>
-          <input type="text" id="bannerSlug" name="slug" class="admin-input" placeholder="mobiles or tvs" required/>
+          <label class="admin-label" for="bannerCategorySelect">Target Category</label>
+          <select id="bannerCategorySelect" class="admin-form-select">
+            <option value="all">ALL (Homepage & Storewide)</option>
+            <option value="mobiles">Mobiles (Smartphones)</option>
+            <option value="tvs">TVs (Televisions)</option>
+            <option value="acs">Air Conditioners (ACs)</option>
+            <option value="home-theatres">Home Theatres</option>
+            <option value="custom">Custom Slug...</option>
+          </select>
+          <input type="text" id="bannerSlug" name="slug" class="admin-input" style="margin-top: 6px;" placeholder="Slug (e.g. all, mobiles, tvs, acs, home-theatres)" value="all" required/>
         </div>
       </div>
 
@@ -297,9 +305,53 @@
   <div class="admin-drawer__body" id="orderDrawerBody">
     <!-- Dynamically populated by admin.js -->
   </div>
+  <div class="admin-drawer__footer" id="orderDrawerFooter" style="display: none;">
+    <!-- Fulfillment status action bar populated by admin.js -->
+  </div>
 </aside>
 
 <!-- ════════════════════════════════════════
-     6. REUSABLE TOAST CONTAINER
+     6. ADMIN ORDER CANCELLATION MODAL
+════════════════════════════════════════ -->
+<div class="admin-modal-backdrop" id="adminCancelReasonModal" role="dialog" aria-modal="true" aria-labelledby="adminCancelModalTitle" aria-hidden="true">
+  <div class="admin-modal" style="max-width: 480px;">
+    <div class="admin-modal__header">
+      <h3 class="admin-modal__title" id="adminCancelModalTitle" style="color: #b91c1c; display:flex; align-items:center; gap:8px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+        Cancel Order
+      </h3>
+      <button class="admin-modal__close" data-close-modal="adminCancelReasonModal" aria-label="Close modal">&times;</button>
+    </div>
+    <div class="admin-modal__body">
+      <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-bottom: var(--space-4);">
+        Please specify why this order is being cancelled. This reason will be recorded and displayed to the customer in their account order tracking.
+      </p>
+
+      <div class="admin-form-group">
+        <label class="admin-label" for="adminCancelPreset">Select Cancellation Reason</label>
+        <select id="adminCancelPreset" class="admin-form-select">
+          <option value="Item(s) out of stock or inventory discrepancy">Item(s) out of stock or inventory discrepancy</option>
+          <option value="Customer requested cancellation via phone/email">Customer requested cancellation via phone/email</option>
+          <option value="Delivery location unreachable or invalid address">Delivery location unreachable or invalid address</option>
+          <option value="Payment verification failed / Suspicious transaction">Payment verification failed / Suspicious transaction</option>
+          <option value="Pricing error or product catalog inaccuracy">Pricing error or product catalog inaccuracy</option>
+          <option value="OTHER">Other reason (Type custom message)</option>
+        </select>
+      </div>
+
+      <div class="admin-form-group" id="adminCustomReasonWrap" style="display: none;">
+        <label class="admin-label" for="adminCustomCancelReason">Custom Note to Customer</label>
+        <textarea id="adminCustomCancelReason" class="admin-textarea" rows="3" placeholder="Provide specific explanation for the customer..."></textarea>
+      </div>
+    </div>
+    <div class="admin-modal__footer" style="display:flex; justify-content:flex-end; gap:var(--space-3);">
+      <button type="button" class="btn btn--outline btn--sm" data-close-modal="adminCancelReasonModal">Keep Order Active</button>
+      <button type="button" class="btn btn--sm" id="confirmAdminCancelBtn" style="background:#ef4444; color:#fff; border:none; padding:var(--space-2) var(--space-4); border-radius:var(--radius-md); font-weight:var(--font-semibold); cursor:pointer;">Confirm Cancellation</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     7. REUSABLE TOAST CONTAINER
 ════════════════════════════════════════ -->
 <div class="admin-toast-container" id="adminToastContainer" aria-live="polite"></div>

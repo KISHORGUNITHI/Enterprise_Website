@@ -33,29 +33,35 @@
         </div>
 
         <!-- ── Status Filter Chips ── -->
-        <div class="orders-filters" id="adminOrderFilterChips" role="group" aria-label="Filter orders by status" style="margin-bottom: var(--space-6);">
-          <button class="orders-filter-chip active" data-filter="all">
-            All Orders
+        <div class="orders-filters" id="adminOrderFilterChips" role="group" aria-label="Filter orders by status">
+          <button class="orders-filter-chip active" data-filter="all" type="button">
+            <span class="orders-filter-chip__label">All Orders</span>
+            <span class="orders-filter-chip__count" id="filterCountAll">0</span>
           </button>
-          <button class="orders-filter-chip" data-filter="processing">
+          <button class="orders-filter-chip" data-filter="processing" type="button">
             <span class="orders-filter-chip__dot" style="background:#eab308;"></span>
-            Processing
+            <span class="orders-filter-chip__label">Processing</span>
+            <span class="orders-filter-chip__count" id="filterCountProcessing">0</span>
           </button>
-          <button class="orders-filter-chip" data-filter="confirmed">
+          <button class="orders-filter-chip" data-filter="confirmed" type="button">
             <span class="orders-filter-chip__dot" style="background:#3b82f6;"></span>
-            Confirmed
+            <span class="orders-filter-chip__label">Confirmed</span>
+            <span class="orders-filter-chip__count" id="filterCountConfirmed">0</span>
           </button>
-          <button class="orders-filter-chip" data-filter="out_for_delivery">
+          <button class="orders-filter-chip" data-filter="out_for_delivery" type="button">
             <span class="orders-filter-chip__dot" style="background:#f97316;"></span>
-            Out for Delivery
+            <span class="orders-filter-chip__label">Out for Delivery</span>
+            <span class="orders-filter-chip__count" id="filterCountOutForDelivery">0</span>
           </button>
-          <button class="orders-filter-chip" data-filter="delivered">
+          <button class="orders-filter-chip" data-filter="delivered" type="button">
             <span class="orders-filter-chip__dot" style="background:#22c55e;"></span>
-            Delivered
+            <span class="orders-filter-chip__label">Delivered</span>
+            <span class="orders-filter-chip__count" id="filterCountDelivered">0</span>
           </button>
-          <button class="orders-filter-chip" data-filter="cancelled">
+          <button class="orders-filter-chip" data-filter="cancelled" type="button">
             <span class="orders-filter-chip__dot" style="background:#ef4444;"></span>
-            Cancelled
+            <span class="orders-filter-chip__label">Cancelled</span>
+            <span class="orders-filter-chip__count" id="filterCountCancelled">0</span>
           </button>
         </div>
 

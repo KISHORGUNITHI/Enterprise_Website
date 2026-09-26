@@ -130,17 +130,9 @@
           <div style="background: var(--color-bg-card); padding: var(--space-4) var(--space-5); border-radius: var(--radius-lg); border: 1px solid var(--color-border-light); display: flex; align-items: center; justify-content: space-between;">
             <div>
               <span style="font-size: var(--text-xs); color: var(--color-text-muted); font-weight: var(--font-bold); text-transform: uppercase;">Active Banners</span>
-              <div class="admin-stat-card__value" id="statActiveBanners" style="font-size: var(--text-xl); font-weight: var(--font-extrabold); color: var(--color-primary-700);">5 Running</div>
+              <div class="admin-stat-card__value" id="statActiveBanners" style="font-size: var(--text-xl); font-weight: var(--font-extrabold); color: var(--color-primary-700);">&mdash;</div>
             </div>
             <a href="/admin/banners" class="btn btn--ghost btn--sm" style="font-size: var(--text-xs);">Manage &rarr;</a>
-          </div>
-
-          <div style="background: var(--color-bg-card); padding: var(--space-4) var(--space-5); border-radius: var(--radius-lg); border: 1px solid var(--color-border-light); display: flex; align-items: center; justify-content: space-between;">
-            <div>
-              <span style="font-size: var(--text-xs); color: var(--color-text-muted); font-weight: var(--font-bold); text-transform: uppercase;">Low Stock Alert</span>
-              <div class="admin-stat-card__value" id="statLowStockCount" style="font-size: var(--text-xl); font-weight: var(--font-extrabold); color: #d97706;">7 Items</div>
-            </div>
-            <a href="/admin/products" class="btn btn--ghost btn--sm" style="font-size: var(--text-xs);">Restock &rarr;</a>
           </div>
 
           <div style="background: var(--color-bg-card); padding: var(--space-4) var(--space-5); border-radius: var(--radius-lg); border: 1px solid var(--color-border-light); display: flex; align-items: center; justify-content: space-between;">
@@ -152,8 +144,8 @@
           </div>
         </div>
 
-        <!-- ── Main Data Section: Recent Orders & Low Stock ── -->
-        <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: var(--space-6); align-items: start;">
+        <!-- ── Main Data Section: Recent Orders ── -->
+        <div>
 
           <!-- Recent Orders Card -->
           <div class="admin-card" style="margin-bottom: 0;">
@@ -178,34 +170,6 @@
                     </tr>
                   </thead>
                   <tbody id="dashboardOrdersTableBody">
-                    <!-- Populated by admin.js -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <!-- Low Stock Products Card -->
-          <div class="admin-card" style="margin-bottom: 0;">
-            <div class="admin-card__header">
-              <div>
-                <h2 class="admin-card__title">Low Stock Alert</h2>
-                <p class="admin-card__subtitle">Inventory requiring immediate supplier replenishment.</p>
-              </div>
-              <a href="/admin/products" class="btn btn--outline btn--sm">Inventory</a>
-            </div>
-            <div class="admin-card__body">
-              <div class="admin-table-wrap">
-                <table class="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Product</th>
-                      <th>Stock</th>
-                      <th>Status</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="dashboardLowStockTableBody">
                     <!-- Populated by admin.js -->
                   </tbody>
                 </table>

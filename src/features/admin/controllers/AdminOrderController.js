@@ -43,9 +43,9 @@ export class AdminOrderController {
   updateStatus = async (req, res) => {
     try {
       const { id } = req.params;
-      const { status } = req.body;
+      const { status, cancelReason } = req.body;
 
-      const result = await this.service.updateStatus(id, status);
+      const result = await this.service.updateStatus(id, status, { cancelReason });
       return res.json(result);
     } catch (err) {
       const status = err.status || 500;

@@ -17,6 +17,35 @@
   let activeFilter = 'all';
   let searchQuery = '';
 
+  function formatISTDateTime(dateStr) {
+    if (!dateStr) return '—';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      }) + ' IST';
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   // ─── Fetch real user orders from API ───────────────────────────────────────
   async function fetchRealOrders() {
     try {
@@ -50,22 +79,31 @@
               id: dbOrder.shortId || dbOrder.id,
               dbId: dbOrder.id,
               date: dateStr,
+              createdAt: dbOrder.createdAt,
               status: statusKey,
               price: Number(dbOrder.totalAmount),
               deliveryDate: dbOrder.deliveryDate || '3-5 Business Days',
               address: dbOrder.shippingAddress || 'Registered Address',
+              cancelReason: dbOrder.cancelReason || null,
+              cancelledBy: dbOrder.cancelledBy || null,
+              cancelledAt: dbOrder.cancelledAt || null,
               product: {
+                id: firstItem.productId,
                 name: (firstItem.productName || 'Electronics Item') + extraItemsText,
                 variant: firstItem.variantDescription || 'Standard Warranty',
                 color: '#1e3d8f',
                 imageUrl: primaryImg,
               },
-              timeline: [
-                { label: 'Order Placed', date: dateStr, done: true },
-                { label: 'Confirmed', date: dateStr, done: statusKey !== 'processing' && statusKey !== 'cancelled' },
-                { label: 'Out for Delivery', date: 'In transit', done: statusKey === 'out_for_delivery' || statusKey === 'delivered' },
-                { label: 'Delivered', date: dbOrder.deliveryDate || 'Expected soon', done: statusKey === 'delivered' },
-              ]
+              items: (dbOrder.items || []).map(i => ({
+                id: i.id,
+                productId: i.productId,
+                name: i.productName || 'Product',
+                variant: i.variantDescription || 'Standard Warranty',
+                quantity: i.quantity || 1,
+                unitPrice: Number(i.unitPrice),
+                review: i.review || null
+              })),
+              timeline: buildTimeline(statusKey, dbOrder.createdAt, dbOrder.cancelledAt)
             };
           });
 
@@ -121,14 +159,15 @@
   }
 
   // ─── Build Timeline ───────────────────────────────────────────────────────
-  function buildTimeline(status, createdAt) {
-    const d = new Date(createdAt).toLocaleDateString();
-    const st = status.toLowerCase();
+  function buildTimeline(status, createdAt, cancelledAt) {
+    const d = new Date(createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    const st = (status || '').toLowerCase();
     
     if (st === 'cancelled') {
+      const cancelDate = cancelledAt ? new Date(cancelledAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
       return [
         { label: 'Order Placed', date: d, done: true },
-        { label: 'Cancelled', date: '', done: true }
+        { label: 'Cancelled', date: cancelDate, done: true }
       ];
     }
     
@@ -167,17 +206,21 @@
       if (result.success && result.data) {
         orders = result.data.map(o => ({
           id: o.shortId || o.id,
-          date: new Date(o.createdAt).toLocaleDateString(),
+          date: new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+          createdAt: o.createdAt,
           status: o.status.toLowerCase(),
           deliveryDate: o.deliveryDate || 'Pending',
           price: o.totalAmount,
           address: o.shippingAddress,
+          cancelReason: o.cancelReason || null,
+          cancelledBy: o.cancelledBy || null,
+          cancelledAt: o.cancelledAt || null,
           product: {
             name: o.items?.[0]?.productName || 'Order Items',
             variant: o.items?.[0]?.variantDescription || '',
             color: '#3b82f6'
           },
-          timeline: buildTimeline(o.status, o.createdAt)
+          timeline: buildTimeline(o.status, o.createdAt, o.cancelledAt)
         }));
         render();
       }
@@ -334,6 +377,27 @@
         </div>
       </div>
 
+      <!-- Cancellation Details if Cancelled -->
+      ${o.status === 'cancelled' ? `
+        <div class="drawer-section" style="background:#fee2e2; border:1.5px solid #fecaca; border-radius:var(--radius-lg); padding:var(--space-3) var(--space-4);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:4px;">
+            <strong style="color:#991b1b; font-size:var(--text-xs); text-transform:uppercase; letter-spacing:0.5px; display:inline-flex; align-items:center; gap:6px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+              ${o.cancelledBy === 'ADMIN' ? 'Cancelled by Kishor Enterprises' : 'Cancelled by You'}
+            </strong>
+            <span style="font-size:11px; color:#991b1b;">
+              ${formatISTDateTime(o.cancelledAt || o.createdAt)}
+            </span>
+          </div>
+          <div style="font-size:var(--text-xs); color:#1f2937;">
+            <strong>Reason:</strong>
+            <p style="margin:4px 0 0 0; color:#991b1b; font-weight:500; font-size:var(--text-xs); line-height:1.4;">
+              "${escapeHtml(o.cancelReason || (o.cancelledBy === 'ADMIN' ? 'Cancelled by store operations.' : 'Cancelled by customer.'))}"
+            </p>
+          </div>
+        </div>
+      ` : ''}
+
       <!-- Timeline -->
       <div class="drawer-section">
         <p class="drawer-section__title">Order Timeline</p>
@@ -367,6 +431,53 @@
         </p>
       </div>
 
+      <!-- Customer Rate & Review Section for Delivered Orders -->
+      ${o.status === 'delivered' && o.items && o.items.length > 0 ? `
+        <div class="drawer-section" id="customerReviewSection">
+          <p class="drawer-section__title">Rate & Review Products</p>
+          <div style="display:flex; flex-direction:column; gap:var(--space-3);">
+            ${o.items.map(item => `
+              <div class="drawer-review-card" style="padding:var(--space-3) var(--space-4); background:var(--color-bg-secondary); border-radius:var(--radius-lg); border:1px solid var(--color-border-light);" data-review-product-id="${item.productId}">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--space-2);">
+                  <strong style="font-size:var(--text-sm);">${item.name}</strong>
+                  ${item.review ? '<span class="badge badge--success" style="font-size:10px; background:#dcfce7; color:#166534; padding:2px 6px; border-radius:4px;">Reviewed</span>' : ''}
+                </div>
+
+                ${item.review ? `
+                  <div style="font-size:var(--text-xs); color:var(--color-text-secondary); margin-bottom:var(--space-2);">
+                    <span style="color:#f59e0b; font-size:var(--text-sm); font-weight:var(--font-bold);">${'★'.repeat(Math.round(item.review.rating || 0))}${'☆'.repeat(5 - Math.round(item.review.rating || 0))}</span>
+                    <span style="margin-left:6px; font-weight:var(--font-semibold);">(${item.review.rating}/5)</span>
+                    <p style="margin:4px 0 0 0; font-style:italic;">"${item.review.comment || 'No feedback text'}"</p>
+                  </div>
+                  <button type="button" class="btn btn--outline btn--sm btn-edit-review" data-prod-id="${item.productId}" style="font-size:11px; padding:3px 8px;">Edit Review</button>
+                ` : ''}
+
+                <div class="review-form-container" style="${item.review ? 'display:none;' : 'display:block;'} margin-top:var(--space-2);">
+                  <div class="star-rating-select" data-selected-rating="${item.review?.rating || 5}" style="display:flex; gap:4px; font-size:22px; cursor:pointer; color:#f59e0b; user-select:none; margin-bottom:var(--space-2);">
+                    <span data-star="1">★</span>
+                    <span data-star="2">★</span>
+                    <span data-star="3">★</span>
+                    <span data-star="4">★</span>
+                    <span data-star="5">★</span>
+                  </div>
+                  <textarea class="form-input form-textarea review-comment-input" rows="2" placeholder="Write a quick review about this product..." style="width:100%; font-size:var(--text-xs); margin-bottom:var(--space-2); padding:6px 8px; border:1px solid var(--color-border-light); border-radius:var(--radius-md);">${item.review?.comment || ''}</textarea>
+                  <button type="button" class="btn btn--primary btn--sm btn-submit-review" data-prod-id="${item.productId}" data-order-id="${o.dbId || o.id}" style="font-size:12px;">Submit Review</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- Cancel Order Button for Active Orders -->
+      ${(o.status === 'processing' || o.status === 'confirmed') ? `
+        <div class="drawer-section" style="border-top:1px solid var(--color-border-light); padding-top:var(--space-3); margin-top:var(--space-3);">
+          <button type="button" class="btn btn--outline btn--sm" id="customerCancelOrderBtn" data-order-id="${o.dbId || o.id}" style="color:var(--color-danger-600); border-color:var(--color-danger-300); width:100%;">
+            Cancel This Order
+          </button>
+        </div>
+      ` : ''}
+
       <!-- Need help -->
       <div class="drawer-help">
         <div class="drawer-help__text">
@@ -380,11 +491,201 @@
           Call Now
         </a>
       </div>`;
+
+    // Star rating selection interaction
+    body.querySelectorAll('.star-rating-select').forEach(starContainer => {
+      const stars = starContainer.querySelectorAll('span[data-star]');
+      stars.forEach(s => {
+        s.addEventListener('click', () => {
+          const ratingVal = parseInt(s.dataset.star, 10);
+          starContainer.dataset.selectedRating = ratingVal;
+          stars.forEach(st => {
+            const val = parseInt(st.dataset.star, 10);
+            st.textContent = val <= ratingVal ? '★' : '☆';
+          });
+        });
+      });
+    });
+
+    // Edit review toggle
+    body.querySelectorAll('.btn-edit-review').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const card = btn.closest('.drawer-review-card');
+        const form = card?.querySelector('.review-form-container');
+        if (form) {
+          form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+      });
+    });
+
+    // Submit review click
+    body.querySelectorAll('.btn-submit-review').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const prodId = btn.dataset.prodId;
+        const card = btn.closest('.drawer-review-card');
+        const starContainer = card?.querySelector('.star-rating-select');
+        const commentInput = card?.querySelector('.review-comment-input');
+        const rating = parseInt(starContainer?.dataset.selectedRating || '5', 10);
+        const comment = (commentInput?.value || '').trim();
+
+        btn.disabled = true;
+        btn.textContent = 'Submitting...';
+
+        try {
+          const headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          };
+          const token = localStorage.getItem('authToken');
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+
+          const res = await fetch(`/api/products/${prodId}/rate`, {
+            method: 'POST',
+            headers,
+            credentials: 'same-origin',
+            body: JSON.stringify({ rating, comment })
+          });
+
+          const json = await res.json();
+          if (res.ok && json.success) {
+            alert('Thank you! Your product review has been submitted.');
+            await fetchRealOrders();
+            const updatedOrder = orders.find(ord => ord.id === o.id || ord.dbId === o.dbId);
+            if (updatedOrder) populateDrawer(updatedOrder);
+          } else {
+            alert(json.message || 'Failed to submit review.');
+            btn.disabled = false;
+            btn.textContent = 'Submit Review';
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Network error while submitting review.');
+          btn.disabled = false;
+          btn.textContent = 'Submit Review';
+        }
+      });
+    });
+
+    // Cancel order click
+    const cancelBtn = body.querySelector('#customerCancelOrderBtn');
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => {
+        openCustomerCancelModal(o);
+      });
+    }
+  }
+
+  let activeCancelOrder = null;
+
+  function openCustomerCancelModal(order) {
+    activeCancelOrder = order;
+    const modal = document.getElementById('customerCancelModal');
+    const select = document.getElementById('customerCancelReasonSelect');
+    const customWrap = document.getElementById('customerCustomReasonWrap');
+    const customInput = document.getElementById('customerCustomReasonInput');
+
+    if (select) select.selectedIndex = 0;
+    if (customInput) customInput.value = '';
+    if (customWrap) customWrap.style.display = 'none';
+
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.setAttribute('aria-hidden', 'false');
+    }
+  }
+
+  function closeCustomerCancelModal() {
+    const modal = document.getElementById('customerCancelModal');
+    if (modal) {
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden', 'true');
+    }
+    activeCancelOrder = null;
+  }
+
+  function initCustomerCancelModal() {
+    const select = document.getElementById('customerCancelReasonSelect');
+    const customWrap = document.getElementById('customerCustomReasonWrap');
+    const customInput = document.getElementById('customerCustomReasonInput');
+    const closeBtn = document.getElementById('closeCustomerCancelModalBtn');
+    const abortBtn = document.getElementById('abortCustomerCancelBtn');
+    const confirmBtn = document.getElementById('confirmCustomerCancelBtn');
+
+    if (select && customWrap) {
+      select.addEventListener('change', () => {
+        if (select.value === 'OTHER') {
+          customWrap.style.display = 'block';
+          if (customInput) customInput.focus();
+        } else {
+          customWrap.style.display = 'none';
+        }
+      });
+    }
+
+    if (closeBtn) closeBtn.addEventListener('click', closeCustomerCancelModal);
+    if (abortBtn) abortBtn.addEventListener('click', closeCustomerCancelModal);
+
+    if (confirmBtn) {
+      confirmBtn.addEventListener('click', async () => {
+        if (!activeCancelOrder) return;
+
+        let reason = select ? select.value : '';
+        if (reason === 'OTHER') {
+          const customVal = customInput ? customInput.value.trim() : '';
+          if (!customVal) {
+            alert('Please specify why you are cancelling this order.');
+            if (customInput) customInput.focus();
+            return;
+          }
+          reason = customVal;
+        }
+
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Cancelling...';
+
+        try {
+          const headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          };
+          const token = localStorage.getItem('authToken');
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+
+          const res = await fetch(`/api/orders/${activeCancelOrder.dbId || activeCancelOrder.id}/cancel`, {
+            method: 'POST',
+            headers,
+            credentials: 'same-origin',
+            body: JSON.stringify({ reason })
+          });
+
+          const json = await res.json();
+          if (res.ok && json.success) {
+            alert('Your order has been cancelled.');
+            const targetId = activeCancelOrder.id;
+            const targetDbId = activeCancelOrder.dbId;
+            closeCustomerCancelModal();
+            await fetchRealOrders();
+            const updatedOrder = orders.find(ord => ord.id === targetId || ord.dbId === targetDbId);
+            if (updatedOrder) populateDrawer(updatedOrder);
+          } else {
+            alert(json.message || 'Could not cancel order.');
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Network error while cancelling order.');
+        } finally {
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = 'Confirm Cancellation';
+        }
+      });
+    }
   }
 
   // ─── Init ─────────────────────────────────────────────────────────────────
   render();
   fetchRealOrders();
+  initCustomerCancelModal();
 
 })();
+
 

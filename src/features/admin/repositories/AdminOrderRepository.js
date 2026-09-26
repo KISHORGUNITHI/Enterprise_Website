@@ -22,6 +22,9 @@ export class AdminOrderRepository {
         paymentMethod: true,
         paymentStatus: true,
         deliveryDate: true,
+        cancelReason: true,
+        cancelledBy: true,
+        cancelledAt: true,
         createdAt: true,
         updatedAt: true,
         user: {
@@ -53,11 +56,13 @@ export class AdminOrderRepository {
   }
 
   /**
-   * Find order by ID with all items and product details
+   * Find order by ID with all items, product details, and customer reviews
    */
   async findById(id) {
-    return prisma.order.findUnique({
-      where: { id },
+    const order = await prisma.order.findFirst({
+      where: {
+        OR: [{ id }, { shortId: id }]
+      },
       select: {
         id: true,
         shortId: true,
@@ -71,6 +76,9 @@ export class AdminOrderRepository {
         paymentStatus: true,
         shippingAddress: true,
         deliveryDate: true,
+        cancelReason: true,
+        cancelledBy: true,
+        cancelledAt: true,
         createdAt: true,
         updatedAt: true,
         user: {
@@ -110,6 +118,55 @@ export class AdminOrderRepository {
         }
       }
     });
+
+    if (!order) return null;
+
+    // Fetch reviews authored by this specific customer for ordered products
+    const productIds = (order.items || []).map(i => i.productId).filter(Boolean);
+    let reviews = [];
+    if (productIds.length > 0 && order.userId) {
+      reviews = await prisma.review.findMany({
+        where: {
+          userId: order.userId,
+          productId: { in: productIds }
+        },
+        select: {
+          id: true,
+          productId: true,
+          userId: true,
+          rating: true,
+          comment: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      });
+    }
+
+    const itemsWithReviews = (order.items || []).map(item => {
+      const rev = reviews.find(r => r.productId === item.productId);
+      return {
+        ...item,
+        review: rev ? {
+          id: rev.id,
+          rating: Number(rev.rating),
+          comment: rev.comment || '',
+          createdAt: rev.createdAt,
+          updatedAt: rev.updatedAt
+        } : null
+      };
+    });
+
+    return {
+      ...order,
+      items: itemsWithReviews,
+      reviews: reviews.map(r => ({
+        id: r.id,
+        productId: r.productId,
+        rating: Number(r.rating),
+        comment: r.comment || '',
+        createdAt: r.createdAt
+      }))
+    };
   }
 
   /**
@@ -132,6 +189,9 @@ export class AdminOrderRepository {
         paymentStatus: true,
         shippingAddress: true,
         deliveryDate: true,
+        cancelReason: true,
+        cancelledBy: true,
+        cancelledAt: true,
         createdAt: true,
         updatedAt: true,
         user: {

@@ -76,8 +76,16 @@ export class AdminOrderService {
           items: order.items.map(item => ({
             ...item,
             unitPrice: parseFloat(item.unitPrice),
-            lineTotal: parseFloat(item.lineTotal)
-          }))
+            lineTotal: parseFloat(item.lineTotal),
+            review: item.review ? {
+              id: item.review.id,
+              rating: Number(item.review.rating),
+              comment: item.review.comment || '',
+              createdAt: item.review.createdAt,
+              updatedAt: item.review.updatedAt
+            } : null
+          })),
+          reviews: order.reviews || []
         }
       };
     } catch (err) {
@@ -91,7 +99,7 @@ export class AdminOrderService {
    * Update order status
    * Valid statuses: PROCESSING, CONFIRMED, OUT_FOR_DELIVERY, DELIVERED, CANCELLED
    */
-  async updateStatus(orderId, newStatus) {
+  async updateStatus(orderId, newStatus, cancelOptions = {}) {
     try {
       const validStatuses = ['PROCESSING', 'CONFIRMED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'];
 
@@ -114,6 +122,14 @@ export class AdminOrderService {
       const updateData = { status: newStatus };
       if (newStatus === 'DELIVERED' && !existing.deliveryDate) {
         updateData.deliveryDate = new Date().toISOString().split('T')[0];
+      }
+
+      if (newStatus === 'CANCELLED') {
+        updateData.cancelReason = (cancelOptions.cancelReason && cancelOptions.cancelReason.trim())
+          ? cancelOptions.cancelReason.trim()
+          : 'Cancelled by store administrator';
+        updateData.cancelledBy = 'ADMIN';
+        updateData.cancelledAt = new Date();
       }
 
       const order = await this.repository.update(orderId, updateData);
