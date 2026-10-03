@@ -93,6 +93,8 @@
 
 .drawer-product { display:flex; gap:var(--space-4); padding:var(--space-4); background-color:var(--color-bg-secondary); border-radius:var(--radius-xl); border:1px solid var(--color-border-light); }
 .drawer-product__image { width:80px; height:80px; border-radius:var(--radius-lg); background-color:var(--color-bg-tertiary); display:flex; align-items:center; justify-content:center; border:1px solid var(--color-border-light); flex-shrink:0; overflow:hidden; }
+.order-card__img,
+.drawer-product__img { width:100%; height:100%; object-fit:contain; padding:4px; }
 .drawer-product__name  { font-size:var(--text-base); font-weight:var(--font-bold); color:var(--color-text-primary); margin-bottom:var(--space-1); line-height:var(--leading-snug); }
 .drawer-product__variant { font-size:var(--text-xs); color:var(--color-text-muted); margin-bottom:var(--space-2); }
 .drawer-product__price  { font-size:var(--text-xl); font-weight:var(--font-extrabold); color:var(--color-text-primary); }

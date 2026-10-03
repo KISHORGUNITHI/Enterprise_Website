@@ -1,122 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <%- include('../../partials/admin/admin-head') %>
 </head>
+
 <body class="admin-body">
 
   <%- include('../../partials/admin/admin-header') %>
 
-  <div class="admin-layout">
+    <div class="admin-layout">
 
-    <%- include('../../partials/admin/admin-sidebar') %>
+      <%- include('../../partials/admin/admin-sidebar') %>
 
-    <main class="admin-main" id="main-content">
-      <div class="admin-container">
+        <main class="admin-main" id="main-content">
+          <div class="admin-container">
 
-        <!-- Breadcrumb navigation -->
-        <nav class="admin-breadcrumb" aria-label="Breadcrumb">
-          <ol class="admin-breadcrumb__list">
-            <li class="admin-breadcrumb__item"><a href="/admin/dashboard" class="admin-breadcrumb__link">Dashboard</a></li>
-            <li class="admin-breadcrumb__separator" aria-hidden="true">/</li>
-            <li class="admin-breadcrumb__item admin-breadcrumb__item--active" aria-current="page">Products & Inventory</li>
-          </ol>
-        </nav>
+            <!-- Breadcrumb navigation -->
+            <nav class="admin-breadcrumb" aria-label="Breadcrumb">
+              <ol class="admin-breadcrumb__list">
+                <li class="admin-breadcrumb__item"><a href="/admin/dashboard"
+                    class="admin-breadcrumb__link">Dashboard</a></li>
+                <li class="admin-breadcrumb__separator" aria-hidden="true">/</li>
+                <li class="admin-breadcrumb__item admin-breadcrumb__item--active" aria-current="page">Products &
+                  Inventory</li>
+              </ol>
+            </nav>
 
-        <!-- Page Header -->
-        <div class="admin-page-header">
-          <div class="admin-page-header__title-group">
-            <span class="admin-page-header__eyebrow">Catalog & Inventory</span>
-            <h1 class="admin-page-header__title">Product & Stock Management</h1>
-            <p class="admin-page-header__subtitle">Manage mobile phones, consumer electronics, stock levels, pricing, and catalog visibility.</p>
-          </div>
-          <div class="admin-page-header__actions">
-            <button type="button" class="btn btn--primary btn--sm" id="addNewProductBtn" data-open-modal="productModal">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-              <span>Add New Product</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- ── Toolbar & Filters ── -->
-        <div class="admin-toolbar">
-          <div class="admin-toolbar__left">
-            <div class="admin-search-input-wrap">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="9" cy="9" r="6"/><path d="M13.5 13.5L17 17"/>
-              </svg>
-              <input type="search" id="productSearchInput" class="admin-search-input" placeholder="Search by name, brand, model, or slug..."/>
-            </div>
-
-            <select id="productCategoryFilter" class="admin-select">
-              <option value="all">All Categories</option>
-              <option value="Mobiles">Mobiles</option>
-              <option value="TVs">TVs</option>
-              <option value="Air Conditioners">Air Conditioners</option>
-              <option value="Refrigerators">Refrigerators</option>
-              <option value="Home Theatres">Home Theatres</option>
-              <option value="Kitchen Appliances">Kitchen Appliances</option>
-            </select>
-
-            <select id="productStockFilter" class="admin-select">
-              <option value="all">All Stock Statuses</option>
-              <option value="In Stock">In Stock</option>
-              <option value="Low Stock">Low Stock (< 5)</option>
-              <option value="Out of Stock">Out of Stock (0)</option>
-            </select>
-          </div>
-          <div style="font-size: var(--text-xs); color: var(--color-text-muted); font-weight: var(--font-semibold);">
-            Showing <span id="productsCountDisplay">8</span> products
-          </div>
-        </div>
-
-        <!-- ── Products Table Card ── -->
-        <div class="admin-card">
-          <div class="admin-card__body">
-            <div class="admin-table-wrap">
-              <table class="admin-table" id="productsTable">
-                <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>Category</th>
-                    <th>Price</th>
-                    <th>Stock Units</th>
-                    <th>Stock Status</th>
-                    <th>Visibility</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="productsTableBody">
-                  <!-- Populated by admin.js -->
-                </tbody>
-              </table>
-            </div>
-
-            <!-- Empty State inside table card -->
-            <div class="admin-empty-state" id="productsEmptyState" style="display: none;">
-              <div class="admin-empty-state__icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                </svg>
+            <!-- Page Header -->
+            <div class="admin-page-header">
+              <div class="admin-page-header__title-group">
+                <span class="admin-page-header__eyebrow">Catalog & Inventory</span>
+                <h1 class="admin-page-header__title">Product & Stock Management</h1>
+                <p class="admin-page-header__subtitle">Manage mobile phones, consumer electronics, stock levels,
+                  pricing, and catalog visibility.</p>
               </div>
-              <h3 class="admin-empty-state__title">No Products Found</h3>
-              <p class="admin-empty-state__desc">No inventory items matched your selected filters or search keywords.</p>
-              <button type="button" class="btn btn--outline btn--sm" id="resetProductFiltersBtn">Reset Filters</button>
+              <div class="admin-page-header__actions" style="display: flex; gap: var(--space-2);">
+                <button type="button" class="btn btn--outline btn--sm" id="pageHeaderNewAttrBtn"
+                  data-open-modal="createAttributeModal">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  <span>New Attribute</span>
+                </button>
+                <button type="button" class="btn btn--primary btn--sm" id="addNewProductBtn"
+                  data-open-modal="productModal">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  <span>Add New Product</span>
+                </button>
+              </div>
             </div>
+
+            <!-- ── Toolbar & Filters ── -->
+            <div class="admin-toolbar">
+              <div class="admin-toolbar__left">
+                <div class="admin-search-input-wrap">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="9" cy="9" r="6" />
+                    <path d="M13.5 13.5L17 17" />
+                  </svg>
+                  <input type="search" id="productSearchInput" class="admin-search-input"
+                    placeholder="Search by name, brand, model, or slug..." />
+                </div>
+
+                <select id="productCategoryFilter" class="admin-select">
+                  <option value="all">All Categories</option>
+                  <option value="Mobiles">Mobiles</option>
+                  <option value="TVs">TVs</option>
+                  <option value="Air Conditioners">Air Conditioners</option>
+                  <option value="Refrigerators">Refrigerators</option>
+                  <option value="Home Theatres">Home Theatres</option>
+                  <option value="Kitchen Appliances">Kitchen Appliances</option>
+                </select>
+
+                <select id="productStockFilter" class="admin-select">
+                  <option value="all">All Stock Statuses</option>
+                  <option value="In Stock">In Stock</option>
+                  <option value="Low Stock">Low Stock (< 5)</option>
+                  <option value="Out of Stock">Out of Stock (0)</option>
+                </select>
+              </div>
+              <div
+                style="font-size: var(--text-xs); color: var(--color-text-muted); font-weight: var(--font-semibold);">
+                Showing <span id="productsCountDisplay">8</span> products
+              </div>
+            </div>
+
+            <!-- ── Products Table Card ── -->
+            <div class="admin-card">
+              <div class="admin-card__body">
+                <div class="admin-table-wrap">
+                  <table class="admin-table" id="productsTable">
+                    <thead>
+                      <tr>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Stock Units</th>
+                        <th>Stock Status</th>
+                        <th>Visibility</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="productsTableBody">
+                      <!-- Populated by admin.js -->
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Empty State inside table card -->
+                <div class="admin-empty-state" id="productsEmptyState" style="display: none;">
+                  <div class="admin-empty-state__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path
+                        d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                      </path>
+                    </svg>
+                  </div>
+                  <h3 class="admin-empty-state__title">No Products Found</h3>
+                  <p class="admin-empty-state__desc">No inventory items matched your selected filters or search
+                    keywords.</p>
+                  <button type="button" class="btn btn--outline btn--sm" id="resetProductFiltersBtn">Reset
+                    Filters</button>
+                </div>
+              </div>
+            </div>
+
           </div>
-        </div>
+        </main>
 
-      </div>
-    </main>
+    </div>
 
-  </div>
+    <%- include('../../partials/admin/admin-footer') %>
+      <%- include('../../partials/admin/admin-modals') %>
 
-  <%- include('../../partials/admin/admin-footer') %>
-  <%- include('../../partials/admin/admin-modals') %>
-
-  <!-- Data & Scripts -->
-  <script src="/assets/data/admin-mock-data.js"></script>
-  <script src="/assets/js/admin.js" defer></script>
+        <!-- Data & Scripts -->
+        <script src="/assets/data/admin-mock-data.js"></script>
+        <script src="/assets/js/admin.js" defer></script>
 
 </body>
+
 </html>

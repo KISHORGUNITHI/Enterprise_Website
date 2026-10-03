@@ -86,9 +86,18 @@
   }
 
   function stars(rating) {
+    const rId = Math.random().toString(36).slice(2, 8);
+    const percent = Math.round((rating % 1) * 100);
     return Array.from({ length: 5 }, (_, i) => {
-      const cls = i < Math.floor(rating) ? '' : ' plp-card__star--empty';
-      return `<svg class="plp-card__star${cls}" viewBox="0 0 16 16"><path d="M8 1.5l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11.5l-5.2 3.3 1.8-5.5L0 7h6.2z"/></svg>`;
+      let fill = 'var(--gray-300)';
+      let defs = '';
+      if (rating >= i + 1) {
+        fill = 'var(--color-warning-500)';
+      } else if (rating > i) {
+        fill = `url(#grad-${rId}-${i})`;
+        defs = `<defs><linearGradient id="grad-${rId}-${i}" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="${percent}%" stop-color="var(--color-warning-500)" /><stop offset="${percent}%" stop-color="var(--gray-300)" /></linearGradient></defs>`;
+      }
+      return `<svg class="plp-card__star" style="fill:${fill};" viewBox="0 0 16 16"><path d="M8 1.5l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11.5l-5.2 3.3 1.8-5.5L0 7h6.2z"/>${defs}</svg>`;
     }).join('');
   }
 
@@ -107,10 +116,6 @@
 
   function buildCard(p) {
     const route = `/product/${p.slug || p.id}`;
-    const emi   = p.salePrice > 5000
-      ? `<p class="plp-card__emi">EMI from ₹${Math.ceil(p.salePrice / 12).toLocaleString('en-IN')}/mo</p>`
-      : '';
-
     const imageContent = p.imageUrl
       ? `<img src="${p.imageUrl}" alt="${p.brand} ${p.name}" class="plp-card__img" loading="lazy" />`
       : placeholder(p.color || '#1e3d8f');
@@ -145,7 +150,6 @@
               ? `<span class="plp-card__price-discount">${p.discount}% off</span>`
               : ''}
           </div>
-          ${emi}
         </div>
         <div class="plp-card__footer">
           <a href="${route}" class="btn btn--primary plp-card__cta">
@@ -307,20 +311,51 @@
 
   // Accent colour per category slug — used for placeholder SVGs when no image is available.
   const CATEGORY_COLORS = {
-    mobiles: '#1e3d8f',
-    tvs:     '#b85e00',
-    acs:     '#0369a1',
+    trending: '#f59e0b',
+    mobiles:  '#1e3d8f',
+    tvs:      '#b85e00',
+    acs:      '#0369a1',
   };
 
   // Slugs that are served live from the backend API (PostgreSQL + Cloudinary).
   // Add a slug here when its products are seeded into the DB.
-  const API_SLUGS = ['mobiles', 'mobile', 'tvs', 'tv', 'acs', 'ac'];
+  const API_SLUGS = ['trending', 'mobiles', 'mobile', 'tvs', 'tv', 'acs', 'ac'];
 
   // URL alias → canonical API slug used by /api/products/category/:slug
   const SLUG_ALIASES = { mobile: 'mobiles', tv: 'tvs', ac: 'acs' };
 
   /**
-   * Fetch products for `slug` from /api/products/category/:slug,
+   * Dynamically add brand checkboxes to sidebar filter if not present
+   */
+  function updateBrandFilters(products) {
+    if (!Array.isArray(products) || products.length === 0) return;
+    const brandContainers = document.querySelectorAll('.plp-filter-brand');
+    if (!brandContainers.length) return;
+
+    const uniqueBrands = [...new Set(products.map(p => p.brand).filter(Boolean))].sort();
+
+    brandContainers.forEach(container => {
+      const existingValues = Array.from(container.querySelectorAll('input')).map(inp => (inp.value || '').toLowerCase());
+      uniqueBrands.forEach(brand => {
+        if (!existingValues.includes(brand.toLowerCase())) {
+          const label = document.createElement('label');
+          label.className = 'plp-filter-option';
+          label.innerHTML = `
+            <input type="checkbox" value="${brand}" aria-label="${brand}"/>
+            <span class="plp-filter-option__label">${brand}</span>
+          `;
+          label.querySelector('input').addEventListener('change', () => {
+            currentPage = 1;
+            renderProducts();
+          });
+          container.appendChild(label);
+        }
+      });
+    });
+  }
+
+  /**
+   * Fetch products for `slug` from /api/products/category/:slug or /api/products/trending,
    * map the response to PLP card shape, write into categoryPlpData,
    * then re-render the grid.
    */
@@ -330,7 +365,10 @@
     renderProducts();
 
     try {
-      const res = await fetch(`/api/products/category/${slug}`);
+      const endpoint = slug === 'trending'
+        ? '/api/products/trending?limit=100'
+        : `/api/products/category/${slug}`;
+      const res = await fetch(endpoint);
       if (!res.ok) throw new Error(`HTTP error ${res.status}`);
       const json = await res.json();
 
@@ -339,6 +377,7 @@
         window.categoryPlpData[SLUG] = json.data.map(p => {
           const primaryImg  = p.productImages?.find(img => img.isPrimary)?.imageUrl
             || p.productImages?.[0]?.imageUrl
+            || p.imageUrl
             || '';
           const price       = parseFloat(p.price) || 0;
           const isAvailable = p.availability === 'AVAILABLE';
@@ -350,18 +389,21 @@
             brand:         p.brand,
             name:          p.name,
             description:   p.description,
-            rating:        4.5,
-            reviews:       0,
+            rating:        parseFloat(p.rating) || 0,
+            reviews:       p.reviews || 0,
             originalPrice: price,
             salePrice:     price,
             discount:      0,
             availability:  p.availability,
-            badge:         isAvailable ? 'In Stock' : 'Out of Stock',
-            badgeType:     isAvailable ? 'success'  : 'primary',
+            badge:         isAvailable ? (SLUG === 'trending' ? 'Trending' : 'In Stock') : 'Out of Stock',
+            badgeType:     isAvailable ? (SLUG === 'trending' ? 'accent' : 'success') : 'primary',
             color:         CATEGORY_COLORS[slug] || '#1e3d8f',
             imageUrl:      primaryImg,
           };
         });
+
+        // Add brand checkboxes dynamically for products
+        updateBrandFilters(window.categoryPlpData[SLUG]);
       } else {
         throw new Error(json.message || `Failed to load ${slug} products`);
       }

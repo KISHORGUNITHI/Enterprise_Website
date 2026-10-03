@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= title %></title>
+  <link rel="icon" type="image/svg+xml" href="/public/icons/favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+  <!-- Foundation -->
+  <link rel="stylesheet" href="/assets/css/variables.css"/>
+  <link rel="stylesheet" href="/assets/css/base.css"/>
+  <link rel="stylesheet" href="/assets/css/utilities.css"/>
+
+  <!-- Header tokens + styles (reused untouched) -->
+  <link rel="stylesheet" href="/assets/css/home-header.css"/>
+  <link rel="stylesheet" href="/assets/css/category-header.css"/>
+
+  <!-- Checkout Page Styles -->
+  <link rel="stylesheet" href="/assets/css/checkout.css"/>
+
+  <!-- Auth modal styles -->
+  <link rel="stylesheet" href="/assets/css/login-required-modal.css"/>
+
+  <!-- Footer -->
+  <link rel="stylesheet" href="/assets/css/footer.css"/>
+  <link rel="stylesheet" href="/assets/css/home-footer.css"/>
+
+  <!-- Responsive -->
+  <link rel="stylesheet" href="/assets/css/responsive.css"/>
+</head>
+
+<body class="checkout-body">
+
+  <!-- ── 1. Reused Category Header (DO NOT CHANGE) ── -->
+  <%- include('../../partials/category-header') %>
+
+  <!-- ── 2. Main Checkout View ── -->
+  <main class="checkout-page" id="main-content">
+    <div class="checkout-container">
+
+      <!-- Breadcrumbs / Steps Indicator -->
+      <nav class="checkout-breadcrumb" aria-label="Checkout Progress">
+        <ol class="checkout-steps">
+          <li class="checkout-step checkout-step--completed">
+            <span class="checkout-step__num">✓</span>
+            <span class="checkout-step__label">Bag</span>
+          </li>
+          <li class="checkout-step checkout-step--separator">›</li>
+          <li class="checkout-step checkout-step--active">
+            <span class="checkout-step__num">1</span>
+            <span class="checkout-step__label">Address & Items</span>
+          </li>
+          <li class="checkout-step checkout-step--separator">›</li>
+          <li class="checkout-step">
+            <span class="checkout-step__num">2</span>
+            <span class="checkout-step__label">Payment</span>
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Alert Notification Banner -->
+      <div id="checkoutAlert" class="checkout-alert" role="alert" hidden>
+        <span class="checkout-alert__icon" id="checkoutAlertIcon"></span>
+        <span class="checkout-alert__msg" id="checkoutAlertMsg"></span>
+        <button type="button" class="checkout-alert__close" id="checkoutAlertClose" aria-label="Dismiss">&times;</button>
+      </div>
+
+      <!-- Checkout Two-Column Grid -->
+      <div class="checkout-grid" id="checkoutGrid">
+
+        <!-- ══════════════════════════════════════════════════════════
+             LEFT / MAIN COLUMN: Address + Order Items
+        ══════════════════════════════════════════════════════════ -->
+        <div class="checkout-main">
+
+          <!-- ── Section 1: Delivery Address ── -->
+          <section class="checkout-card checkout-section-address" aria-labelledby="deliveryAddressHeading">
+            <div class="checkout-card__header">
+              <div class="checkout-card__title-wrap">
+                <span class="checkout-section-badge">1</span>
+                <h2 class="checkout-card__title" id="deliveryAddressHeading">DELIVERY ADDRESS</h2>
+              </div>
+              <button type="button" class="checkout-btn-change" id="openChangeAddressBtn" aria-label="Change delivery address" hidden>
+                Change
+              </button>
+            </div>
+
+            <div class="checkout-card__body" id="selectedAddressContainer">
+              <!-- Loading Skeleton -->
+              <div class="checkout-address-skeleton" id="addressSkeleton" hidden>
+                <div class="skeleton-line skeleton-line--title"></div>
+                <div class="skeleton-line skeleton-line--text"></div>
+                <div class="skeleton-line skeleton-line--phone"></div>
+              </div>
+
+              <!-- State A: Active Selected Address -->
+              <div class="checkout-selected-address" id="selectedAddressCard" hidden>
+                <div class="checkout-selected-address__header">
+                  <div class="checkout-selected-address__recipient">
+                    <span class="checkout-selected-address__name" id="selectedAddrName"></span>
+                    <span class="checkout-addr-type-tag" id="selectedAddrType">HOME</span>
+                    <span class="checkout-addr-default-tag" id="selectedAddrDefault" hidden>DEFAULT</span>
+                  </div>
+                </div>
+                <p class="checkout-selected-address__text" id="selectedAddrText"></p>
+                <p class="checkout-selected-address__phone">
+                  <span class="checkout-phone-label">Phone Number:</span>
+                  <strong id="selectedAddrPhone"></strong>
+                </p>
+              </div>
+
+              <!-- State B: No Saved Address -->
+              <div class="checkout-no-address" id="noAddressCard" hidden>
+                <div class="checkout-no-address__icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 21s-8-5.686-8-12a8 8 0 1116 0c0 6.314-8 12-8 12z"/>
+                    <circle cx="12" cy="9" r="2.5"/>
+                  </svg>
+                </div>
+                <div class="checkout-no-address__content">
+                  <h3 class="checkout-no-address__title">No Delivery Address Found</h3>
+                  <p class="checkout-no-address__desc">Please add your delivery address to continue with your purchase.</p>
+                </div>
+                <button type="button" class="btn btn--primary checkout-btn-add-addr" id="noAddrAddBtn">
+                  + Add Address
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ── Section 2: Order Items (Products) ── -->
+          <section class="checkout-card checkout-section-items" aria-labelledby="orderItemsHeading">
+            <div class="checkout-card__header">
+              <div class="checkout-card__title-wrap">
+                <span class="checkout-section-badge">2</span>
+                <h2 class="checkout-card__title" id="orderItemsHeading">
+                  ORDER SUMMARY (<span id="checkoutItemsCount">0</span>)
+                </h2>
+              </div>
+            </div>
+
+            <div class="checkout-card__body">
+              <!-- Items List -->
+              <div class="checkout-items-list" id="checkoutItemsList">
+                <!-- Injected via JavaScript -->
+              </div>
+
+              <!-- Empty Bag State -->
+              <div class="checkout-empty-items" id="checkoutEmptyItems" hidden>
+                <div class="checkout-empty-items__icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <path d="M16 10a4 4 0 01-8 0"/>
+                  </svg>
+                </div>
+                <h3 class="checkout-empty-items__title">Your Checkout Bag is Empty</h3>
+                <p class="checkout-empty-items__desc">Explore our top deals and add items to place an order.</p>
+                <a href="/products/mobiles" class="btn btn--primary">Browse Products</a>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════
+             RIGHT / SIDEBAR COLUMN: Price Details & Place Order
+        ══════════════════════════════════════════════════════════ -->
+        <aside class="checkout-sidebar" aria-label="Order Summary and Payment">
+          <div class="checkout-price-card">
+            <h2 class="checkout-price-card__title">PRICE DETAILS</h2>
+            <div class="checkout-price-card__divider"></div>
+
+            <dl class="checkout-price-breakdown">
+              <div class="checkout-price-row">
+                <dt class="checkout-price-row__label">Price (<span id="summaryItemCount">0</span> items)</dt>
+                <dd class="checkout-price-row__val" id="summarySubtotal">₹0</dd>
+              </div>
+
+              <div class="checkout-price-row checkout-price-row--discount" id="summaryDiscountRow">
+                <dt class="checkout-price-row__label">Discount</dt>
+                <dd class="checkout-price-row__val checkout-text-success" id="summaryDiscount">-₹0</dd>
+              </div>
+
+              <div class="checkout-price-row">
+                <dt class="checkout-price-row__label">Delivery Charges</dt>
+                <dd class="checkout-price-row__val">
+                  <span class="checkout-price-original">₹99</span>
+                  <span class="checkout-text-success font-semibold">FREE</span>
+                </dd>
+              </div>
+
+              <div class="checkout-price-row">
+                <dt class="checkout-price-row__label">Secured Packaging Fee</dt>
+                <dd class="checkout-price-row__val checkout-text-success font-semibold">FREE</dd>
+              </div>
+
+              <div class="checkout-price-card__divider checkout-price-card__divider--dashed"></div>
+
+              <div class="checkout-price-row checkout-price-row--total">
+                <dt class="checkout-price-total-label">Total Amount</dt>
+                <dd class="checkout-price-total-val" id="summaryTotalAmount">₹0</dd>
+              </div>
+            </dl>
+
+            <!-- Savings Banner -->
+            <div class="checkout-savings-banner" id="savingsBanner" hidden>
+              <svg class="checkout-savings-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              <span>You will save <strong id="savingsAmountText">₹0</strong> on this order!</span>
+            </div>
+
+            <!-- Payment Method Selection -->
+            <div class="checkout-payment-section">
+              <label class="checkout-payment-section__title" id="paymentMethodTitle">Payment Mode</label>
+              <div class="checkout-payment-options" role="radiogroup" aria-labelledby="paymentMethodTitle">
+                <label class="checkout-payment-opt checkout-payment-opt--selected">
+                  <input type="radio" name="payment_mode" value="COD" checked class="checkout-payment-radio"/>
+                  <div class="checkout-payment-opt__info">
+                    <span class="checkout-payment-opt__name">Cash on Delivery (COD)</span>
+                    <span class="checkout-payment-opt__sub">Pay cash or UPI at the time of delivery</span>
+                  </div>
+                </label>
+
+                <label class="checkout-payment-opt">
+                  <input type="radio" name="payment_mode" value="UPI" class="checkout-payment-radio"/>
+                  <div class="checkout-payment-opt__info">
+                    <span class="checkout-payment-opt__name">UPI / Online Payment</span>
+                    <span class="checkout-payment-opt__sub">Instant payment via GPay, PhonePe, Cards</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Place Order CTA Button -->
+            <button type="button" class="btn btn--accent btn--block checkout-place-order-btn" id="placeOrderBtn">
+              <span class="checkout-place-order-btn__text">PLACE ORDER</span>
+              <span class="checkout-btn-spinner" id="placeOrderSpinner" hidden aria-hidden="true"></span>
+            </button>
+
+            <!-- Trust / Security Signals -->
+            <div class="checkout-trust-badges">
+              <div class="checkout-trust-item">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M10 2l6 3v5c0 4.5-3 8-6 9-3-1-6-4.5-6-9V5l6-3z"/>
+                </svg>
+                <span>Safe and Secure Payments</span>
+              </div>
+              <div class="checkout-trust-item">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M16 6l-8 8-4-4"/>
+                </svg>
+                <span>100% Genuine Electronics</span>
+              </div>
+            </div>
+
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       3. ADDRESS SELECTION MODAL / DRAWER
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="checkout-modal-backdrop" id="addressModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="addressModalTitle" hidden>
+    <div class="checkout-modal" id="addressModal">
+      
+      <!-- Modal Header -->
+      <div class="checkout-modal__header">
+        <div class="checkout-modal__title-group">
+          <h3 class="checkout-modal__title" id="addressModalTitle">Select Delivery Address</h3>
+          <p class="checkout-modal__subtitle" id="addressModalSubtitle">Choose where you want your order delivered</p>
+        </div>
+        <button type="button" class="checkout-modal__close" id="closeAddressModalBtn" aria-label="Close address selector">
+          &times;
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="checkout-modal__body" id="addressModalBody">
+        
+        <!-- View 1: Saved Addresses List -->
+        <div class="checkout-address-list-view" id="addressListView">
+          
+          <div class="checkout-modal__action-bar">
+            <span class="checkout-modal__addr-count" id="modalSavedCount">Saved Addresses (0)</span>
+            <button type="button" class="btn btn--outline btn--sm checkout-modal__btn-add" id="showNewAddressFormBtn">
+              + Add New Address
+            </button>
+          </div>
+
+          <div class="checkout-address-cards-list" id="modalAddressCardsList">
+            <!-- Rendered by JS from DB -->
+          </div>
+        </div>
+
+        <!-- View 2: Add / Edit Address Form -->
+        <div class="checkout-address-form-view" id="addressFormView" hidden>
+          <div class="checkout-form-header">
+            <button type="button" class="checkout-form-back-btn" id="backToAddressListBtn" aria-label="Back to saved addresses">
+              ← Back to saved addresses
+            </button>
+            <h4 class="checkout-form-title" id="addrFormHeaderTitle">ADD NEW ADDRESS</h4>
+          </div>
+
+          <form class="checkout-address-form" id="checkoutAddressForm" novalidate>
+            <input type="hidden" id="addrFormId" value=""/>
+
+            <div class="checkout-form-grid">
+              
+              <!-- Full Name -->
+              <div class="checkout-form-group">
+                <label for="addrFormFullName" class="checkout-form-label">Full Name <span class="required">*</span></label>
+                <input type="text" id="addrFormFullName" class="checkout-form-input" placeholder="e.g. Kishor Gunithi" required/>
+                <span class="checkout-form-error" id="errFullName" hidden>Please enter your full name (minimum 2 characters).</span>
+              </div>
+
+              <!-- Mobile Number -->
+              <div class="checkout-form-group">
+                <label for="addrFormPhone" class="checkout-form-label">10-digit Mobile Number <span class="required">*</span></label>
+                <div class="checkout-phone-input-wrap">
+                  <span class="checkout-phone-prefix">+91</span>
+                  <input type="tel" id="addrFormPhone" class="checkout-form-input checkout-phone-field" placeholder="9876543210" maxlength="10" required/>
+                </div>
+                <span class="checkout-form-error" id="errPhone" hidden>Please enter a valid 10-digit Indian phone number.</span>
+              </div>
+
+              <!-- Pincode -->
+              <div class="checkout-form-group">
+                <div class="checkout-label-with-action">
+                  <label for="addrFormPincode" class="checkout-form-label">Pincode <span class="required">*</span></label>
+                  <button type="button" class="checkout-btn-location" id="useCurrentLocationBtn">
+                    <svg viewBox="0 0 16 16" fill="currentColor" width="12" height="12" aria-hidden="true">
+                      <path d="M8 0a8 8 0 100 16A8 8 0 008 0zm0 14A6 6 0 118 2a6 6 0 010 12z"/>
+                      <circle cx="8" cy="8" r="3"/>
+                    </svg>
+                    Use my location
+                  </button>
+                </div>
+                <input type="text" id="addrFormPincode" class="checkout-form-input" placeholder="6-digit Pincode (e.g. 522240)" maxlength="6" required/>
+                <span class="checkout-form-error" id="errPincode" hidden>Please enter a valid 6-digit postal pincode.</span>
+                <span class="checkout-location-status" id="addrLocationStatus" hidden></span>
+              </div>
+
+              <!-- Locality / Landmark -->
+              <div class="checkout-form-group">
+                <label for="addrFormLandmark" class="checkout-form-label">Locality / Landmark (Optional)</label>
+                <input type="text" id="addrFormLandmark" class="checkout-form-input" placeholder="Near SRM Auditorium, Vedhavathi"/>
+              </div>
+
+              <!-- Address Line 1 -->
+              <div class="checkout-form-group checkout-form-group--full">
+                <label for="addrFormLine1" class="checkout-form-label">Flat, House no., Building, Company, Apartment <span class="required">*</span></label>
+                <input type="text" id="addrFormLine1" class="checkout-form-input" placeholder="e.g. Flat 716, Block B, SRM Campus" required/>
+                <span class="checkout-form-error" id="errLine1" hidden>Please enter your street address or building number.</span>
+              </div>
+
+              <!-- Address Line 2 -->
+              <div class="checkout-form-group checkout-form-group--full">
+                <label for="addrFormLine2" class="checkout-form-label">Area, Street, Sector, Village (Optional)</label>
+                <input type="text" id="addrFormLine2" class="checkout-form-input" placeholder="e.g. Mangalagiri Road, Neerukonda"/>
+              </div>
+
+              <!-- City / District -->
+              <div class="checkout-form-group">
+                <label for="addrFormCity" class="checkout-form-label">City / District <span class="required">*</span></label>
+                <input type="text" id="addrFormCity" class="checkout-form-input" placeholder="e.g. Guntur / Vijayawada" required/>
+                <span class="checkout-form-error" id="errCity" hidden>Please enter your city.</span>
+              </div>
+
+              <!-- State -->
+              <div class="checkout-form-group">
+                <label for="addrFormState" class="checkout-form-label">State <span class="required">*</span></label>
+                <select id="addrFormState" class="checkout-form-select" required>
+                  <option value="">-- Select State --</option>
+                  <option value="Andhra Pradesh">Andhra Pradesh</option>
+                  <option value="Telangana">Telangana</option>
+                  <option value="Karnataka">Karnataka</option>
+                  <option value="Tamil Nadu">Tamil Nadu</option>
+                  <option value="Maharashtra">Maharashtra</option>
+                  <option value="Delhi">Delhi</option>
+                  <option value="Kerala">Kerala</option>
+                  <option value="Gujarat">Gujarat</option>
+                  <option value="West Bengal">West Bengal</option>
+                  <option value="Other">Other</option>
+                </select>
+                <span class="checkout-form-error" id="errState" hidden>Please select your state.</span>
+              </div>
+
+            </div>
+
+            <!-- Address Type (HOME / WORK / OTHER) -->
+            <div class="checkout-form-group checkout-form-group--full checkout-form-type-group">
+              <label class="checkout-form-label">Address Type</label>
+              <div class="checkout-type-radios">
+                <label class="checkout-type-radio-label">
+                  <input type="radio" name="address_type" value="HOME" checked/>
+                  <span class="checkout-type-pill">HOME</span>
+                </label>
+                <label class="checkout-type-radio-label">
+                  <input type="radio" name="address_type" value="WORK"/>
+                  <span class="checkout-type-pill">WORK</span>
+                </label>
+                <label class="checkout-type-radio-label">
+                  <input type="radio" name="address_type" value="OTHER"/>
+                  <span class="checkout-type-pill">OTHER</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Make Default Checkbox -->
+            <div class="checkout-form-group checkout-form-group--full checkout-form-default-check">
+              <label class="checkout-checkbox-label">
+                <input type="checkbox" id="addrFormIsDefault"/>
+                <span>Set as my default delivery address</span>
+              </label>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="checkout-form-actions">
+              <button type="button" class="btn btn--outline" id="cancelAddressFormBtn">Cancel</button>
+              <button type="submit" class="btn btn--primary" id="saveAddressBtn">
+                <span id="saveAddrBtnText">Save & Deliver Here</span>
+                <span class="checkout-btn-spinner" id="saveAddrSpinner" hidden aria-hidden="true"></span>
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       4. ORDER SUCCESS CELEBRATION MODAL
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="checkout-success-overlay" id="orderSuccessModal" role="dialog" aria-modal="true" hidden>
+    <div class="checkout-success-card">
+      <div class="checkout-success-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+
+      <h2 class="checkout-success-title">Order Placed Successfully!</h2>
+      <p class="checkout-success-sub">Thank you for shopping with Kishor Enterprises. We have received your order.</p>
+
+      <div class="checkout-success-meta">
+        <div class="checkout-success-meta-row">
+          <span>Order ID:</span>
+          <strong id="successOrderShortId">ORD-XXXXXX</strong>
+        </div>
+        <div class="checkout-success-meta-row">
+          <span>Total Amount:</span>
+          <strong id="successOrderTotal">₹0</strong>
+        </div>
+        <div class="checkout-success-meta-row">
+          <span>Payment Mode:</span>
+          <strong id="successOrderPayment">Cash on Delivery</strong>
+        </div>
+        <div class="checkout-success-meta-row">
+          <span>Delivery Estimate:</span>
+          <span class="checkout-text-success font-semibold">3-5 Business Days</span>
+        </div>
+      </div>
+
+      <div class="checkout-success-actions">
+        <a href="/orders" class="btn btn--primary btn--block">View My Orders</a>
+        <a href="/home" class="btn btn--outline btn--block">Continue Shopping</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 5. Existing Login Required Modal (reused from partials) ── -->
+  <%- include('../../partials/login-required-modal') %>
+
+  <!-- ── 6. Existing Footer (reused untouched) ── -->
+  <%- include('../../partials/home-footer') %>
+
+  <!-- Scripts -->
+  <script src="/assets/js/auth-guard.js"></script>
+  <script src="/assets/js/checkout.js"></script>
+
+</body>
+</html>

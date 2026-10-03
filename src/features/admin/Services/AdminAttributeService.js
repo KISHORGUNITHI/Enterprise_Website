@@ -37,18 +37,57 @@ export class AdminAttributeService {
         throw error;
       }
 
+      // Sanitize attribute name
+      const rawName = String(data.name).trim();
+      const sanitizedName = rawName.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/(^-|-$)/g, '') || rawName;
+
       // Check if attribute name already exists
-      const existing = await this.repository.findByName(data.name);
+      const existing = await this.repository.findByName(sanitizedName);
       if (existing) {
-        const error = new Error('Attribute name already exists');
+        const error = new Error(`Attribute name "${sanitizedName}" already exists`);
         error.status = 409;
         throw error;
       }
 
-      const attribute = await this.repository.create({
-        name: data.name,
-        displayName: data.displayName
-      });
+      const createPayload = {
+        name: sanitizedName,
+        displayName: String(data.displayName).trim()
+      };
+
+      // Process initial values if provided
+      let valuesToCreate = [];
+      if (typeof data.values === 'string' && data.values.trim()) {
+        valuesToCreate = data.values.split(',').map(v => v.trim()).filter(Boolean);
+      } else if (Array.isArray(data.values)) {
+        valuesToCreate = data.values;
+      }
+
+      if (valuesToCreate.length > 0) {
+        const uniqueValues = [];
+        const seenValues = new Set();
+
+        for (const item of valuesToCreate) {
+          const displayVal = typeof item === 'object' ? String(item.displayValue || item.value).trim() : String(item).trim();
+          let slugVal = typeof item === 'object' && item.value ? String(item.value).trim() : displayVal.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/(^-|-$)/g, '');
+          if (!slugVal) slugVal = `val-${Date.now()}`;
+
+          if (displayVal && !seenValues.has(slugVal)) {
+            seenValues.add(slugVal);
+            uniqueValues.push({
+              value: slugVal,
+              displayValue: displayVal
+            });
+          }
+        }
+
+        if (uniqueValues.length > 0) {
+          createPayload.values = {
+            create: uniqueValues
+          };
+        }
+      }
+
+      const attribute = await this.repository.create(createPayload);
 
       return {
         success: true,
@@ -100,9 +139,15 @@ export class AdminAttributeService {
    */
   async createValue(attributeId, data) {
     try {
+      const displayValue = String(data.displayValue || data.value || '').trim();
+      let value = String(data.value || '').trim();
+      if (!value && displayValue) {
+        value = displayValue.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/(^-|-$)/g, '');
+      }
+
       // Validate required fields
-      if (!data.value || !data.displayValue) {
-        const error = new Error('Missing required fields: value, displayValue');
+      if (!value || !displayValue) {
+        const error = new Error('Missing required field: displayValue');
         error.status = 400;
         throw error;
       }
@@ -116,23 +161,23 @@ export class AdminAttributeService {
       }
 
       // Check if value already exists for this attribute
-      const valueExists = await this.repository.valueExists(attributeId, data.value);
+      const valueExists = await this.repository.valueExists(attributeId, value);
       if (valueExists) {
-        const error = new Error(`Value "${data.value}" already exists for this attribute`);
+        const error = new Error(`Value "${value}" already exists for this attribute`);
         error.status = 409;
         throw error;
       }
 
-      const value = await this.repository.createValue({
+      const valObj = await this.repository.createValue({
         attributeId,
-        value: data.value,
-        displayValue: data.displayValue
+        value,
+        displayValue
       });
 
       return {
         success: true,
         message: 'Attribute value created successfully',
-        data: value
+        data: valObj
       };
     } catch (err) {
       const error = err.status ? err : new Error(`Failed to create attribute value: ${err.message}`);

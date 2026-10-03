@@ -62,8 +62,9 @@
             <li><a href="/profile"  class="footer__nav-link">My Profile</a></li>
             <li><a href="/orders"   class="footer__nav-link">My Orders</a></li>
             <li><a href="/cart"     class="footer__nav-link">Cart</a></li>
-            <li><a href="/login"    class="footer__nav-link">Login</a></li>
-            <li><a href="/signup"   class="footer__nav-link">Create Account</a></li>
+            <li id="footerLoginLi"><a href="/login" class="footer__nav-link">Login</a></li>
+            <li id="footerSignupLi"><a href="/signup" class="footer__nav-link">Create Account</a></li>
+            <li id="footerLogoutLi" style="display: none;"><button type="button" class="footer__nav-link" id="footerLogoutBtn" style="background:none;border:none;padding:0;color:inherit;cursor:pointer;font-family:inherit;font-size:inherit;">Logout</button></li>
             <li><a href="#"         class="footer__nav-link">Help &amp; FAQ</a></li>
             <li><a href="#"         class="footer__nav-link">Return Policy</a></li>
           </ul>
@@ -77,7 +78,7 @@
               <div class="footer__contact-icon" aria-hidden="true">
                 <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
               </div>
-              <span>Main Road, Hyderabad — 500001</span>
+              <span>Kishor Enterprises, All Andhra Road, Pathapatnam, Srikakulam(dist), AP — 532213</span>
             </div>
             <div class="footer__contact-item">
               <div class="footer__contact-icon" aria-hidden="true">
@@ -114,4 +115,43 @@
   </div>
 
 </footer>
-<script>document.getElementById('homeFooterYear').textContent = new Date().getFullYear();</script>
+<script>
+(function() {
+  document.getElementById('homeFooterYear').textContent = new Date().getFullYear();
+
+  function syncFooterAuth() {
+    try {
+      var raw = localStorage.getItem('authUser');
+      if (raw) {
+        var u = JSON.parse(raw);
+        if (u && (u.id || u.email)) {
+          var loginLi = document.getElementById('footerLoginLi');
+          var signupLi = document.getElementById('footerSignupLi');
+          var logoutLi = document.getElementById('footerLogoutLi');
+          if (loginLi) loginLi.style.display = 'none';
+          if (signupLi) signupLi.style.display = 'none';
+          if (logoutLi) logoutLi.style.display = 'block';
+        }
+      }
+    } catch (_) {}
+  }
+
+  syncFooterAuth();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', syncFooterAuth);
+  }
+
+  var logoutBtn = document.getElementById('footerLogoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', function() {
+      fetch('/logout', { method: 'POST', credentials: 'same-origin' })
+        .finally(function () {
+          localStorage.removeItem('authUser');
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('pendingRoute');
+          window.location.href = '/';
+        });
+    });
+  }
+})();
+</script>

@@ -50,6 +50,12 @@
         </svg>
         Admin
       </a>
+      <a href="/profile" class="btn btn--outline btn--sm" id="navProfileBtn" style="display: none;">
+        Profile
+      </a>
+      <button type="button" class="btn btn--ghost btn--sm" id="navLogoutBtn" style="display: none; color: var(--color-text-primary);">
+        Logout
+      </button>
       <a href="/login" class="btn btn--primary btn--sm navbar__login-btn" id="navbarLoginBtn">
         <svg class="icon icon--sm" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
           <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
@@ -90,7 +96,8 @@
           </svg>
           Call: 9963 657 799
         </a>
-        <a href="/login" class="btn btn--primary btn--lg w-full">Login</a>
+        <a href="/login" class="btn btn--primary btn--lg w-full" id="navMobileLoginBtn">Login</a>
+        <a href="/profile" class="btn btn--primary btn--lg w-full" id="navMobileProfileBtn" style="display: none;">My Profile</a>
       </div>
     </nav>
   </div>
@@ -101,15 +108,49 @@
 
 <script>
 (function() {
-  try {
-    var raw = localStorage.getItem('authUser');
-    if (raw) {
-      var u = JSON.parse(raw);
-      if (u && (u.role === 'ADMIN' || u.role === 'admin')) {
-        var adminBtn = document.getElementById('navAdminBtn');
-        if (adminBtn) adminBtn.style.display = 'inline-flex';
+  function syncAuthUI() {
+    try {
+      var raw = localStorage.getItem('authUser');
+      if (raw) {
+        var u = JSON.parse(raw);
+        if (u && (u.id || u.email)) {
+          var loginBtn = document.getElementById('navbarLoginBtn');
+          var profileBtn = document.getElementById('navProfileBtn');
+          var logoutBtn = document.getElementById('navLogoutBtn');
+          var mobileLogin = document.getElementById('navMobileLoginBtn');
+          var mobileProfile = document.getElementById('navMobileProfileBtn');
+
+          if (loginBtn) loginBtn.style.display = 'none';
+          if (profileBtn) profileBtn.style.display = 'inline-flex';
+          if (logoutBtn) logoutBtn.style.display = 'inline-flex';
+          if (mobileLogin) mobileLogin.style.display = 'none';
+          if (mobileProfile) mobileProfile.style.display = 'block';
+
+          if (u.role === 'ADMIN' || u.role === 'admin') {
+            var adminBtn = document.getElementById('navAdminBtn');
+            if (adminBtn) adminBtn.style.display = 'inline-flex';
+          }
+        }
       }
-    }
-  } catch (e) {}
+    } catch (e) {}
+  }
+
+  syncAuthUI();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', syncAuthUI);
+  }
+
+  var logoutBtn = document.getElementById('navLogoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', function () {
+      fetch('/logout', { method: 'POST', credentials: 'same-origin' })
+        .finally(function () {
+          localStorage.removeItem('authUser');
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('pendingRoute');
+          window.location.href = '/';
+        });
+    });
+  }
 })();
 </script>

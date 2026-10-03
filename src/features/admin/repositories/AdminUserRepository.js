@@ -78,10 +78,19 @@ export class AdminUserRepository {
             shortId: true,
             status: true,
             totalAmount: true,
-            createdAt: true
+            createdAt: true,
+            items: {
+              select: {
+                id: true,
+                productId: true,
+                productName: true,
+                quantity: true,
+                unitPrice: true
+              }
+            }
           },
           orderBy: { createdAt: 'desc' },
-          take: 10
+          take: 50
         }
       }
     });

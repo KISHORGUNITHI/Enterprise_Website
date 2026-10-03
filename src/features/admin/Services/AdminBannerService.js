@@ -1,8 +1,31 @@
 import { AdminBannerRepository } from '../repositories/AdminBannerRepository.js';
+import { uploadImageSource } from '../../../config/cloudinary.js';
 
 export class AdminBannerService {
   constructor() {
     this.repository = new AdminBannerRepository();
+  }
+
+  /**
+   * Helper: Ensure image is uploaded to Cloudinary if given as DataURI
+   */
+  async _resolveImageUrl(rawImage) {
+    if (!rawImage || typeof rawImage !== 'string') return null;
+    const trimmed = rawImage.trim();
+    if (!trimmed) return null;
+
+    // If it's a base64 data URI, upload to Cloudinary
+    if (trimmed.startsWith('data:image/')) {
+      try {
+        const uploadRes = await uploadImageSource(trimmed, { folder: 'enterprise_store/banners' });
+        return uploadRes.secure_url || uploadRes.url;
+      } catch (err) {
+        console.error('Failed to upload banner image to Cloudinary:', err);
+        throw new Error(`Cloudinary upload failed: ${err.message}`);
+      }
+    }
+
+    return trimmed;
   }
 
   /**
@@ -49,7 +72,7 @@ export class AdminBannerService {
   /**
    * Create a new banner
    * Required: title, eyebrow, ctaText, slug
-   * Optional: subtitle, badge, status, bgGradient, accentColor, displayOrder
+   * Optional: subtitle, badge, status, bgGradient, accentColor, displayOrder, imageUrl/image
    */
   async create(data) {
     try {
@@ -68,6 +91,9 @@ export class AdminBannerService {
         throw error;
       }
 
+      const rawImg = data.imageUrl || data.image || null;
+      const resolvedImageUrl = await this._resolveImageUrl(rawImg);
+
       // Create with defaults
       const banner = await this.repository.create({
         title: data.title,
@@ -76,10 +102,11 @@ export class AdminBannerService {
         ctaText: data.ctaText,
         slug: data.slug,
         badge: data.badge || null,
+        imageUrl: resolvedImageUrl,
         status: data.status || 'ACTIVE',
         bgGradient: data.bgGradient || 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 100%)',
         accentColor: data.accentColor || '#f58500',
-        displayOrder: data.displayOrder || 0
+        displayOrder: data.displayOrder ? parseInt(data.displayOrder, 10) : 0
       });
 
       return {
@@ -110,14 +137,26 @@ export class AdminBannerService {
       // If slug is being updated, check for duplicates
       if (data.slug && data.slug !== existing.slug) {
         const slugExists = await this.repository.findBySlug(data.slug);
-        if (slugExists) {
+        if (slugExists && slugExists.id !== id) {
           const error = new Error('Banner slug already exists');
           error.status = 409;
           throw error;
         }
       }
 
-      const banner = await this.repository.update(id, data);
+      const updateData = { ...data };
+      delete updateData.image;
+
+      if (data.imageUrl !== undefined || data.image !== undefined) {
+        const rawImg = data.imageUrl !== undefined ? data.imageUrl : data.image;
+        updateData.imageUrl = await this._resolveImageUrl(rawImg);
+      }
+
+      if (updateData.displayOrder !== undefined) {
+        updateData.displayOrder = parseInt(updateData.displayOrder, 10) || 0;
+      }
+
+      const banner = await this.repository.update(id, updateData);
 
       return {
         success: true,

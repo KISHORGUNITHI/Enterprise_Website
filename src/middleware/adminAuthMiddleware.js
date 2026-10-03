@@ -22,10 +22,33 @@ function getCookie(req, name) {
  */
 export const adminAuthenticate = async (req, res, next) => {
   const isApi = req.xhr || (req.headers.accept && req.headers.accept.includes('application/json'));
-  const token = getCookie(req, 'authToken');
+  let token = getCookie(req, 'authToken');
+  let decoded = null;
 
-  // Case 1: Unauthenticated visitor (no token)
-  if (!token) {
+  if (token) {
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (_) {
+      decoded = null;
+    }
+  }
+
+  // Also support Authorization header (Bearer <token>)
+  if (!decoded && req.headers.authorization) {
+    const parts = req.headers.authorization.split(' ');
+    if (parts.length === 2 && (parts[0] === 'Bearer' || parts[0] === 'bearer')) {
+      try {
+        decoded = jwt.verify(parts[1], process.env.JWT_SECRET);
+        token = parts[1];
+      } catch (_) {
+        decoded = null;
+      }
+    }
+  }
+
+  // Case 1: Unauthenticated visitor (no token or invalid token)
+  if (!decoded) {
+    res.clearCookie('authToken', { path: '/' });
     if (isApi) {
       return res.status(401).json({
         success: false,
@@ -36,8 +59,6 @@ export const adminAuthenticate = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
     let role = decoded.role;
     let username = decoded.username;
     let email = decoded.email;

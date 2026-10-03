@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  url      = env("DATABASE_URL")
 }
 
 datasource db {
@@ -8,36 +7,25 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   username      String
-  email         String   @unique
+  email         String    @unique
   password_hash String
+  role          Role      @default(USER)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  phone_number  String    @unique
   gender        Gender?
-  role          Role     @default(USER)
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-  phone_number  String   @unique
-
   addresses     Address[]
   orders        Order[]
-}
+  reviews       Review[]
 
-enum Gender{
-  MALE
-  FEMALE
-  OTHER
-  PREFER_NOT_TO_SAY
-}
-
-enum Role {
-  USER
-  ADMIN
+  @@index([email])
 }
 
 model Address {
   id             String   @id @default(cuid())
   user_id        String
-
   full_name      String
   phone_number   String
   address_line_1 String
@@ -48,98 +36,83 @@ model Address {
   country        String
   landmark       String?
   is_default     Boolean  @default(false)
-
   created_at     DateTime @default(now())
   updated_at     DateTime @updatedAt
-
   user           User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])
 }
 
 model Category {
-  id       String @id @default(cuid())
-  name     String @unique
+  id       String    @id @default(cuid())
+  name     String    @unique
   products Product[]
 }
 
 model Product {
-  id              String @id @default(cuid())
-  categoryId      String
-  name            String
-  description     String
-  brand           String
-  price           Decimal
-  availability    Status @default(AVAILABLE)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  slug            String @unique
-  category        Category @relation(fields:[categoryId],references:[id],onDelete:Cascade)
-  productImages   ProductImage[]
-  interactions    ProductInteraction[]
-  variants        ProductVariant[]
-  orderItems      OrderItem[]
+  id             String               @id @default(cuid())
+  categoryId     String
+  name           String
+  description    String
+  brand          String
+  price          Decimal
+  availability   Status               @default(AVAILABLE)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  slug           String               @unique
+  rating         Decimal              @default(0) @db.Decimal(3, 2)
+  reviews        Int                  @default(0)
+  stock          Int                  @default(0)
+  orderItems     OrderItem[]
+  category       Category             @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  productImages  ProductImage[]
+  interactions   ProductInteraction[]
+  variants       ProductVariant[]
+  productReviews Review[]
 
   @@index([categoryId])
 }
 
 model ProductImage {
-  id              String @id @default(cuid())
-  productId       String
-  imageUrl        String
-  isPrimary       Boolean @default(false)
-  createdAt       DateTime @default(now())
-  variantId       String?
-
-  product         Product @relation(fields:[productId],references:[id],onDelete:Cascade)
-  variant         ProductVariant? @relation(fields:[variantId],references:[id],onDelete:Cascade)
+  id        String          @id @default(cuid())
+  productId String
+  imageUrl  String
+  isPrimary Boolean         @default(false)
+  createdAt DateTime        @default(now())
+  variantId String?
+  product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
 
   @@index([productId])
   @@index([variantId])
 }
 
-enum Status {
-  AVAILABLE
-  NOT_AVAILABLE
-}
-
-// ─── Trending Deals — Interaction Tracking ───────────────────────────────────
-
-enum InteractionType {
-  PRODUCT_VIEW
-  WISHLIST_ADD
-  CART_ADD
-  PURCHASE
-}
-
-/**
- * ProductInteraction records a single user behaviour event on a product.
- *
- * Used by the Trending Deals scoring engine:
- *   FinalScore = Σ [ Weight(type) × e^(-λ × AgeInDays) ]
- *   λ = 0.1  (configurable in trendingService.js)
- *
- * Weights:
- *   PRODUCT_VIEW  = 1   (interest signal)
- *   WISHLIST_ADD  = 3   (purchase intent)
- *   CART_ADD      = 5   (strong purchase intent)
- *   PURCHASE      = 10  (confirmed intent)
- *
- * userId is nullable so guest interactions (views) can be recorded.
- * For authenticated users it is set so duplicate-view throttling works.
- *
- * sessionId is set for guests to provide coarse duplicate suppression
- * when userId is not available.
- */
+/// *
+///  * ProductInteraction records a single user behaviour event on a product.
+///  *
+///  * Used by the Trending Deals scoring engine:
+///  *   FinalScore = Σ [ Weight(type) × e^(-λ × AgeInDays) ]
+///  *   λ = 0.1  (configurable in trendingService.js)
+///  *
+///  * Weights:
+///  *   PRODUCT_VIEW  = 1   (interest signal)
+///  *   WISHLIST_ADD  = 3   (purchase intent)
+///  *   CART_ADD      = 5   (strong purchase intent)
+///  *   PURCHASE      = 10  (confirmed intent)
+///  *
+///  * userId is nullable so guest interactions (views) can be recorded.
+///  * For authenticated users it is set so duplicate-view throttling works.
+///  *
+///  * sessionId is set for guests to provide coarse duplicate suppression
+///  * when userId is not available.
 model ProductInteraction {
-  id          String          @id @default(cuid())
-  productId   String
-  userId      String?
-  sessionId   String?
-  type        InteractionType
-  createdAt   DateTime        @default(now())
-
-  product     Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id        String          @id @default(cuid())
+  productId String
+  userId    String?
+  sessionId String?
+  type      InteractionType
+  createdAt DateTime        @default(now())
+  product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
   @@index([type])
@@ -160,9 +133,11 @@ model Order {
   paymentStatus   String      @default("Pending")
   shippingAddress String
   deliveryDate    String?
+  cancelReason    String?
+  cancelledBy     String?
+  cancelledAt     DateTime?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
-
   user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   items           OrderItem[]
 
@@ -171,20 +146,19 @@ model Order {
 }
 
 model OrderItem {
-  id                 String   @id @default(cuid())
+  id                 String          @id @default(cuid())
   orderId            String
-  productId          String
+  productId          String?
   variantId          String?
   productName        String
-  variantDescription String   @default("")
-  unitPrice          Decimal  @db.Decimal(10, 2)
+  variantDescription String          @default("")
+  unitPrice          Decimal         @db.Decimal(10, 2)
   quantity           Int
-  lineTotal          Decimal  @db.Decimal(12, 2)
-  createdAt          DateTime @default(now())
-
-  order              Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product            Product  @relation(fields: [productId], references: [id])
-  variant            ProductVariant? @relation(fields: [variantId], references: [id])
+  lineTotal          Decimal         @db.Decimal(12, 2)
+  createdAt          DateTime        @default(now())
+  order              Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product            Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  variant            ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
 
   @@index([orderId])
   @@index([productId])
@@ -192,64 +166,98 @@ model OrderItem {
 }
 
 model Banner {
-  id           String        @id @default(cuid())
+  id           String       @id @default(cuid())
   title        String
   eyebrow      String
-  subtitle     String        @default("")
+  subtitle     String       @default("")
   ctaText      String
   slug         String
   badge        String?
-  status       BannerStatus  @default(ACTIVE)
-  bgGradient   String        @default("linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 100%)")
-  accentColor  String        @default("#f58500")
-  displayOrder Int           @default(0)
-  clicks       Int           @default(0)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  imageUrl     String?
+  status       BannerStatus @default(ACTIVE)
+  bgGradient   String       @default("linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 100%)")
+  accentColor  String       @default("#f58500")
+  displayOrder Int          @default(0)
+  clicks       Int          @default(0)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 }
 
 model ProductVariant {
-  id              String @id @default(cuid())
+  id              String                  @id @default(cuid())
   productId       String
-  product         Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  availability    Status @default(AVAILABLE)
-  priceOverride   Decimal? @db.Decimal(10, 2)
-
-  attributeValues VariantAttributeValue[]
-  images          ProductImage[]
+  availability    Status                  @default(AVAILABLE)
+  priceOverride   Decimal?                @db.Decimal(10, 2)
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
   orderItems      OrderItem[]
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  images          ProductImage[]
+  product         Product                 @relation(fields: [productId], references: [id], onDelete: Cascade)
+  attributeValues VariantAttributeValue[] @relation("ProductVariantToVariantAttributeValue")
 
   @@index([productId])
 }
 
 model VariantAttribute {
-  id          String @id @default(cuid())
-  name        String @unique
+  id          String                  @id @default(cuid())
+  name        String                  @unique
   displayName String
-
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
   values      VariantAttributeValue[]
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 }
 
 model VariantAttributeValue {
-  id          String @id @default(cuid())
-  attributeId String
-  attribute   VariantAttribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
-
-  value           String
-  displayValue    String
-
-  variants        ProductVariant[]
+  id           String           @id @default(cuid())
+  attributeId  String
+  value        String
+  displayValue String
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  attribute    VariantAttribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  variants     ProductVariant[] @relation("ProductVariantToVariantAttributeValue")
 
   @@unique([attributeId, value])
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  userId    String
+  rating    Decimal  @db.Decimal(3, 2)
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId])
+  @@index([productId])
+  @@index([userId])
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Status {
+  AVAILABLE
+  NOT_AVAILABLE
+}
+
+enum InteractionType {
+  PRODUCT_VIEW
+  WISHLIST_ADD
+  CART_ADD
+  PURCHASE
 }
 
 enum BannerStatus {

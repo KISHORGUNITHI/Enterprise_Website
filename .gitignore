@@ -10,7 +10,6 @@ lerna-debug.log*
 .DS_Store
 */.DS_Store
 
-
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
@@ -150,3 +149,5 @@ vite.config.ts.timestamp-*
 /src/generated/prisma
 
 .enterpise website.txt
+
+/scratch

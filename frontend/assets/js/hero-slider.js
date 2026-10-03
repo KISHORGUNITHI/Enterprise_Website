@@ -4,7 +4,7 @@
  * Features: auto-play, manual arrows, dot nav, progress bar, pause on hover, touch/drag.
  */
 
-(function () {
+(async function () {
   'use strict';
 
   // ─── Config ────────────────────────────────────────────────────────────────
@@ -107,17 +107,69 @@
 
   if (!track || !window.bannersData) return;
 
-  const banners = window.bannersData;
-  const total   = banners.length;
+  let banners = window.bannersData || [];
+  let total   = banners.length;
   let current   = 0;
   let autoTimer = null;
   let progressTimer = null;
   let progressVal   = 0;
   let isPaused = false;
 
+  async function loadLiveBanners() {
+    try {
+      const res = await fetch('/api/banners?category=all');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          banners = json.data.map(b => {
+            const rawSlug = (b.slug || 'all').toLowerCase();
+            let href = '/products';
+            let illustration = 'smartphone';
+
+            if (rawSlug === 'mobiles' || rawSlug.includes('mobile')) {
+              href = '/products/mobiles';
+              illustration = 'smartphone';
+            } else if (rawSlug === 'tvs' || rawSlug.includes('tv')) {
+              href = '/products/tvs';
+              illustration = 'festival';
+            } else if (rawSlug === 'acs' || rawSlug.includes('ac')) {
+              href = '/products/acs';
+              illustration = 'warranty';
+            } else if (rawSlug === 'home-theatres' || rawSlug.includes('theatre') || rawSlug.includes('audio')) {
+              href = '/products/home-theatres';
+              illustration = 'festival';
+            } else if (rawSlug.startsWith('/')) {
+              href = rawSlug;
+            }
+
+            return {
+              id: b.id,
+              title: b.title,
+              eyebrow: b.eyebrow,
+              subtitle: b.subtitle || '',
+              badge: b.badge || 'Trending',
+              cta_primary: { label: b.ctaText || 'Shop Now', href },
+              cta_secondary: { label: 'Explore Store', href: '/products' },
+              bgGradient: b.bgGradient || 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 60%, #2f52a0 100%)',
+              accentColor: b.accentColor || '#f58500',
+              imageUrl: b.imageUrl || b.image || '',
+              illustration
+            };
+          });
+          total = banners.length;
+        }
+      }
+    } catch (e) {
+      console.warn('Could not load dynamic banners for landing hero:', e);
+    }
+  }
+
   // ─── Build slides ──────────────────────────────────────────────────────────
   function buildSlides() {
-    track.innerHTML = banners.map((banner, i) => `
+    if (!banners.length) return;
+    track.innerHTML = banners.map((banner, i) => {
+      const bannerImg = banner.imageUrl || banner.image || '';
+      return `
       <div
         class="hero__slide${i === 0 ? ' active' : ''}"
         role="tabpanel"
@@ -127,7 +179,9 @@
         style="--slide-accent: ${banner.accentColor};"
       >
         <!-- Background -->
-        <div class="hero__slide-bg" style="background: ${banner.bgGradient};"></div>
+        <div class="hero__slide-bg" style="background: ${banner.bgGradient};">
+          ${bannerImg ? `<img src="${bannerImg}" alt="${banner.title || 'Hero Banner'}" class="hero__slide-bg-img" onerror="this.style.display='none'"/>` : ''}
+        </div>
         <div class="hero__slide-overlay"></div>
 
         <!-- Content -->
@@ -174,14 +228,18 @@
               <div class="hero__illustration-ring"></div>
               <div class="hero__illustration-ring"></div>
               <div class="hero__illustration-svg">
-                ${illustrations[banner.illustration] || ''}
+                ${bannerImg
+                  ? `<img src="${bannerImg}" alt="${banner.title || 'Hero Banner'}" class="hero__illustration-img" onerror="this.parentElement.innerHTML=\`${illustrations[banner.illustration] || ''}\`"/>`
+                  : (illustrations[banner.illustration] || '')
+                }
               </div>
             </div>
           </div>
         </div>
 
       </div>
-    `).join('');
+    `;
+    }).join('');
   }
 
   // ─── Build dots ────────────────────────────────────────────────────────────
@@ -332,6 +390,7 @@
   });
 
   // ─── Init ──────────────────────────────────────────────────────────────────
+  await loadLiveBanners();
   buildSlides();
   buildDots();
   startAutoPlay();

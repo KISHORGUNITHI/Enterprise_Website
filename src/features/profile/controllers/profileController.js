@@ -8,12 +8,18 @@ export class ProfileController {
         try {
             const userId = req.user.userId || req.user.id;
             const user = await this.profileService.getUser(userId);
+            if (!user) {
+                return res.status(401).json({ success: false, message: "User not found or session invalid" });
+            }
             return res.status(200).json({
                 success: true,
                 data: user
             });
         } catch (error) {
             console.error("Get profile error:", error);
+            if (error.message === "User not found") {
+                return res.status(401).json({ success: false, message: "User not found" });
+            }
             return res.status(500).json({ success: false, message: "Internal server error" });
         }
     }
@@ -30,6 +36,9 @@ export class ProfileController {
             });
         } catch (error) {
             console.error("Update profile error:", error);
+            if (error.message === "User not found") {
+                return res.status(401).json({ success: false, message: "User not found" });
+            }
             return res.status(500).json({ success: false, message: "Internal server error" });
         }
     }
@@ -79,10 +88,10 @@ export class ProfileController {
     }
     async updateAdress(req, res) {
         try {
-            const userID = req.user.userID || req.user.id;
-            const adressID = req.params.id
-            const adress = req.body;
-            const updatedAddress = await this.profileService.updateAddress(userID, adressID, adress);
+            const userId = req.user.userId || req.user.id;
+            const addressId = req.params.id;
+            const addressData = req.body;
+            const updatedAddress = await this.profileService.updateAddress(userId, addressId, addressData);
             return res.status(200).json({
                 success: true,
                 data: updatedAddress

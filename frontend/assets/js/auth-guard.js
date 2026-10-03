@@ -33,6 +33,20 @@
 
   // ─── Open ──────────────────────────────────────────────────────────────────
   function openModal(targetRoute) {
+    // If the user is already authenticated in localStorage, don't show the modal
+    try {
+      const cached = localStorage.getItem('authUser');
+      if (cached) {
+        const u = JSON.parse(cached);
+        if (u && (u.id || u.email)) {
+          if (targetRoute && window.location.pathname !== targetRoute) {
+            window.location.href = targetRoute;
+            return;
+          }
+        }
+      }
+    } catch (_) {}
+
     // Store the intended destination for post-login redirect
     if (targetRoute) {
       localStorage.setItem(STORAGE_KEY, targetRoute);
@@ -57,22 +71,39 @@
     document.body.style.overflow = '';
   }
 
+  // ─── Close handler ────────────────────────────────────────────────────────
+  function handleClose() {
+    closeModal();
+    const protectedPaths = ['/checkout', '/orders', '/profile'];
+    if (protectedPaths.some(p => window.location.pathname.startsWith(p))) {
+      window.location.href = '/';
+    }
+  }
+
+  function handleBrowse(e) {
+    if (e) e.preventDefault();
+    closeModal();
+    window.location.href = '/';
+  }
+
   // ─── Click outside backdrop ────────────────────────────────────────────────
   backdrop.addEventListener('click', (e) => {
     // Only close when clicking the backdrop itself, not the modal panel
-    if (e.target === backdrop) closeModal();
+    if (e.target === backdrop) {
+      handleClose();
+    }
   });
 
   // ─── ESC key ──────────────────────────────────────────────────────────────
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && backdrop.classList.contains('open')) {
-      closeModal();
+      handleClose();
     }
   });
 
-  // ─── Close button ──────────────────────────────────────────────────────────
-  closeBtn  && closeBtn.addEventListener('click', closeModal);
-  browseBtn && browseBtn.addEventListener('click', closeModal);
+  // ─── Close and Browse buttons ──────────────────────────────────────────────
+  closeBtn  && closeBtn.addEventListener('click', handleClose);
+  browseBtn && browseBtn.addEventListener('click', handleBrowse);
 
   // ─── Focus trap ───────────────────────────────────────────────────────────
   // Keep Tab / Shift+Tab cycling within the modal while open

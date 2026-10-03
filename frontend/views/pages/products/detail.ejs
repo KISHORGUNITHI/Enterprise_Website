@@ -140,6 +140,37 @@
           <div id="pdpSpecs"></div>
         </div>
 
+        <!-- Rate & Review Section -->
+        <div class="pdp-reviews reveal" id="pdpReviewsSection" style="margin-top:var(--space-6);">
+          <p class="pdp-section__title">Customer Reviews</p>
+          
+          <div class="pdp-reviews__submit-box">
+            <h3 class="pdp-reviews__submit-title">Rate and Review the Product</h3>
+            <div class="pdp-reviews__star-rating" id="pdpSubmitRating">
+              <svg data-star="1" class="pdp-star-icon-interactive" width="24" height="24" viewBox="0 0 16 16"><path d="M8 1.5l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11.5l-5.2 3.3 1.8-5.5L0 7h6.2z"/></svg>
+              <svg data-star="2" class="pdp-star-icon-interactive" width="24" height="24" viewBox="0 0 16 16"><path d="M8 1.5l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11.5l-5.2 3.3 1.8-5.5L0 7h6.2z"/></svg>
+              <svg data-star="3" class="pdp-star-icon-interactive" width="24" height="24" viewBox="0 0 16 16"><path d="M8 1.5l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11.5l-5.2 3.3 1.8-5.5L0 7h6.2z"/></svg>
+              <svg data-star="4" class="pdp-star-icon-interactive" width="24" height="24" viewBox="0 0 16 16"><path d="M8 1.5l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11.5l-5.2 3.3 1.8-5.5L0 7h6.2z"/></svg>
+              <svg data-star="5" class="pdp-star-icon-interactive" width="24" height="24" viewBox="0 0 16 16"><path d="M8 1.5l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11.5l-5.2 3.3 1.8-5.5L0 7h6.2z"/></svg>
+              <svg width="0" height="0" style="position:absolute;">
+                <defs>
+                  <linearGradient id="dynamicStarGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop id="dynamicStarStop1" offset="50%" stop-color="var(--color-warning-500)" />
+                    <stop id="dynamicStarStop2" offset="50%" stop-color="var(--gray-300)" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <span id="pdpHoverRatingVal" style="margin-left: 12px; font-size: 1.1rem; font-weight: 600; color: var(--gray-700); font-variant-numeric: tabular-nums;">0.00</span>
+            </div>
+            <textarea class="pdp-reviews__textarea" id="pdpSubmitComment" placeholder="Write a review (optional)..." rows="3"></textarea>
+            <button class="pdp-reviews__submit-btn" id="pdpSubmitReviewBtn">Submit Review</button>
+          </div>
+
+          <div class="pdp-reviews__list" id="pdpReviewsList">
+            <!-- JS will populate reviews here -->
+          </div>
+        </div>
+
         <!-- Related Products -->
         <section class="pdp-related reveal" aria-label="You may also like">
           <div class="pdp-related__header">

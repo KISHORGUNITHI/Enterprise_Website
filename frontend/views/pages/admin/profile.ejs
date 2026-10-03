@@ -177,7 +177,7 @@
                         id="adminPhoneInput"
                         name="phone"
                         class="admin-input"
-                        value="+91 99636 57799"
+                        value="<%= (typeof adminUser !== 'undefined' && adminUser?.phone_number) ? adminUser.phone_number : '' %>"
                         placeholder="+91 98765 43210"
                       />
                     </div>
@@ -279,7 +279,8 @@
               </div>
             </div>
 
-            <!-- Active Sessions & Security Environment Card -->
+            <!-- Active Sessions & Security Environment Card (Commented Out) -->
+            <!--
             <div class="admin-card">
               <div class="admin-card__header">
                 <div>
@@ -302,6 +303,7 @@
                 </div>
               </div>
             </div>
+            -->
 
           </div>
 

@@ -40,7 +40,10 @@ export class AdminStatsRepository {
   async countLowStock() {
     return prisma.product.count({
       where: {
-        availability: 'NOT_AVAILABLE'
+        OR: [
+          { availability: 'NOT_AVAILABLE' },
+          { stock: { lte: 5 } }
+        ]
       },
     });
   }

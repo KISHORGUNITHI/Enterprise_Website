@@ -2,9 +2,24 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
 import { ProductController } from "../controllers/productController.js";
+import jwtAuthenticate from "../../../middleware/jwtmiddleware.js";
+import prisma from "../../../config/prisma.js";
 
 const router = express.Router();
 const productController = new ProductController();
+
+// ─── Public Banners ──────────────────────────────────────────────────────────
+router.get("/banners", async (req, res) => {
+  try {
+    const banners = await prisma.banner.findMany({
+      where: { status: "ACTIVE" },
+      orderBy: [{ displayOrder: "asc" }, { createdAt: "desc" }]
+    });
+    return res.json({ success: true, count: banners.length, data: banners });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
 
 // ─── Trending Deals ───────────────────────────────────────────────────────────
 // Must be registered BEFORE /:id so the literal path "trending" is not
@@ -38,8 +53,18 @@ router.post(
   productController.recordInteraction.bind(productController)
 );
 
+// POST /api/products/:id/rate
+// Body: { rating: Number }
+// Rate a product (requires authentication)
+router.post(
+  "/products/:id/rate",
+  jwtAuthenticate,
+  productController.rateProduct.bind(productController)
+);
+
 // ─── Existing product routes ──────────────────────────────────────────────────
 router.get("/products", productController.getProducts.bind(productController));
+router.get("/products/category/trending", productController.getTrendingProducts.bind(productController));
 router.get("/products/category/:category", productController.getProductsByCategory.bind(productController));
 router.get("/products/:id", productController.getProductByIdOrSlug.bind(productController));
 

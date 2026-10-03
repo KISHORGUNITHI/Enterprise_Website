@@ -32,45 +32,61 @@
           </div>
         </div>
 
-        <!-- ── Status Filter Chips (Matches User Panel orders.ejs styling) ── -->
-        <div class="orders-filters" id="adminOrderFilterChips" role="group" aria-label="Filter orders by status" style="margin-bottom: var(--space-6);">
-          <button class="orders-filter-chip active" data-filter="all">
-            All Orders
+        <!-- ── Status Filter Chips ── -->
+        <div class="orders-filters" id="adminOrderFilterChips" role="group" aria-label="Filter orders by status">
+          <button class="orders-filter-chip active" data-filter="all" type="button">
+            <span class="orders-filter-chip__label">All Orders</span>
+            <span class="orders-filter-chip__count" id="filterCountAll">0</span>
           </button>
-          <button class="orders-filter-chip" data-filter="processing">
+          <button class="orders-filter-chip" data-filter="processing" type="button">
             <span class="orders-filter-chip__dot" style="background:#eab308;"></span>
-            Processing (1)
+            <span class="orders-filter-chip__label">Processing</span>
+            <span class="orders-filter-chip__count" id="filterCountProcessing">0</span>
           </button>
-          <button class="orders-filter-chip" data-filter="confirmed">
+          <button class="orders-filter-chip" data-filter="confirmed" type="button">
             <span class="orders-filter-chip__dot" style="background:#3b82f6;"></span>
-            Confirmed (1)
+            <span class="orders-filter-chip__label">Confirmed</span>
+            <span class="orders-filter-chip__count" id="filterCountConfirmed">0</span>
           </button>
-          <button class="orders-filter-chip" data-filter="out_for_delivery">
+          <button class="orders-filter-chip" data-filter="out_for_delivery" type="button">
             <span class="orders-filter-chip__dot" style="background:#f97316;"></span>
-            Out for Delivery (1)
+            <span class="orders-filter-chip__label">Out for Delivery</span>
+            <span class="orders-filter-chip__count" id="filterCountOutForDelivery">0</span>
           </button>
-          <button class="orders-filter-chip" data-filter="delivered">
+          <button class="orders-filter-chip" data-filter="delivered" type="button">
             <span class="orders-filter-chip__dot" style="background:#22c55e;"></span>
-            Delivered (1)
+            <span class="orders-filter-chip__label">Delivered</span>
+            <span class="orders-filter-chip__count" id="filterCountDelivered">0</span>
           </button>
-          <button class="orders-filter-chip" data-filter="cancelled">
+          <button class="orders-filter-chip" data-filter="cancelled" type="button">
             <span class="orders-filter-chip__dot" style="background:#ef4444;"></span>
-            Cancelled (1)
+            <span class="orders-filter-chip__label">Cancelled</span>
+            <span class="orders-filter-chip__count" id="filterCountCancelled">0</span>
           </button>
         </div>
 
-        <!-- ── Toolbar Search ── -->
+        <!-- ── Toolbar Search & Sort ── -->
         <div class="admin-toolbar">
-          <div class="admin-toolbar__left">
+          <div class="admin-toolbar__left" style="display:flex; align-items:center; gap:var(--space-3); flex-wrap:wrap;">
             <div class="admin-search-input-wrap">
               <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="9" cy="9" r="6"/><path d="M13.5 13.5L17 17"/>
               </svg>
               <input type="search" id="orderSearchInput" class="admin-search-input" placeholder="Search by Order ID (#ORD / ES-...) or customer name..."/>
             </div>
+
+            <select id="orderSortSelect" class="admin-select" title="Sort orders" style="min-width:210px;">
+              <option value="date-desc" selected>Sort by Date: Newest First</option>
+              <option value="date-asc">Sort by Date: Oldest First</option>
+              <option value="status-asc">Sort by Status: In-Progress &rarr; Completed</option>
+              <option value="status-desc">Sort by Status: Completed &rarr; In-Progress</option>
+              <option value="payment-status">Sort by Payment Status (Paid First)</option>
+              <option value="payment-high">Sort by Payment Amount: High to Low</option>
+              <option value="payment-low">Sort by Payment Amount: Low to High</option>
+            </select>
           </div>
           <div style="font-size: var(--text-xs); color: var(--color-text-muted); font-weight: var(--font-semibold);">
-            Showing <span id="ordersCountDisplay">5</span> orders
+            Showing <span id="ordersCountDisplay">0</span> orders
           </div>
         </div>
 
@@ -85,9 +101,15 @@
                     <th>Customer</th>
                     <th>Items</th>
                     <th>Total Amount</th>
-                    <th>Payment</th>
-                    <th>Order Status</th>
-                    <th>Date</th>
+                    <th class="admin-th-sortable" data-sort-field="payment" style="cursor:pointer; user-select:none;" title="Click to sort by Payment">
+                      Payment <span id="sortIndicatorPayment" style="font-size:11px; opacity:0.6; margin-left:4px;">⇅</span>
+                    </th>
+                    <th class="admin-th-sortable" data-sort-field="status" style="cursor:pointer; user-select:none;" title="Click to sort by Order Status">
+                      Order Status <span id="sortIndicatorStatus" style="font-size:11px; opacity:0.6; margin-left:4px;">⇅</span>
+                    </th>
+                    <th class="admin-th-sortable" data-sort-field="date" style="cursor:pointer; user-select:none;" title="Click to sort by Date">
+                      Date <span id="sortIndicatorDate" style="font-size:11px; color:var(--color-primary-600); margin-left:4px;">↓</span>
+                    </th>
                     <th>Action</th>
                   </tr>
                 </thead>

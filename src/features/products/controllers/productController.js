@@ -2,21 +2,25 @@ import { ProductService } from "../services/productService.js";
 import { TrendingService } from "../services/trendingService.js";
 
 const CATEGORY_MAP = {
-  mobiles: "Mobile",
-  mobile: "Mobile",
-  tvs: "TV",
-  tv: "TV",
-  acs: "AC",
-  ac: "AC",
-  "home-theatres": "Home Theatre",
-  hometheatres: "Home Theatre",
-  kitchen: "Kitchen Ware",
-  refrigerators: "Refrigerator",
+  mobiles: "Mobiles",
+  mobile: "Mobiles",
+  tvs: "TVs",
+  tv: "TVs",
+  acs: "Air Conditioners",
+  ac: "Air Conditioners",
+  "air-conditioners": "Air Conditioners",
+  "air conditioners": "Air Conditioners",
+  "home-theatres": "Home Theatres",
+  hometheatres: "Home Theatres",
+  "home theatres": "Home Theatres",
+  kitchen: "Kitchen Appliances",
+  refrigerators: "Refrigerators",
 };
+
 
 export class ProductController {
   constructor() {
-    this.productService  = new ProductService();
+    this.productService = new ProductService();
     this.trendingService = new TrendingService();
   }
 
@@ -25,8 +29,7 @@ export class ProductController {
       const { category } = req.query;
       let products;
       if (category) {
-        const dbCategoryName = CATEGORY_MAP[category.toLowerCase()] || category;
-        products = await this.productService.getProductsByCategory(dbCategoryName);
+        products = await this.productService.getProductsByCategory(category);
       } else {
         products = await this.productService.getAllProducts();
       }
@@ -43,8 +46,7 @@ export class ProductController {
   async getProductsByCategory(req, res) {
     try {
       const categoryParam = req.params.category;
-      const dbCategoryName = CATEGORY_MAP[categoryParam.toLowerCase()] || categoryParam;
-      const products = await this.productService.getProductsByCategory(dbCategoryName);
+      const products = await this.productService.getProductsByCategory(categoryParam);
       return res.status(200).json({
         success: true,
         data: products,
@@ -86,7 +88,7 @@ export class ProductController {
    */
   async getTrendingProducts(req, res) {
     try {
-      const limit = Math.min(parseInt(req.query.limit) || 10, 50); // cap at 50
+      const limit = Math.min(parseInt(req.query.limit) || 20, 100); // cap at 100
       const products = await this.trendingService.getTrendingProducts(limit);
       return res.status(200).json({
         success: true,
@@ -109,10 +111,10 @@ export class ProductController {
    */
   async recordInteraction(req, res) {
     try {
-      const { id }       = req.params;
-      const { type }     = req.body;
-      const userId       = req.user?.userId || null;
-      const sessionId    = req.headers["x-session-id"] || null;
+      const { id } = req.params;
+      const { type } = req.body;
+      const userId = req.user?.userId || null;
+      const sessionId = req.headers["x-session-id"] || null;
 
       if (!type) {
         return res.status(400).json({ success: false, message: "Interaction type is required" });
@@ -128,6 +130,35 @@ export class ProductController {
       }
       console.error("Record interaction error:", error.message, error.stack);
       return res.status(500).json({ success: false, message: "Internal server error", detail: error.message });
+    }
+  }
+  async rateProduct(req, res) {
+    try {
+      const { id } = req.params;
+      let { rating, comment } = req.body;
+      const userId = req.user?.userId || req.user?.id; // user ID from JWT payload
+
+      if (!userId) {
+        return res.status(401).json({ success: false, message: "Unauthorized: User ID not found" });
+      }
+
+      rating = parseInt(rating, 10);
+      console.log(rating);
+      if (isNaN(rating) || rating < 1 || rating > 5) {
+        return res.status(400).json({ success: false, message: "Rating must be an integer between 1 and 5" });
+      }
+
+      const updatedProduct = await this.productService.rateProduct(id, userId, rating, comment);
+      return res.status(200).json({
+        success: true,
+        data: updatedProduct,
+      });
+    } catch (error) {
+      if (error.message === 'Product not found') {
+        return res.status(404).json({ success: false, message: error.message });
+      }
+      console.error("Rate product error:", error.message, error.stack);
+      return res.status(500).json({ success: false, message: "Internal server error" });
     }
   }
 }

@@ -2,7 +2,7 @@ import prisma from '../../../config/prisma.js';
 
 export class AdminProductRepository {
   /**
-   * Find all products with category and primary image
+   * Find all products with category and images
    */
   async findAll(where = {}, skip = 0, take = 20, orderBy = { createdAt: 'desc' }) {
     const products = await prisma.product.findMany({
@@ -17,6 +17,9 @@ export class AdminProductRepository {
         brand: true,
         price: true,
         availability: true,
+        stock: true,
+        rating: true,
+        reviews: true,
         slug: true,
         createdAt: true,
         updatedAt: true,
@@ -27,12 +30,33 @@ export class AdminProductRepository {
           }
         },
         productImages: {
-          where: { isPrimary: true },
           select: {
             id: true,
-            imageUrl: true
+            imageUrl: true,
+            isPrimary: true
           },
-          take: 1
+          orderBy: { isPrimary: 'desc' }
+        },
+        variants: {
+          select: {
+            id: true,
+            availability: true,
+            priceOverride: true,
+            attributeValues: {
+              select: {
+                id: true,
+                value: true,
+                displayValue: true,
+                attribute: {
+                  select: {
+                    id: true,
+                    name: true,
+                    displayName: true
+                  }
+                }
+              }
+            }
+          }
         },
         _count: {
           select: {
@@ -49,8 +73,8 @@ export class AdminProductRepository {
     return {
       products: products.map(p => ({
         ...p,
-        variantsCount: p._count.variants,
-        primaryImage: p.productImages[0] || null,
+        variantsCount: p._count?.variants || (p.variants?.length || 0),
+        primaryImage: p.productImages?.find(img => img.isPrimary) || p.productImages?.[0] || null,
         _count: undefined
       })),
       total
@@ -70,6 +94,9 @@ export class AdminProductRepository {
         brand: true,
         price: true,
         availability: true,
+        stock: true,
+        rating: true,
+        reviews: true,
         slug: true,
         createdAt: true,
         updatedAt: true,
@@ -84,6 +111,28 @@ export class AdminProductRepository {
             id: true,
             imageUrl: true,
             isPrimary: true
+          },
+          orderBy: { isPrimary: 'desc' }
+        },
+        variants: {
+          select: {
+            id: true,
+            availability: true,
+            priceOverride: true,
+            attributeValues: {
+              select: {
+                id: true,
+                value: true,
+                displayValue: true,
+                attribute: {
+                  select: {
+                    id: true,
+                    name: true,
+                    displayName: true
+                  }
+                }
+              }
+            }
           }
         },
         _count: {
@@ -118,10 +167,20 @@ export class AdminProductRepository {
         brand: true,
         price: true,
         availability: true,
+        stock: true,
+        rating: true,
+        reviews: true,
         slug: true,
         createdAt: true,
         updatedAt: true,
-        categoryId: true
+        categoryId: true,
+        productImages: {
+          select: {
+            id: true,
+            imageUrl: true,
+            isPrimary: true
+          }
+        }
       }
     });
   }
@@ -140,6 +199,9 @@ export class AdminProductRepository {
         brand: true,
         price: true,
         availability: true,
+        stock: true,
+        rating: true,
+        reviews: true,
         slug: true,
         createdAt: true,
         updatedAt: true,
@@ -154,7 +216,8 @@ export class AdminProductRepository {
             id: true,
             imageUrl: true,
             isPrimary: true
-          }
+          },
+          orderBy: { isPrimary: 'desc' }
         },
         _count: {
           select: {
@@ -167,6 +230,26 @@ export class AdminProductRepository {
   }
 
   /**
+   * Replace product images
+   */
+  async updateImages(productId, images) {
+    await prisma.productImage.deleteMany({
+      where: { productId }
+    });
+
+    if (Array.isArray(images) && images.length > 0) {
+      const hasPrimary = images.some(img => typeof img === 'object' && img.isPrimary);
+      await prisma.productImage.createMany({
+        data: images.map((img, idx) => ({
+          productId,
+          imageUrl: (typeof img === 'string' ? img : (img.url || img.imageUrl)).trim(),
+          isPrimary: typeof img === 'object' ? (hasPrimary ? !!img.isPrimary : idx === 0) : (idx === 0)
+        }))
+      });
+    }
+  }
+
+  /**
    * Delete product by ID
    */
   async remove(id) {
@@ -176,11 +259,19 @@ export class AdminProductRepository {
   }
 
   /**
-   * Check if category exists
+   * Check if category exists by ID or Name
    */
-  async categoryExists(categoryId) {
-    return prisma.category.findUnique({
-      where: { id: categoryId }
+  async categoryExists(identifier) {
+    if (!identifier) return null;
+    const byId = await prisma.category.findUnique({
+      where: { id: identifier }
+    });
+    if (byId) return byId;
+
+    return prisma.category.findFirst({
+      where: {
+        name: { equals: identifier, mode: 'insensitive' }
+      }
     });
   }
 }

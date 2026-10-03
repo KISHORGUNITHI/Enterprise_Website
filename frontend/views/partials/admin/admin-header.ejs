@@ -70,67 +70,15 @@
         <span class="admin-header__notif-dot"></span>
       </button>
 
-      <!-- User Profile Dropdown Toggle -->
+      <!-- User Profile Link to /admin/profile -->
       <div class="admin-header__user-wrapper">
-        <div class="admin-header__user" id="adminUserDropdownBtn" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false" aria-label="Admin Profile Menu">
+        <a href="/admin/profile" class="admin-header__user" id="adminUserDropdownBtn" title="View Admin Profile" aria-label="Admin Profile">
           <div class="admin-header__user-avatar" id="headerUserAvatar"><%= (typeof adminUser !== 'undefined' && adminUser?.avatar) ? adminUser.avatar : 'AU' %></div>
           <div class="admin-header__user-info">
             <span class="admin-header__user-name" id="headerUserName"><%= (typeof adminUser !== 'undefined' && adminUser?.username) ? adminUser.username : 'Admin User' %></span>
             <span class="admin-header__user-role" id="headerUserRole"><%= (typeof adminUser !== 'undefined' && adminUser?.role) ? adminUser.role : 'ADMIN' %></span>
           </div>
-          <svg class="admin-header__user-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="4 6 8 10 12 6"></polyline>
-          </svg>
-        </div>
-
-        <!-- Profile Dropdown Menu -->
-        <div class="admin-dropdown-menu" id="adminUserDropdownMenu" role="menu" aria-label="User Account Actions" hidden>
-          <div class="admin-dropdown-menu__header">
-            <div class="admin-dropdown-menu__avatar" id="dropdownUserAvatar"><%= (typeof adminUser !== 'undefined' && adminUser?.avatar) ? adminUser.avatar : 'AU' %></div>
-            <div class="admin-dropdown-menu__user-meta">
-              <strong class="admin-dropdown-menu__name" id="dropdownUserName"><%= (typeof adminUser !== 'undefined' && adminUser?.username) ? adminUser.username : 'Admin User' %></strong>
-              <span class="admin-dropdown-menu__email" id="dropdownUserEmail"><%= (typeof adminUser !== 'undefined' && adminUser?.email) ? adminUser.email : 'admin@enterprisestore.com' %></span>
-              <span class="badge badge--accent" style="font-size:10px; margin-top:4px; align-self:flex-start;">SUPER ADMIN</span>
-            </div>
-          </div>
-          <div class="admin-dropdown-menu__divider"></div>
-          <div class="admin-dropdown-menu__items">
-            <a href="/admin/profile" class="admin-dropdown-menu__item" role="menuitem">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-              <span>Admin Profile</span>
-            </a>
-            <a href="/admin/dashboard" class="admin-dropdown-menu__item" role="menuitem">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="7" height="7"></rect>
-                <rect x="14" y="3" width="7" height="7"></rect>
-                <rect x="14" y="14" width="7" height="7"></rect>
-                <rect x="3" y="14" width="7" height="7"></rect>
-              </svg>
-              <span>Dashboard</span>
-            </a>
-            <a href="/home" class="admin-dropdown-menu__item" target="_blank" rel="noopener" role="menuitem">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-              </svg>
-              <span>Customer Storefront</span>
-            </a>
-          </div>
-          <div class="admin-dropdown-menu__divider"></div>
-          <div class="admin-dropdown-menu__footer">
-            <button type="button" class="admin-dropdown-menu__item admin-dropdown-menu__item--danger" id="headerLogoutBtn" role="menuitem">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16 17 21 12 16 7"></polyline>
-                <line x1="21" y1="12" x2="9" y2="12"></line>
-              </svg>
-              <span>Sign Out</span>
-            </button>
-          </div>
-        </div>
+        </a>
       </div>
     </div>
 

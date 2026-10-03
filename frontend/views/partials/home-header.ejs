@@ -207,6 +207,7 @@
       fetch('/logout', { method: 'POST', credentials: 'same-origin' })
         .finally(function () {
           localStorage.removeItem('authUser');
+          localStorage.removeItem('authToken');
           localStorage.removeItem('pendingRoute');
           window.location.href = '/';
         });

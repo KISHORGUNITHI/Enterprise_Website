@@ -71,7 +71,7 @@
       sectionId:    'trending',
       sectionTitle: 'Trending Deals',
       eyebrow:      "Today's Top Picks",
-      viewAllHref:  '/products',
+      viewAllHref:  '/products/trending',
     }) %>
 
     <%- include('../partials/home-product-section', {
@@ -126,9 +126,10 @@
   <%# ── Auth modal (global) ── %>
   <%- include('../partials/login-required-modal') %>
 
-  <!-- ── Data ── -->
+  <!-- ── Data & Data Structures ── -->
   <script src="/assets/data/home-banners.js"></script>
   <script src="/assets/data/home-products.js"></script>
+  <script src="/assets/js/banner-circular-list.js"></script>
 
   <!-- ── JS (deferred) ── -->
   <script src="/assets/js/home-hero.js"     defer></script>

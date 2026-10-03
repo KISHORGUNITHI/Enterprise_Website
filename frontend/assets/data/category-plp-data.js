@@ -6,6 +6,9 @@
 
 const categoryPlpData = {
 
+  // Trending data is fetched live from the backend API (/api/products/trending)
+  trending: [],
+
   // Mobiles data is fetched live from the backend API (PostgreSQL + Cloudinary)
   mobiles: [],
 

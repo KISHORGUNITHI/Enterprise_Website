@@ -45,20 +45,20 @@ const SCORING = {
   // Kept in sync with categoryConfig.js — no manual duplication needed.
 };
 
-// Map route slugs → DB category names (mirrors productController.js CATEGORY_MAP)
-const SLUG_TO_CATEGORY_NAME = {
-  kitchen:       "Kitchen Ware",
-  refrigerators: "Refrigerator",
-  acs:           "AC",
-  "home-theatres": "Home Theatre",
-  mobiles:       "Mobile",
-  tvs:           "TV",
+// Map route slugs → DB category names (handles both singular and plural variants)
+const SLUG_TO_CATEGORY_NAMES = {
+  kitchen:         ["Kitchen Ware", "Kitchen Appliances", "Kitchen"],
+  refrigerators:   ["Refrigerator", "Refrigerators", "Fridge"],
+  acs:             ["AC", "Air Conditioners", "ACs"],
+  "home-theatres": ["Home Theatre", "Home Theatres"],
+  mobiles:         ["Mobile", "Mobiles"],
+  tvs:             ["TV", "TVs"],
 };
 
 // Build the list of DB category names that are currently inactive
 function getInactiveCategoryNames() {
-  return INACTIVE_CATEGORIES.map(
-    slug => SLUG_TO_CATEGORY_NAME[slug] || slug
+  return INACTIVE_CATEGORIES.flatMap(
+    slug => SLUG_TO_CATEGORY_NAMES[slug] || [slug]
   );
 }
 
@@ -197,6 +197,8 @@ export class TrendingService {
       brand:        product.brand,
       description:  product.description,
       price,
+      rating:       product.rating,
+      reviews:      product.reviews,
       availability: product.availability,
       category:     product.category?.name || "",
       imageUrl:     primaryImg,

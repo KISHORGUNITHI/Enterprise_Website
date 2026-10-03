@@ -16,6 +16,7 @@ export class AdminBannerRepository {
         ctaText: true,
         slug: true,
         badge: true,
+        imageUrl: true,
         status: true,
         bgGradient: true,
         accentColor: true,
@@ -41,6 +42,7 @@ export class AdminBannerRepository {
         ctaText: true,
         slug: true,
         badge: true,
+        imageUrl: true,
         status: true,
         bgGradient: true,
         accentColor: true,
@@ -56,7 +58,7 @@ export class AdminBannerRepository {
    * Find banner by slug
    */
   async findBySlug(slug) {
-    return prisma.banner.findUnique({
+    return prisma.banner.findFirst({
       where: { slug }
     });
   }
@@ -75,6 +77,7 @@ export class AdminBannerRepository {
         ctaText: true,
         slug: true,
         badge: true,
+        imageUrl: true,
         status: true,
         bgGradient: true,
         accentColor: true,
@@ -101,6 +104,7 @@ export class AdminBannerRepository {
         ctaText: true,
         slug: true,
         badge: true,
+        imageUrl: true,
         status: true,
         bgGradient: true,
         accentColor: true,
@@ -136,6 +140,7 @@ export class AdminBannerRepository {
         ctaText: true,
         slug: true,
         badge: true,
+        imageUrl: true,
         status: true,
         bgGradient: true,
         accentColor: true,

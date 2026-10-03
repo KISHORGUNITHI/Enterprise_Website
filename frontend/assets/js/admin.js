@@ -52,6 +52,21 @@
       if (filters.search) params.append('search', filters.search);
       return this.fetch(`/banners?${params}`);
     },
+    async getAttributes() {
+      return this.fetch('/attributes');
+    },
+    async createAttribute(data) {
+      return this.fetch('/attributes', {
+        method: 'POST',
+        body: JSON.stringify(data)
+      });
+    },
+    async createAttributeValue(attributeId, data) {
+      return this.fetch(`/attributes/${attributeId}/values`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      });
+    },
     async getProducts(filters = {}) {
       const params = new URLSearchParams();
       if (filters.search) params.append('search', filters.search);
@@ -130,11 +145,55 @@
       });
     },
 
-    async updateOrderStatus(orderId, status) {
+    async updateOrderStatus(orderId, status, cancelReason = null) {
       return this.fetch(`/orders/${orderId}/status`, {
         method: 'PATCH',
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status, cancelReason })
       });
+    },
+
+    // Cloudinary upload operations
+    async uploadImage(fileOrData, type = 'general', category = '') {
+      if (fileOrData instanceof File || fileOrData instanceof Blob) {
+        const formData = new FormData();
+        formData.append('image', fileOrData);
+        const params = new URLSearchParams({ type });
+        if (category) params.append('category', category);
+        const response = await fetch(`/api/admin/upload?${params.toString()}`, {
+          method: 'POST',
+          body: formData
+        });
+        if (!response.ok) {
+          const error = await response.json().catch(() => ({}));
+          throw new Error(error.message || `Upload failed with status ${response.status}`);
+        }
+        return await response.json();
+      } else {
+        const params = new URLSearchParams({ type });
+        if (category) params.append('category', category);
+        return this.fetch(`/upload?${params.toString()}`, {
+          method: 'POST',
+          body: JSON.stringify({ image: fileOrData, category })
+        });
+      }
+    },
+
+    async uploadMultipleImages(files, type = 'product', category = '') {
+      const formData = new FormData();
+      Array.from(files).forEach(file => {
+        formData.append('images', file);
+      });
+      const params = new URLSearchParams({ type });
+      if (category) params.append('category', category);
+      const response = await fetch(`/api/admin/upload/multiple?${params.toString()}`, {
+        method: 'POST',
+        body: formData
+      });
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `Batch upload failed with status ${response.status}`);
+      }
+      return await response.json();
     }
   };
 
@@ -152,7 +211,7 @@
         return { success: true };
       }
       try {
-        const res = bannerId 
+        const res = bannerId
           ? await API.updateBanner(bannerId, bannerData)
           : await API.createBanner(bannerData);
         if (res.success) showAdminToast(`Banner ${bannerId ? 'updated' : 'created'} successfully`);
@@ -191,7 +250,7 @@
         return { success: true };
       }
       try {
-        const res = productId 
+        const res = productId
           ? await API.updateProduct(productId, productData)
           : await API.createProduct(productData);
         if (res.success) showAdminToast(`Product ${productId ? 'updated' : 'created'} successfully`);
@@ -234,7 +293,7 @@
 
     const toast = document.createElement('div');
     toast.className = `admin-toast admin-toast--${type}`;
-    
+
     let iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
     if (type === 'warning') {
       iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
@@ -299,21 +358,22 @@
     }
   }
 
-  if (userDropdownBtn) {
+  if (userDropdownBtn && userDropdownMenu) {
     userDropdownBtn.addEventListener('click', (e) => {
       e.stopPropagation();
+      e.preventDefault();
       toggleUserDropdown();
     });
-  }
 
-  // Close dropdown on outside click
-  document.addEventListener('click', (e) => {
-    if (userDropdownMenu && userDropdownMenu.classList.contains('open')) {
-      if (!userDropdownMenu.contains(e.target) && !userDropdownBtn?.contains(e.target)) {
-        toggleUserDropdown(false);
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+      if (userDropdownMenu && userDropdownMenu.classList.contains('open')) {
+        if (!userDropdownMenu.contains(e.target) && !userDropdownBtn?.contains(e.target)) {
+          toggleUserDropdown(false);
+        }
       }
-    }
-  });
+    });
+  }
 
   // Admin Logout unified handler
   function performAdminLogout() {
@@ -322,12 +382,16 @@
       fetch('/logout', { method: 'POST', credentials: 'same-origin' })
         .finally(() => {
           localStorage.removeItem('authUser');
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('pendingRoute');
           setTimeout(() => {
             window.location.href = '/login';
           }, 600);
         });
     } catch (e) {
       localStorage.removeItem('authUser');
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('pendingRoute');
       window.location.href = '/login';
     }
   }
@@ -392,13 +456,116 @@
     }
   });
 
+  /**
+   * Reusable Custom UI Confirmation Dialog.
+   * Replaces native window.confirm() with an accessible modal popup.
+   *
+   * @param {Object} options
+   * @param {string} options.title - Heading text
+   * @param {string} [options.subtitle] - Subtitle or reminder
+   * @param {string} options.message - Confirmation prompt message
+   * @param {string} [options.itemName] - Name or label of item to highlight
+   * @param {string} [options.confirmText] - Button text (default: "Delete")
+   * @param {boolean} [options.isDanger] - Style as destructive action (default: true)
+   * @returns {Promise<boolean>} Resolves true if confirmed, false if cancelled
+   */
+  function showConfirmDialog({
+    title = 'Confirm Deletion',
+    subtitle = 'This action cannot be undone',
+    message = 'Are you sure you want to delete this record?',
+    itemName = null,
+    confirmText = 'Delete',
+    isDanger = true
+  } = {}) {
+    return new Promise((resolve) => {
+      const modal = document.getElementById('adminConfirmModal');
+      const titleEl = document.getElementById('confirmModalTitle');
+      const subtitleEl = document.getElementById('confirmModalSubtitle');
+      const descEl = document.getElementById('confirmModalDesc');
+      const targetWrap = document.getElementById('confirmModalTargetPreview');
+      const targetName = document.getElementById('confirmModalTargetName');
+      const submitBtn = document.getElementById('confirmModalSubmitBtn');
+      const submitText = document.getElementById('confirmModalSubmitText');
+      const cancelBtn = document.getElementById('confirmModalCancelBtn');
+
+      if (!modal || !submitBtn) {
+        return resolve(window.confirm(message));
+      }
+
+      if (titleEl) titleEl.textContent = title;
+      if (subtitleEl) subtitleEl.textContent = subtitle;
+      if (descEl) descEl.textContent = message;
+      if (submitText) submitText.textContent = confirmText;
+
+      if (submitBtn) {
+        submitBtn.className = `btn btn--sm ${isDanger ? 'btn--danger' : 'btn--primary'}`;
+        submitBtn.disabled = false;
+      }
+
+      if (itemName && targetWrap && targetName) {
+        targetName.textContent = itemName;
+        targetWrap.style.display = 'flex';
+      } else if (targetWrap) {
+        targetWrap.style.display = 'none';
+      }
+
+      let settled = false;
+
+      function finish(result) {
+        if (settled) return;
+        settled = true;
+        closeModal('adminConfirmModal');
+        cleanup();
+        resolve(result);
+      }
+
+      function onConfirm() {
+        finish(true);
+      }
+
+      function onCancel() {
+        finish(false);
+      }
+
+      function onBackdrop(e) {
+        if (e.target === modal) {
+          finish(false);
+        }
+      }
+
+      function onKeyDown(e) {
+        if (e.key === 'Escape') {
+          finish(false);
+        }
+      }
+
+      function cleanup() {
+        submitBtn.removeEventListener('click', onConfirm);
+        if (cancelBtn) cancelBtn.removeEventListener('click', onCancel);
+        modal.removeEventListener('click', onBackdrop);
+        document.removeEventListener('keydown', onKeyDown);
+        const closeBtn = modal.querySelector('.admin-modal__close');
+        if (closeBtn) closeBtn.removeEventListener('click', onCancel);
+      }
+
+      submitBtn.addEventListener('click', onConfirm);
+      if (cancelBtn) cancelBtn.addEventListener('click', onCancel);
+      modal.addEventListener('click', onBackdrop);
+      document.addEventListener('keydown', onKeyDown);
+      const closeBtn = modal.querySelector('.admin-modal__close');
+      if (closeBtn) closeBtn.addEventListener('click', onCancel);
+
+      openModal('adminConfirmModal');
+      submitBtn.focus();
+    });
+  }
+
   /* =========================================================================
      4. DASHBOARD VIEW CONTROLLER
      ========================================================================= */
 
   function initDashboard() {
     const ordersTbody = document.getElementById('dashboardOrdersTableBody');
-    const lowStockTbody = document.getElementById('dashboardLowStockTableBody');
 
     if (!useApi) {
       // Use mock data
@@ -431,37 +598,6 @@
           btn.addEventListener('click', () => openOrderDrawer(btn.dataset.viewOrder));
         });
       }
-
-      if (lowStockTbody) {
-        const lowStock = data.products.filter(p => p.stock <= p.minStockThreshold);
-        lowStockTbody.innerHTML = lowStock.map(p => `
-          <tr>
-            <td>
-              <div style="font-weight:var(--font-semibold); line-height:1.2;">${p.name}</div>
-              <div style="font-size:var(--text-xs); color:var(--color-text-muted);">${p.category}</div>
-            </td>
-            <td>
-              <span style="font-weight:var(--font-bold); color:${p.stock === 0 ? 'var(--color-error-600)' : '#d97706'};">
-                ${p.stock} units
-              </span>
-            </td>
-            <td>
-              <span class="badge ${p.stock === 0 ? 'badge--accent' : 'badge--primary'}" style="${p.stock === 0 ? 'background:#fee2e2; color:#991b1b;' : 'background:#fef3c7; color:#b45309;'}">
-                ${p.status}
-              </span>
-            </td>
-            <td>
-              <button type="button" class="admin-btn-action" data-stock-product="${p.id}">
-                <span>Restock</span>
-              </button>
-            </td>
-          </tr>
-        `).join('');
-
-        lowStockTbody.querySelectorAll('[data-stock-product]').forEach(btn => {
-          btn.addEventListener('click', () => openStockModal(btn.dataset.stockProduct));
-        });
-      }
       return;
     }
 
@@ -469,28 +605,34 @@
     Promise.all([API.getOrders({ limit: 5 }), API.getStats()])
       .then(([ordersRes, statsRes]) => {
         if (ordersTbody && ordersRes.data) {
-          ordersTbody.innerHTML = ordersRes.data.map(o => `
-            <tr>
-              <td><strong style="font-family:var(--font-mono); color:var(--color-primary-700);">${o.shortId}</strong></td>
-              <td>
-                <div style="font-weight:var(--font-semibold);">${o.user.username}</div>
-                <div style="font-size:var(--text-xs); color:var(--color-text-muted);">${o.user.phone_number}</div>
-              </td>
-              <td><strong>${formatRupees(o.totalAmount)}</strong></td>
-              <td>
-                <span class="order-status order-status--${o.status.toLowerCase()}">
-                  <span class="order-status__dot"></span>
-                  ${capitalize(o.status.replace(/_/g, ' '))}
-                </span>
-              </td>
-              <td style="font-size:var(--text-xs); color:var(--color-text-muted);">${new Date(o.createdAt).toLocaleDateString()}</td>
-              <td>
-                <button type="button" class="admin-btn-action" data-view-order="${o.id}">
-                  <span>View</span>
-                </button>
-              </td>
-            </tr>
-          `).join('');
+          ordersTbody.innerHTML = ordersRes.data.map(o => {
+            const customerName = o.user?.username || (o.user?.email ? o.user.email.split('@')[0] : 'Customer');
+            const customerPhone = o.user?.phone_number || '-';
+            const statusStr = (o.status || 'PENDING').toLowerCase();
+
+            return `
+              <tr>
+                <td><strong style="font-family:var(--font-mono); color:var(--color-primary-700);">${o.shortId}</strong></td>
+                <td>
+                  <div style="font-weight:var(--font-semibold);">${customerName}</div>
+                  <div style="font-size:var(--text-xs); color:var(--color-text-muted);">${customerPhone}</div>
+                </td>
+                <td><strong>${formatRupees(o.totalAmount)}</strong></td>
+                <td>
+                  <span class="order-status order-status--${statusStr}">
+                    <span class="order-status__dot"></span>
+                    ${capitalize(statusStr.replace(/_/g, ' '))}
+                  </span>
+                </td>
+                <td style="font-size:var(--text-xs); color:var(--color-text-muted);">${new Date(o.createdAt).toLocaleDateString()}</td>
+                <td>
+                  <button type="button" class="admin-btn-action" data-view-order="${o.id}">
+                    <span>View</span>
+                  </button>
+                </td>
+              </tr>
+            `;
+          }).join('');
 
           ordersTbody.querySelectorAll('[data-view-order]').forEach(btn => {
             btn.addEventListener('click', () => openOrderDrawer(btn.dataset.viewOrder));
@@ -502,10 +644,9 @@
           const stats = statsRes.data;
           const els = {
             totalProducts: document.getElementById('statTotalProducts'),
-            totalUsers: document.getElementById('statTotalUsers'),
+            totalUsers: document.getElementById('statTotalUsers') || document.getElementById('statRegisteredUsers'),
             totalOrders: document.getElementById('statTotalOrders'),
             revenue: document.getElementById('statTotalRevenue'),
-            lowStock: document.getElementById('statLowStockCount'),
             pending: document.getElementById('statPendingCount'),
             banners: document.getElementById('statActiveBanners')
           };
@@ -513,12 +654,12 @@
           if (els.totalUsers) els.totalUsers.textContent = stats.totalUsers;
           if (els.totalOrders) els.totalOrders.textContent = stats.totalOrders;
           if (els.revenue) els.revenue.textContent = formatRupees(stats.totalRevenue);
-          if (els.lowStock) els.lowStock.textContent = stats.lowStockProducts;
-          if (els.pending) els.pending.textContent = stats.pendingOrders;
-          if (els.banners) els.banners.textContent = stats.activeBanners;
+          if (els.pending) els.pending.textContent = `${stats.pendingOrders} Orders`;
+          if (els.banners) els.banners.textContent = `${stats.activeBanners} Running`;
         }
       })
-      .catch(() => {
+      .catch((err) => {
+        console.warn('Failed to load dashboard from API:', err);
         // Fall back to mock data
         initDashboard_Mock();
       });
@@ -527,8 +668,7 @@
   function initDashboard_Mock() {
     // Fallback mock implementation - same as original
     const ordersTbody = document.getElementById('dashboardOrdersTableBody');
-    const lowStockTbody = document.getElementById('dashboardLowStockTableBody');
-    
+
     if (ordersTbody) {
       const recent = data.orders.slice(0, 5);
       ordersTbody.innerHTML = recent.map(o => `
@@ -610,17 +750,47 @@
       });
     });
 
+    // Handle banner file upload to Cloudinary
+    async function handleBannerFile(file) {
+      if (!file || !file.type.startsWith('image/')) return;
+      const spinner = document.getElementById('bannerUploadSpinner');
+      if (spinner) spinner.style.display = 'inline-flex';
+
+      try {
+        if (useApi) {
+          const res = await API.uploadImage(file, 'banner');
+          if (res && res.success && res.url) {
+            setBannerImage(res.url);
+            showAdminToast('Banner image uploaded to Cloudinary!');
+            return;
+          }
+        }
+        // Fallback / mock mode
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          setBannerImage(ev.target.result);
+        };
+        reader.readAsDataURL(file);
+      } catch (err) {
+        console.error('Cloudinary banner image upload error:', err);
+        showAdminToast(`Cloudinary upload failed: ${err.message}`, 'error');
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          setBannerImage(ev.target.result);
+        };
+        reader.readAsDataURL(file);
+      } finally {
+        if (spinner) spinner.style.display = 'none';
+      }
+    }
+
     // File input change (local file)
     const fileInput = document.getElementById('bannerFileInput');
     if (fileInput) {
       fileInput.addEventListener('change', (e) => {
         const file = e.target.files?.[0];
         if (file) {
-          const reader = new FileReader();
-          reader.onload = (ev) => {
-            setBannerImage(ev.target.result);
-          };
-          reader.readAsDataURL(file);
+          handleBannerFile(file);
         }
       });
     }
@@ -644,12 +814,8 @@
       });
       dropzone.addEventListener('drop', (e) => {
         const file = e.dataTransfer?.files?.[0];
-        if (file && file.type.startsWith('image/')) {
-          const reader = new FileReader();
-          reader.onload = (ev) => {
-            setBannerImage(ev.target.result);
-          };
-          reader.readAsDataURL(file);
+        if (file) {
+          handleBannerFile(file);
         }
       });
     }
@@ -680,7 +846,35 @@
     }
   }
 
-  function renderBanners() {
+  let liveBannersLoaded = false;
+
+  async function loadLiveBanners() {
+    if (!useApi) return;
+    try {
+      const res = await API.getBanners();
+      if (res && res.success && Array.isArray(res.data)) {
+        data.banners = res.data.map(b => ({
+          id: b.id,
+          title: b.title,
+          eyebrow: b.eyebrow,
+          subtitle: b.subtitle || '',
+          ctaText: b.ctaText,
+          slug: b.slug,
+          badge: b.badge || '',
+          status: b.status === 'ACTIVE' ? 'Active' : 'Inactive',
+          bgGradient: b.bgGradient || 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 60%, #2f52a0 100%)',
+          accentColor: b.accentColor || '#f58500',
+          image: b.imageUrl || b.image || '',
+          imageUrl: b.imageUrl || b.image || ''
+        }));
+        liveBannersLoaded = true;
+      }
+    } catch (e) {
+      console.warn('Could not load live banners from API:', e);
+    }
+  }
+
+  async function renderBanners() {
     const grid = document.getElementById('bannersGrid');
     const emptyState = document.getElementById('bannersEmptyState');
     const searchInput = document.getElementById('bannerSearchInput');
@@ -688,14 +882,33 @@
 
     if (!grid) return;
 
+    if (useApi && !liveBannersLoaded) {
+      await loadLiveBanners();
+    }
+
+    // Dynamically update filter counts with actual live numbers
+    if (statusFilter && Array.isArray(data.banners)) {
+      const totalCount = data.banners.length;
+      const activeCount = data.banners.filter(b => (b.status || '').toLowerCase() === 'active').length;
+      const inactiveCount = data.banners.filter(b => (b.status || '').toLowerCase() === 'inactive').length;
+
+      const optAll = statusFilter.querySelector('option[value="all"]');
+      const optActive = statusFilter.querySelector('option[value="Active"]');
+      const optInactive = statusFilter.querySelector('option[value="Inactive"]');
+
+      if (optAll) optAll.textContent = `All Banners (${totalCount})`;
+      if (optActive) optActive.textContent = `Active Only (${activeCount})`;
+      if (optInactive) optInactive.textContent = `Inactive Only (${inactiveCount})`;
+    }
+
     const query = (searchInput?.value || '').trim().toLowerCase();
     const filterStatus = statusFilter?.value || 'all';
 
     const filtered = data.banners.filter(b => {
-      const matchSearch = b.title.toLowerCase().includes(query) ||
-                          b.eyebrow.toLowerCase().includes(query) ||
-                          b.slug.toLowerCase().includes(query);
-      const matchStatus = filterStatus === 'all' || b.status === filterStatus;
+      const matchSearch = (b.title || '').toLowerCase().includes(query) ||
+                          (b.eyebrow || '').toLowerCase().includes(query) ||
+                          (b.slug || '').toLowerCase().includes(query);
+      const matchStatus = filterStatus === 'all' || (b.status || '').toLowerCase() === filterStatus.toLowerCase();
       return matchSearch && matchStatus;
     });
 
@@ -711,7 +924,7 @@
       <div class="admin-banner-card" data-id="${b.id}">
         <!-- Visual Banner Header Preview -->
         <div class="admin-banner-preview" style="background:${b.bgGradient || 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 60%, #2f52a0 100%)'};">
-          ${b.image ? `<img src="${b.image}" alt="${b.title}" class="admin-banner-preview__bg-img" onerror="this.style.display='none'"/>` : ''}
+          ${(b.imageUrl || b.image) ? `<img src="${b.imageUrl || b.image}" alt="${b.title}" class="admin-banner-preview__bg-img" onerror="this.style.display='none'"/>` : ''}
           <div>
             <span class="admin-banner-preview__eyebrow">${b.eyebrow}</span>
             <h3 class="admin-banner-preview__title">${b.title}</h3>
@@ -762,8 +975,21 @@
     });
 
     grid.querySelectorAll('[data-toggle-banner]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const item = data.banners.find(x => x.id === btn.dataset.toggleBanner);
+      btn.addEventListener('click', async () => {
+        const bannerId = btn.dataset.toggleBanner;
+        if (useApi) {
+          try {
+            await API.toggleBanner(bannerId);
+            await loadLiveBanners();
+            renderBanners();
+            showAdminToast('Banner visibility toggled.');
+            return;
+          } catch (err) {
+            showAdminToast('Failed to toggle banner.', 'error');
+            return;
+          }
+        }
+        const item = data.banners.find(x => x.id === bannerId);
         if (item) {
           item.status = item.status === 'Active' ? 'Inactive' : 'Active';
           renderBanners();
@@ -773,8 +999,35 @@
     });
 
     grid.querySelectorAll('[data-delete-banner]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const idx = data.banners.findIndex(x => x.id === btn.dataset.deleteBanner);
+      btn.addEventListener('click', async () => {
+        const bannerId = btn.dataset.deleteBanner;
+        const targetBanner = data.banners.find(b => b.id === bannerId);
+        const bannerTitle = targetBanner?.title || 'this promotional banner';
+
+        const confirmed = await showConfirmDialog({
+          title: 'Delete Banner',
+          subtitle: 'This promotional banner will be immediately removed from the customer carousel.',
+          message: 'Are you sure you want to delete this banner?',
+          itemName: bannerTitle,
+          confirmText: 'Delete Banner',
+          isDanger: true
+        });
+
+        if (!confirmed) return;
+
+        if (useApi) {
+          try {
+            await API.deleteBanner(bannerId);
+            await loadLiveBanners();
+            renderBanners();
+            showAdminToast(`Banner "${bannerTitle}" deleted successfully.`);
+            return;
+          } catch (err) {
+            showAdminToast('Failed to delete banner.', 'error');
+            return;
+          }
+        }
+        const idx = data.banners.findIndex(x => x.id === bannerId);
         if (idx !== -1) {
           const removed = data.banners.splice(idx, 1)[0];
           renderBanners();
@@ -792,6 +1045,29 @@
     const title = document.getElementById('bannerModalTitle');
     if (title) title.textContent = 'Add New Banner';
     setBannerImage('');
+    const catSel = document.getElementById('bannerCategorySelect');
+    if (catSel) catSel.value = 'all';
+    const slugInp = document.getElementById('bannerSlug');
+    if (slugInp) slugInp.value = 'all';
+  }
+
+  // Category select sync with slug input
+  const bannerCatSelect = document.getElementById('bannerCategorySelect');
+  const bannerSlugInput = document.getElementById('bannerSlug');
+  if (bannerCatSelect && bannerSlugInput) {
+    bannerCatSelect.addEventListener('change', () => {
+      if (bannerCatSelect.value !== 'custom') {
+        bannerSlugInput.value = bannerCatSelect.value;
+      }
+    });
+    bannerSlugInput.addEventListener('input', () => {
+      const val = bannerSlugInput.value.trim().toLowerCase();
+      if (['all', 'mobiles', 'tvs', 'acs', 'home-theatres'].includes(val)) {
+        bannerCatSelect.value = val;
+      } else {
+        bannerCatSelect.value = 'custom';
+      }
+    });
   }
 
   function editBanner(id) {
@@ -807,7 +1083,17 @@
     document.getElementById('bannerBadge').value = banner.badge || '';
     document.getElementById('bannerStatus').value = banner.status;
 
-    setBannerImage(banner.image || '');
+    const catSel = document.getElementById('bannerCategorySelect');
+    if (catSel) {
+      const lower = (banner.slug || '').toLowerCase();
+      if (['all', 'mobiles', 'tvs', 'acs', 'home-theatres'].includes(lower)) {
+        catSel.value = lower;
+      } else {
+        catSel.value = 'custom';
+      }
+    }
+    
+    setBannerImage(banner.imageUrl || banner.image || '');
 
     document.getElementById('bannerModalTitle').textContent = 'Edit Banner';
     openModal('bannerModal');
@@ -815,7 +1101,7 @@
 
   const saveBannerBtn = document.getElementById('saveBannerBtn');
   if (saveBannerBtn) {
-    saveBannerBtn.addEventListener('click', () => {
+    saveBannerBtn.addEventListener('click', async () => {
       const id = document.getElementById('bannerFormId').value;
       const title = document.getElementById('bannerTitle').value.trim();
       const eyebrow = document.getElementById('bannerEyebrow').value.trim();
@@ -826,28 +1112,70 @@
       const status = document.getElementById('bannerStatus').value;
 
       if (!title || !slug) {
-        alert('Please provide a banner title and target slug.');
+        showAdminToast('Please provide a banner title and target slug.', 'warning');
         return;
       }
 
+      if (useApi) {
+        try {
+          const defaultThemes = {
+            mobiles: { bg: 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 55%, #2f52a0 100%)', accent: '#f58500' },
+            tvs: { bg: 'linear-gradient(135deg, #1a0d2e 0%, #3b1f6b 55%, #5a2ea0 100%)', accent: '#a78bfa' },
+            acs: { bg: 'linear-gradient(135deg, #0a1a30 0%, #0d3a6e 55%, #1e5aa0 100%)', accent: '#60a5fa' },
+            'home-theatres': { bg: 'linear-gradient(135deg, #10141f 0%, #1f2937 55%, #374151 100%)', accent: '#fbbf24' },
+            all: { bg: 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 60%, #2f52a0 100%)', accent: '#f58500' }
+          };
+          const theme = defaultThemes[slug.toLowerCase()] || defaultThemes['all'];
+          const existingBanner = id ? data.banners.find(b => b.id === id) : null;
+
+          const bannerPayload = {
+            title,
+            eyebrow,
+            subtitle,
+            ctaText,
+            slug,
+            badge: badge || null,
+            imageUrl: currentBannerImage || null,
+            status: status === 'Active' ? 'ACTIVE' : 'INACTIVE',
+            bgGradient: existingBanner?.bgGradient || theme.bg,
+            accentColor: existingBanner?.accentColor || theme.accent
+          };
+          if (id) {
+            await API.updateBanner(id, bannerPayload);
+            showAdminToast('Banner updated successfully.');
+          } else {
+            await API.createBanner(bannerPayload);
+            showAdminToast('New banner added successfully.');
+          }
+          await loadLiveBanners();
+          closeModal('bannerModal');
+          renderBanners();
+          return;
+        } catch (err) {
+          showAdminToast(`Error saving banner: ${err.message}`, 'error');
+          return;
+        }
+      }
+
       if (id) {
-        // Edit existing
+        // Edit existing mock
         const banner = data.banners.find(b => b.id === id);
         if (banner) {
-          Object.assign(banner, { 
-            title, 
-            eyebrow, 
-            subtitle, 
-            ctaText, 
-            slug, 
-            badge, 
+          Object.assign(banner, {
+            title,
+            eyebrow,
+            subtitle,
+            ctaText,
+            slug,
+            badge,
             status,
-            image: currentBannerImage 
+            image: currentBannerImage,
+            imageUrl: currentBannerImage
           });
           showAdminToast('Banner updated successfully.');
         }
       } else {
-        // Add new
+        // Add new mock
         const newBanner = {
           id: 'BNR-' + String(data.banners.length + 1).padStart(3, '0'),
           title,
@@ -858,6 +1186,7 @@
           badge,
           status,
           image: currentBannerImage,
+          imageUrl: currentBannerImage,
           bgGradient: 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 60%, #2f52a0 100%)',
           accentColor: '#f58500',
           clicks: 0
@@ -976,22 +1305,63 @@
       });
     });
 
+    // Handle multiple product files upload to Cloudinary
+    async function handleProductFiles(files) {
+      if (!files || files.length === 0) return;
+      const validFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+      if (validFiles.length === 0) return;
+
+      const spinner = document.getElementById('productUploadSpinner');
+      const spinnerText = document.getElementById('productUploadSpinnerText');
+      if (spinner) {
+        spinner.style.display = 'inline-flex';
+        if (spinnerText) spinnerText.textContent = `Uploading ${validFiles.length} image(s) to Cloudinary...`;
+      }
+
+      try {
+        if (useApi) {
+          const category = document.getElementById('productCategory')?.value || '';
+          const res = await API.uploadMultipleImages(validFiles, 'product', category);
+          if (res && res.success && Array.isArray(res.images)) {
+            res.images.forEach(img => {
+              addProductImage(img.url);
+            });
+            showAdminToast(`${res.images.length} image(s) uploaded to Cloudinary (${res.folder || 'products'})!`);
+            return;
+          }
+        }
+        // Fallback or mock mode
+        for (const file of validFiles) {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            addProductImage(ev.target.result);
+          };
+          reader.readAsDataURL(file);
+        }
+      } catch (err) {
+        console.error('Cloudinary product images upload error:', err);
+        showAdminToast(`Cloudinary upload failed: ${err.message}`, 'error');
+        // Fallback to local DataURL
+        for (const file of validFiles) {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            addProductImage(ev.target.result);
+          };
+          reader.readAsDataURL(file);
+        }
+      } finally {
+        if (spinner) spinner.style.display = 'none';
+      }
+    }
+
     // File input (multiple local files)
     const fileInput = document.getElementById('productFileInput');
     if (fileInput) {
       fileInput.addEventListener('change', (e) => {
         const files = Array.from(e.target.files || []);
-        if (files.length === 0) return;
-
-        files.forEach(file => {
-          if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-              addProductImage(ev.target.result);
-            };
-            reader.readAsDataURL(file);
-          }
-        });
+        if (files.length > 0) {
+          handleProductFiles(files);
+        }
         fileInput.value = '';
       });
     }
@@ -1015,15 +1385,9 @@
       });
       dropzone.addEventListener('drop', (e) => {
         const files = Array.from(e.dataTransfer?.files || []);
-        files.forEach(file => {
-          if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-              addProductImage(ev.target.result);
-            };
-            reader.readAsDataURL(file);
-          }
-        });
+        if (files.length > 0) {
+          handleProductFiles(files);
+        }
       });
     }
 
@@ -1049,7 +1413,49 @@
     }
   }
 
-  function renderProducts() {
+  let liveProductsLoaded = false;
+
+  async function loadLiveProducts() {
+    if (!useApi) return;
+    try {
+      const res = await API.getProducts({ limit: 100 });
+      if (res && res.success && Array.isArray(res.data)) {
+        data.products = res.data.map(p => {
+          const primaryImg = (p.productImages && p.productImages.find(img => img.isPrimary)?.imageUrl) ||
+                             p.productImages?.[0]?.imageUrl ||
+                             '';
+          const images = (p.productImages || []).map(img => ({
+            url: img.imageUrl,
+            isPrimary: !!img.isPrimary
+          }));
+          const priceNum = parseFloat(p.price) || 0;
+          return {
+            id: p.id,
+            name: p.name,
+            brand: p.brand || '',
+            category: p.category ? p.category.name : 'General',
+            categoryId: p.categoryId,
+            price: priceNum,
+            originalPrice: priceNum,
+            stock: (p.stock !== undefined && p.stock !== null) ? Number(p.stock) : 0,
+            minStockThreshold: 4,
+            status: (p.availability === 'NOT_AVAILABLE' || p.stock === 0) ? 'Out of Stock' : (Number(p.stock) < 5 ? 'Low Stock' : 'In Stock'),
+            availability: p.availability || 'AVAILABLE',
+            slug: p.slug,
+            description: p.description || '',
+            images,
+            primaryImage: primaryImg,
+            variants: p.variants || []
+          };
+        });
+        liveProductsLoaded = true;
+      }
+    } catch (e) {
+      console.warn('Could not load live products from API:', e);
+    }
+  }
+
+  async function renderProducts() {
     const tbody = document.getElementById('productsTableBody');
     const emptyState = document.getElementById('productsEmptyState');
     const searchInput = document.getElementById('productSearchInput');
@@ -1059,16 +1465,20 @@
 
     if (!tbody) return;
 
+    if (useApi && !liveProductsLoaded) {
+      await loadLiveProducts();
+    }
+
     const query = (searchInput?.value || '').trim().toLowerCase();
     const cat = catFilter?.value || 'all';
     const stockStatus = stockFilter?.value || 'all';
 
     const filtered = data.products.filter(p => {
-      const matchQuery = p.name.toLowerCase().includes(query) ||
-                         p.brand.toLowerCase().includes(query) ||
-                         p.category.toLowerCase().includes(query) ||
-                         p.slug.toLowerCase().includes(query);
-      const matchCat = cat === 'all' || p.category === cat;
+      const matchQuery = (p.name || '').toLowerCase().includes(query) ||
+                         (p.brand || '').toLowerCase().includes(query) ||
+                         (p.category || '').toLowerCase().includes(query) ||
+                         (p.slug || '').toLowerCase().includes(query);
+      const matchCat = cat === 'all' || p.category.toLowerCase() === cat.toLowerCase();
       const matchStock = stockStatus === 'all' || p.status === stockStatus;
       return matchQuery && matchCat && matchStock;
     });
@@ -1094,11 +1504,11 @@
         stockColor = '#dc2626';
       }
 
-      const primaryImg = p.primaryImage || 
-                         (Array.isArray(p.images) && (p.images.find(x => x.isPrimary)?.url || p.images[0]?.url || (typeof p.images[0] === 'string' ? p.images[0] : null))) || 
-                         p.image || null;
+      const primaryImg = p.primaryImage ||
+        (Array.isArray(p.images) && (p.images.find(x => x.isPrimary)?.url || p.images[0]?.url || (typeof p.images[0] === 'string' ? p.images[0] : null))) ||
+        p.image || null;
 
-      const imgHtml = primaryImg 
+      const imgHtml = primaryImg
         ? `<img src="${primaryImg}" alt="${p.name}" class="admin-cell-product__thumb-img" onerror="this.parentElement.innerHTML='<svg viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'1.75\\'><rect x=\\'5\\' y=\\'2\\' width=\\'14\\' height=\\'20\\' rx=\\'2\\' ry=\\'2\\'></rect><line x1=\\'12\\' y1=\\'18\\' x2=\\'12.01\\' y2=\\'18\\'></line></svg>'"/>`
         : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
              <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
@@ -1161,8 +1571,21 @@
     });
 
     tbody.querySelectorAll('[data-toggle-avail]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const prod = data.products.find(x => x.id === btn.dataset.toggleAvail);
+      btn.addEventListener('click', async () => {
+        const prodId = btn.dataset.toggleAvail;
+        if (useApi) {
+          try {
+            await API.toggleProductVisibility(prodId);
+            await loadLiveProducts();
+            renderProducts();
+            showAdminToast('Product visibility updated.');
+            return;
+          } catch (err) {
+            showAdminToast('Failed to update product visibility.', 'error');
+            return;
+          }
+        }
+        const prod = data.products.find(x => x.id === prodId);
         if (prod) {
           prod.availability = prod.availability === 'AVAILABLE' ? 'NOT_AVAILABLE' : 'AVAILABLE';
           renderProducts();
@@ -1172,8 +1595,35 @@
     });
 
     tbody.querySelectorAll('[data-delete-product]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const idx = data.products.findIndex(x => x.id === btn.dataset.deleteProduct);
+      btn.addEventListener('click', async () => {
+        const prodId = btn.dataset.deleteProduct;
+        const targetProduct = data.products.find(p => p.id === prodId);
+        const prodName = targetProduct?.name || 'this product';
+
+        const confirmed = await showConfirmDialog({
+          title: 'Delete Product',
+          subtitle: 'This product and its variant data will be permanently removed from inventory.',
+          message: 'Are you sure you want to delete this product?',
+          itemName: prodName,
+          confirmText: 'Delete Product',
+          isDanger: true
+        });
+
+        if (!confirmed) return;
+
+        if (useApi) {
+          try {
+            await API.deleteProduct(prodId);
+            await loadLiveProducts();
+            renderProducts();
+            showAdminToast(`Product "${prodName}" deleted successfully.`);
+            return;
+          } catch (err) {
+            showAdminToast('Failed to delete product.', 'error');
+            return;
+          }
+        }
+        const idx = data.products.findIndex(x => x.id === prodId);
         if (idx !== -1) {
           const removed = data.products.splice(idx, 1)[0];
           renderProducts();
@@ -1181,6 +1631,357 @@
         }
       });
     });
+  }
+
+  let productSlugManual = false;
+
+  // ─── Variant Attributes & Cards Management ──────────────────────────────
+  let availableAttributes = [];
+
+  async function loadAdminAttributes() {
+    try {
+      if (useApi) {
+        const res = await API.getAttributes();
+        if (res && res.success && Array.isArray(res.data)) {
+          availableAttributes = res.data;
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('Could not load attributes from API:', e);
+    }
+
+    if (!availableAttributes.length) {
+      availableAttributes = [
+        { id: 'attr-ram', name: 'RAM', displayName: 'RAM', values: [
+          { id: 'cmue4phix000s9gdxka1vv50u', value: '8gb', displayValue: '8GB' },
+          { id: 'cmue4phix000t9gdx9rz0s7jp', value: '12gb', displayValue: '12GB' },
+          { id: 'cmue4phix000u9gdx4ui0c3d0', value: '16gb', displayValue: '16GB' }
+        ]},
+        { id: 'attr-storage', name: 'Storage', displayName: 'Storage', values: [
+          { id: 'cmue4ph83000n9gdx7lce6uh7', value: '128gb', displayValue: '128GB' },
+          { id: 'cmue4ph83000o9gdxnz6tsk75', value: '256gb', displayValue: '256GB' },
+          { id: 'cmue4ph83000p9gdxv9izipwb', value: '512gb', displayValue: '512GB' },
+          { id: 'cmue4ph83000q9gdx4rt2np3q', value: '1tb', displayValue: '1TB' }
+        ]},
+        { id: 'attr-color', name: 'Color', displayName: 'Color', values: [
+          { id: 'cmue4pgm6000i9gdxow1dzicc', value: 'black', displayValue: 'Phantom Black' },
+          { id: 'cmue4pgm6000j9gdx8q2wgfid', value: 'silver', displayValue: 'Titanium Silver' },
+          { id: 'cmue4pgm6000k9gdx90e3fjiy', value: 'blue', displayValue: 'Deep Ocean Blue' },
+          { id: 'cmue4pgm6000l9gdx8v2n5ml9', value: 'gold', displayValue: 'Desert Gold' },
+          { id: 'cmuo47gzf000ee8e53e8zy3b7', value: 'green', displayValue: 'Emerald Green' }
+        ]},
+        { id: 'attr-screen', name: 'Screen Size', displayName: 'Screen Size', values: [
+          { id: 'cmuo47h7i000ge8e5w7n2shxj', value: '24-inch', displayValue: '24 Inch' },
+          { id: 'cmuo47h9u000he8e5ksf9mx5f', value: '32-inch', displayValue: '32 Inch' },
+          { id: 'cmuo47heb000ie8e53xo0mtgx', value: '40-inch', displayValue: '40 Inch' },
+          { id: 'cmuo47hh1000je8e5n3whd2n3', value: '43-inch', displayValue: '43 Inch' },
+          { id: 'cmuo47hll000ke8e5rdnd3h7e', value: '50-inch', displayValue: '50 Inch' },
+          { id: 'cmuo47hpl000le8e5a7giwdeu', value: '55-inch', displayValue: '55 Inch' },
+          { id: 'cmuo47hta000me8e5aqbw9tdm', value: '65-inch', displayValue: '65 Inch' },
+          { id: 'cmuo47hv6000ne8e5owf09q99', value: '75-inch', displayValue: '75 Inch' }
+        ]},
+        { id: 'attr-cap', name: 'Capacity', displayName: 'Capacity', values: [
+          { id: 'cmuo47i0t000pe8e5jhimnirp', value: '1-ton', displayValue: '1.0 Ton' },
+          { id: 'cmuo47i4l000qe8e5e96c32dw', value: '1.5-ton', displayValue: '1.5 Ton' },
+          { id: 'cmuo47ifg000re8e5d6kkufrt', value: '2-ton', displayValue: '2.0 Ton' }
+        ]},
+        { id: 'attr-star', name: 'Star Rating', displayName: 'Energy Rating', values: [
+          { id: 'cmuo47ior000te8e5fu02z6k2', value: '3-star', displayValue: '3 Star' },
+          { id: 'cmuo47isp000ue8e5t8p1jhqy', value: '5-star', displayValue: '5 Star' }
+        ]}
+      ];
+    }
+  }
+
+  function updateVariantCardsIndex() {
+    const container = document.getElementById('productVariantsContainer');
+    const countBadge = document.getElementById('productVariantsCount');
+    if (!container) return;
+    const cards = container.querySelectorAll('.admin-variant-card');
+    if (countBadge) {
+      countBadge.textContent = `${cards.length} variant${cards.length === 1 ? '' : 's'}`;
+    }
+    cards.forEach((card, idx) => {
+      card.dataset.variantIndex = idx;
+      const titleBadge = card.querySelector('.admin-variant-badge');
+      if (titleBadge) {
+        titleBadge.textContent = `Variant #${idx + 1}`;
+      }
+    });
+  }
+
+  function syncAttributeDropdowns(card) {
+    const rows = Array.from(card.querySelectorAll('.admin-attr-row'));
+    const addAttrBtn = card.querySelector('.add-attr-btn');
+
+    // Collect currently chosen attributes in this card
+    const chosenAttrNames = rows
+      .map(r => r.querySelector('.attr-name-select')?.value)
+      .filter(Boolean);
+
+    // Disable Add Attribute button if all available attributes are already chosen
+    if (addAttrBtn) {
+      const allChosen = availableAttributes.length > 0 && chosenAttrNames.length >= availableAttributes.length;
+      addAttrBtn.disabled = allChosen;
+      addAttrBtn.style.opacity = allChosen ? '0.5' : '1';
+      addAttrBtn.style.cursor = allChosen ? 'not-allowed' : 'pointer';
+      addAttrBtn.title = allChosen ? 'All available attributes have been added' : 'Add another attribute';
+    }
+
+    // Update each row's attribute dropdown: exclude attributes chosen in other rows
+    rows.forEach(row => {
+      const nameSelect = row.querySelector('.attr-name-select');
+      const valSelect = row.querySelector('.attr-val-select');
+      if (!nameSelect) return;
+
+      const currentVal = nameSelect.value;
+      const otherChosen = chosenAttrNames.filter(name => name !== currentVal);
+      const allowedAttrs = availableAttributes.filter(a => !otherChosen.includes(a.name));
+
+      // Rebuild options while preserving current selection
+      nameSelect.innerHTML = `<option value="">-- Select Attribute --</option>` +
+        allowedAttrs.map(a => `<option value="${a.name}" ${a.name === currentVal ? 'selected' : ''}>${a.displayName || a.name}</option>`).join('');
+
+      if (!nameSelect.value) {
+        valSelect.disabled = true;
+        valSelect.innerHTML = `<option value="">-- Select Attribute First --</option>`;
+      }
+    });
+  }
+
+  function addAttributeRow(card, selectedAttrName = '', selectedValId = '') {
+    const list = card.querySelector('.variant-attrs-list');
+    if (!list) return;
+
+    // Find canonical attribute from availableAttributes
+    let matchedAttr = null;
+    if (selectedAttrName) {
+      matchedAttr = availableAttributes.find(a =>
+        a.name === selectedAttrName ||
+        a.name.toLowerCase() === selectedAttrName.toLowerCase() ||
+        (a.displayName && a.displayName.toLowerCase() === selectedAttrName.toLowerCase()) ||
+        a.id === selectedAttrName
+      );
+    }
+    const initialAttrName = matchedAttr ? matchedAttr.name : (selectedAttrName || '');
+
+    const chosenNames = Array.from(card.querySelectorAll('.attr-name-select'))
+      .map(s => s.value)
+      .filter(Boolean);
+
+    if (availableAttributes.length > 0 && !initialAttrName && chosenNames.length >= availableAttributes.length) {
+      showAdminToast('All available attributes have already been added to this variant.', 'warning');
+      return;
+    }
+
+    const row = document.createElement('div');
+    row.className = 'admin-attr-row';
+
+    row.innerHTML = `
+      <div class="admin-attr-row__select-group">
+        <select class="admin-form-select attr-name-select">
+          <option value="">-- Select Attribute --</option>
+        </select>
+      </div>
+      <div class="admin-attr-row__select-group">
+        <select class="admin-form-select attr-val-select" disabled>
+          <option value="">-- Select Attribute First --</option>
+        </select>
+      </div>
+      <button type="button" class="admin-attr-remove-btn" title="Remove attribute">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    `;
+
+    const nameSelect = row.querySelector('.attr-name-select');
+    const valSelect = row.querySelector('.attr-val-select');
+    const removeBtn = row.querySelector('.admin-attr-remove-btn');
+
+    removeBtn.addEventListener('click', () => {
+      row.remove();
+      syncAttributeDropdowns(card);
+    });
+
+    function populateValuesForSelectedAttribute(attrName, preselectValId = '') {
+      if (!attrName) {
+        valSelect.disabled = true;
+        valSelect.innerHTML = `<option value="">-- Select Attribute First --</option>`;
+        return;
+      }
+      const attrObj = availableAttributes.find(a =>
+        a.name === attrName ||
+        a.name.toLowerCase() === attrName.toLowerCase() ||
+        (a.displayName && a.displayName.toLowerCase() === attrName.toLowerCase()) ||
+        a.id === attrName
+      );
+      if (!attrObj) {
+        valSelect.disabled = true;
+        valSelect.innerHTML = `<option value="">-- No values available --</option>`;
+        return;
+      }
+
+      valSelect.disabled = false;
+      const valuesList = Array.isArray(attrObj.values) ? attrObj.values : [];
+      valSelect.innerHTML = `<option value="">-- Select Value --</option>` +
+        valuesList.map(v => {
+          const isSelected = preselectValId && (v.id === preselectValId || v.value === preselectValId || v.displayValue === preselectValId);
+          return `<option value="${v.id}" ${isSelected ? 'selected' : ''}>${v.displayValue || v.value}</option>`;
+        }).join('') +
+        `<option value="__ADD_NEW_VAL__" style="color:var(--color-primary-700); font-weight:600;">+ Add New Value...</option>`;
+
+      if (preselectValId) {
+        const found = valuesList.find(v => v.id === preselectValId || v.value === preselectValId || v.displayValue === preselectValId);
+        if (found) {
+          valSelect.value = found.id;
+        }
+      }
+    }
+
+    valSelect.addEventListener('change', async () => {
+      if (valSelect.value === '__ADD_NEW_VAL__') {
+        const attrObj = availableAttributes.find(a =>
+          a.name === nameSelect.value ||
+          a.name.toLowerCase() === (nameSelect.value || '').toLowerCase()
+        );
+        if (!attrObj) {
+          valSelect.value = '';
+          return;
+        }
+        const inputVal = prompt(`Enter new option/value for "${attrObj.displayName || attrObj.name}":`);
+        if (!inputVal || !inputVal.trim()) {
+          valSelect.value = '';
+          return;
+        }
+        const newValTrimmed = inputVal.trim();
+        const slug = newValTrimmed.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/(^-|-$)/g, '');
+        try {
+          if (useApi) {
+            const res = await API.createAttributeValue(attrObj.id, {
+              value: slug,
+              displayValue: newValTrimmed
+            });
+            if (res && res.success && res.data) {
+              showAdminToast(`Added "${newValTrimmed}" to ${attrObj.displayName || attrObj.name}.`);
+              await loadAdminAttributes();
+              populateValuesForSelectedAttribute(nameSelect.value, res.data.id);
+              return;
+            }
+          } else {
+            const fakeVal = {
+              id: 'val-' + Math.random().toString(36).substring(2, 9),
+              value: slug,
+              displayValue: newValTrimmed
+            };
+            if (!Array.isArray(attrObj.values)) attrObj.values = [];
+            attrObj.values.push(fakeVal);
+            populateValuesForSelectedAttribute(nameSelect.value, fakeVal.id);
+            showAdminToast(`Added "${newValTrimmed}" to ${attrObj.displayName || attrObj.name}.`);
+            return;
+          }
+        } catch (err) {
+          showAdminToast(err.message || 'Error adding value.', 'error');
+        }
+        valSelect.value = '';
+      }
+    });
+
+    nameSelect.addEventListener('change', () => {
+      populateValuesForSelectedAttribute(nameSelect.value);
+      syncAttributeDropdowns(card);
+    });
+
+    list.appendChild(row);
+
+    // Pre-populate nameSelect options taking existing rows into account
+    const otherChosen = Array.from(card.querySelectorAll('.attr-name-select'))
+      .filter(s => s !== nameSelect)
+      .map(s => s.value)
+      .filter(Boolean);
+
+    const allowedAttrs = availableAttributes.filter(a => !otherChosen.includes(a.name));
+    nameSelect.innerHTML = `<option value="">-- Select Attribute --</option>` +
+      allowedAttrs.map(a => `<option value="${a.name}" ${a.name === initialAttrName ? 'selected' : ''}>${a.displayName || a.name}</option>`).join('');
+
+    if (initialAttrName) {
+      nameSelect.value = initialAttrName;
+      populateValuesForSelectedAttribute(initialAttrName, selectedValId);
+    }
+
+    syncAttributeDropdowns(card);
+  }
+
+  function addVariantCard(initialData = null) {
+    const container = document.getElementById('productVariantsContainer');
+    if (!container) return;
+
+    const card = document.createElement('div');
+    card.className = 'admin-variant-card';
+
+    card.innerHTML = `
+      <div class="admin-variant-card__header">
+        <div class="admin-variant-card__title">
+          <span class="admin-variant-badge">Variant #1</span>
+        </div>
+        <button type="button" class="admin-variant-remove-btn" title="Remove this variant">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <span>Remove</span>
+        </button>
+      </div>
+
+      <div class="admin-form-row" style="margin-bottom: var(--space-3);">
+        <div class="admin-form-group" style="margin-bottom: 0;">
+          <label class="admin-label" style="font-size: 11px;">Price Override (₹)</label>
+          <input type="number" class="admin-input variant-price-override" placeholder="Leave blank to use base price" min="0" step="any" value="${(initialData?.priceOverride !== undefined && initialData?.priceOverride !== null) ? initialData.priceOverride : ''}"/>
+        </div>
+        <div class="admin-form-group" style="margin-bottom: 0;">
+          <label class="admin-label" style="font-size: 11px;">Availability</label>
+          <select class="admin-form-select variant-availability">
+            <option value="AVAILABLE" ${(initialData?.availability === 'AVAILABLE' || !initialData) ? 'selected' : ''}>Available</option>
+            <option value="NOT_AVAILABLE" ${initialData?.availability === 'NOT_AVAILABLE' ? 'selected' : ''}>Out of Stock</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="admin-variant-attrs-wrap">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-2);">
+          <span style="font-size: 11px; font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Attributes & Options</span>
+          <button type="button" class="btn btn--outline btn--xs add-attr-btn">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Add Attribute</span>
+          </button>
+        </div>
+        
+        <div class="variant-attrs-list"></div>
+      </div>
+    `;
+
+    const removeBtn = card.querySelector('.admin-variant-remove-btn');
+    removeBtn.addEventListener('click', () => {
+      card.remove();
+      updateVariantCardsIndex();
+    });
+
+    const addAttrBtn = card.querySelector('.add-attr-btn');
+    addAttrBtn.addEventListener('click', () => {
+      addAttributeRow(card);
+    });
+
+    container.appendChild(card);
+    updateVariantCardsIndex();
+
+    // Populate initial attributes or add one initial blank attribute row
+    if (initialData && Array.isArray(initialData.attributeValues) && initialData.attributeValues.length > 0) {
+      initialData.attributeValues.forEach(av => {
+        const attrName = av.attribute?.name || av.attribute?.displayName;
+        const valId = av.id;
+        addAttributeRow(card, attrName, valId);
+      });
+    } else {
+      addAttributeRow(card);
+    }
+
+    return card;
   }
 
   function resetProductForm() {
@@ -1191,17 +1992,49 @@
     const title = document.getElementById('productModalTitle');
     if (title) title.textContent = 'Add New Product';
     currentProductImages = [];
+    productSlugManual = false;
     renderProductGallery();
     const urlInput = document.getElementById('productImageUrlInput');
     if (urlInput) urlInput.value = '';
     const fileInput = document.getElementById('productFileInput');
     if (fileInput) fileInput.value = '';
+    const descInput = document.getElementById('productDescription');
+    if (descInput) descInput.value = '';
+
+    // Reset variants container and add initial variant with 1 attribute row
+    const varContainer = document.getElementById('productVariantsContainer');
+    if (varContainer) {
+      varContainer.innerHTML = '';
+      addVariantCard();
+    }
   }
 
-  function editProduct(id) {
+  // Auto-generate URL Slug from Product Name
+  const productNameInput = document.getElementById('productName');
+  const productSlugInput = document.getElementById('productSlug');
+  if (productNameInput && productSlugInput) {
+    productSlugInput.addEventListener('input', () => {
+      productSlugManual = !!productSlugInput.value.trim();
+    });
+    productNameInput.addEventListener('input', () => {
+      if (!productSlugManual) {
+        productSlugInput.value = productNameInput.value
+          .toLowerCase()
+          .trim()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
+      }
+    });
+  }
+
+  async function editProduct(id) {
+    if (!availableAttributes || availableAttributes.length === 0) {
+      await loadAdminAttributes();
+    }
     const prod = data.products.find(p => p.id === id);
     if (!prod) return;
 
+    productSlugManual = true;
     document.getElementById('productFormId').value = prod.id;
     document.getElementById('productName').value = prod.name;
     document.getElementById('productBrand').value = prod.brand;
@@ -1228,26 +2061,45 @@
 
     renderProductGallery();
 
+    // Populate variants
+    const varContainer = document.getElementById('productVariantsContainer');
+    if (varContainer) {
+      varContainer.innerHTML = '';
+      if (Array.isArray(prod.variants) && prod.variants.length > 0) {
+        prod.variants.forEach(v => addVariantCard(v));
+      } else {
+        addVariantCard();
+      }
+    }
+
     document.getElementById('productModalTitle').textContent = 'Edit Product Details';
     openModal('productModal');
   }
 
   const saveProductBtn = document.getElementById('saveProductBtn');
   if (saveProductBtn) {
-    saveProductBtn.addEventListener('click', () => {
+    saveProductBtn.addEventListener('click', async () => {
       const id = document.getElementById('productFormId').value;
       const name = document.getElementById('productName').value.trim();
       const brand = document.getElementById('productBrand').value.trim();
       const category = document.getElementById('productCategory').value;
       const price = Number(document.getElementById('productPrice').value) || 0;
       const stock = Number(document.getElementById('productStock').value) || 0;
-      const slug = document.getElementById('productSlug').value.trim();
+      let slug = document.getElementById('productSlug').value.trim();
       const availability = document.getElementById('productAvailability').value;
-      const description = document.getElementById('productDescription').value.trim();
+      let description = document.getElementById('productDescription') ? document.getElementById('productDescription').value.trim() : '';
 
-      if (!name || !brand || !slug || price <= 0) {
-        alert('Please fill in product name, brand, price and slug.');
+      if (!name || !brand || price <= 0) {
+        showAdminToast('Please fill in product name, brand, and a valid price.', 'error');
         return;
+      }
+
+      if (!slug) {
+        slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `prod-${Date.now()}`;
+      }
+
+      if (!description) {
+        description = `${name} - Official ${brand} ${category}.`;
       }
 
       let status = 'In Stock';
@@ -1255,23 +2107,83 @@
       else if (stock < 5) status = 'Low Stock';
 
       const primaryImgUrl = currentProductImages.find(x => x.isPrimary)?.url || currentProductImages[0]?.url || '';
-      const productImages = currentProductImages.map(x => ({ url: x.url, isPrimary: !!x.isPrimary }));
+      const productImages = currentProductImages
+        .filter(x => x && x.url && String(x.url).trim().length > 0)
+        .map(x => ({ url: String(x.url).trim(), isPrimary: !!x.isPrimary }));
+
+      // Collect variants
+      const variantElements = document.querySelectorAll('.admin-variant-card');
+      const variants = [];
+      variantElements.forEach(card => {
+        const priceOverrideInput = card.querySelector('.variant-price-override');
+        const priceOverride = priceOverrideInput && priceOverrideInput.value.trim() ? parseFloat(priceOverrideInput.value.trim()) : null;
+        const availSelect = card.querySelector('.variant-availability');
+        const availability = availSelect ? availSelect.value : 'AVAILABLE';
+
+        const attributeValueIds = [];
+        card.querySelectorAll('.admin-attr-row').forEach(row => {
+          const valSelect = row.querySelector('.attr-val-select');
+          if (valSelect && valSelect.value && valSelect.value.trim()) {
+            attributeValueIds.push(valSelect.value.trim());
+          }
+        });
+
+        if (attributeValueIds.length > 0) {
+          variants.push({
+            priceOverride,
+            availability,
+            attributeValueIds
+          });
+        }
+      });
+
+      if (useApi) {
+        try {
+          const payload = {
+            name,
+            brand,
+            category,
+            price,
+            stock,
+            slug,
+            availability,
+            description,
+            images: productImages,
+            variants
+          };
+          if (id) {
+            await API.updateProduct(id, payload);
+            showAdminToast(`Product "${name}" updated successfully.`);
+          } else {
+            await API.createProduct(payload);
+            showAdminToast(`Product "${name}" created successfully.`);
+          }
+          await loadLiveProducts();
+          closeModal('productModal');
+          renderProducts();
+          return;
+        } catch (err) {
+          showAdminToast(`Error saving product: ${err.message}`, 'error');
+          return;
+        }
+      }
 
       if (id) {
         const prod = data.products.find(p => p.id === id);
         if (prod) {
-          Object.assign(prod, { 
-            name, 
-            brand, 
-            category, 
-            price, 
-            stock, 
-            slug, 
-            availability, 
-            description, 
+          Object.assign(prod, {
+            name,
+            brand,
+            category,
+            price,
+            stock,
+            slug,
+            availability,
+            description,
             status,
             images: productImages,
-            primaryImage: primaryImgUrl
+            primaryImage: primaryImgUrl,
+            variants
           });
           showAdminToast(`Product "${prod.name}" updated successfully.`);
         }
@@ -1291,7 +2203,8 @@
           rating: 5.0,
           description,
           images: productImages,
-          primaryImage: primaryImgUrl
+          primaryImage: primaryImgUrl,
+          variants
         };
         data.products.unshift(newProduct);
         showAdminToast(`New product "${name}" added to catalogue.`);
@@ -1348,10 +2261,32 @@
 
   const saveStockBtn = document.getElementById('saveStockBtn');
   if (saveStockBtn) {
-    saveStockBtn.addEventListener('click', () => {
+    saveStockBtn.addEventListener('click', async () => {
       const id = document.getElementById('stockProductId').value;
       const stock = Number(document.getElementById('stockQuantityInput').value) || 0;
       const status = document.getElementById('stockStatusSelect').value;
+      const availability = (status === 'Out of Stock' || stock === 0) ? 'NOT_AVAILABLE' : 'AVAILABLE';
+
+      if (useApi) {
+        try {
+          await API.updateProduct(id, { stock, availability });
+          const prod = data.products.find(p => p.id === id);
+          if (prod) {
+            prod.stock = stock;
+            prod.status = status;
+            prod.availability = availability;
+          }
+          showAdminToast(`Stock updated to ${stock} units (${status}) for "${prod ? prod.name : 'Product'}"`);
+          closeModal('stockModal');
+          await loadLiveProducts();
+          renderProducts();
+          initDashboard();
+          return;
+        } catch (err) {
+          showAdminToast(`Failed to update stock: ${err.message}`, 'error');
+          return;
+        }
+      }
 
       const prod = data.products.find(p => p.id === id);
       if (prod) {
@@ -1367,10 +2302,89 @@
   }
 
   /* =========================================================================
-     7. REGISTERED USERS CONTROLLER
+     7. REGISTERED USERS CONTROLLER (DATABASE BACKED)
      ========================================================================= */
 
-  function renderUsers() {
+  let registeredUsersData = [];
+
+  function formatAdminDate(dateStr) {
+    if (!dateStr) return 'Recent';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
+  function formatAdminDateTimeIST(dateStr) {
+    if (!dateStr) return '—';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      }) + ' IST';
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
+  function escapeAdminHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function formatAdminCurrency(amount) {
+    const num = Number(amount) || 0;
+    return '₹' + num.toLocaleString('en-IN');
+  }
+
+  async function loadUsersFromDb() {
+    try {
+      const res = await fetch('/api/admin/users?limit=100');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          registeredUsersData = json.data;
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to fetch /api/admin/users from database:', e);
+    }
+    // Fallback to mock data if API is unreachable
+    registeredUsersData = (data.users || []).map(u => ({
+      id: u.id,
+      username: u.name,
+      email: u.email,
+      phone_number: u.phone,
+      gender: u.gender,
+      role: u.role,
+      created_at: u.joinedDate,
+      orderCount: u.ordersCount,
+      addresses: u.addresses || []
+    }));
+  }
+
+  async function renderUsers() {
     const tbody = document.getElementById('usersTableBody');
     const emptyState = document.getElementById('usersEmptyState');
     const searchInput = document.getElementById('userSearchInput');
@@ -1379,18 +2393,23 @@
 
     if (!tbody) return;
 
+    if (registeredUsersData.length === 0) {
+      await loadUsersFromDb();
+    }
+
     const query = (searchInput?.value || '').trim().toLowerCase();
     const role = roleFilter?.value || 'all';
 
-    const filtered = data.users.filter(u => {
-      const matchQuery = u.name.toLowerCase().includes(query) ||
-                         u.email.toLowerCase().includes(query) ||
-                         u.phone.toLowerCase().includes(query);
+    const filtered = registeredUsersData.filter(u => {
+      const name = (u.username || u.name || '').toLowerCase();
+      const email = (u.email || '').toLowerCase();
+      const phone = (u.phone_number || u.phone || '').toLowerCase();
+      const matchQuery = name.includes(query) || email.includes(query) || phone.includes(query);
       const matchRole = role === 'all' || u.role === role;
       return matchQuery && matchRole;
     });
 
-    if (countDisplay) countDisplay.textContent = filtered.length;
+    if (countDisplay) countDisplay.textContent = registeredUsersData.length;
 
     if (filtered.length === 0) {
       tbody.innerHTML = '';
@@ -1401,29 +2420,35 @@
     if (emptyState) emptyState.style.display = 'none';
 
     tbody.innerHTML = filtered.map(u => {
-      const initials = u.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+      const displayName = u.username || u.name || 'User';
+      const initials = displayName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'U';
+      const phoneDisplay = u.phone_number || u.phone || 'N/A';
+      const orders = u.orderCount !== undefined ? u.orderCount : (u.ordersCount || 0);
+      const joinedFormatted = formatAdminDate(u.created_at || u.joinedDate);
+      const genderDisplay = u.gender ? u.gender.replace(/_/g, ' ') : 'Not specified';
+
       return `
         <tr data-user-id="${u.id}">
           <td>
             <div class="admin-cell-user">
               <div class="admin-cell-user__avatar">${initials}</div>
               <div>
-                <strong style="color:var(--color-text-primary);">${u.name}</strong>
-                <div style="font-size:var(--text-xs); color:var(--color-text-muted);">${u.gender || 'Not specified'}</div>
+                <strong style="color:var(--color-text-primary);">${displayName}</strong>
+                <div style="font-size:var(--text-xs); color:var(--color-text-muted);">${genderDisplay}</div>
               </div>
             </div>
           </td>
           <td><span style="font-family:var(--font-mono); font-size:var(--text-xs);">${u.email}</span></td>
-          <td>${u.phone}</td>
+          <td>${phoneDisplay}</td>
           <td>
             <span class="badge ${u.role === 'ADMIN' ? 'badge--accent' : 'badge--primary'}">
               ${u.role}
             </span>
           </td>
-          <td style="font-size:var(--text-xs); color:var(--color-text-muted);">${u.joinedDate}</td>
-          <td><strong>${u.ordersCount}</strong> orders</td>
+          <td style="font-size:var(--text-xs); color:var(--color-text-muted);">${joinedFormatted}</td>
+          <td><strong>${orders}</strong> orders</td>
           <td>
-            <span class="badge badge--success">${u.status}</span>
+            <span class="badge badge--success">Active</span>
           </td>
           <td>
             <button type="button" class="admin-btn-action" data-view-user="${u.id}">
@@ -1439,8 +2464,46 @@
     });
   }
 
-  function openUserDrawer(userId) {
-    const user = data.users.find(u => u.id === userId);
+  // Hook up user search and role filter listeners
+  const userSearchInput = document.getElementById('userSearchInput');
+  const userRoleFilter = document.getElementById('userRoleFilter');
+  const resetUserFiltersBtn = document.getElementById('resetUserFiltersBtn');
+
+  if (userSearchInput) {
+    userSearchInput.addEventListener('input', () => renderUsers());
+  }
+  if (userRoleFilter) {
+    userRoleFilter.addEventListener('change', () => renderUsers());
+  }
+  if (resetUserFiltersBtn) {
+    resetUserFiltersBtn.addEventListener('click', () => {
+      if (userSearchInput) userSearchInput.value = '';
+      if (userRoleFilter) userRoleFilter.value = 'all';
+      renderUsers();
+    });
+  }
+
+  async function openUserDrawer(userId) {
+    let user = registeredUsersData.find(u => u.id === userId);
+    try {
+      if (useApi) {
+        const json = await API.getUserDetail(userId);
+        if (json && json.success && json.data) {
+          user = { ...user, ...json.data };
+        }
+      } else {
+        const res = await fetch(`/api/admin/users/${userId}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            user = { ...user, ...json.data };
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Could not fetch user details:', e);
+    }
+
     if (!user) return;
 
     const drawerBody = document.getElementById('userDrawerBody');
@@ -1449,7 +2512,13 @@
 
     if (!drawerBody || !drawer || !overlay) return;
 
-    const initials = user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    const displayName = user.username || user.name || 'User';
+    const initials = displayName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'U';
+    const joinedFormatted = formatAdminDate(user.created_at || user.joinedDate);
+    const phoneDisplay = user.phone_number || user.phone || 'Not provided';
+    const ordersCount = user.orderCount !== undefined ? user.orderCount : (user.ordersCount || (user.orders ? user.orders.length : 0));
+    const totalSpent = user.totalSpent !== undefined ? formatAdminCurrency(user.totalSpent) : (user.totalSpentFormatted || '₹0');
+    const addresses = user.addresses || [];
 
     drawerBody.innerHTML = `
       <!-- User Summary Card -->
@@ -1458,7 +2527,7 @@
           ${initials}
         </div>
         <div>
-          <h4 style="font-size:var(--text-lg); font-weight:var(--font-bold); margin:0;">${user.name}</h4>
+          <h4 style="font-size:var(--text-lg); font-weight:var(--font-bold); margin:0;">${displayName}</h4>
           <span style="font-size:var(--text-xs); color:var(--color-text-muted);">Customer ID: ${user.id}</span>
         </div>
       </div>
@@ -1475,7 +2544,7 @@
           </div>
           <div>
             <span style="color:var(--color-text-muted); font-size:var(--text-xs); display:block;">Phone Number</span>
-            <strong>${user.phone}</strong>
+            <strong>${phoneDisplay}</strong>
           </div>
           <div>
             <span style="color:var(--color-text-muted); font-size:var(--text-xs); display:block;">Account Role</span>
@@ -1483,7 +2552,7 @@
           </div>
           <div>
             <span style="color:var(--color-text-muted); font-size:var(--text-xs); display:block;">Date Registered</span>
-            <strong>${user.joinedDate}</strong>
+            <strong>${joinedFormatted}</strong>
           </div>
         </div>
       </div>
@@ -1496,11 +2565,11 @@
         <div style="display:flex; gap:var(--space-4);">
           <div style="flex:1; padding:var(--space-4); background:var(--color-bg-secondary); border-radius:var(--radius-lg); border:1px solid var(--color-border-light);">
             <span style="font-size:var(--text-xs); color:var(--color-text-muted);">Total Completed Orders</span>
-            <div style="font-size:var(--text-2xl); font-weight:var(--font-extrabold); color:var(--color-primary-700);">${user.ordersCount}</div>
+            <div style="font-size:var(--text-2xl); font-weight:var(--font-extrabold); color:var(--color-primary-700);">${ordersCount}</div>
           </div>
           <div style="flex:1; padding:var(--space-4); background:var(--color-bg-secondary); border-radius:var(--radius-lg); border:1px solid var(--color-border-light);">
             <span style="font-size:var(--text-xs); color:var(--color-text-muted);">Lifetime Spend</span>
-            <div style="font-size:var(--text-2xl); font-weight:var(--font-extrabold); color:var(--color-accent-600);">${user.totalSpent}</div>
+            <div style="font-size:var(--text-2xl); font-weight:var(--font-extrabold); color:var(--color-accent-600);">${totalSpent}</div>
           </div>
         </div>
       </div>
@@ -1508,12 +2577,42 @@
       <!-- Saved Delivery Addresses -->
       <div>
         <h5 style="font-size:var(--text-xs); font-weight:var(--font-bold); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:var(--tracking-wider); margin-bottom:var(--space-3);">
-          Saved Addresses (${user.addresses.length})
+          Saved Addresses (${addresses.length})
         </h5>
-        ${user.addresses.length === 0 ? '<p style="font-size:var(--text-xs); color:var(--color-text-muted);">No addresses saved yet.</p>' : user.addresses.map(a => `
+        ${addresses.length === 0 ? '<p style="font-size:var(--text-xs); color:var(--color-text-muted);">No addresses saved yet.</p>' : addresses.map(a => `
           <div style="padding:var(--space-3) var(--space-4); background:var(--color-bg-secondary); border-radius:var(--radius-lg); border:1px solid var(--color-border-light); margin-bottom:var(--space-2); font-size:var(--text-sm);">
-            <strong style="color:var(--color-primary-700);">${a.name}</strong>
-            <p style="margin:4px 0 0 0; color:var(--color-text-secondary);">${a.line1}, ${a.city}, ${a.state} — ${a.pincode}</p>
+            <strong style="color:var(--color-primary-700);">${a.full_name || a.name || 'Address'}</strong>
+            <p style="margin:4px 0 0 0; color:var(--color-text-secondary);">${a.address_line_1 || a.line1 || ''}, ${a.city || ''}, ${a.state || ''} — ${a.postal_code || a.pincode || ''}</p>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Placed Orders by User -->
+      <div>
+        <h5 style="font-size:var(--text-xs); font-weight:var(--font-bold); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:var(--tracking-wider); margin-bottom:var(--space-3);">
+          Placed Orders (${(user.orders || []).length})
+        </h5>
+        ${(!user.orders || user.orders.length === 0) ? '<p style="font-size:var(--text-xs); color:var(--color-text-muted);">No orders placed yet.</p>' : user.orders.map(order => `
+          <div style="padding:var(--space-3) var(--space-4); background:var(--color-bg-secondary); border-radius:var(--radius-lg); border:1px solid var(--color-border-light); margin-bottom:var(--space-3); font-size:var(--text-sm);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-2); padding-bottom:var(--space-2); border-bottom:1px solid var(--color-border-light);">
+              <div>
+                <strong style="color:var(--color-primary-700); font-size:var(--text-sm);">${order.shortId || order.id}</strong>
+                <span style="font-size:11px; color:var(--color-text-muted); margin-left:8px;">${formatAdminDate(order.createdAt)}</span>
+              </div>
+              <span class="badge ${order.status === 'DELIVERED' ? 'badge--success' : (order.status === 'PROCESSING' ? 'badge--warning' : 'badge--primary')}" style="font-size:10px;">${order.status}</span>
+            </div>
+            
+            <!-- Products List (Product ID & Product Name) -->
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              ${(order.items && order.items.length > 0) ? order.items.map(item => `
+                <div style="background:#ffffff; padding:6px 10px; border-radius:var(--radius-md); border:1px solid var(--color-border-light); font-size:12px;">
+                  <div style="font-weight:600; color:var(--color-text-primary);">${item.productName}</div>
+                  <div style="font-size:11px; color:var(--color-text-muted); font-family:monospace; margin-top:2px;">
+                    <span style="color:var(--color-primary-600); font-weight:500;">Product ID:</span> ${item.productId || 'N/A'}
+                  </div>
+                </div>
+              `).join('') : '<span style="font-size:11px; color:var(--color-text-muted);">No products in this order</span>'}
+            </div>
           </div>
         `).join('')}
       </div>
@@ -1540,8 +2639,89 @@
      ========================================================================= */
 
   let currentOrderFilter = 'all';
+  let currentOrderSort = 'date-desc';
+  let liveOrdersLoaded = false;
 
-  function renderOrders() {
+  const ORDER_STATUS_RANK = {
+    'processing': 1,
+    'confirmed': 2,
+    'out_for_delivery': 3,
+    'delivered': 4,
+    'cancelled': 5
+  };
+
+  async function loadLiveOrders() {
+    if (!useApi) return;
+    try {
+      const res = await API.getOrders({ limit: 100 });
+      if (res && res.success && Array.isArray(res.data)) {
+        data.orders = res.data.map(o => {
+          const custName = o.user?.username || (o.user?.email ? o.user.email.split('@')[0] : 'Customer');
+          const custEmail = o.user?.email || '';
+          const custPhone = o.user?.phone_number || '-';
+          const items = (o.items || []).map(i => ({
+            name: i.productName || 'Product',
+            variant: i.variantDescription || 'Standard',
+            quantity: i.quantity || 1,
+            unitPrice: parseFloat(i.unitPrice) || 0,
+            subtotal: parseFloat(i.lineTotal) || ((parseFloat(i.unitPrice) || 0) * (i.quantity || 1))
+          }));
+
+          return {
+            id: o.id,
+            shortId: o.shortId,
+            customer: {
+              name: custName,
+              email: custEmail,
+              phone: custPhone
+            },
+            items: items.length > 0 ? items : [{ name: 'Order Item', variant: 'Standard', quantity: o.itemCount || 1, subtotal: parseFloat(o.totalAmount) || 0 }],
+            totalAmount: parseFloat(o.totalAmount) || 0,
+            subtotal: parseFloat(o.subtotal) || parseFloat(o.totalAmount) || 0,
+            paymentMethod: o.paymentMethod || 'Online',
+            paymentStatus: o.paymentStatus || 'Paid',
+            status: (o.status || 'PENDING').toLowerCase(),
+            shippingAddress: o.shippingAddress || 'Registered Address',
+            createdAt: o.createdAt ? new Date(o.createdAt).getTime() : 0,
+            date: formatAdminDate(o.createdAt)
+          };
+        });
+        liveOrdersLoaded = true;
+        updateOrderFilterCounts();
+      }
+    } catch (e) {
+      console.warn('Could not load live orders from API:', e);
+    }
+  }
+
+  function updateOrderFilterCounts() {
+    const counts = {
+      all: (data.orders || []).length,
+      processing: 0,
+      confirmed: 0,
+      out_for_delivery: 0,
+      delivered: 0,
+      cancelled: 0
+    };
+    (data.orders || []).forEach(o => {
+      const st = (o.status || '').toLowerCase();
+      if (counts[st] !== undefined) counts[st]++;
+    });
+
+    const setEl = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val;
+    };
+
+    setEl('filterCountAll', counts.all);
+    setEl('filterCountProcessing', counts.processing);
+    setEl('filterCountConfirmed', counts.confirmed);
+    setEl('filterCountOutForDelivery', counts.out_for_delivery);
+    setEl('filterCountDelivered', counts.delivered);
+    setEl('filterCountCancelled', counts.cancelled);
+  }
+
+  async function renderOrders() {
     const tbody = document.getElementById('ordersTableBody');
     const emptyState = document.getElementById('ordersEmptyState');
     const searchInput = document.getElementById('orderSearchInput');
@@ -1549,15 +2729,52 @@
 
     if (!tbody) return;
 
+    if (useApi && !liveOrdersLoaded) {
+      await loadLiveOrders();
+    }
+
+    updateOrderFilterCounts();
+
     const query = (searchInput?.value || '').trim().toLowerCase();
 
     const filtered = data.orders.filter(o => {
-      const matchQuery = o.id.toLowerCase().includes(query) ||
-                         o.shortId.toLowerCase().includes(query) ||
-                         o.customer.name.toLowerCase().includes(query) ||
-                         o.customer.phone.includes(query);
+      const matchQuery = (o.id || '').toLowerCase().includes(query) ||
+                         (o.shortId || '').toLowerCase().includes(query) ||
+                         (o.customer?.name || '').toLowerCase().includes(query) ||
+                         (o.customer?.phone || '').includes(query);
       const matchFilter = currentOrderFilter === 'all' || o.status === currentOrderFilter;
       return matchQuery && matchFilter;
+    });
+
+    // Sort according to payment, order status, date
+    filtered.sort((a, b) => {
+      switch (currentOrderSort) {
+        case 'date-desc':
+          return (b.createdAt || 0) - (a.createdAt || 0);
+        case 'date-asc':
+          return (a.createdAt || 0) - (b.createdAt || 0);
+        case 'status-asc': {
+          const rankA = ORDER_STATUS_RANK[a.status] || 99;
+          const rankB = ORDER_STATUS_RANK[b.status] || 99;
+          return rankA - rankB;
+        }
+        case 'status-desc': {
+          const rankA = ORDER_STATUS_RANK[a.status] || 99;
+          const rankB = ORDER_STATUS_RANK[b.status] || 99;
+          return rankB - rankA;
+        }
+        case 'payment-status': {
+          const pA = (a.paymentStatus || '').toLowerCase();
+          const pB = (b.paymentStatus || '').toLowerCase();
+          return pA.localeCompare(pB);
+        }
+        case 'payment-high':
+          return (b.totalAmount || 0) - (a.totalAmount || 0);
+        case 'payment-low':
+          return (a.totalAmount || 0) - (b.totalAmount || 0);
+        default:
+          return (b.createdAt || 0) - (a.createdAt || 0);
+      }
     });
 
     if (countDisplay) countDisplay.textContent = filtered.length;
@@ -1614,8 +2831,50 @@
     });
   }
 
-  function openOrderDrawer(orderId) {
-    const order = data.orders.find(o => o.id === orderId);
+  async function openOrderDrawer(orderId) {
+    let order = data.orders.find(o => o.id === orderId);
+
+    if (useApi) {
+      try {
+        const res = await API.getOrderDetail(orderId);
+        if (res && res.success && res.data) {
+          const o = res.data;
+          order = {
+            id: o.id,
+            shortId: o.shortId,
+            customer: {
+              name: o.user?.username || o.user?.email || 'Customer',
+              email: o.user?.email || '',
+              phone: o.user?.phone_number || '-'
+            },
+            items: (o.items || []).map(i => ({
+              productId: i.productId,
+              name: i.productName || 'Product',
+              variant: i.variantDescription || 'Standard',
+              quantity: i.quantity || 1,
+              unitPrice: parseFloat(i.unitPrice) || 0,
+              subtotal: parseFloat(i.lineTotal) || ((parseFloat(i.unitPrice) || 0) * (i.quantity || 1)),
+              review: i.review || null
+            })),
+            reviews: o.reviews || [],
+            subtotal: parseFloat(o.subtotal) || parseFloat(o.totalAmount) || 0,
+            totalAmount: parseFloat(o.totalAmount) || 0,
+            paymentMethod: o.paymentMethod || 'Online',
+            paymentStatus: o.paymentStatus || 'Paid',
+            status: (o.status || 'PENDING').toLowerCase(),
+            shippingAddress: o.shippingAddress || 'Registered Address',
+            cancelReason: o.cancelReason || null,
+            cancelledBy: o.cancelledBy || null,
+            cancelledAt: o.cancelledAt || null,
+            date: formatAdminDate(o.createdAt),
+            createdAt: o.createdAt
+          };
+        }
+      } catch (e) {
+        console.warn('Could not fetch fresh order detail from API:', e);
+      }
+    }
+
     if (!order) return;
 
     const drawerBody = document.getElementById('orderDrawerBody');
@@ -1624,12 +2883,106 @@
 
     if (!drawerBody || !drawer || !overlay) return;
 
+    // Render Cancellation Banner if order was cancelled
+    let cancellationBannerHtml = '';
+    if (order.status === 'cancelled') {
+      const isUserCancel = (order.cancelledBy || '').toUpperCase() === 'USER';
+      const badgeLabel = isUserCancel ? 'Cancelled by Customer' : 'Cancelled by Store (Admin)';
+      const badgeColor = isUserCancel ? '#b45309' : '#b91c1c';
+      const badgeBg = isUserCancel ? '#fef3c7' : '#fee2e2';
+      const badgeBorder = isUserCancel ? '#fde68a' : '#fecaca';
+      const reasonText = order.cancelReason || (isUserCancel ? 'No reason provided by customer.' : 'Cancelled by store administrator.');
+      const formattedCancelTime = formatAdminDateTimeIST(order.cancelledAt || order.createdAt || order.date);
+
+      cancellationBannerHtml = `
+        <div style="padding:var(--space-3) var(--space-4); background:${badgeBg}; border:1px solid ${badgeBorder}; border-radius:var(--radius-lg); margin-top:var(--space-1);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:4px;">
+            <span style="display:inline-flex; align-items:center; gap:6px; font-weight:var(--font-bold); font-size:var(--text-xs); text-transform:uppercase; letter-spacing:0.5px; color:${badgeColor};">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+              ${badgeLabel}
+            </span>
+            <span style="font-size:11px; color:var(--color-text-muted);">
+              ${formattedCancelTime}
+            </span>
+          </div>
+          <div style="font-size:var(--text-xs); color:#1f2937;">
+            <strong>Cancellation Reason:</strong>
+            <span style="color:${isUserCancel ? '#92400e' : '#991b1b'}; font-weight:500;">"${escapeAdminHtml(reasonText)}"</span>
+          </div>
+        </div>
+      `;
+    }
+
+    // Render Review Section Content based on order fulfillment status
+    let reviewsHtml = '';
+    if (order.status === 'cancelled') {
+      const isUserCancel = (order.cancelledBy || '').toUpperCase() === 'USER';
+      const who = isUserCancel ? 'the customer' : 'the store administrator';
+      reviewsHtml = `
+        <div style="padding:var(--space-4); background:#fef2f2; border:1px solid #fecaca; border-radius:var(--radius-lg); color:#991b1b; font-size:var(--text-sm);">
+          <div style="display:flex; align-items:center; gap:var(--space-2); font-weight:var(--font-bold); margin-bottom:4px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            Order Cancelled
+          </div>
+          <p style="margin:0; font-size:var(--text-xs); color:#b91c1c;">
+            This order was cancelled by ${who}. Reviews cannot be submitted for cancelled orders.
+          </p>
+        </div>
+      `;
+    } else if (order.status === 'delivered') {
+      reviewsHtml = `
+        <div style="display:flex; flex-direction:column; gap:var(--space-3);">
+          ${order.items.map(item => {
+            if (item.review) {
+              const ratingNum = Math.min(5, Math.max(1, Math.round(item.review.rating || 0)));
+              const stars = '★'.repeat(ratingNum) + '☆'.repeat(5 - ratingNum);
+              return `
+                <div style="background:#ffffff; border:1px solid var(--color-border-light); border-left:4px solid var(--color-success-600); border-radius:var(--radius-lg); padding:var(--space-3) var(--space-4); box-shadow:var(--shadow-xs);">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <span style="font-weight:var(--font-bold); font-size:var(--text-sm); color:var(--color-text-primary);">${item.name}</span>
+                    <span style="color:#f59e0b; font-size:var(--text-sm); font-weight:var(--font-bold); letter-spacing:1px;" title="${item.review.rating} out of 5 stars">
+                      ${stars} <span style="font-size:var(--text-xs); color:var(--color-text-muted); font-weight:var(--font-normal);">(${item.review.rating}/5)</span>
+                    </span>
+                  </div>
+                  <p style="font-size:var(--text-sm); color:var(--color-text-secondary); margin:4px 0 6px 0; font-style:${item.review.comment ? 'normal' : 'italic'};">
+                    ${item.review.comment ? `"${item.review.comment}"` : 'No written feedback provided with this rating.'}
+                  </p>
+                  <div style="font-size:11px; color:var(--color-text-muted);">
+                    Reviewed by <strong>${order.customer.name}</strong> &bull; ${formatAdminDateTimeIST(item.review.createdAt)}
+                  </div>
+                </div>
+              `;
+            } else {
+              return `
+                <div style="background:var(--color-bg-secondary); border:1px dashed var(--color-border-light); border-radius:var(--radius-lg); padding:var(--space-3) var(--space-4); font-size:var(--text-xs); color:var(--color-text-muted); display:flex; justify-content:space-between; align-items:center;">
+                  <span>${item.name}</span>
+                  <span class="badge" style="background:#f3f4f6; color:#6b7280; font-size:11px;">No review submitted yet</span>
+                </div>
+              `;
+            }
+          }).join('')}
+        </div>
+      `;
+    } else {
+      reviewsHtml = `
+        <div style="padding:var(--space-4); background:var(--color-primary-50); border:1px solid var(--color-primary-200); border-radius:var(--radius-lg); color:var(--color-primary-900); font-size:var(--text-xs);">
+          <div style="display:flex; align-items:center; gap:var(--space-2); font-weight:var(--font-bold); margin-bottom:2px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Fulfillment In Progress
+          </div>
+          Customer review will unlock once order fulfillment status is marked as <strong>Delivered</strong>.
+        </div>
+      `;
+    }
+
+    const drawerFooter = document.getElementById('orderDrawerFooter');
+
     drawerBody.innerHTML = `
-      <!-- Order Top Summary -->
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; padding:var(--space-4); background:var(--color-bg-secondary); border-radius:var(--radius-xl); border:1px solid var(--color-border-light);">
+      <!-- Order Top Summary Card (Clean, unnested) -->
+      <div style="background:#ffffff; border-radius:var(--radius-xl); border:1px solid var(--color-border-light); padding:var(--space-4); display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-xs);">
         <div>
-          <span style="font-family:var(--font-mono); font-weight:var(--font-extrabold); font-size:var(--text-lg); color:var(--color-primary-700);">${order.shortId}</span>
-          <div style="font-size:var(--text-xs); color:var(--color-text-muted);">Placed on ${order.date}</div>
+          <span style="font-family:var(--font-mono); font-weight:var(--font-extrabold); font-size:var(--text-lg); color:var(--color-primary-700); letter-spacing:-0.5px;">${order.shortId}</span>
+          <div style="font-size:var(--text-xs); color:var(--color-text-muted); margin-top:2px;">Placed on ${formatAdminDateTimeIST(order.createdAt || order.date)}</div>
         </div>
         <span class="order-status order-status--${order.status}">
           <span class="order-status__dot"></span>
@@ -1637,33 +2990,20 @@
         </span>
       </div>
 
-      <!-- Quick Status Updater -->
-      <div style="padding:var(--space-4); border:1.5px dashed var(--color-primary-300); border-radius:var(--radius-xl); background:var(--color-primary-50);">
-        <label class="admin-label" for="drawerStatusSelect" style="color:var(--color-primary-700);">Update Fulfillment Status</label>
-        <div style="display:flex; gap:var(--space-3);">
-          <select id="drawerStatusSelect" class="admin-form-select" style="background:#fff;">
-            <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
-            <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-            <option value="out_for_delivery" ${order.status === 'out_for_delivery' ? 'selected' : ''}>Out for Delivery</option>
-            <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
-            <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-          </select>
-          <button type="button" class="btn btn--primary btn--sm" id="updateOrderStatusBtn" data-order-id="${order.id}">
-            Update
-          </button>
-        </div>
-      </div>
+      ${cancellationBannerHtml}
 
       <!-- Customer & Shipping -->
       <div>
         <h5 style="font-size:var(--text-xs); font-weight:var(--font-bold); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:var(--tracking-wider); margin-bottom:var(--space-3);">
           Customer & Delivery Address
         </h5>
-        <div style="padding:var(--space-4); background:var(--color-bg-secondary); border-radius:var(--radius-lg); border:1px solid var(--color-border-light); font-size:var(--text-sm);">
-          <strong>${order.customer.name}</strong>
-          <div style="color:var(--color-text-secondary); margin:4px 0;">Phone: ${order.customer.phone} &bull; ${order.customer.email}</div>
-          <div style="color:var(--color-text-muted); margin-top:var(--space-2);">
-            📍 ${order.shippingAddress}
+        <div style="padding:var(--space-4); background:#ffffff; border-radius:var(--radius-lg); border:1px solid var(--color-border-light); font-size:var(--text-sm); box-shadow:var(--shadow-xs);">
+          <strong style="font-size:var(--text-base); color:var(--color-text-primary); display:block; margin-bottom:4px;">${order.customer.name}</strong>
+          <div style="color:var(--color-text-secondary); margin-bottom:var(--space-2); font-size:var(--text-xs);">
+            <span>📞 ${order.customer.phone}</span> &bull; <span>✉️ ${order.customer.email}</span>
+          </div>
+          <div style="color:var(--color-text-secondary); padding-top:var(--space-2); border-top:1px dashed var(--color-border-light); font-size:var(--text-xs); display:flex; gap:6px;">
+            <span>📍</span> <span>${order.shippingAddress}</span>
           </div>
         </div>
       </div>
@@ -1673,71 +3013,272 @@
         <h5 style="font-size:var(--text-xs); font-weight:var(--font-bold); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:var(--tracking-wider); margin-bottom:var(--space-3);">
           Order Items (${order.items.length})
         </h5>
-        ${order.items.map(item => `
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:var(--space-3) 0; border-bottom:1px solid var(--color-border-light);">
-            <div>
-              <strong style="font-size:var(--text-sm);">${item.name}</strong>
-              <div style="font-size:var(--text-xs); color:var(--color-text-muted);">${item.variant} &bull; Qty: ${item.quantity}</div>
+        <div style="background:#ffffff; border-radius:var(--radius-lg); border:1px solid var(--color-border-light); padding:0 var(--space-4); box-shadow:var(--shadow-xs);">
+          ${order.items.map((item, idx) => `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:var(--space-3) 0; ${idx !== order.items.length - 1 ? 'border-bottom:1px solid var(--color-border-light);' : ''}">
+              <div>
+                <strong style="font-size:var(--text-sm); color:var(--color-text-primary);">${item.name}</strong>
+                <div style="font-size:var(--text-xs); color:var(--color-text-muted);">${item.variant} &bull; Qty: ${item.quantity}</div>
+              </div>
+              <strong style="font-size:var(--text-sm);">${formatRupees(item.subtotal)}</strong>
             </div>
-            <strong>${formatRupees(item.subtotal)}</strong>
-          </div>
-        `).join('')}
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Customer Reviews & Feedback Section (Directly After Order Items) -->
+      <div>
+        <h5 style="font-size:var(--text-xs); font-weight:var(--font-bold); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:var(--tracking-wider); margin-bottom:var(--space-3); display:flex; align-items:center; justify-content:space-between;">
+          <span>Customer Reviews & Feedback</span>
+          ${order.status === 'delivered' ? '<span class="badge badge--success" style="font-size:10px;">Delivered Order</span>' : (order.status === 'cancelled' ? '<span class="badge" style="font-size:10px; background:#fee2e2; color:#991b1b;">Cancelled</span>' : '<span class="badge badge--warning" style="font-size:10px;">In Fulfillment</span>')}
+        </h5>
+        ${reviewsHtml}
       </div>
 
       <!-- Financial Calculation -->
-      <div style="background:var(--color-bg-secondary); padding:var(--space-4); border-radius:var(--radius-lg); border:1px solid var(--color-border-light); font-size:var(--text-sm);">
-        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+      <div style="background:#ffffff; padding:var(--space-4); border-radius:var(--radius-lg); border:1px solid var(--color-border-light); font-size:var(--text-sm); box-shadow:var(--shadow-xs);">
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
           <span style="color:var(--color-text-muted);">Subtotal</span>
           <span>${formatRupees(order.subtotal)}</span>
         </div>
-        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
           <span style="color:var(--color-text-muted);">Shipping Fee</span>
           <span style="color:var(--color-success-600); font-weight:var(--font-semibold);">FREE</span>
         </div>
-        <div style="display:flex; justify-content:space-between; padding-top:var(--space-2); border-top:1px solid var(--color-border-light); font-weight:var(--font-extrabold); font-size:var(--text-base);">
+        <div style="display:flex; justify-content:space-between; padding-top:var(--space-3); border-top:1px solid var(--color-border-light); font-weight:var(--font-extrabold); font-size:var(--text-base);">
           <span>Total Paid</span>
           <span style="color:var(--color-primary-700);">${formatRupees(order.totalAmount)}</span>
         </div>
       </div>
     `;
 
-  function updateOrderStatus(orderId, newStatus) {
-    if (!useApi) {
-      // Mock implementation
-      const order = data.orders.find(o => o.id === orderId);
-      if (order) {
-        order.status = newStatus;
-        showAdminToast(`Order ${order.shortId} status updated to "${capitalize(newStatus.replace(/_/g, ' '))}".`);
-        renderOrders();
-        initDashboard();
+    // Populate dedicated sticky Drawer Footer with Status Action Bar (Custom Dropdown)
+    if (drawerFooter) {
+      drawerFooter.style.display = 'flex';
+
+      const statusMap = {
+        processing: { label: 'Processing', dot: 'status-dot-indicator--processing' },
+        confirmed: { label: 'Confirmed', dot: 'status-dot-indicator--confirmed' },
+        out_for_delivery: { label: 'Out for Delivery', dot: 'status-dot-indicator--out_for_delivery' },
+        delivered: { label: 'Delivered', dot: 'status-dot-indicator--delivered' },
+        cancelled: { label: 'Cancelled', dot: 'status-dot-indicator--cancelled' }
+      };
+
+      const currentStatusKey = (order.status || 'processing').toLowerCase();
+      const currentMeta = statusMap[currentStatusKey] || statusMap.processing;
+
+      drawerFooter.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <label style="font-size:11px; text-transform:uppercase; font-weight:var(--font-bold); color:var(--color-text-muted); letter-spacing:var(--tracking-wider); margin:0;">
+            Update Fulfillment Status
+          </label>
+          <span style="font-size:11px; color:var(--color-text-muted);">Current: <strong style="text-transform:capitalize; color:var(--color-text-primary);">${order.status.replace(/_/g, ' ')}</strong></span>
+        </div>
+        <div style="display:flex; gap:var(--space-2); align-items:center; position:relative;">
+          <!-- Hidden input keeping chosen value -->
+          <input type="hidden" id="drawerStatusSelect" value="${currentStatusKey}"/>
+
+          <!-- Custom Dropdown Container (No ugly OS popups or misaligned boxes) -->
+          <div class="admin-custom-select" id="drawerCustomSelect">
+            <button type="button" class="admin-custom-select__trigger" id="drawerCustomSelectTrigger" aria-haspopup="listbox" aria-expanded="false">
+              <span class="admin-custom-select__value" id="drawerCustomSelectValue">
+                <span class="status-dot-indicator ${currentMeta.dot}"></span>
+                <span>${currentMeta.label}</span>
+              </span>
+              <svg class="admin-custom-select__arrow" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+
+            <!-- Popup Menu positioned with exact 100% width -->
+            <div class="admin-custom-select__menu" id="drawerCustomSelectMenu" role="listbox">
+              ${Object.entries(statusMap).map(([val, info]) => `
+                <div class="admin-custom-select__option${val === currentStatusKey ? ' selected' : ''}" data-status-val="${val}" role="option" aria-selected="${val === currentStatusKey}">
+                  <span class="admin-custom-select__option-left">
+                    <span class="status-dot-indicator ${info.dot}"></span>
+                    <span>${info.label}</span>
+                  </span>
+                  ${val === currentStatusKey ? '<svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>' : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <button type="button" class="btn btn--primary btn--sm" id="updateOrderStatusBtn" data-order-id="${order.id}" style="height:42px; padding:0 var(--space-5); border-radius:var(--radius-md); font-weight:var(--font-semibold); white-space:nowrap;">
+            Update
+          </button>
+        </div>
+      `;
+
+      // Wire custom dropdown interactivity
+      const customSelect = document.getElementById('drawerCustomSelect');
+      const triggerBtn = document.getElementById('drawerCustomSelectTrigger');
+      const hiddenInput = document.getElementById('drawerStatusSelect');
+      const valueSpan = document.getElementById('drawerCustomSelectValue');
+      const options = customSelect?.querySelectorAll('.admin-custom-select__option');
+
+      if (customSelect && triggerBtn) {
+        triggerBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isOpen = customSelect.classList.toggle('open');
+          triggerBtn.setAttribute('aria-expanded', String(isOpen));
+        });
+
+        options?.forEach(opt => {
+          opt.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const val = opt.dataset.statusVal;
+            const meta = statusMap[val];
+            if (hiddenInput && meta) {
+              hiddenInput.value = val;
+              valueSpan.innerHTML = `
+                <span class="status-dot-indicator ${meta.dot}"></span>
+                <span>${meta.label}</span>
+              `;
+              options.forEach(o => {
+                const isSel = o === opt;
+                o.classList.toggle('selected', isSel);
+                o.setAttribute('aria-selected', String(isSel));
+                const checkIcon = o.querySelector('svg');
+                if (isSel && !checkIcon) {
+                  o.insertAdjacentHTML('beforeend', '<svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>');
+                } else if (!isSel && checkIcon) {
+                  checkIcon.remove();
+                }
+              });
+            }
+            customSelect.classList.remove('open');
+            triggerBtn.setAttribute('aria-expanded', 'false');
+          });
+        });
+
+        // Close on clicking outside
+        document.addEventListener('click', (e) => {
+          if (!customSelect.contains(e.target)) {
+            customSelect.classList.remove('open');
+            triggerBtn.setAttribute('aria-expanded', 'false');
+          }
+        });
       }
-      return;
     }
 
-    // Use API
-    API.updateOrderStatus(orderId, newStatus)
-      .then((res) => {
-        if (res.success) {
-          showAdminToast(`Order status updated to ${newStatus.replace(/_/g, ' ')}`, 'success');
-          renderOrders();
-          initDashboard();
-          openOrderDrawer(orderId);
+    // Attach status update listener
+    const updateBtn = document.getElementById('updateOrderStatusBtn');
+    const selectEl = document.getElementById('drawerStatusSelect');
+    if (updateBtn && selectEl) {
+      updateBtn.addEventListener('click', () => {
+        const chosenStatus = selectEl.value;
+        if (chosenStatus === 'cancelled' && order.status !== 'cancelled') {
+          openAdminCancelModal(order.id);
+        } else {
+          updateOrderStatus(order.id, chosenStatus);
         }
-      })
-      .catch(() => {
-        showAdminToast('Failed to update order status', 'error');
       });
-  }
+    }
 
     drawer.classList.add('open');
     overlay.classList.add('open');
   }
 
+  let pendingCancelOrderId = null;
+
+  function openAdminCancelModal(orderId) {
+    pendingCancelOrderId = orderId;
+    const modal = document.getElementById('adminCancelReasonModal');
+    const presetSelect = document.getElementById('adminCancelPreset');
+    const customWrap = document.getElementById('adminCustomReasonWrap');
+    const customInput = document.getElementById('adminCustomCancelReason');
+
+    if (presetSelect) presetSelect.selectedIndex = 0;
+    if (customInput) customInput.value = '';
+    if (customWrap) customWrap.style.display = 'none';
+
+    if (modal) {
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+  }
+
+  function initAdminCancelModal() {
+    const modal = document.getElementById('adminCancelReasonModal');
+    const presetSelect = document.getElementById('adminCancelPreset');
+    const customWrap = document.getElementById('adminCustomReasonWrap');
+    const customInput = document.getElementById('adminCustomCancelReason');
+    const confirmBtn = document.getElementById('confirmAdminCancelBtn');
+
+    if (presetSelect && customWrap) {
+      presetSelect.addEventListener('change', () => {
+        if (presetSelect.value === 'OTHER') {
+          customWrap.style.display = 'block';
+          if (customInput) customInput.focus();
+        } else {
+          customWrap.style.display = 'none';
+        }
+      });
+    }
+
+    if (confirmBtn) {
+      confirmBtn.addEventListener('click', async () => {
+        if (!pendingCancelOrderId) return;
+
+        let reason = presetSelect ? presetSelect.value : '';
+        if (reason === 'OTHER') {
+          const customVal = customInput ? customInput.value.trim() : '';
+          if (!customVal) {
+            showAdminToast('Please provide a specific cancellation note.', 'warning');
+            if (customInput) customInput.focus();
+            return;
+          }
+          reason = customVal;
+        }
+
+        closeModal('adminCancelReasonModal');
+        await updateOrderStatus(pendingCancelOrderId, 'cancelled', reason);
+        pendingCancelOrderId = null;
+      });
+    }
+  }
+
+  async function updateOrderStatus(orderId, newStatus, cancelReason = null) {
+    if (useApi) {
+      try {
+        const res = await API.updateOrderStatus(orderId, newStatus.toUpperCase(), cancelReason);
+        if (res.success) {
+          showAdminToast(`Order status updated to ${newStatus.replace(/_/g, ' ')}`, 'success');
+          await loadLiveOrders();
+          renderOrders();
+          initDashboard();
+          openOrderDrawer(orderId);
+        }
+      } catch (err) {
+        showAdminToast(`Failed to update order status: ${err.message}`, 'error');
+      }
+      return;
+    }
+
+    // Mock implementation
+    const order = data.orders.find(o => o.id === orderId);
+    if (order) {
+      order.status = newStatus;
+      if (newStatus === 'cancelled') {
+        order.cancelReason = cancelReason || 'Cancelled by store administrator';
+        order.cancelledBy = 'ADMIN';
+        order.cancelledAt = new Date().toISOString();
+      }
+      showAdminToast(`Order ${order.shortId} status updated to "${capitalize(newStatus.replace(/_/g, ' '))}".`);
+      renderOrders();
+      initDashboard();
+      openOrderDrawer(orderId);
+    }
+  }
+
   function closeOrderDrawer() {
     const drawer = document.getElementById('orderDrawer');
     const overlay = document.getElementById('orderDrawerOverlay');
+    const footer = document.getElementById('orderDrawerFooter');
     if (drawer) drawer.classList.remove('open');
     if (overlay) overlay.classList.remove('open');
+    if (footer) footer.style.display = 'none';
   }
 
   const orderDrawerCloseBtn = document.getElementById('orderDrawerClose');
@@ -1757,6 +3298,83 @@
       });
     });
   }
+
+  // Order Search Input
+  const orderSearchInput = document.getElementById('orderSearchInput');
+  if (orderSearchInput) {
+    orderSearchInput.addEventListener('input', () => {
+      renderOrders();
+    });
+  }
+
+  // Order Sort Select & Clickable Column Headers
+  function updateOrderSortIndicators() {
+    const iconDate = document.getElementById('sortIndicatorDate');
+    const iconStatus = document.getElementById('sortIndicatorStatus');
+    const iconPayment = document.getElementById('sortIndicatorPayment');
+
+    if (iconDate) { iconDate.textContent = '⇅'; iconDate.style.color = ''; iconDate.style.opacity = '0.6'; }
+    if (iconStatus) { iconStatus.textContent = '⇅'; iconStatus.style.color = ''; iconStatus.style.opacity = '0.6'; }
+    if (iconPayment) { iconPayment.textContent = '⇅'; iconPayment.style.color = ''; iconPayment.style.opacity = '0.6'; }
+
+    if (currentOrderSort === 'date-desc' && iconDate) {
+      iconDate.textContent = '↓';
+      iconDate.style.color = 'var(--color-primary-600)';
+      iconDate.style.opacity = '1';
+    } else if (currentOrderSort === 'date-asc' && iconDate) {
+      iconDate.textContent = '↑';
+      iconDate.style.color = 'var(--color-primary-600)';
+      iconDate.style.opacity = '1';
+    } else if (currentOrderSort === 'status-asc' && iconStatus) {
+      iconStatus.textContent = '↑';
+      iconStatus.style.color = 'var(--color-primary-600)';
+      iconStatus.style.opacity = '1';
+    } else if (currentOrderSort === 'status-desc' && iconStatus) {
+      iconStatus.textContent = '↓';
+      iconStatus.style.color = 'var(--color-primary-600)';
+      iconStatus.style.opacity = '1';
+    } else if ((currentOrderSort === 'payment-high' || currentOrderSort === 'payment-status') && iconPayment) {
+      iconPayment.textContent = '↓';
+      iconPayment.style.color = 'var(--color-primary-600)';
+      iconPayment.style.opacity = '1';
+    } else if (currentOrderSort === 'payment-low' && iconPayment) {
+      iconPayment.textContent = '↑';
+      iconPayment.style.color = 'var(--color-primary-600)';
+      iconPayment.style.opacity = '1';
+    }
+  }
+
+  const orderSortSelect = document.getElementById('orderSortSelect');
+  if (orderSortSelect) {
+    orderSortSelect.value = currentOrderSort;
+    orderSortSelect.addEventListener('change', () => {
+      currentOrderSort = orderSortSelect.value;
+      updateOrderSortIndicators();
+      renderOrders();
+    });
+  }
+
+  document.querySelectorAll('.admin-th-sortable').forEach(th => {
+    th.addEventListener('click', () => {
+      const field = th.dataset.sortField;
+      if (field === 'date') {
+        currentOrderSort = (currentOrderSort === 'date-desc') ? 'date-asc' : 'date-desc';
+      } else if (field === 'status') {
+        currentOrderSort = (currentOrderSort === 'status-asc') ? 'status-desc' : 'status-asc';
+      } else if (field === 'payment') {
+        if (currentOrderSort === 'payment-high') {
+          currentOrderSort = 'payment-low';
+        } else if (currentOrderSort === 'payment-low') {
+          currentOrderSort = 'payment-status';
+        } else {
+          currentOrderSort = 'payment-high';
+        }
+      }
+      if (orderSortSelect) orderSortSelect.value = currentOrderSort;
+      updateOrderSortIndicators();
+      renderOrders();
+    });
+  });
 
   function capitalize(str) {
     if (!str) return '';
@@ -1897,7 +3515,7 @@
     const inputEmail = document.getElementById('adminEmailInput');
     if (inputEmail && !inputEmail.value) inputEmail.value = email;
     const inputPhone = document.getElementById('adminPhoneInput');
-    if (inputPhone && phone && (!inputPhone.value || inputPhone.value === '+91 99636 57799')) inputPhone.value = phone;
+    if (inputPhone && !inputPhone.value && phone) inputPhone.value = phone;
   }
 
   function initAdminProfilePage() {
@@ -1913,10 +3531,11 @@
       });
     });
 
-    // 2. Personal Info Form
+    // 2. Personal Info Form (Real Database Updates via /api/admin/profile)
     const personalForm = document.getElementById('adminPersonalForm');
+    const saveProfileBtn = document.getElementById('saveAdminProfileBtn');
     if (personalForm) {
-      personalForm.addEventListener('submit', (e) => {
+      personalForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.getElementById('adminFullNameInput')?.value.trim();
         const email = document.getElementById('adminEmailInput')?.value.trim();
@@ -1927,23 +3546,68 @@
           return;
         }
 
+        if (saveProfileBtn) {
+          saveProfileBtn.disabled = true;
+          saveProfileBtn.textContent = 'Saving Changes...';
+        }
+
         try {
+          const res = await fetch('/api/admin/profile', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, email, phone })
+          });
+
+          const json = await res.json();
+          if (!res.ok || !json.success) {
+            throw new Error(json.message || 'Failed to save profile changes.');
+          }
+
+          const updatedUser = json.data;
+
+          // Update localStorage authUser
           let authUser = {};
-          const stored = localStorage.getItem('authUser');
-          if (stored) authUser = JSON.parse(stored);
-          authUser.username = username;
-          authUser.email = email;
-          authUser.phone_number = phone;
+          try {
+            const stored = localStorage.getItem('authUser');
+            if (stored) authUser = JSON.parse(stored);
+          } catch (e) {}
+          authUser.username = updatedUser.username;
+          authUser.email = updatedUser.email;
+          authUser.phone_number = updatedUser.phone_number;
           localStorage.setItem('authUser', JSON.stringify(authUser));
-          hydrateAdminUser();
-          showAdminToast('Admin profile details updated successfully!');
+
+          // Update visible DOM elements
+          const profName = document.getElementById('adminProfileDisplayName');
+          if (profName) profName.textContent = updatedUser.username;
+          const profEmail = document.getElementById('adminProfileDisplayEmail');
+          if (profEmail) profEmail.textContent = updatedUser.email;
+          const hdrName = document.getElementById('headerUserName');
+          if (hdrName) hdrName.textContent = updatedUser.username;
+          const sideName = document.getElementById('sidebarUserName');
+          if (sideName) sideName.textContent = updatedUser.username;
+
+          if (updatedUser.avatar) {
+            const profAv = document.getElementById('adminProfileLargeAvatar');
+            if (profAv) profAv.textContent = updatedUser.avatar;
+            const hdrAv = document.getElementById('headerUserAvatar');
+            if (hdrAv) hdrAv.textContent = updatedUser.avatar;
+            const sideAv = document.getElementById('sidebarUserAvatar');
+            if (sideAv) sideAv.textContent = updatedUser.avatar;
+          }
+
+          showAdminToast(json.message || 'Admin profile details saved to database successfully!');
         } catch (err) {
-          showAdminToast('Failed to save profile changes.', 'warning');
+          showAdminToast(err.message || 'Failed to save profile changes.', 'error');
+        } finally {
+          if (saveProfileBtn) {
+            saveProfileBtn.disabled = false;
+            saveProfileBtn.textContent = 'Save Profile Changes';
+          }
         }
       });
     }
 
-    // 3. Password Live Validation & Form Submit
+    // 3. Password Live Validation & Form Submit (Real Database Password Update)
     const newPassInput = document.getElementById('adminNewPass');
     const confirmPassInput = document.getElementById('adminConfirmPass');
     const chkLength = document.getElementById('chkLength');
@@ -1978,8 +3642,9 @@
     if (confirmPassInput) confirmPassInput.addEventListener('input', validatePasswordInputs);
 
     const passForm = document.getElementById('adminPasswordForm');
+    const updatePassBtn = document.getElementById('updateAdminPasswordBtn');
     if (passForm) {
-      passForm.addEventListener('submit', (e) => {
+      passForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const curPass = document.getElementById('adminCurrentPass')?.value || '';
         if (!curPass) {
@@ -1989,13 +3654,40 @@
 
         const valid = validatePasswordInputs();
         if (!valid) {
-          showAdminToast('Please fulfill all password requirements.', 'warning');
+          showAdminToast('Please fulfill all password requirements before updating.', 'warning');
           return;
         }
 
-        passForm.reset();
-        validatePasswordInputs();
-        showAdminToast('Password updated securely!');
+        const newPass = newPassInput?.value || '';
+
+        if (updatePassBtn) {
+          updatePassBtn.disabled = true;
+          updatePassBtn.textContent = 'Updating Password...';
+        }
+
+        try {
+          const res = await fetch('/api/admin/profile/password', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ currentPassword: curPass, newPassword: newPass })
+          });
+
+          const json = await res.json();
+          if (!res.ok || !json.success) {
+            throw new Error(json.message || 'Failed to update password.');
+          }
+
+          passForm.reset();
+          validatePasswordInputs();
+          showAdminToast(json.message || 'Password updated securely in database!');
+        } catch (err) {
+          showAdminToast(err.message || 'Failed to update password.', 'error');
+        } finally {
+          if (updatePassBtn) {
+            updatePassBtn.disabled = false;
+            updatePassBtn.textContent = 'Update Password';
+          }
+        }
       });
     }
   }
@@ -2012,12 +3704,112 @@
     }
   });
 
+  function initAttributeModal() {
+    const openBtn1 = document.getElementById('openCreateAttrModalBtn');
+    const openBtn2 = document.getElementById('pageHeaderNewAttrBtn');
+    const nameInput = document.getElementById('newAttrName');
+    const displayInput = document.getElementById('newAttrDisplayName');
+    const valuesInput = document.getElementById('newAttrInitialValues');
+    const saveBtn = document.getElementById('saveAttributeBtn');
+    const form = document.getElementById('createAttributeForm');
+
+    function openModalHandler() {
+      if (form) form.reset();
+      openModal('createAttributeModal');
+    }
+
+    if (openBtn1) openBtn1.addEventListener('click', openModalHandler);
+    if (openBtn2) openBtn2.addEventListener('click', openModalHandler);
+
+    if (displayInput && nameInput) {
+      displayInput.addEventListener('input', () => {
+        nameInput.value = displayInput.value.toLowerCase().trim().replace(/[^a-z0-9_-]+/g, '-').replace(/(^-|-$)/g, '');
+      });
+    }
+
+    if (saveBtn) {
+      saveBtn.addEventListener('click', async () => {
+        const displayName = displayInput ? displayInput.value.trim() : '';
+        let name = nameInput ? nameInput.value.trim() : '';
+        if (!name && displayName) {
+          name = displayName.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/(^-|-$)/g, '');
+        }
+        const values = valuesInput ? valuesInput.value.trim() : '';
+
+        if (!displayName || !name) {
+          showAdminToast('Please provide both Display Name and Attribute Key.', 'warning');
+          return;
+        }
+
+        saveBtn.disabled = true;
+        const originalText = saveBtn.textContent;
+        saveBtn.textContent = 'Saving…';
+
+        try {
+          let res;
+          if (useApi) {
+            res = await API.createAttribute({
+              name,
+              displayName,
+              values
+            });
+          } else {
+            const newAttr = {
+              id: 'attr-' + Date.now(),
+              name,
+              displayName,
+              values: values.split(',').map(v => v.trim()).filter(Boolean).map(v => ({
+                id: 'val-' + Math.random().toString(36).substring(2, 9),
+                value: v.toLowerCase().replace(/[^a-z0-9_-]+/g, '-'),
+                displayValue: v
+              }))
+            };
+            availableAttributes.push(newAttr);
+            res = { success: true, data: newAttr };
+          }
+
+          if (res && res.success) {
+            showAdminToast(`Attribute "${displayName}" created successfully.`);
+            closeModal('createAttributeModal');
+            if (form) form.reset();
+            
+            // Reload all available attributes from server
+            if (useApi) {
+              await loadAdminAttributes();
+            }
+
+            // Refresh all currently open variant cards in product modal
+            document.querySelectorAll('.admin-variant-card').forEach(card => {
+              syncAttributeDropdowns(card);
+            });
+          } else {
+            showAdminToast(res?.message || 'Failed to create attribute.', 'error');
+          }
+        } catch (err) {
+          showAdminToast(err.message || 'Error creating attribute.', 'error');
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.textContent = originalText;
+        }
+      });
+    }
+  }
+
   /* =========================================================================
      11. INITIALIZATION
      ========================================================================= */
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     hydrateAdminUser();
+    await loadAdminAttributes();
+    if (useApi) {
+      await Promise.allSettled([
+        loadLiveBanners(),
+        loadLiveProducts(),
+        loadLiveOrders(),
+        loadUsersFromDb()
+      ]);
+    }
     initDashboard();
     setupBannerImageControls();
     setupProductImageControls();
@@ -2025,7 +3817,16 @@
     renderProducts();
     renderUsers();
     renderOrders();
+    initAdminCancelModal();
     initAdminProfilePage();
+    initAttributeModal();
+
+    const addVariantCardBtn = document.getElementById('addVariantCardBtn');
+    if (addVariantCardBtn) {
+      addVariantCardBtn.addEventListener('click', () => {
+        addVariantCard();
+      });
+    }
   });
 
 }());

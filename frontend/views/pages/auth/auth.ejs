@@ -407,7 +407,14 @@
       }
 
       function redirectAfterAuth(role) {
-        const pendingRoute = localStorage.getItem('pendingRoute');
+        let pendingRoute = localStorage.getItem('pendingRoute');
+        if (!pendingRoute) {
+          try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const q = urlParams.get('pendingRoute');
+            if (q && q.startsWith('/') && !q.startsWith('//')) pendingRoute = q;
+          } catch (_) {}
+        }
         localStorage.removeItem('pendingRoute');
         if (role === 'ADMIN' || role === 'admin') {
           if (pendingRoute && pendingRoute.startsWith('/admin')) {
@@ -417,12 +424,34 @@
           }
           return;
         }
-        if (pendingRoute && pendingRoute.startsWith('/') && !pendingRoute.startsWith('//') && pendingRoute !== '/login' && pendingRoute !== '/auth') {
+        if (pendingRoute && pendingRoute.startsWith('/') && !pendingRoute.startsWith('//') && pendingRoute !== '/login' && pendingRoute !== '/auth' && pendingRoute !== '/signup') {
           window.location.assign(pendingRoute);
           return;
         }
         window.location.assign('/home');
       }
+
+      // Check URL query parameter for pendingRoute
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const qRoute = urlParams.get('pendingRoute');
+        if (qRoute && qRoute.startsWith('/') && !qRoute.startsWith('//')) {
+          localStorage.setItem('pendingRoute', qRoute);
+        }
+      } catch (_) {}
+
+      // If already logged in, redirect directly rather than showing login form
+      (function checkActiveSession() {
+        try {
+          const cached = localStorage.getItem('authUser');
+          if (cached) {
+            const u = JSON.parse(cached);
+            if (u && (u.id || u.email)) {
+              redirectAfterAuth(u.role);
+            }
+          }
+        } catch (_) {}
+      })();
 
       // Validate a field only if it has been touched OR forceAll is true
       function validateField(inputId, fieldId, errorId, rule, forceAll) {
@@ -462,6 +491,7 @@
               password: loginPas.value,
             });
             const safeuser = data?.data?.safeuser;
+            if (data?.token) localStorage.setItem('authToken', data.token);
             if (safeuser) localStorage.setItem('authUser', JSON.stringify(safeuser));
             redirectAfterAuth(safeuser?.role);
           } catch (error) {
@@ -522,6 +552,7 @@
               confirmPassword: regConf.value,
             });
             const safeuser = data?.data?.safeuser;
+            if (data?.token) localStorage.setItem('authToken', data.token);
             if (safeuser) localStorage.setItem('authUser', JSON.stringify(safeuser));
             redirectAfterAuth(safeuser?.role);
           } catch (error) {

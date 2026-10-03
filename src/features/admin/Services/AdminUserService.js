@@ -72,6 +72,14 @@ export class AdminUserService {
         data: {
           ...user,
           totalSpent: parseFloat(totalSpent),
+          orders: (user.orders || []).map(o => ({
+            ...o,
+            totalAmount: parseFloat(o.totalAmount),
+            items: (o.items || []).map(item => ({
+              ...item,
+              unitPrice: parseFloat(item.unitPrice)
+            }))
+          })),
           stats: {
             addressCount: user.addresses.length,
             orderCount: user.orders.length

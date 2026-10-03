@@ -12,5 +12,12 @@ router.get('/login', (req, res) => {
     res.render("pages/auth/auth");
 });
 
+router.get('/signup', (req, res) => {
+    res.render("pages/auth/auth");
+});
+
+router.get('/auth', (req, res) => {
+    res.render("pages/auth/auth");
+});
 
 export default router;

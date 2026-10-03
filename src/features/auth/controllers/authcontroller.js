@@ -9,7 +9,7 @@ const COOKIE_NAME = 'authToken';
 const cookieOptions = {
   httpOnly: true,
   secure:   process.env.NODE_ENV === 'production', // HTTPS only in prod
-  sameSite: 'strict',
+  sameSite: 'lax',
   maxAge:   7 * 24 * 60 * 60 * 1000, // 7 days in ms
   path:     '/',
 };
@@ -24,6 +24,7 @@ export class AuthController {
         success: true,
         message: "Registered successfully",
         data:    safeResult,
+        token:   result.token,
       });
     } catch (error) {
       console.error('[AuthController.register Error]:', error);
@@ -71,6 +72,7 @@ export class AuthController {
       return res.json({
         success: true,
         data:    safeResult,
+        token:   result.token,
       });
     } catch (error) {
       console.error('[AuthController.login Error]:', error);
