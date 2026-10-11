@@ -62,25 +62,35 @@
   .section__title  { font-size: var(--text-xl); }
   .container       { padding-inline: var(--space-3); }
   .categories__grid { grid-template-columns: repeat(2, 1fr) !important; }
-  .emi__partners-list { flex-direction: column; align-items: flex-start; }
+  .emi__partners-list { display: grid; grid-template-columns: repeat(2, 1fr); width: 100%; }
 }
 
 /* =============================================
-   LANDING — HERO (additional mobile fixes)
+   LANDING — HERO (compact promotional mobile hero)
 ============================================= */
+
+@media (max-width: 768px) {
+  .hero {
+    height: clamp(395px, 54vh, 455px);
+    min-height: 395px;
+    max-height: 465px;
+  }
+}
 
 @media (max-width: 480px) {
   .hero {
-    height: calc(100svh - var(--navbar-height));
-    min-height: 400px;
+    height: clamp(380px, 53vh, 435px);
+    min-height: 380px;
+    max-height: 445px;
   }
-  .hero__content { padding-inline: var(--space-4); }
-  .hero__badge   { font-size: 10px; padding: var(--space-1) var(--space-3); }
-  .hero__dots    { bottom: var(--space-5); }
 }
 
-@media (max-width: 375px) {
-  .hero__title { font-size: var(--text-2xl); }
+@media (max-width: 360px) {
+  .hero {
+    height: clamp(365px, 52vh, 410px);
+    min-height: 365px;
+    max-height: 420px;
+  }
 }
 
 /* =============================================
@@ -327,26 +337,43 @@
    GLOBAL — no horizontal scroll anywhere
 ============================================= */
 
-body { overflow-x: hidden; }
+html {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
+  position: relative;
+}
 
 /* =============================================
    SMALL SCREEN SAFEGUARDS
    Keep grid and flex children from expanding the viewport.  This is
    especially important for long product names, prices, and controls.
 ============================================= */
-html,
-body {
-  max-width: 100%;
-}
-
 main,
+#main-content,
 section,
+.hero,
+.trust,
+.categories,
+.featured,
+.emi,
+.achievements,
+.location,
+.whatsapp-section,
+.footer,
 .container,
 .container--wide,
 .plp__container,
 .pdp__container,
 .hdr__wrapper {
   min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .plp-toolbar__left,
@@ -356,8 +383,16 @@ section,
 .pdp-related,
 .order-card__info,
 .product-card,
-.plp-card {
+.plp-card,
+.location__info,
+.location__info-card,
+.whatsapp-section__content,
+.whatsapp-section__cta-card,
+.achievements__card,
+.trust__card {
   min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .pdp-info__title,
@@ -365,8 +400,13 @@ section,
 .product-card__name,
 .order-card__product-name,
 .plp-banner__title,
-.plp-banner__subtitle {
+.plp-banner__subtitle,
+.location__info-value,
+.location__address,
+.footer__contact-item,
+.footer__brand-desc {
   overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 @media (max-width: 600px) {

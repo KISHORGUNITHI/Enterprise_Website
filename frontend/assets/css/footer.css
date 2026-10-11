@@ -280,6 +280,11 @@
   .footer__grid {
     grid-template-columns: 1fr;
     gap: var(--space-8);
+    min-width: 0;
+  }
+
+  .footer__col {
+    min-width: 0;
   }
 
   .footer__col--brand {
@@ -288,6 +293,17 @@
 
   .footer__brand-desc {
     max-width: 100%;
+  }
+
+  .footer__contact-item {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .footer__contact-link {
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .footer__bottom-inner {

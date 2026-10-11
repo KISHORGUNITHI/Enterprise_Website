@@ -278,6 +278,7 @@
   white-space: nowrap;
   backdrop-filter: blur(8px);
   border: 1px solid var(--color-border-light);
+  max-width: calc(100% - 32px);
 }
 
 /* =============================================
@@ -296,6 +297,35 @@
 }
 
 @media (max-width: 600px) {
+  .location__info {
+    min-width: 0;
+  }
+
+  .location__info-card {
+    padding: var(--space-4);
+    min-width: 0;
+  }
+
+  .location__info-card > div {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .location__info-value {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    font-size: var(--text-sm);
+  }
+
+  .location__address {
+    font-size: var(--text-sm);
+  }
+
+  .location__hours {
+    padding: var(--space-4);
+  }
+
   .location__actions {
     flex-direction: column;
   }
@@ -305,6 +335,16 @@
   }
 
   .location__map {
-    height: 300px;
+    height: 280px;
+  }
+
+  .location__map-badge {
+    bottom: var(--space-3);
+    font-size: var(--text-xs);
+    padding: var(--space-1) var(--space-3);
+    white-space: normal;
+    text-align: center;
+    border-radius: var(--radius-lg);
+    max-width: calc(100% - 24px);
   }
 }

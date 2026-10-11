@@ -315,65 +315,209 @@
 ============================================= */
 
 @media (max-width: 768px) {
-  /* Hide the center nav links — they're in the drawer */
+  /* Hide the center nav links */
   .navbar__nav { display: none; }
 
-  /* Keep actions visible but compact */
+  /* REMOVE hamburger menu and mobile drawer */
+  .navbar__hamburger { display: none !important; }
+  .navbar__mobile-menu { display: none !important; }
+
+  .navbar__container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-inline: var(--space-4);
+    overflow: visible;
+  }
+
+  /* Logo: ensure "Kishor Enterprises" is clearly readable */
+  .navbar__logo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+    flex-shrink: 1;
+    text-decoration: none;
+  }
+
+  .navbar__logo-icon {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+  }
+
+  .navbar__logo-icon svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .navbar__logo-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.15;
+    min-width: 0;
+  }
+
+  .navbar__logo-name {
+    font-size: 15px;
+    font-weight: var(--font-extrabold);
+    color: var(--color-primary-700);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+
+  .navbar__logo-tagline {
+    display: block !important;
+    font-size: 9.5px;
+    font-weight: var(--font-bold);
+    color: var(--color-accent-500);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* Actions aligned to the right */
   .navbar__actions {
     display: flex;
     align-items: center;
     gap: var(--space-2);
+    margin-left: auto;
+    flex-shrink: 0;
   }
 
-  /* Call Us — icon only on mobile */
+  /* Call Us action */
   .navbar__call-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 36px;
     height: 36px;
+    min-height: 36px;
     padding: 0;
-    justify-content: center;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--color-border-medium);
-    background-color: var(--color-bg-primary);
+    border-radius: var(--radius-lg);
+    border: 1.5px solid var(--color-border-medium);
+    background-color: var(--color-bg-secondary);
+    color: var(--color-primary-700);
+    transition: var(--transition-fast);
   }
 
-  .navbar__call-btn span { display: none; } /* hide "Call Us" text */
+  .navbar__call-btn:hover {
+    background-color: var(--color-primary-50);
+    border-color: var(--color-primary-700);
+  }
 
-  /* Login button — compact */
+  .navbar__call-btn .icon {
+    width: 17px;
+    height: 17px;
+  }
+
+  .navbar__call-btn span {
+    display: none;
+  }
+
+  /* Login action */
   .navbar__login-btn {
-    padding: var(--space-2) var(--space-3) !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 5px;
+    height: 36px;
+    min-height: 36px;
+    padding: 0 var(--space-3) !important;
+    font-size: var(--text-xs) !important;
+    font-weight: var(--font-semibold);
+    border-radius: var(--radius-lg);
+    white-space: nowrap;
+  }
+
+  .navbar__login-btn .icon {
+    display: inline-flex;
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Authenticated buttons on mobile if present */
+  #navProfileBtn, #navLogoutBtn, #navAdminBtn {
+    height: 36px;
+    min-height: 36px;
+    padding: 0 var(--space-3) !important;
     font-size: var(--text-xs) !important;
   }
-
-  .navbar__login-btn .icon { display: none; } /* hide icon, keep text */
-
-  .navbar__hamburger { display: flex; }
-
-  .navbar__mobile-menu { top: var(--navbar-height); }
-  .navbar.scrolled .navbar__mobile-menu { top: var(--navbar-height-scrolled); }
 }
 
 @media (max-width: 480px) {
-  .navbar__logo-tagline { display: none; }
+  .navbar__container {
+    padding-inline: var(--space-3);
+    gap: var(--space-2);
+  }
 
-  /* Tighten container gap */
-  .navbar__container { gap: var(--space-3); }
+  .navbar__logo {
+    gap: 7px;
+  }
 
-  /* Call Us — icon only, smaller */
+  .navbar__logo-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .navbar__logo-icon svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .navbar__logo-name {
+    font-size: 13.5px;
+  }
+
+  .navbar__logo-tagline {
+    display: block !important;
+    font-size: 8.5px;
+    letter-spacing: 0.06em;
+  }
+
+  .navbar__actions {
+    gap: 6px;
+  }
+
   .navbar__call-btn {
     width: 34px;
     height: 34px;
+    min-height: 34px;
   }
 
-  /* Login — minimal */
   .navbar__login-btn {
-    padding: var(--space-2) var(--space-2) !important;
-    font-size: 11px !important;
-    gap: var(--space-1) !important;
+    height: 34px;
+    min-height: 34px;
+    padding: 0 10px !important;
+    font-size: 11.5px !important;
   }
 }
 
 @media (max-width: 360px) {
-  /* On very small screens, hide hamburger and show only icon actions */
-  .navbar__login-btn .btn-text { display: none; }
-  .navbar__login-btn .icon     { display: flex !important; }
+  .navbar__container {
+    padding-inline: 8px;
+    gap: 4px;
+  }
+
+  .navbar__logo-name {
+    font-size: 12.5px;
+  }
+
+  .navbar__logo-tagline {
+    font-size: 8px;
+  }
+
+  .navbar__call-btn {
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+  }
+
+  .navbar__login-btn {
+    height: 32px;
+    min-height: 32px;
+    padding: 0 8px !important;
+    font-size: 11px !important;
+  }
 }

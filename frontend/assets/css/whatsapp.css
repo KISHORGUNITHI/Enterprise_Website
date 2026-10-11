@@ -231,6 +231,7 @@
 
 .whatsapp-section__input {
   flex: 1;
+  min-width: 0;
   padding: var(--space-3) var(--space-4);
   background: transparent;
   border: none;
@@ -323,17 +324,39 @@
 }
 
 @media (max-width: 600px) {
+  .whatsapp-section__layout {
+    min-width: 0;
+  }
+
   .whatsapp-section__title {
     font-size: var(--text-3xl);
   }
 
   .whatsapp-section__cta-card {
     padding: var(--space-6);
+    min-width: 0;
   }
 
   .whatsapp-section__trust-notes {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-2);
+  }
+}
+
+@media (max-width: 480px) {
+  .whatsapp-section__cta-card {
+    padding: var(--space-4);
+    border-radius: var(--radius-2xl);
+  }
+
+  .whatsapp-section__input-prefix {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-xs);
+  }
+
+  .whatsapp-section__input {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
   }
 }

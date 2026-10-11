@@ -34,7 +34,24 @@
   <!-- Full-width scrollable track (outside container for edge-to-edge scroll) -->
   <div class="featured__viewport" aria-label="Product carousel">
     <div class="featured__track" id="featuredTrack" role="list">
-      <%# Cards injected by featured-slider.js %>
+      <%# Initial skeleton cards for immediate visual feedback before API resolves %>
+      <% for (let i = 0; i < 5; i++) { %>
+        <article class="product-card product-card--skeleton" role="listitem" aria-hidden="true">
+          <div class="product-card__image-wrap">
+            <div class="skeleton-shimmer skeleton-shimmer--image"></div>
+          </div>
+          <div class="product-card__body">
+            <div class="skeleton-shimmer skeleton-shimmer--brand"></div>
+            <div class="skeleton-shimmer skeleton-shimmer--title"></div>
+            <div class="skeleton-shimmer skeleton-shimmer--title-short"></div>
+            <div class="skeleton-shimmer skeleton-shimmer--rating"></div>
+            <div class="skeleton-shimmer skeleton-shimmer--price"></div>
+          </div>
+          <div class="product-card__footer">
+            <div class="skeleton-shimmer skeleton-shimmer--btn"></div>
+          </div>
+        </article>
+      <% } %>
     </div>
   </div>
 
