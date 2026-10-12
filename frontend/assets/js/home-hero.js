@@ -101,19 +101,22 @@
               href = rawSlug;
             }
 
+            const ctaText = (b.ctaText || '').trim();
+
             return {
               id: b.id,
-              title: b.title,
-              eyebrow: b.eyebrow,
-              subtitle: b.subtitle || '',
-              badge: b.badge || 'Trending',
-              cta: { label: b.ctaText || 'Shop Now', href },
-              ctaAlt: { label: 'Explore Store', href: '/products' },
+              title: (b.title || '').trim(),
+              eyebrow: (b.eyebrow || '').trim(),
+              subtitle: (b.subtitle || '').trim(),
+              badge: (b.badge || '').trim(),
+              cta: ctaText ? { label: ctaText, href } : null,
+              ctaAlt: null,
               bg: b.bgGradient || 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 60%, #2f52a0 100%)',
               accent: b.accentColor || '#f58500',
               image: b.imageUrl || b.image || '',
               imageUrl: b.imageUrl || b.image || '',
-              icon
+              icon,
+              href
             };
           });
 
@@ -138,42 +141,58 @@
 
     track.innerHTML = banners.map((b, i) => {
       const bannerImg = b.imageUrl || b.image || '';
+      const title = (b.title || '').trim();
+      const eyebrow = (b.eyebrow || '').trim();
+      const subtitle = (b.subtitle || '').trim();
+      const badge = (b.badge || '').trim();
+      const hasCta = Boolean(b.cta && b.cta.label && b.cta.label.trim());
+      const hasCtaAlt = Boolean(b.ctaAlt && b.ctaAlt.label && b.ctaAlt.label.trim());
+      const hasCtas = hasCta || hasCtaAlt;
+      const hasAnyText = Boolean(title || eyebrow || subtitle || badge || hasCtas);
+      const isImageOnly = !hasAnyText && Boolean(bannerImg);
+      const targetHref = (b.cta && b.cta.href) || b.href || '';
+
       return `
       <div
-        class="home-hero__slide${i === 0 ? ' active' : ''}"
+        class="home-hero__slide${i === 0 ? ' active' : ''}${isImageOnly ? ' home-hero__slide--image-only' : ''}"
         role="tabpanel"
-        aria-label="Slide ${i + 1}: ${b.title}"
+        aria-label="Slide ${i + 1}${title ? ': ' + title : ''}"
         aria-hidden="${i !== 0}"
         data-index="${i}"
         data-banner-id="${b.id || ''}"
+        ${isImageOnly && targetHref ? `data-href="${targetHref}" style="cursor: pointer;"` : ''}
       >
-        <div class="home-hero__slide-bg" style="background:${b.bg};">
-          ${bannerImg ? `<img src="${bannerImg}" alt="${b.title || 'Banner'}" class="home-hero__slide-bg-img" onerror="this.style.display='none'"/>` : ''}
+        <div class="home-hero__slide-bg" style="background:${b.bg || 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 60%, #2f52a0 100%)'};">
+          ${bannerImg ? `<img src="${bannerImg}" alt="${title || 'Banner'}" class="home-hero__slide-bg-img" onerror="this.style.display='none'"/>` : ''}
         </div>
         <div class="home-hero__slide-overlay"></div>
 
+        ${hasAnyText ? `
         <div class="home-hero__content">
-          ${b.badge ? `<div class="home-hero__badge">${b.badge}</div>` : ''}
-          <p class="home-hero__eyebrow">${b.eyebrow}</p>
-          <h2 class="home-hero__title">${b.title}</h2>
-          <p class="home-hero__subtitle">${b.subtitle}</p>
+          ${badge ? `<div class="home-hero__badge">${badge}</div>` : ''}
+          ${eyebrow ? `<p class="home-hero__eyebrow">${eyebrow}</p>` : ''}
+          ${title ? `<h2 class="home-hero__title">${title}</h2>` : ''}
+          ${subtitle ? `<p class="home-hero__subtitle">${subtitle}</p>` : ''}
+          ${hasCtas ? `
           <div class="home-hero__ctas">
+            ${hasCta ? `
             <a href="${b.cta.href}" class="btn btn--accent btn--lg" data-banner-cta="${b.id || ''}">
               ${b.cta.label}
               <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
               </svg>
-            </a>
+            </a>` : ''}
+            ${hasCtaAlt ? `
             <a href="${b.ctaAlt.href}" class="btn btn--outline-inverse">
               ${b.ctaAlt.label}
-            </a>
-          </div>
-        </div>
+            </a>` : ''}
+          </div>` : ''}
+        </div>` : ''}
 
         <div class="home-hero__illustration" aria-hidden="true">
           ${bannerImg
             ? `<div class="home-hero__media-wrap">
-                 <img src="${bannerImg}" alt="${b.title || 'Banner'}" class="home-hero__illustration-img" onerror="this.parentElement.innerHTML=\`${icons[b.icon] || icons.deals}\`"/>
+                 <img src="${bannerImg}" alt="${title || 'Banner'}" class="home-hero__illustration-img" onerror="this.parentElement.innerHTML=\`${icons[b.icon] || icons.deals}\`"/>
                </div>`
             : (icons[b.icon] || icons.deals)
           }
@@ -191,6 +210,15 @@
           fetch(`/api/banners/${encodeURIComponent(bid)}/click`, { method: 'POST' }).catch(() => {});
         }
       });
+    });
+
+    // Support click navigation on image-only slides
+    track.addEventListener('click', (e) => {
+      const imageOnlySlide = e.target.closest('.home-hero__slide--image-only[data-href]');
+      if (imageOnlySlide && !e.target.closest('a') && !e.target.closest('button')) {
+        const href = imageOnlySlide.dataset.href;
+        if (href) window.location.href = href;
+      }
     });
   }
 

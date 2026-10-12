@@ -108,6 +108,23 @@
       rgba(0, 0, 0, 0.05) 100%);
 }
 
+/* Image-only banner slide styling */
+.hero__slide--image-only .hero__slide-overlay {
+  background: transparent;
+}
+
+.hero__slide--image-only .hero__slide-bg-img {
+  opacity: 1;
+}
+
+.hero__slide--image-only.active .hero__slide-bg-img {
+  opacity: 1;
+}
+
+.hero__slide--image-only .hero__illustration {
+  display: none;
+}
+
 /* =============================================
    SLIDE CONTENT
 ============================================= */

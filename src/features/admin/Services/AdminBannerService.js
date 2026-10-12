@@ -71,20 +71,23 @@ export class AdminBannerService {
 
   /**
    * Create a new banner
-   * Required: title, eyebrow, ctaText, slug
-   * Optional: subtitle, badge, status, bgGradient, accentColor, displayOrder, imageUrl/image
+   * Required: slug (and either image or text content)
+   * Optional text fields: title, eyebrow, subtitle, ctaText, badge
+   * Optional presentation fields: status, bgGradient, accentColor, displayOrder, imageUrl/image
    */
   async create(data) {
     try {
-      // Validate required fields
-      if (!data.title || !data.eyebrow || !data.ctaText || !data.slug) {
-        const error = new Error('Missing required fields: title, eyebrow, ctaText, slug');
+      // Validate genuinely required destination slug
+      if (!data.slug || !String(data.slug).trim()) {
+        const error = new Error('Missing required field: slug');
         error.status = 400;
         throw error;
       }
 
+      const slugVal = String(data.slug).trim();
+
       // Check if slug already exists
-      const existing = await this.repository.findBySlug(data.slug);
+      const existing = await this.repository.findBySlug(slugVal);
       if (existing) {
         const error = new Error('Banner slug already exists');
         error.status = 409;
@@ -92,16 +95,32 @@ export class AdminBannerService {
       }
 
       const rawImg = data.imageUrl || data.image || null;
+      const hasImage = Boolean(rawImg && String(rawImg).trim());
+      const hasText = Boolean(
+        (data.title && String(data.title).trim()) ||
+        (data.eyebrow && String(data.eyebrow).trim()) ||
+        (data.subtitle && String(data.subtitle).trim()) ||
+        (data.ctaText && String(data.ctaText).trim()) ||
+        (data.badge && String(data.badge).trim())
+      );
+
+      // A banner must provide either text content or an image
+      if (!hasText && !hasImage) {
+        const error = new Error('Banner must provide either text content or an image');
+        error.status = 400;
+        throw error;
+      }
+
       const resolvedImageUrl = await this._resolveImageUrl(rawImg);
 
-      // Create with defaults
+      // Create with defaults (text fields are optional, storing empty strings or null)
       const banner = await this.repository.create({
-        title: data.title,
-        eyebrow: data.eyebrow,
-        subtitle: data.subtitle || '',
-        ctaText: data.ctaText,
-        slug: data.slug,
-        badge: data.badge || null,
+        title: data.title ? String(data.title).trim() : '',
+        eyebrow: data.eyebrow ? String(data.eyebrow).trim() : '',
+        subtitle: data.subtitle ? String(data.subtitle).trim() : '',
+        ctaText: data.ctaText ? String(data.ctaText).trim() : '',
+        slug: slugVal,
+        badge: data.badge ? String(data.badge).trim() : null,
         imageUrl: resolvedImageUrl,
         status: data.status || 'ACTIVE',
         bgGradient: data.bgGradient || 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 100%)',
@@ -155,6 +174,14 @@ export class AdminBannerService {
       if (updateData.displayOrder !== undefined) {
         updateData.displayOrder = parseInt(updateData.displayOrder, 10) || 0;
       }
+
+      // Handle optional text fields consistently
+      if (data.title !== undefined) updateData.title = data.title ? String(data.title).trim() : '';
+      if (data.eyebrow !== undefined) updateData.eyebrow = data.eyebrow ? String(data.eyebrow).trim() : '';
+      if (data.subtitle !== undefined) updateData.subtitle = data.subtitle ? String(data.subtitle).trim() : '';
+      if (data.ctaText !== undefined) updateData.ctaText = data.ctaText ? String(data.ctaText).trim() : '';
+      if (data.badge !== undefined) updateData.badge = data.badge ? String(data.badge).trim() : null;
+      if (data.slug !== undefined) updateData.slug = String(data.slug).trim();
 
       const banner = await this.repository.update(id, updateData);
 

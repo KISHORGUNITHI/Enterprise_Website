@@ -924,24 +924,28 @@
       <div class="admin-banner-card" data-id="${b.id}">
         <!-- Visual Banner Header Preview -->
         <div class="admin-banner-preview" style="background:${b.bgGradient || 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 60%, #2f52a0 100%)'};">
-          ${(b.imageUrl || b.image) ? `<img src="${b.imageUrl || b.image}" alt="${b.title}" class="admin-banner-preview__bg-img" onerror="this.style.display='none'"/>` : ''}
+          ${(b.imageUrl || b.image) ? `<img src="${b.imageUrl || b.image}" alt="${b.title || 'Banner'}" class="admin-banner-preview__bg-img" onerror="this.style.display='none'"/>` : ''}
           <div>
-            <span class="admin-banner-preview__eyebrow">${b.eyebrow}</span>
-            <h3 class="admin-banner-preview__title">${b.title}</h3>
+            ${b.eyebrow ? `<span class="admin-banner-preview__eyebrow">${b.eyebrow}</span>` : ''}
+            ${b.title ? `<h3 class="admin-banner-preview__title">${b.title}</h3>` : ''}
           </div>
           <div style="display:flex; justify-content:space-between; align-items:flex-end;">
             ${b.badge ? `<span class="admin-banner-preview__badge">${b.badge}</span>` : '<span></span>'}
-            <span style="font-size:var(--text-xs); background:rgba(0,0,0,0.4); padding:2px 8px; border-radius:var(--radius-sm);">
-              CTA: ${b.ctaText}
-            </span>
+            ${b.ctaText ? `
+              <span style="font-size:var(--text-xs); background:rgba(0,0,0,0.4); padding:2px 8px; border-radius:var(--radius-sm);">
+                CTA: ${b.ctaText}
+              </span>
+            ` : ''}
           </div>
         </div>
 
         <!-- Banner Card Body -->
         <div class="admin-banner-card__details">
-          <p style="font-size:var(--text-xs); color:var(--color-text-muted); line-height:var(--leading-relaxed); margin:0;">
-            ${b.subtitle}
-          </p>
+          ${b.subtitle ? `
+            <p style="font-size:var(--text-xs); color:var(--color-text-muted); line-height:var(--leading-relaxed); margin:0;">
+              ${b.subtitle}
+            </p>
+          ` : ''}
 
           <div class="admin-banner-card__slug-row">
             <span style="color:var(--color-text-muted);">Destination Slug:</span>
@@ -1074,14 +1078,14 @@
     const banner = data.banners.find(b => b.id === id);
     if (!banner) return;
 
-    document.getElementById('bannerFormId').value = banner.id;
-    document.getElementById('bannerEyebrow').value = banner.eyebrow;
-    document.getElementById('bannerTitle').value = banner.title;
-    document.getElementById('bannerSubtitle').value = banner.subtitle;
-    document.getElementById('bannerCtaText').value = banner.ctaText;
-    document.getElementById('bannerSlug').value = banner.slug;
+    document.getElementById('bannerFormId').value = banner.id || '';
+    document.getElementById('bannerEyebrow').value = banner.eyebrow || '';
+    document.getElementById('bannerTitle').value = banner.title || '';
+    document.getElementById('bannerSubtitle').value = banner.subtitle || '';
+    document.getElementById('bannerCtaText').value = banner.ctaText || '';
+    document.getElementById('bannerSlug').value = banner.slug || 'all';
     document.getElementById('bannerBadge').value = banner.badge || '';
-    document.getElementById('bannerStatus').value = banner.status;
+    document.getElementById('bannerStatus').value = banner.status || 'Active';
 
     const catSel = document.getElementById('bannerCategorySelect');
     if (catSel) {
@@ -1111,8 +1115,17 @@
       const badge = document.getElementById('bannerBadge').value.trim();
       const status = document.getElementById('bannerStatus').value;
 
-      if (!title || !slug) {
-        showAdminToast('Please provide a banner title and target slug.', 'warning');
+      if (!slug) {
+        showAdminToast('Please provide a target destination slug (e.g. "all", "mobiles").', 'warning');
+        return;
+      }
+
+      const hasAnyText = Boolean(title || eyebrow || subtitle || ctaText || badge);
+      const existingBanner = id ? data.banners.find(b => b.id === id) : null;
+      const hasImage = Boolean(currentBannerImage || existingBanner?.imageUrl || existingBanner?.image);
+
+      if (!hasAnyText && !hasImage) {
+        showAdminToast('Please provide either banner text or an image.', 'warning');
         return;
       }
 
@@ -1126,13 +1139,12 @@
             all: { bg: 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 60%, #2f52a0 100%)', accent: '#f58500' }
           };
           const theme = defaultThemes[slug.toLowerCase()] || defaultThemes['all'];
-          const existingBanner = id ? data.banners.find(b => b.id === id) : null;
 
           const bannerPayload = {
-            title,
-            eyebrow,
-            subtitle,
-            ctaText,
+            title: title || '',
+            eyebrow: eyebrow || '',
+            subtitle: subtitle || '',
+            ctaText: ctaText || '',
             slug,
             badge: badge || null,
             imageUrl: currentBannerImage || null,
@@ -1162,15 +1174,15 @@
         const banner = data.banners.find(b => b.id === id);
         if (banner) {
           Object.assign(banner, {
-            title,
-            eyebrow,
-            subtitle,
-            ctaText,
+            title: title || '',
+            eyebrow: eyebrow || '',
+            subtitle: subtitle || '',
+            ctaText: ctaText || '',
             slug,
-            badge,
+            badge: badge || '',
             status,
-            image: currentBannerImage,
-            imageUrl: currentBannerImage
+            image: currentBannerImage || banner.image || '',
+            imageUrl: currentBannerImage || banner.imageUrl || ''
           });
           showAdminToast('Banner updated successfully.');
         }
@@ -1178,15 +1190,15 @@
         // Add new mock
         const newBanner = {
           id: 'BNR-' + String(data.banners.length + 1).padStart(3, '0'),
-          title,
-          eyebrow,
-          subtitle,
-          ctaText,
+          title: title || '',
+          eyebrow: eyebrow || '',
+          subtitle: subtitle || '',
+          ctaText: ctaText || '',
           slug,
-          badge,
+          badge: badge || '',
           status,
-          image: currentBannerImage,
-          imageUrl: currentBannerImage,
+          image: currentBannerImage || '',
+          imageUrl: currentBannerImage || '',
           bgGradient: 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 60%, #2f52a0 100%)',
           accentColor: '#f58500',
           clicks: 0

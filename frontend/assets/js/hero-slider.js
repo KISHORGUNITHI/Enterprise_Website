@@ -9,7 +9,7 @@
 
   // ─── Config ────────────────────────────────────────────────────────────────
   const AUTOPLAY_INTERVAL = 5000; // ms per slide
-  const TRANSITION_SPEED  = 700;  // must match hero.css transition
+  const TRANSITION_SPEED = 700;  // must match hero.css transition
 
   // ─── SVG Illustrations (inline, no image files needed) ────────────────────
   const illustrations = {
@@ -98,21 +98,21 @@
   };
 
   // ─── DOM refs ──────────────────────────────────────────────────────────────
-  const track       = document.getElementById('heroTrack');
+  const track = document.getElementById('heroTrack');
   const dotsWrapper = document.getElementById('heroDots');
-  const prevBtn     = document.getElementById('heroPrev');
-  const nextBtn     = document.getElementById('heroNext');
+  const prevBtn = document.getElementById('heroPrev');
+  const nextBtn = document.getElementById('heroNext');
   const progressBar = document.getElementById('heroProgressBar');
-  const sliderEl    = document.getElementById('heroSlider');
+  const sliderEl = document.getElementById('heroSlider');
 
   if (!track || !window.bannersData) return;
 
   let banners = window.bannersData || [];
-  let total   = banners.length;
-  let current   = 0;
+  let total = banners.length;
+  let current = 0;
   let autoTimer = null;
   let progressTimer = null;
-  let progressVal   = 0;
+  let progressVal = 0;
   let isPaused = false;
 
   async function loadLiveBanners() {
@@ -142,18 +142,21 @@
               href = rawSlug;
             }
 
+            const ctaPrimaryText = (b.ctaText || '').trim();
+
             return {
               id: b.id,
-              title: b.title,
-              eyebrow: b.eyebrow,
-              subtitle: b.subtitle || '',
-              badge: b.badge || 'Trending',
-              cta_primary: { label: b.ctaText || 'Shop Now', href },
-              cta_secondary: { label: 'Explore Store', href: '/products' },
+              title: (b.title || '').trim(),
+              eyebrow: (b.eyebrow || '').trim(),
+              subtitle: (b.subtitle || '').trim(),
+              badge: (b.badge || '').trim(),
+              cta_primary: ctaPrimaryText ? { label: ctaPrimaryText, href } : null,
+              cta_secondary: null,
               bgGradient: b.bgGradient || 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 60%, #2f52a0 100%)',
               accentColor: b.accentColor || '#f58500',
               imageUrl: b.imageUrl || b.image || '',
-              illustration
+              illustration,
+              href
             };
           });
           total = banners.length;
@@ -169,41 +172,58 @@
     if (!banners.length) return;
     track.innerHTML = banners.map((banner, i) => {
       const bannerImg = banner.imageUrl || banner.image || '';
+      const title = (banner.title || '').trim();
+      const eyebrow = (banner.eyebrow || '').trim();
+      const subtitle = (banner.subtitle || '').trim();
+      const badge = (banner.badge || '').trim();
+      const hasPrimaryCta = Boolean(banner.cta_primary && banner.cta_primary.label && banner.cta_primary.label.trim());
+      const hasSecondaryCta = Boolean(banner.cta_secondary && banner.cta_secondary.label && banner.cta_secondary.label.trim());
+      const hasCta = hasPrimaryCta || hasSecondaryCta;
+      const hasAnyText = Boolean(title || eyebrow || subtitle || badge || hasCta);
+      const isImageOnly = !hasAnyText && Boolean(bannerImg);
+      const targetHref = (banner.cta_primary && banner.cta_primary.href) || banner.href || '';
+
       return `
       <div
-        class="hero__slide${i === 0 ? ' active' : ''}"
+        class="hero__slide${i === 0 ? ' active' : ''}${isImageOnly ? ' hero__slide--image-only' : ''}"
         role="tabpanel"
-        aria-label="Slide ${i + 1}: ${banner.title}"
+        aria-label="Slide ${i + 1}${title ? ': ' + title : ''}"
         aria-hidden="${i !== 0}"
         data-index="${i}"
-        style="--slide-accent: ${banner.accentColor};"
+        ${isImageOnly && targetHref ? `data-href="${targetHref}"` : ''}
+        style="--slide-accent: ${banner.accentColor || '#f58500'};${isImageOnly && targetHref ? ' cursor: pointer;' : ''}"
       >
         <!-- Background -->
-        <div class="hero__slide-bg" style="background: ${banner.bgGradient};">
-          ${bannerImg ? `<img src="${bannerImg}" alt="${banner.title || 'Hero Banner'}" class="hero__slide-bg-img" onerror="this.style.display='none'"/>` : ''}
+        <div class="hero__slide-bg" style="background: ${banner.bgGradient || 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 60%, #2f52a0 100%)'};">
+          ${bannerImg ? `<img src="${bannerImg}" alt="${title || 'Hero Banner'}" class="hero__slide-bg-img" onerror="this.style.display='none'"/>` : ''}
         </div>
         <div class="hero__slide-overlay"></div>
 
         <!-- Content -->
+        ${hasAnyText ? `
         <div class="hero__content">
           <div class="hero__text">
 
+            ${badge ? `
             <div class="hero__badge">
               <svg class="hero__badge-icon" viewBox="0 0 16 16" aria-hidden="true">
                 <path d="M8 0l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11l-5.2 3.3 1.8-5.5L0 5.5h6.2z"/>
               </svg>
-              ${banner.badge}
-            </div>
+              ${badge}
+            </div>` : ''}
 
+            ${eyebrow ? `
             <p class="hero__eyebrow">
               <span class="hero__eyebrow-dot"></span>
-              ${banner.eyebrow}
-            </p>
+              ${eyebrow}
+            </p>` : ''}
 
-            <h1 class="hero__title">${banner.title}</h1>
-            <p class="hero__subtitle">${banner.subtitle}</p>
+            ${title ? `<h1 class="hero__title">${title}</h1>` : ''}
+            ${subtitle ? `<p class="hero__subtitle">${subtitle}</p>` : ''}
 
+            ${hasCta ? `
             <div class="hero__cta-group">
+              ${hasPrimaryCta ? `
               <a
                 href="${banner.cta_primary.href}"
                 class="btn btn--accent btn--lg"
@@ -212,14 +232,15 @@
                 <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
                 </svg>
-              </a>
+              </a>` : ''}
+              ${hasSecondaryCta ? `
               <a
                 href="${banner.cta_secondary.href}"
                 class="btn btn--outline-inverse btn--lg"
               >
                 ${banner.cta_secondary.label}
-              </a>
-            </div>
+              </a>` : ''}
+            </div>` : ''}
 
           </div>
 
@@ -229,13 +250,13 @@
               <div class="hero__illustration-ring"></div>
               <div class="hero__illustration-svg">
                 ${bannerImg
-                  ? `<img src="${bannerImg}" alt="${banner.title || 'Hero Banner'}" class="hero__illustration-img" onerror="this.parentElement.innerHTML=\`${illustrations[banner.illustration] || ''}\`"/>`
-                  : (illustrations[banner.illustration] || '')
-                }
+            ? `<img src="${bannerImg}" alt="${title || 'Hero Banner'}" class="hero__illustration-img" onerror="this.parentElement.innerHTML=\`${illustrations[banner.illustration] || ''}\`"/>`
+            : (illustrations[banner.illustration] || '')
+          }
               </div>
             </div>
           </div>
-        </div>
+        </div>` : ''}
 
       </div>
     `;
@@ -262,7 +283,7 @@
   // ─── Go to slide ───────────────────────────────────────────────────────────
   function goTo(index) {
     const slides = track.querySelectorAll('.hero__slide');
-    const dots   = dotsWrapper.querySelectorAll('.hero__dot');
+    const dots = dotsWrapper.querySelectorAll('.hero__dot');
 
     slides[current].classList.remove('active');
     slides[current].setAttribute('aria-hidden', 'true');
@@ -333,7 +354,7 @@
 
   // ─── Touch / drag support ──────────────────────────────────────────────────
   let touchStartX = 0;
-  let touchEndX   = 0;
+  let touchEndX = 0;
   const MIN_SWIPE = 50;
 
   sliderEl.addEventListener('touchstart', (e) => {
@@ -350,13 +371,13 @@
   }, { passive: true });
 
   // Mouse drag support
-  let isDragging  = false;
-  let dragStartX  = 0;
+  let isDragging = false;
+  let dragStartX = 0;
   let dragStarted = false;
 
   sliderEl.addEventListener('mousedown', (e) => {
-    isDragging  = true;
-    dragStartX  = e.clientX;
+    isDragging = true;
+    dragStartX = e.clientX;
     dragStarted = false;
   });
 
@@ -377,7 +398,7 @@
 
   sliderEl.addEventListener('mouseleave', () => { isDragging = false; });
 
-  // Prevent link clicks when dragging
+  // Prevent link clicks when dragging & support navigation for image-only slides
   sliderEl.addEventListener('click', (e) => {
     if (dragStarted) e.preventDefault();
     dragStarted = false;
@@ -385,7 +406,7 @@
 
   // ─── Keyboard navigation ───────────────────────────────────────────────────
   sliderEl.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft')  goTo(current - 1);
+    if (e.key === 'ArrowLeft') goTo(current - 1);
     if (e.key === 'ArrowRight') goTo(current + 1);
   });
 

@@ -65,6 +65,23 @@
   z-index: 1;
 }
 
+/* Image-only banner styling */
+.plp-banner__slide--image-only .plp-banner__overlay {
+  background: transparent;
+}
+
+.plp-banner__slide--image-only .plp-banner__bg-img {
+  opacity: 1;
+}
+
+.plp-banner__slide.active.plp-banner__slide--image-only .plp-banner__bg-img {
+  opacity: 1;
+}
+
+.plp-banner__slide--image-only .plp-banner__illustration {
+  display: none;
+}
+
 .plp-banner__content {
   position: relative;
   z-index: 2;

@@ -60,11 +60,11 @@
 
     const mapped = json.data.map(b => ({
       id: b.id,
-      title: b.title,
-      eyebrow: b.eyebrow,
-      subtitle: b.subtitle || '',
-      ctaText: b.ctaText || 'Shop Now',
-      badge: b.badge || '',
+      title: (b.title || '').trim(),
+      eyebrow: (b.eyebrow || '').trim(),
+      subtitle: (b.subtitle || '').trim(),
+      ctaText: (b.ctaText || '').trim(),
+      badge: (b.badge || '').trim(),
       bgGradient: b.bgGradient || 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 100%)',
       accentColor: b.accentColor || '#f58500',
       imageUrl: b.imageUrl || b.image || '',
@@ -85,29 +85,39 @@
 
     track.innerHTML = banners.map((b, i) => {
       const bannerImg = b.imageUrl || b.image || '';
+      const title = (b.title || '').trim();
+      const eyebrow = (b.eyebrow || '').trim();
+      const subtitle = (b.subtitle || '').trim();
+      const badge = (b.badge || '').trim();
+      const ctaText = (b.ctaText || '').trim();
+      const hasAnyText = Boolean(title || eyebrow || subtitle || badge || ctaText);
+      const isImageOnly = !hasAnyText && Boolean(bannerImg);
+
       return `
-      <div class="plp-banner__slide${i === 0 ? ' active' : ''}" data-index="${i}">
-        <div class="plp-banner__bg" style="background: ${b.bgGradient};" aria-hidden="true">
-          ${bannerImg ? `<img src="${bannerImg}" alt="${b.title || 'Category Banner'}" class="plp-banner__bg-img" onerror="this.style.display='none'"/>` : ''}
+      <div class="plp-banner__slide${i === 0 ? ' active' : ''}${isImageOnly ? ' plp-banner__slide--image-only' : ''}" data-index="${i}" ${isImageOnly ? 'data-href="#plpGrid" style="cursor: pointer;"' : ''}>
+        <div class="plp-banner__bg" style="background: ${b.bgGradient || 'linear-gradient(135deg, #0d1e4d 0%, #1e3d8f 100%)'};" aria-hidden="true">
+          ${bannerImg ? `<img src="${bannerImg}" alt="${title || 'Category Banner'}" class="plp-banner__bg-img" onerror="this.style.display='none'"/>` : ''}
         </div>
         <div class="plp-banner__overlay" aria-hidden="true"></div>
 
+        ${hasAnyText ? `
         <div class="plp-banner__content">
-          ${b.badge ? `<span class="badge badge--pill badge--accent" style="margin-bottom:8px; display:inline-block; font-size:11px;">${b.badge}</span><br/>` : ''}
-          <span class="plp-banner__eyebrow">${b.eyebrow}</span>
-          <h1 class="plp-banner__title">${b.title}</h1>
-          <p class="plp-banner__subtitle">${b.subtitle}</p>
+          ${badge ? `<span class="badge badge--pill badge--accent" style="margin-bottom:8px; display:inline-block; font-size:11px;">${badge}</span><br/>` : ''}
+          ${eyebrow ? `<span class="plp-banner__eyebrow">${eyebrow}</span>` : ''}
+          ${title ? `<h1 class="plp-banner__title">${title}</h1>` : ''}
+          ${subtitle ? `<p class="plp-banner__subtitle">${subtitle}</p>` : ''}
+          ${ctaText ? `
           <a href="#plpGrid" class="plp-banner__cta" data-cat-cta="${b.id || ''}">
-            ${b.ctaText}
+            ${ctaText}
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
               <path d="M3 8h10M9 4l4 4-4 4" />
             </svg>
-          </a>
-        </div>
+          </a>` : ''}
+        </div>` : ''}
 
         <div class="plp-banner__illustration" aria-hidden="true">
           ${bannerImg
-            ? `<img src="${bannerImg}" alt="${b.title || 'Category Banner'}" class="plp-banner__illustration-img" onerror="this.parentElement.innerHTML=\`<svg viewBox='0 0 160 160' fill='none'><circle cx='80' cy='80' r='64' fill='rgba(255,255,255,0.05)' stroke='rgba(255,255,255,0.12)' stroke-width='1.5'/><text x='80' y='88' text-anchor='middle' font-size='38' font-weight='900' fill='rgba(255,255,255,0.25)'>${categoryEmoji}</text></svg>\`"/>`
+            ? `<img src="${bannerImg}" alt="${title || 'Category Banner'}" class="plp-banner__illustration-img" onerror="this.parentElement.innerHTML=\`<svg viewBox='0 0 160 160' fill='none'><circle cx='80' cy='80' r='64' fill='rgba(255,255,255,0.05)' stroke='rgba(255,255,255,0.12)' stroke-width='1.5'/><text x='80' y='88' text-anchor='middle' font-size='38' font-weight='900' fill='rgba(255,255,255,0.25)'>${categoryEmoji}</text></svg>\`"/>`
             : `<svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="80" cy="80" r="64" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" />
                 <circle cx="80" cy="80" r="44" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
@@ -120,6 +130,16 @@
       </div>
     `;
     }).join('');
+
+    // Support click navigation on image-only slides
+    track.querySelectorAll('.plp-banner__slide--image-only[data-href]').forEach(slide => {
+      slide.addEventListener('click', (e) => {
+        if (!e.target.closest('a') && !e.target.closest('button')) {
+          const gridEl = document.getElementById('plpGrid');
+          if (gridEl) gridEl.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
 
     // Optional click analytics
     track.querySelectorAll('[data-cat-cta]').forEach(cta => {
