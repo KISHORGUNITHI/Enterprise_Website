@@ -311,6 +311,14 @@
 }
 
 /* =============================================
+   MOBILE BOTTOM ACTION BAR (Base — Hidden on Desktop)
+============================================= */
+
+.mobile-bottom-bar {
+  display: none !important;
+}
+
+/* =============================================
    RESPONSIVE — compact actions on mobile, never hide buttons
 ============================================= */
 
@@ -437,12 +445,263 @@
     height: 14px;
   }
 
-  /* Authenticated buttons on mobile if present */
-  #navProfileBtn, #navLogoutBtn, #navAdminBtn {
+  /* =============================================
+     AUTHENTICATED MOBILE HEADER
+     Branding on left, ONLY Logout on right.
+     Hide call button, login, admin, profile, view store.
+  ============================================= */
+  body.is-authenticated .navbar .navbar__call-btn,
+  body.is-authenticated .navbar #navbarLoginBtn,
+  body.is-authenticated .navbar #navAdminBtn,
+  body.is-authenticated .navbar #navProfileBtn {
+    display: none !important;
+  }
+
+  body.is-authenticated .navbar #navLogoutBtn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     height: 36px;
     min-height: 36px;
-    padding: 0 var(--space-3) !important;
+    padding: 0 14px !important;
     font-size: var(--text-xs) !important;
+    font-weight: var(--font-semibold);
+    color: var(--color-error-600, #dc2626) !important;
+    background-color: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    white-space: nowrap;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body.is-authenticated .navbar #navLogoutBtn:hover,
+  body.is-authenticated .navbar #navLogoutBtn:active {
+    background-color: rgba(239, 68, 68, 0.16);
+    border-color: rgba(239, 68, 68, 0.45);
+    color: var(--color-error-600, #dc2626) !important;
+  }
+
+  body.is-authenticated .navbar #navLogoutBtn .icon {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    flex-shrink: 0;
+  }
+
+  /* =============================================
+     FIXED BOTTOM ACTION BAR (Mobile Viewport)
+  ============================================= */
+  body.has-mobile-bottom-bar {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  body.has-mobile-bottom-bar .mobile-bottom-bar {
+    display: block !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 250;
+    background-color: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--color-border-light);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    overflow: visible;
+  }
+
+  /* Admin bottom action bar: 3 actions */
+  .mobile-bottom-bar__admin {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    height: 64px;
+    padding: 0 var(--space-4);
+    max-width: 500px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .mobile-bottom-bar__action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    text-decoration: none;
+    color: var(--color-text-secondary);
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    transition: var(--transition-fast);
+    min-height: 48px;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-bottom-bar__action--admin {
+    justify-self: center;
+  }
+
+  .mobile-bottom-bar__action--store {
+    justify-self: center;
+  }
+
+  .mobile-bottom-bar__action:hover,
+  .mobile-bottom-bar__action:active {
+    color: var(--color-primary-700);
+    background-color: var(--color-primary-50);
+  }
+
+  .mobile-bottom-bar__icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+  }
+
+  .mobile-bottom-bar__icon {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+
+  .mobile-bottom-bar__label {
+    font-size: 11px;
+    font-weight: var(--font-semibold);
+    letter-spacing: var(--tracking-wide);
+    color: inherit;
+    white-space: nowrap;
+    line-height: 1.2;
+  }
+
+  /* PhonePe-inspired prominent circular Call button */
+  .mobile-bottom-bar__center-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 var(--space-3);
+  }
+
+  .mobile-bottom-bar__circle-call {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    position: relative;
+    top: -14px;
+    margin-bottom: -14px;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .mobile-bottom-bar__circle-call:active {
+    transform: scale(0.94);
+  }
+
+  .mobile-bottom-bar__circle-btn {
+    width: 54px;
+    height: 54px;
+    min-width: 54px;
+    min-height: 54px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-800) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    box-shadow: 0 6px 18px rgba(30, 61, 143, 0.35), 0 0 0 4px #ffffff;
+    transition: box-shadow var(--transition-fast);
+  }
+
+  .mobile-bottom-bar__circle-call:hover .mobile-bottom-bar__circle-btn {
+    box-shadow: 0 8px 22px rgba(30, 61, 143, 0.45), 0 0 0 4px #ffffff;
+  }
+
+  .mobile-bottom-bar__circle-icon {
+    width: 24px;
+    height: 24px;
+    fill: #ffffff;
+  }
+
+  .mobile-bottom-bar__circle-label {
+    font-size: 11px;
+    font-weight: var(--font-bold);
+    color: var(--color-primary-700);
+    letter-spacing: 0.02em;
+    margin-top: 3px;
+    text-align: center;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  /* Regular-user bottom action bar: 2 rectangular buttons distributed evenly */
+  .mobile-bottom-bar__user {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    height: 64px;
+    padding: 0 var(--space-4);
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .mobile-bottom-bar__user-btn {
+    flex: 1;
+    height: 46px;
+    border-radius: var(--radius-lg);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    text-decoration: none;
+    transition: var(--transition-fast);
+    white-space: nowrap;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-bottom-bar__btn-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  .mobile-bottom-bar__user-btn--call {
+    background-color: var(--color-bg-secondary);
+    border: 1.5px solid var(--color-primary-300);
+    color: var(--color-primary-700);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .mobile-bottom-bar__user-btn--call:hover,
+  .mobile-bottom-bar__user-btn--call:active {
+    background-color: var(--color-primary-50);
+    border-color: var(--color-primary-600);
+  }
+
+  .mobile-bottom-bar__user-btn--store {
+    background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-800) 100%);
+    border: 1.5px solid var(--color-primary-700);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(30, 61, 143, 0.25);
+  }
+
+  .mobile-bottom-bar__user-btn--store:hover,
+  .mobile-bottom-bar__user-btn--store:active {
+    background: linear-gradient(135deg, var(--color-primary-700) 0%, var(--color-primary-900) 100%);
+    box-shadow: 0 6px 16px rgba(30, 61, 143, 0.35);
   }
 }
 
@@ -492,6 +751,22 @@
     padding: 0 10px !important;
     font-size: 11.5px !important;
   }
+
+  .mobile-bottom-bar__admin {
+    padding: 0 var(--space-3);
+  }
+  .mobile-bottom-bar__center-wrap {
+    padding: 0 var(--space-2);
+  }
+  .mobile-bottom-bar__user {
+    padding: 0 var(--space-3);
+    gap: var(--space-2);
+  }
+  .mobile-bottom-bar__user-btn {
+    height: 44px;
+    font-size: 13px;
+    gap: 6px;
+  }
 }
 
 @media (max-width: 360px) {
@@ -519,5 +794,45 @@
     min-height: 32px;
     padding: 0 8px !important;
     font-size: 11px !important;
+  }
+
+  .mobile-bottom-bar__admin {
+    padding: 0 var(--space-2);
+  }
+  .mobile-bottom-bar__center-wrap {
+    padding: 0 4px;
+  }
+  .mobile-bottom-bar__circle-btn {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    min-height: 50px;
+  }
+  .mobile-bottom-bar__circle-icon {
+    width: 22px;
+    height: 22px;
+  }
+  .mobile-bottom-bar__circle-label {
+    font-size: 10px;
+  }
+  .mobile-bottom-bar__action {
+    padding: 4px 6px;
+    min-height: 44px;
+  }
+  .mobile-bottom-bar__icon {
+    width: 20px;
+    height: 20px;
+  }
+  .mobile-bottom-bar__label {
+    font-size: 10px;
+  }
+  .mobile-bottom-bar__user {
+    padding: 0 var(--space-2);
+    gap: 6px;
+  }
+  .mobile-bottom-bar__user-btn {
+    height: 42px;
+    font-size: 12px;
+    gap: 4px;
   }
 }

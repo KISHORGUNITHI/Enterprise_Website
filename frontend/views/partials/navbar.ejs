@@ -53,8 +53,11 @@
       <a href="/profile" class="btn btn--outline btn--sm" id="navProfileBtn" style="display: none;">
         Profile
       </a>
-      <button type="button" class="btn btn--ghost btn--sm" id="navLogoutBtn" style="display: none; color: var(--color-text-primary);">
-        Logout
+      <button type="button" class="btn btn--ghost btn--sm" id="navLogoutBtn" style="display: none; color: var(--color-text-primary);" aria-label="Log out">
+        <svg class="icon icon--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M13 16l4-4-4-4M17 12H7M7 4H4a1 1 0 00-1 1v14a1 1 0 001 1h3"></path>
+        </svg>
+        <span>Logout</span>
       </button>
       <a href="/login" class="btn btn--primary btn--sm navbar__login-btn" id="navbarLoginBtn">
         <svg class="icon icon--sm" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -106,6 +109,64 @@
 <!-- Spacer to prevent content going under fixed navbar -->
 <div class="navbar__spacer" aria-hidden="true"></div>
 
+<!-- Mobile Fixed Bottom Action Bar (Authenticated Only) -->
+<nav class="mobile-bottom-bar" id="mobileBottomBar" aria-label="Quick actions" style="display: none;">
+  <!-- Admin Bottom Bar: 3 actions (Admin, circular Call, View Store) -->
+  <div class="mobile-bottom-bar__admin" id="mobileBottomBarAdmin" style="display: none;">
+    <a href="/admin/dashboard" class="mobile-bottom-bar__action mobile-bottom-bar__action--admin" id="mobileBottomAdminBtn">
+      <div class="mobile-bottom-bar__icon-wrap">
+        <svg class="mobile-bottom-bar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+          <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+          <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+          <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+        </svg>
+      </div>
+      <span class="mobile-bottom-bar__label">Admin</span>
+    </a>
+
+    <div class="mobile-bottom-bar__center-wrap">
+      <a href="tel:9963657799" class="mobile-bottom-bar__circle-call" id="mobileBottomCircleCallBtn" aria-label="Call Kishor Enterprises at 9963657799">
+        <span class="mobile-bottom-bar__circle-btn">
+          <svg class="mobile-bottom-bar__circle-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.61 21 3 13.39 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.45.57 3.57a1 1 0 01-.25 1.02l-2.2 2.2z"/>
+          </svg>
+        </span>
+        <span class="mobile-bottom-bar__circle-label">Call</span>
+      </a>
+    </div>
+
+    <a href="/home" class="mobile-bottom-bar__action mobile-bottom-bar__action--store" id="mobileBottomStoreBtnAdmin">
+      <div class="mobile-bottom-bar__icon-wrap">
+        <svg class="mobile-bottom-bar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 9l2-5h14l2 5"></path>
+          <path d="M21 9v10a2 2 0 01-2 2H5a2 2 0 01-2-2V9"></path>
+          <path d="M9 21V12h6v9"></path>
+        </svg>
+      </div>
+      <span class="mobile-bottom-bar__label">View Store</span>
+    </a>
+  </div>
+
+  <!-- Regular User Bottom Bar: 2 actions (Rectangular Call, Rectangular View Store) -->
+  <div class="mobile-bottom-bar__user" id="mobileBottomBarUser" style="display: none;">
+    <a href="tel:9963657799" class="mobile-bottom-bar__user-btn mobile-bottom-bar__user-btn--call" id="mobileBottomUserCallBtn">
+      <svg class="mobile-bottom-bar__btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.61 21 3 13.39 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.45.57 3.57a1 1 0 01-.25 1.02l-2.2 2.2z"/>
+      </svg>
+      <span>Call</span>
+    </a>
+    <a href="/home" class="mobile-bottom-bar__user-btn mobile-bottom-bar__user-btn--store" id="mobileBottomUserStoreBtn">
+      <svg class="mobile-bottom-bar__btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 9l2-5h14l2 5"></path>
+        <path d="M21 9v10a2 2 0 01-2 2H5a2 2 0 01-2-2V9"></path>
+        <path d="M9 21V12h6v9"></path>
+      </svg>
+      <span>View Store</span>
+    </a>
+  </div>
+</nav>
+
 <script>
 (function() {
   function syncAuthUI() {
@@ -114,11 +175,26 @@
       if (raw) {
         var u = JSON.parse(raw);
         if (u && (u.id || u.email)) {
+          var isAdmin = (u.role === 'ADMIN' || u.role === 'admin');
+
+          if (document.body) {
+            document.body.classList.add('is-authenticated');
+            document.body.classList.add('has-mobile-bottom-bar');
+            if (isAdmin) {
+              document.body.classList.add('is-admin');
+              document.body.classList.remove('is-user');
+            } else {
+              document.body.classList.add('is-user');
+              document.body.classList.remove('is-admin');
+            }
+          }
+
           var loginBtn = document.getElementById('navbarLoginBtn');
           var profileBtn = document.getElementById('navProfileBtn');
           var logoutBtn = document.getElementById('navLogoutBtn');
           var mobileLogin = document.getElementById('navMobileLoginBtn');
           var mobileProfile = document.getElementById('navMobileProfileBtn');
+          var adminBtn = document.getElementById('navAdminBtn');
 
           if (loginBtn) loginBtn.style.display = 'none';
           if (profileBtn) profileBtn.style.display = 'inline-flex';
@@ -126,12 +202,43 @@
           if (mobileLogin) mobileLogin.style.display = 'none';
           if (mobileProfile) mobileProfile.style.display = 'block';
 
-          if (u.role === 'ADMIN' || u.role === 'admin') {
-            var adminBtn = document.getElementById('navAdminBtn');
-            if (adminBtn) adminBtn.style.display = 'inline-flex';
+          if (adminBtn) {
+            adminBtn.style.display = isAdmin ? 'inline-flex' : 'none';
           }
+
+          var bottomBar = document.getElementById('mobileBottomBar');
+          var adminBottom = document.getElementById('mobileBottomBarAdmin');
+          var userBottom = document.getElementById('mobileBottomBarUser');
+          if (bottomBar) bottomBar.style.display = '';
+          if (adminBottom) adminBottom.style.display = isAdmin ? '' : 'none';
+          if (userBottom) userBottom.style.display = isAdmin ? 'none' : '';
+          return;
         }
       }
+
+      // Unauthenticated state
+      if (document.body) {
+        document.body.classList.remove('is-authenticated', 'has-mobile-bottom-bar', 'is-admin', 'is-user');
+      }
+      var loginBtn = document.getElementById('navbarLoginBtn');
+      var profileBtn = document.getElementById('navProfileBtn');
+      var logoutBtn = document.getElementById('navLogoutBtn');
+      var mobileLogin = document.getElementById('navMobileLoginBtn');
+      var mobileProfile = document.getElementById('navMobileProfileBtn');
+      var adminBtn = document.getElementById('navAdminBtn');
+      var bottomBar = document.getElementById('mobileBottomBar');
+      var adminBottom = document.getElementById('mobileBottomBarAdmin');
+      var userBottom = document.getElementById('mobileBottomBarUser');
+
+      if (loginBtn) loginBtn.style.display = '';
+      if (profileBtn) profileBtn.style.display = 'none';
+      if (logoutBtn) logoutBtn.style.display = 'none';
+      if (mobileLogin) mobileLogin.style.display = '';
+      if (mobileProfile) mobileProfile.style.display = 'none';
+      if (adminBtn) adminBtn.style.display = 'none';
+      if (bottomBar) bottomBar.style.display = 'none';
+      if (adminBottom) adminBottom.style.display = 'none';
+      if (userBottom) userBottom.style.display = 'none';
     } catch (e) {}
   }
 
@@ -139,6 +246,7 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', syncAuthUI);
   }
+  window.addEventListener('storage', syncAuthUI);
 
   var logoutBtn = document.getElementById('navLogoutBtn');
   if (logoutBtn) {
