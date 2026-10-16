@@ -583,8 +583,300 @@
   border-color: var(--color-accent-500);
 }
 
-.hdr__action-btn--admin .hdr__action-label {
-  color: var(--color-accent-400);
-  font-weight: var(--font-bold);
+/* ─── Mobile-only header elements: hidden on desktop / tablet ─── */
+.hdr__mobile-logout {
+  display: none;
+}
+
+.hdr__mobile-call-btn {
+  display: none;
+}
+
+.hdr__row3 {
+  display: none;
+}
+
+/* ==========================================================================
+   AUTHENTICATED SHOPPING HOME PAGE — MOBILE HEADER REDESIGN
+   Scoped exclusively to .home-page at max-width: 768px.
+   Row 1: Brand (left) + Logout (right)
+   Row 2: Search input + Call button (Sticky at top: 0 with solid white background)
+   Row 3: Delivery Location selector
+   ========================================================================== */
+
+html:has(body.home-page),
+body.home-page {
+  overflow-x: clip !important;
+}
+
+@media (max-width: 768px) {
+  /* Mobile sticky header: top sticks at -44px so Row 1 (44px) scrolls away, while Row 2 sticks at 0 */
+  .home-page .hdr {
+    position: sticky !important;
+    top: -44px !important;
+    z-index: var(--z-sticky) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .home-page .hdr__wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* ── ROW 1: Brand & Logout ── */
+  .home-page .hdr__row1 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline: var(--container-padding-mobile);
+    padding-block: 0 !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    background: linear-gradient(160deg, var(--color-primary-800) 0%, var(--color-primary-700) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-sizing: border-box;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+  }
+
+  .home-page .hdr__row1 .hdr__location {
+    display: none !important;
+  }
+
+  .home-page .hdr__logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+
+  .home-page .hdr__logo svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .home-page .hdr__logo-name {
+    font-size: 15px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .home-page .hdr__logo-sub {
+    display: block !important;
+    font-size: 9.5px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .home-page .hdr__mobile-logout {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 5px;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #fca5a5;
+    padding: 5px 12px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    line-height: 1;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .home-page .hdr__mobile-logout:hover,
+  .home-page .hdr__mobile-logout:active {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: #f87171;
+    color: #ffffff;
+  }
+
+  .home-page .hdr__mobile-logout svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+
+  /* ── ROW 2: Product Search & Call (Sticky on scroll) ── */
+  .home-page .hdr__row2 {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    padding-inline: var(--container-padding-mobile);
+    padding-block: 8px;
+    background: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1000 !important;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .home-page .hdr__actions {
+    display: none !important;
+  }
+
+  .home-page .hdr__search-wrap {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .home-page .hdr__search-form {
+    width: 100%;
+    margin: 0;
+  }
+
+  .home-page .hdr__search-box {
+    background: #f8fafc !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: var(--radius-lg) !important;
+    height: 38px !important;
+    display: flex;
+    align-items: center;
+    box-shadow: none !important;
+    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .home-page .hdr__search-box:focus-within {
+    background: #ffffff !important;
+    border-color: var(--color-primary-600) !important;
+    box-shadow: 0 0 0 3px rgba(30, 61, 143, 0.12) !important;
+  }
+
+  .home-page .hdr__search-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 38px;
+    flex-shrink: 0;
+    color: #64748b;
+  }
+
+  .home-page .hdr__search-icon svg {
+    width: 16px;
+    height: 16px;
+    stroke: #64748b;
+  }
+
+  .home-page .hdr__search-input {
+    color: var(--color-text-primary) !important;
+    font-size: 13.5px !important;
+    font-weight: 400 !important;
+    background: transparent !important;
+    padding-left: 0 !important;
+    height: 100% !important;
+  }
+
+  .home-page .hdr__search-input::placeholder {
+    color: #64748b !important;
+    font-size: 12.5px !important;
+  }
+
+  .home-page .hdr__search-submit {
+    display: none !important;
+  }
+
+  /* Compact Call button beside search */
+  .home-page .hdr__mobile-call-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-lg);
+    background: var(--color-primary-700);
+    color: #ffffff;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+    box-shadow: 0 2px 5px rgba(30, 61, 143, 0.2);
+  }
+
+  .home-page .hdr__mobile-call-btn:hover,
+  .home-page .hdr__mobile-call-btn:active {
+    background: var(--color-primary-800);
+    transform: scale(0.96);
+  }
+
+  .home-page .hdr__mobile-call-btn svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  /* ── ROW 3: Delivery Location ── */
+  .home-page .hdr__row3 {
+    display: flex !important;
+    align-items: center;
+    padding-inline: var(--container-padding-mobile);
+    padding-block: 7px;
+    background: #ebf3fc;
+    border-bottom: 1px solid #d4e4f7;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 2;
+  }
+
+  .home-page .hdr__mobile-location {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--color-primary-950);
+    font-size: 12px;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+  }
+
+  .home-page .hdr__mobile-location-icon {
+    width: 15px;
+    height: 15px;
+    color: var(--color-accent-500);
+    flex-shrink: 0;
+  }
+
+  .home-page .hdr__mobile-location-text {
+    flex: 1 1 auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--color-text-secondary);
+    font-size: 12px;
+  }
+
+  .home-page .hdr__mobile-location-city {
+    color: var(--color-text-primary);
+    font-weight: 700;
+  }
+
+  .home-page .hdr__mobile-location-chevron {
+    width: 12px;
+    height: 12px;
+    color: var(--color-text-tertiary);
+    flex-shrink: 0;
+  }
 }
 

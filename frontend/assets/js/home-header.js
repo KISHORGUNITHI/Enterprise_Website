@@ -6,6 +6,10 @@
 (function () {
   'use strict';
 
+  if (document.body && document.body.classList.contains('home-page')) {
+    document.documentElement.style.overflowX = 'clip';
+  }
+
   const hdr      = document.getElementById('homeHeader');
   const catStrip = document.getElementById('catStrip');
   const input    = document.getElementById('hdrSearchInput');
@@ -19,9 +23,13 @@
     hdr.classList.toggle('scrolled', window.scrollY > 4);
   }
 
-  // ─── Cat-strip top = actual header rendered height ───────────────────────
+  // ─── Cat-strip top = actual header rendered height (desktop only) ─────────
   function syncStripTop() {
     if (!hdr || !catStrip) return;
+    if (window.innerWidth <= 768) {
+      catStrip.style.top = '';
+      return;
+    }
     // Use getBoundingClientRect so it works regardless of row count
     catStrip.style.top = Math.round(hdr.getBoundingClientRect().height) + 'px';
   }
@@ -116,31 +124,33 @@
     form && form.addEventListener('submit', hideSuggestions);
   }
 
-  // ─── Location button ─────────────────────────────────────────────────────
-  if (locBtn) {
-    locBtn.addEventListener('click', () => {
-      window.location.href = '/profile#addresses';
-    });
+  // ─── Location button (desktop & mobile) ─────────────────────────────────
+  const mobileLocBtn = document.getElementById('hdrMobileLocation');
+  const goToAddresses = () => { window.location.href = '/profile#addresses'; };
 
-    // Fetch user's address to display
-    fetch('/api/profile/addresses')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success && data.data && data.data.length > 0) {
-          const address = data.data.find(a => a.is_default) || data.data[0];
-          
-          // Format as City, Postal Code or Address Line 1
-          const displayText = address.city ? `${address.city}, ${address.postal_code || ''}`.replace(/,\s*$/, '') : address.address_line_1;
-          
-          const locFull = document.querySelector('.hdr__loc-full');
-          const locShort = document.querySelector('.hdr__loc-short');
-          
-          if (locFull && displayText) locFull.textContent = displayText;
-          if (locShort && address.city) locShort.textContent = `📍 ${address.city}`;
-        }
-      })
-      .catch(err => console.error("Error fetching location:", err));
-  }
+  if (locBtn) locBtn.addEventListener('click', goToAddresses);
+  if (mobileLocBtn) mobileLocBtn.addEventListener('click', goToAddresses);
+
+  // Fetch user's address to display
+  fetch('/api/profile/addresses')
+    .then(res => res.json())
+    .then(data => {
+      if (data.success && data.data && data.data.length > 0) {
+        const address = data.data.find(a => a.is_default) || data.data[0];
+        
+        // Format as City, Postal Code or Address Line 1
+        const displayText = address.city ? `${address.city}, ${address.postal_code || ''}`.replace(/,\s*$/, '') : address.address_line_1;
+        
+        const locFull = document.querySelector('.hdr__loc-full');
+        const locShort = document.querySelector('.hdr__loc-short');
+        const locMobileCity = document.getElementById('hdrMobileLocCity');
+        
+        if (locFull && displayText) locFull.textContent = displayText;
+        if (locShort && address.city) locShort.textContent = `📍 ${address.city}`;
+        if (locMobileCity && address.city) locMobileCity.textContent = address.city;
+      }
+    })
+    .catch(err => console.error("Error fetching location:", err));
 
   // ─── Bind scroll / resize ─────────────────────────────────────────────────
   window.addEventListener('scroll', () => {

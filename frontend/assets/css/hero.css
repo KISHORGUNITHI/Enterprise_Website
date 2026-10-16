@@ -423,13 +423,27 @@
 
 @media (max-width: 768px) {
   .hero {
+    background-color: var(--color-bg-secondary);
+    padding-inline: var(--container-padding-mobile);
+    padding-block: var(--space-4);
+    max-width: var(--container-max-width);
+    margin-inline: auto;
+    box-sizing: border-box;
     width: 100%;
-    max-width: 100%;
-    aspect-ratio: 638 / 480;
     height: auto;
     min-height: unset;
     max-height: unset;
+    overflow: visible;
+  }
+
+  .hero__slider {
+    position: relative;
+    width: 100%;
+    height: 310px;
+    border-radius: var(--radius-xl);
     overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    background-color: var(--color-bg-dark);
   }
 
   /* Rich product photography filling the standardized Vivo V80 reference frame */
@@ -491,10 +505,15 @@
     background: transparent !important;
   }
 
+  .hero__slide--image-only .hero__slide-bg::after {
+    display: none !important;
+  }
+
   .hero__slide--image-only .hero__slide-bg-img {
     opacity: 1 !important;
     object-fit: cover !important;
     object-position: center center !important;
+    filter: none !important;
   }
 
   /* Safe container width with gutters to prevent arrow overlap */
@@ -659,6 +678,15 @@
 }
 
 @media (max-width: 480px) {
+  .hero {
+    padding-inline: var(--container-padding-mobile);
+    padding-block: var(--space-4);
+  }
+
+  .hero__slider {
+    height: 250px;
+  }
+
   .hero__subtitle {
     max-width: 260px;
   }
@@ -669,6 +697,14 @@
 }
 
 @media (max-width: 360px) {
+  .hero {
+    padding-inline: var(--space-2);
+  }
+
+  .hero__slider {
+    height: 245px;
+  }
+
   .hero__content {
     padding-inline: 28px;
     padding-top: var(--space-1);

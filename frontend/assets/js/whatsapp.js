@@ -9,7 +9,7 @@
   // ─── Page load reveal — always runs, regardless of which page this is on ──
   document.body.classList.add('page-loaded');
 
-  const joinBtn    = document.getElementById('joinWhatsAppBtn');
+  const joinBtn = document.getElementById('joinWhatsAppBtn');
   const phoneInput = document.querySelector('.whatsapp-section__input');
 
   if (!joinBtn || !phoneInput) return;
@@ -37,7 +37,7 @@
     }
   }
 
-  phoneInput.addEventListener('input',  updateJoinLink);
+  phoneInput.addEventListener('input', updateJoinLink);
   phoneInput.addEventListener('change', updateJoinLink);
 
   // ─── Store status badge ───────────────────────────────────────────────────
@@ -48,17 +48,17 @@
   }
 
   function setStoreStatus(el) {
-    const now  = new Date();
-    const day  = now.getDay();   // 0=Sun, 1=Mon, ... 6=Sat
+    const now = new Date();
+    const day = now.getDay();   // 0=Sun, 1=Mon, ... 6=Sat
     const hour = now.getHours();
 
     let isOpen = false;
     if (day >= 1 && day <= 6) {
-      // Mon–Sat: 10am–9pm
-      isOpen = hour >= 10 && hour < 21;
+      // Mon–Sat: 9am–9pm
+      isOpen = hour >= 9 && hour < 21;
     } else if (day === 0) {
-      // Sunday: 11am–7pm
-      isOpen = hour >= 11 && hour < 19;
+      // Sunday: 9am–7pm
+      isOpen = hour >= 9 && hour < 19;
     }
 
     el.innerHTML = `
@@ -104,13 +104,13 @@
 
   // ─── Animated counters (Achievements section) ────────────────────────────
   function animateCounter(el) {
-    const target   = parseInt(el.dataset.target, 10);
-    const suffix   = el.dataset.suffix || '';
-    const format   = el.dataset.format;
+    const target = parseInt(el.dataset.target, 10);
+    const suffix = el.dataset.suffix || '';
+    const format = el.dataset.format;
     const duration = 2000;
-    const steps    = 60;
+    const steps = 60;
     const stepTime = duration / steps;
-    let current    = 0;
+    let current = 0;
 
     const timer = setInterval(() => {
       current += target / steps;

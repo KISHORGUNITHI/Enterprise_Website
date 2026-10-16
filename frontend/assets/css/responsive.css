@@ -66,32 +66,9 @@
 }
 
 /* =============================================
-   LANDING — HERO (compact promotional mobile hero)
+   LANDING — HERO
+   Mobile hero sizing and card frame are handled in hero.css
 ============================================= */
-
-@media (max-width: 768px) {
-  .hero {
-    height: clamp(395px, 54vh, 455px);
-    min-height: 395px;
-    max-height: 465px;
-  }
-}
-
-@media (max-width: 480px) {
-  .hero {
-    height: clamp(380px, 53vh, 435px);
-    min-height: 380px;
-    max-height: 445px;
-  }
-}
-
-@media (max-width: 360px) {
-  .hero {
-    height: clamp(365px, 52vh, 410px);
-    min-height: 365px;
-    max-height: 420px;
-  }
-}
 
 /* =============================================
    LANDING — CATEGORIES (grid padding fix)
