@@ -127,10 +127,11 @@
         <div class="pdp-description reveal" style="margin-top:var(--space-6);">
           <p class="pdp-section__title">Description</p>
           <div class="pdp-description__body pdp-description__body--collapsed" id="pdpDescBody"></div>
-          <button class="pdp-description__toggle" id="pdpDescToggle">
+          <button class="pdp-description__toggle" id="pdpDescToggle" type="button" aria-expanded="false" style="display:none;">
             Read More
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <polyline points="4 6 8 10 12 6"/>
+            <svg class="pdp-desc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <polyline points="19 12 12 19 5 12"></polyline>
             </svg>
           </button>
         </div>

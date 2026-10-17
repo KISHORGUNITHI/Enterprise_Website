@@ -95,6 +95,27 @@
     toast.hideTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
   }
 
+  function escapeHtml(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[&<>"']/g, m => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[m]);
+  }
+
+  function formatDescriptionToBullets(desc) {
+    if (!desc || typeof desc !== 'string') return [];
+    // Break content right after comma (,) or period (.), preserving decimals (1.5), thousands (50,000), and common abbreviations (sq.ft, etc.)
+    const re = /(?<=(?:\D,|[0-9],(?!\d)|(?<!\b(?:sq|approx|etc|eg|ie))\.(?!\d)))\s*(?![.,])|\n+/i;
+    return desc
+      .split(re)
+      .map(s => s.replace(/^[-•*]\s*/, '').trim())
+      .filter(s => /[a-zA-Z0-9]/.test(s));
+  }
+
   // ─── DOM refs ─────────────────────────────────────────────────────────────
   const mainImg     = document.getElementById('pdpMainImg');
   const pdpBadge    = document.getElementById('pdpBadge');
@@ -789,35 +810,66 @@
       ).join('');
     }
 
+    // ─── Description ────────────────────────────────────────────────────────
+    function updateDescToggleUI(expanded) {
+      if (!descToggle) return;
+      descToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      descToggle.innerHTML = expanded
+        ? `Read Less <svg class="pdp-desc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>`
+        : `Read More <svg class="pdp-desc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>`;
+    }
+
     if (descBody && product.description) {
-      descBody.textContent = product.description;
-      
+      const bullets = formatDescriptionToBullets(product.description);
+      if (bullets.length > 0) {
+        descBody.innerHTML = `
+          <ul class="pdp-description__list">
+            ${bullets.map(b => `
+              <li class="pdp-description__item">
+                <span class="pdp-description__dot" aria-hidden="true"></span>
+                <span class="pdp-description__text">${escapeHtml(b)}</span>
+              </li>`).join('')}
+          </ul>`;
+      } else {
+        descBody.textContent = product.description;
+      }
+
       // Temporarily expand to measure total height
       descBody.classList.remove('pdp-description__body--collapsed');
+      descBody.classList.remove('pdp-description__body--expanded');
       descBody.style.maxHeight = 'none';
-      
+
       const scrollHeight = descBody.scrollHeight;
-      
-      // 1 line is ~23px (14px * 1.625). 2 lines is ~46px.
-      // Safe threshold to distinguish 1 line from 2+ lines is 34px.
-      if (scrollHeight <= 34) {
+      descBody.style.maxHeight = '';
+
+      // If description fits comfortably in 2 bullet items (approx <= 88px) or has <= 2 bullets, hide toggle
+      if (bullets.length <= 2 && scrollHeight <= 88) {
+        descBody.classList.remove('pdp-description__body--collapsed');
+        descBody.classList.remove('pdp-description__body--expanded');
         if (descToggle) descToggle.style.display = 'none';
       } else {
         descBody.classList.add('pdp-description__body--collapsed');
-        if (descToggle) descToggle.style.display = 'inline-flex';
+        descBody.classList.remove('pdp-description__body--expanded');
+        if (descToggle) {
+          descToggle.classList.remove('expanded');
+          descToggle.style.display = 'inline-flex';
+          updateDescToggleUI(false);
+        }
       }
-      descBody.style.maxHeight = '';
+    } else {
+      if (descBody) descBody.innerHTML = '';
+      if (descToggle) descToggle.style.display = 'none';
     }
 
     if (descToggle) {
-      descToggle.addEventListener('click', () => {
-        const expanded = descToggle.classList.toggle('expanded');
-        descBody.classList.toggle('pdp-description__body--collapsed', !expanded);
-        descBody.classList.toggle('pdp-description__body--expanded',   expanded);
-        descToggle.innerHTML = expanded
-          ? `Read Less <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="4 10 8 6 12 10"/></svg>`
-          : `Read More <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="4 6 8 10 12 6"/></svg>`;
-      });
+      descToggle.onclick = () => {
+        const isCurrentlyExpanded = descBody.classList.contains('pdp-description__body--expanded');
+        const willExpand = !isCurrentlyExpanded;
+        descToggle.classList.toggle('expanded', willExpand);
+        descBody.classList.toggle('pdp-description__body--collapsed', !willExpand);
+        descBody.classList.toggle('pdp-description__body--expanded', willExpand);
+        updateDescToggleUI(willExpand);
+      };
     }
 
     // ─── Specifications ─────────────────────────────────────────────────────
