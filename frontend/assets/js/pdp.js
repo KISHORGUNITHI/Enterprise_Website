@@ -941,27 +941,61 @@
   async function loadRelatedProducts(currentProduct) {
     if (!relTrack) return;
 
-    const cat = currentProduct.relatedCategory || currentProduct.category;
+    let cat = currentProduct.relatedCategory || currentProduct.category;
+    if (typeof cat === 'object' && cat !== null) {
+      cat = cat.slug || cat.name || cat.id || '';
+    }
     if (!cat) return;
 
+    const SLUG_ALIASES = { mobile: 'mobiles', tv: 'tvs', ac: 'acs' };
+    const normalizedCat = SLUG_ALIASES[cat.toLowerCase()] || cat;
+
     try {
-      const res = await fetch(`/api/products/category/${encodeURIComponent(cat)}`);
+      const res = await fetch(`/api/products/category/${encodeURIComponent(normalizedCat)}`);
       const json = await res.json();
       
       if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-        const others = json.data.filter(p => p.slug !== currentProduct.slug && p.id !== currentProduct.dbId);
+        const others = json.data.filter(p => p.slug !== currentProduct.slug && p.id !== currentProduct.dbId && p.id !== currentProduct.id);
         
         if (others.length > 0) {
-          renderRelatedTrack(others.map(p => ({
-            id: p.slug || p.id,
-            brand: p.brand,
-            name: p.name,
-            salePrice: parseFloat(p.price) || 0,
-            discount: 0,
-            imageUrl: p.productImages?.[0]?.imageUrl || '',
-            badge: p.availability === 'AVAILABLE' ? 'In Stock' : 'Out of Stock',
-            badgeType: p.availability === 'AVAILABLE' ? 'success' : 'primary',
-          })));
+          renderRelatedTrack(others.map(p => {
+            const rawPrice = parseFloat(p.price) || 0;
+            const offerVal = (p.offer !== undefined && p.offer !== null && !isNaN(parseFloat(p.offer))) ? parseFloat(p.offer) : 0;
+            const hasOffer = offerVal > 0;
+            const salePrice = hasOffer ? Math.round(rawPrice * (1 - offerVal / 100)) : rawPrice;
+            const originalPrice = hasOffer ? rawPrice : ((p.originalPrice && p.originalPrice > rawPrice) ? p.originalPrice : rawPrice);
+            const discount = hasOffer ? offerVal : (p.discount || 0);
+
+            const primaryImg = p.productImages?.find(img => img.isPrimary)?.imageUrl
+              || p.productImages?.[0]?.imageUrl
+              || p.imageUrl
+              || '';
+
+            const isAvailable = p.availability === 'AVAILABLE';
+            const badgeText = isAvailable
+              ? (hasOffer ? `${offerVal}% OFF` : 'In Stock')
+              : 'Out of Stock';
+            const badgeType = isAvailable
+              ? (hasOffer ? 'accent' : 'success')
+              : 'primary';
+
+            return {
+              id: p.slug || p.id,
+              brand: p.brand,
+              name: p.name,
+              originalPrice,
+              salePrice,
+              discount,
+              imageUrl: primaryImg,
+              badge: badgeText,
+              badgeType,
+              gifts: (p.giftsGiven || []).map(g => ({
+                id: g.giftProduct?.id,
+                name: g.giftProduct?.name,
+                brand: g.giftProduct?.brand
+              }))
+            };
+          }));
           return;
         }
       }
@@ -979,13 +1013,17 @@
 
   function renderRelatedTrack(products) {
     if (!relTrack) return;
-    relTrack.innerHTML = products.map(p => `
+    relTrack.innerHTML = products.map(p => {
+      const hasOffer = (p.discount && p.discount > 0) || (p.originalPrice && p.originalPrice > p.salePrice);
+      const origPrice = p.originalPrice || (hasOffer ? Math.round(p.salePrice / (1 - p.discount / 100)) : null);
+
+      return `
       <article class="plp-card" role="listitem" style="width:200px; flex-shrink:0;">
         <div class="plp-card__image-wrap">
-          ${p.badge ? `<span class="plp-card__badge plp-card__badge--${p.badgeType || 'primary'}">${p.badge}</span>` : ''}
+          ${p.badge ? `<span class="plp-card__badge plp-card__badge--${p.badgeType || 'primary'}">${escapeHtml(p.badge)}</span>` : ''}
           <div class="plp-card__image-placeholder" aria-hidden="true">
             ${p.imageUrl
-              ? `<img src="${p.imageUrl}" alt="${p.brand} ${p.name}" class="plp-card__img" loading="lazy" />`
+              ? `<img src="${p.imageUrl}" alt="${escapeHtml(p.brand || '')} ${escapeHtml(p.name || '')}" class="plp-card__img" loading="lazy" />`
               : `<svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect width="200" height="200" fill="var(--color-bg-tertiary)"/>
                   <rect x="50" y="38" width="100" height="124" rx="9" fill="#1e3d8f14" stroke="#1e3d8f35" stroke-width="1.5"/>
@@ -997,20 +1035,32 @@
           </div>
         </div>
         <div class="plp-card__body">
-          <p class="plp-card__brand">${p.brand}</p>
-          <h3 class="plp-card__name">${p.name}</h3>
+          <p class="plp-card__brand">${escapeHtml(p.brand || '')}</p>
+          <h3 class="plp-card__name">${escapeHtml(p.name || '')}</h3>
           <div class="plp-card__price">
-            <span class="plp-card__price-sale">₹${p.salePrice.toLocaleString('en-IN')}</span>
-            ${p.discount ? `<span class="plp-card__price-discount">${p.discount}% off</span>` : ''}
+            <span class="plp-card__price-sale">₹${Number(p.salePrice).toLocaleString('en-IN')}</span>
+            ${(origPrice && origPrice > p.salePrice)
+              ? `<span class="plp-card__price-original">₹${Number(origPrice).toLocaleString('en-IN')}</span>`
+              : ''}
+            ${(p.discount && p.discount > 0)
+              ? `<span class="plp-card__price-discount">${p.discount}% off</span>`
+              : ''}
           </div>
+          ${(p.gifts && p.gifts.length > 0) ? `
+            <div style="margin-top: 6px;">
+              <span style="display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:600; color:#9d174d; background:#fdf2f8; border:1px solid #fbcfe8; border-radius:4px; padding:2px 6px;">
+                🎁 Free Gift${p.gifts.length > 1 ? ` (${p.gifts.length})` : ''}
+              </span>
+            </div>
+          ` : ''}
         </div>
         <div class="plp-card__footer">
           <a href="/product/${p.id}" class="btn btn--primary plp-card__cta">
             View Details
           </a>
         </div>
-      </article>`
-    ).join('');
+      </article>`;
+    }).join('');
 
     // Scroll controls
     const SCROLL = 220;
