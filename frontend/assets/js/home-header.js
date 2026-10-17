@@ -147,7 +147,18 @@
         
         if (locFull && displayText) locFull.textContent = displayText;
         if (locShort && address.city) locShort.textContent = `📍 ${address.city}`;
-        if (locMobileCity && address.city) locMobileCity.textContent = address.city;
+
+        if (locMobileCity) {
+          const placeName = address.city || address.address_line_1 || '';
+          const pincode = address.postal_code || address.pincode || '';
+          if (placeName && pincode) {
+            locMobileCity.textContent = `${placeName} (${pincode})`;
+          } else if (placeName) {
+            locMobileCity.textContent = placeName;
+          } else if (pincode) {
+            locMobileCity.textContent = pincode;
+          }
+        }
       }
     })
     .catch(err => console.error("Error fetching location:", err));

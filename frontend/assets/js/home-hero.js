@@ -7,7 +7,7 @@
 (async function () {
   'use strict';
 
-  const INTERVAL = 4500;
+  const INTERVAL = 5000;
 
   const track    = document.getElementById('homeHeroTrack');
   const dotsWrap = document.getElementById('homeHeroDots');
@@ -169,24 +169,39 @@
 
         ${hasAnyText ? `
         <div class="home-hero__content">
-          ${badge ? `<div class="home-hero__badge">${badge}</div>` : ''}
-          ${eyebrow ? `<p class="home-hero__eyebrow">${eyebrow}</p>` : ''}
-          ${title ? `<h2 class="home-hero__title">${title}</h2>` : ''}
-          ${subtitle ? `<p class="home-hero__subtitle">${subtitle}</p>` : ''}
-          ${hasCtas ? `
-          <div class="home-hero__ctas">
-            ${hasCta ? `
-            <a href="${b.cta.href}" class="btn btn--accent btn--lg" data-banner-cta="${b.id || ''}">
-              ${b.cta.label}
-              <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+          <div class="home-hero__text">
+            ${badge ? `
+            <div class="home-hero__badge">
+              <svg class="home-hero__badge-icon" viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M8 0l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11l-5.2 3.3 1.8-5.5L0 5.5h6.2z"/>
               </svg>
-            </a>` : ''}
-            ${hasCtaAlt ? `
-            <a href="${b.ctaAlt.href}" class="btn btn--outline-inverse">
-              ${b.ctaAlt.label}
-            </a>` : ''}
-          </div>` : ''}
+              ${badge}
+            </div>` : ''}
+
+            ${eyebrow ? `
+            <p class="home-hero__eyebrow">
+              <span class="home-hero__eyebrow-dot"></span>
+              ${eyebrow}
+            </p>` : ''}
+
+            ${title ? `<h2 class="home-hero__title">${title}</h2>` : ''}
+            ${subtitle ? `<p class="home-hero__subtitle">${subtitle}</p>` : ''}
+
+            ${hasCtas ? `
+            <div class="home-hero__ctas">
+              ${hasCta ? `
+              <a href="${b.cta.href}" class="btn btn--accent btn--lg" data-banner-cta="${b.id || ''}">
+                ${b.cta.label}
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+              </a>` : ''}
+              ${hasCtaAlt ? `
+              <a href="${b.ctaAlt.href}" class="btn btn--outline-inverse">
+                ${b.ctaAlt.label}
+              </a>` : ''}
+            </div>` : ''}
+          </div>
         </div>` : ''}
 
         <div class="home-hero__illustration" aria-hidden="true">
@@ -310,6 +325,12 @@
         resetTimer();
       }
     }, { passive: true });
+
+    // Keyboard navigation
+    sliderEl.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft') { stepPrev(); resetTimer(); }
+      if (e.key === 'ArrowRight') { stepNext(); resetTimer(); }
+    });
   }
 
   // ─── Auto-play ─────────────────────────────────────────────────────────────

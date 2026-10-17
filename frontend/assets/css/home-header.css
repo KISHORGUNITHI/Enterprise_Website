@@ -630,7 +630,7 @@ body.home-page {
     width: 100% !important;
   }
 
-  /* ── ROW 1: Brand & Logout ── */
+  /* ── ROW 1: Brand & Logout (Matches Kishor Enterprises Landing Page Branding) ── */
   .home-page .hdr__row1 {
     display: flex;
     align-items: center;
@@ -640,8 +640,8 @@ body.home-page {
     height: 44px !important;
     min-height: 44px !important;
     max-height: 44px !important;
-    background: linear-gradient(160deg, var(--color-primary-800) 0%, var(--color-primary-700) 100%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: #ffffff !important;
+    border-bottom: 1px solid var(--color-border-light, #e2e8f0);
     box-sizing: border-box;
     width: 100%;
     position: relative;
@@ -662,12 +662,26 @@ body.home-page {
   .home-page .hdr__logo svg {
     width: 26px;
     height: 26px;
+    flex-shrink: 0;
+  }
+
+  /* Match public landing page logo SVG: enterprise-blue box, white paths, orange dot */
+  .home-page .hdr__logo svg rect {
+    fill: var(--color-primary-700) !important;
+  }
+
+  .home-page .hdr__logo svg path {
+    stroke: #ffffff !important;
+  }
+
+  .home-page .hdr__logo svg circle {
+    fill: var(--color-accent-500) !important;
   }
 
   .home-page .hdr__logo-name {
     font-size: 15px;
     font-weight: 800;
-    color: #ffffff;
+    color: var(--color-primary-700) !important;
     line-height: 1.15;
     letter-spacing: -0.01em;
   }
@@ -675,58 +689,71 @@ body.home-page {
   .home-page .hdr__logo-sub {
     display: block !important;
     font-size: 9.5px;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.7);
+    font-weight: 700;
+    color: var(--color-accent-500) !important;
     line-height: 1;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
   }
 
   .home-page .hdr__mobile-logout {
     display: inline-flex !important;
     align-items: center;
-    gap: 5px;
-    background: rgba(239, 68, 68, 0.12);
-    border: 1px solid rgba(239, 68, 68, 0.35);
-    color: #fca5a5;
-    padding: 5px 12px;
+    justify-content: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 13px !important;
+    font-size: 12px !important;
+    font-weight: var(--font-semibold, 600);
+    color: var(--color-error-600, #dc2626) !important;
+    background-color: rgba(239, 68, 68, 0.08) !important;
+    border: 1px solid rgba(239, 68, 68, 0.25) !important;
     border-radius: var(--radius-full);
-    font-size: 12px;
-    font-weight: var(--font-semibold);
     cursor: pointer;
     line-height: 1;
-    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: var(--transition-fast, 0.15s ease);
   }
 
   .home-page .hdr__mobile-logout:hover,
   .home-page .hdr__mobile-logout:active {
-    background: rgba(239, 68, 68, 0.25);
-    border-color: #f87171;
-    color: #ffffff;
+    background-color: rgba(239, 68, 68, 0.16) !important;
+    border-color: rgba(239, 68, 68, 0.45) !important;
+    color: var(--color-error-600, #dc2626) !important;
   }
 
   .home-page .hdr__mobile-logout svg {
     width: 14px;
     height: 14px;
     stroke: currentColor;
-    stroke-width: 2;
+    stroke-width: 2.2;
+    flex-shrink: 0;
   }
 
-  /* ── ROW 2: Product Search & Call (Sticky on scroll) ── */
+  /* ── ROW 2: Product Search & Call (Sticky with Frosted Glass Effect) ── */
   .home-page .hdr__row2 {
     display: flex !important;
     align-items: center;
     gap: 8px;
     padding-inline: var(--container-padding-mobile);
     padding-block: 8px;
-    background: #ffffff !important;
-    border-bottom: 1px solid #e2e8f0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 1000 !important;
+    background: #ffffff; /* Solid fallback */
+    background: rgba(255, 255, 255, 0.88) !important;
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
     box-sizing: border-box;
     width: 100%;
+    position: relative !important;
+    z-index: 10 !important;
+  }
+
+  @supports not (backdrop-filter: blur(1px)) {
+    .home-page .hdr__row2 {
+      background: #ffffff !important;
+    }
   }
 
   .home-page .hdr__actions {
@@ -865,6 +892,7 @@ body.home-page {
     text-overflow: ellipsis;
     color: var(--color-text-secondary);
     font-size: 12px;
+    min-width: 0;
   }
 
   .home-page .hdr__mobile-location-city {

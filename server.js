@@ -156,13 +156,7 @@ app.get('/products/trending', (req, res) => {
 
 // Products — real category page (header + strip + content area)
 app.get('/products', (req, res) => {
-  res.render('pages/products/category', {
-    title: `All Products — ${site.name}`,
-    pageLabel: 'All Products',
-    activeCategory: 'all',
-    slug: 'all',
-    site,
-  });
+  res.redirect('/home');
 });
 
 const categoryRoutes = [
@@ -203,7 +197,7 @@ app.get('/product/:id', (req, res) => {
 // ─── Auth Guard for Customer Pages ──────────────────────────────────────────
 function requireAuthPage(req, res, next) {
   const header = req.headers.cookie || '';
-  const match  = header.split(';').map(c => c.trim()).find(c => c.startsWith('authToken='));
+  const match = header.split(';').map(c => c.trim()).find(c => c.startsWith('authToken='));
   let token = match ? decodeURIComponent(match.slice('authToken='.length)) : null;
   if (token && token.startsWith('"') && token.endsWith('"')) token = token.slice(1, -1);
 
@@ -212,7 +206,7 @@ function requireAuthPage(req, res, next) {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.user = decoded;
       return next();
-    } catch (_) {}
+    } catch (_) { }
   }
 
   return res.redirect(`/login?pendingRoute=${encodeURIComponent(req.originalUrl || req.path)}`);
