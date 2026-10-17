@@ -35,7 +35,16 @@
                 <p class="admin-page-header__subtitle">Manage mobile phones, consumer electronics, stock levels,
                   pricing, and catalog visibility.</p>
               </div>
-              <div class="admin-page-header__actions" style="display: flex; gap: var(--space-2);">
+              <div class="admin-page-header__actions" style="display: flex; gap: var(--space-2); flex-wrap: wrap;">
+                <button type="button" class="btn btn--outline btn--sm" id="pageHeaderCategoryOfferBtn"
+                  data-open-modal="categoryOfferModal" title="Apply or update discount across an entire category">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="5" x2="5" y2="19"></line>
+                    <circle cx="6.5" cy="6.5" r="2.5"></circle>
+                    <circle cx="17.5" cy="17.5" r="2.5"></circle>
+                  </svg>
+                  <span>Category Offer</span>
+                </button>
                 <button type="button" class="btn btn--outline btn--sm" id="pageHeaderNewAttrBtn"
                   data-open-modal="createAttributeModal">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -91,6 +100,38 @@
               </div>
             </div>
 
+            <!-- ── Active Offers & Free Gifts Showcase Card ── -->
+            <div class="admin-card" id="activeOffersGiftsCard" style="margin-bottom: var(--space-5); border-top: 3px solid #db2777;">
+              <div class="admin-card__header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-3); padding-bottom: var(--space-3); border-bottom: 1px solid var(--color-border-light);">
+                <div>
+                  <div style="display: flex; align-items: center; gap: var(--space-2);">
+                    <h2 class="admin-card__title" style="font-size: var(--text-base); display: flex; align-items: center; gap: 8px; margin: 0;">
+                      <span style="font-size: 18px;">🎁</span> Active Offers & Bundled Gifts
+                    </h2>
+                    <span id="activeOffersCountBadge" class="badge badge--success" style="font-size: 11px; font-weight: 700;">0 Active</span>
+                  </div>
+                  <p style="font-size: var(--text-xs); color: var(--color-text-muted); margin-top: 4px; margin-bottom: 0;">
+                    Products currently configured with discount offers or free store gifts. Admins can cancel offers or remove gifts anytime directly from here.
+                  </p>
+                </div>
+                <div style="display: flex; gap: var(--space-2);">
+                  <button type="button" class="btn btn--outline btn--xs" id="refreshActiveOffersBtn" title="Refresh active offers and gifts list">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="23 4 23 10 17 10"></polyline>
+                      <polyline points="1 20 1 14 7 14"></polyline>
+                      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                    </svg>
+                    <span>Refresh</span>
+                  </button>
+                </div>
+              </div>
+              <div class="admin-card__body" style="padding-top: var(--space-4);">
+                <div id="activeOffersListContainer">
+                  <!-- Populated dynamically by admin.js -->
+                </div>
+              </div>
+            </div>
+
             <!-- ── Products Table Card ── -->
             <div class="admin-card">
               <div class="admin-card__body">
@@ -101,6 +142,7 @@
                         <th>Product</th>
                         <th>Category</th>
                         <th>Price</th>
+                        <th>Offer</th>
                         <th>Stock Units</th>
                         <th>Stock Status</th>
                         <th>Visibility</th>

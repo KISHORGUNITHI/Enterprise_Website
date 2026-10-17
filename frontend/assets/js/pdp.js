@@ -313,7 +313,12 @@
         selectedVariants[g] = av.displayValue || av.value;
       });
       if (currentSelectedVariant.priceOverride) {
-        product.salePrice = parseFloat(currentSelectedVariant.priceOverride);
+        const rawOverride = parseFloat(currentSelectedVariant.priceOverride);
+        product.basePrice = rawOverride;
+        product.originalPrice = rawOverride;
+        product.salePrice = (product.discount && product.discount > 0)
+          ? Math.round(rawOverride * (1 - product.discount / 100))
+          : rawOverride;
       }
       product.availability = currentSelectedVariant.availability;
     }
@@ -369,6 +374,43 @@
       emiNote.innerHTML = product.emi
         ? `No cost EMI from <strong>${fmt(product.emi.from)}/mo</strong> · ${product.emi.months} months`
         : '';
+    }
+
+    // Render Free Gifts Banner
+    const freeGiftsBanner = document.getElementById('pdpFreeGiftsBanner');
+    if (freeGiftsBanner) {
+      const gifts = product.gifts || [];
+      if (gifts.length > 0) {
+        freeGiftsBanner.style.display = 'block';
+        freeGiftsBanner.innerHTML = `
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 8px;">
+            <div style="display:flex; align-items:center; gap: 8px;">
+              <span style="font-size: 20px;">🎁</span>
+              <div>
+                <strong style="color: #831843; font-size: 14px;">Special Promotional Offer: Free Gift${gifts.length > 1 ? 's' : ''} Included!</strong>
+                <div style="font-size: 11.5px; color: #9d174d;">You will receive this store item 100% free with your purchase.</div>
+              </div>
+            </div>
+            <span class="badge badge--success" style="font-size: 11px; font-weight: 700; background: #059669; color: white;">FREE GIFT</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap: 8px; margin-top: 6px;">
+            ${gifts.map(g => `
+              <div style="display:flex; align-items:center; justify-content:space-between; background: rgba(255,255,255,0.9); border-radius: 8px; padding: 8px 12px; border: 1px solid #fbcfe8;">
+                <div style="display:flex; align-items:center; gap: 10px;">
+                  ${g.imageUrl ? `<img src="${g.imageUrl}" style="width: 38px; height: 38px; object-fit: cover; border-radius: 6px; border: 1px solid #f472b6;" alt="${g.name}"/>` : `<span style="font-size: 20px;">🎁</span>`}
+                  <div>
+                    <strong style="color: #1e293b; font-size: 13px;">${g.name}</strong>
+                    <div style="font-size: 11px; color: #64748b;">${g.brand ? `${g.brand} &bull; ` : ''}Store Value: <span style="text-decoration: line-through;">${fmt(g.price)}</span> <strong style="color: #059669; margin-left: 4px;">₹0 Free</strong></div>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        freeGiftsBanner.style.display = 'none';
+        freeGiftsBanner.innerHTML = '';
+      }
     }
 
     // Sticky bar price
@@ -656,16 +698,19 @@
         }
 
         // Update displayed prices
-        const origPrice = product.originalPrice || activePrice;
-        const save = origPrice - activePrice;
+        const offer = (currentProductData && currentProductData.discount) || 0;
+        const origPrice = activePrice;
+        const finalSalePrice = offer > 0 ? Math.round(activePrice * (1 - offer / 100)) : activePrice;
+        const save = origPrice - finalSalePrice;
 
-        if (priceSale) priceSale.textContent = fmt(activePrice);
-        if (barPrice) barPrice.textContent = fmt(activePrice);
+        if (priceSale) priceSale.textContent = fmt(finalSalePrice);
+        if (barPrice) barPrice.textContent = fmt(finalSalePrice);
         if (priceOrig) priceOrig.textContent = save > 0 ? fmt(origPrice) : '';
+        if (priceDis) priceDis.textContent = offer > 0 ? `${offer}% off` : '';
         if (priceSave) priceSave.textContent = save > 0 ? `Save ${fmt(save)}` : '';
 
         // Recalculate EMI
-        const emiMonthly = Math.ceil(activePrice / 12);
+        const emiMonthly = Math.ceil(finalSalePrice / 12);
         if (emiNote) {
           emiNote.innerHTML = `No cost EMI from <strong>${fmt(emiMonthly)}/mo</strong> · 12 months`;
         }
@@ -1044,6 +1089,19 @@
             });
           }
 
+          const offer = (p.offer && parseFloat(p.offer) > 0) ? parseFloat(p.offer) : 0;
+          const originalPrice = price;
+          const salePrice = offer > 0 ? Math.round(price * (1 - offer / 100)) : price;
+
+          const gifts = (p.giftsGiven || []).map(g => ({
+            id: g.giftProduct?.id,
+            name: g.giftProduct?.name,
+            brand: g.giftProduct?.brand,
+            price: parseFloat(g.giftProduct?.price) || 0,
+            slug: g.giftProduct?.slug,
+            imageUrl: g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || ''
+          }));
+
           const backendProduct = {
             id: p.slug || p.id,
             slug: p.slug,
@@ -1052,10 +1110,11 @@
             brand: p.brand,
             name: p.name,
             tagline: `${p.brand} Official Product · 100% Genuine`,
-            originalPrice: price,
-            salePrice: price,
+            originalPrice: originalPrice,
+            salePrice: salePrice,
             basePrice: price,
-            discount: 0,
+            discount: offer,
+            gifts: gifts,
             rating: parseFloat(p.rating) || 0,
             reviews: p.reviews || 0,
             productReviews: p.productReviews || [],

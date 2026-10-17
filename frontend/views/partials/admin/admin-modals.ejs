@@ -192,6 +192,12 @@
             <input type="number" id="productPrice" name="price" class="admin-input" placeholder="134999" required />
           </div>
           <div class="admin-form-group">
+            <label class="admin-label" for="productOffer">Offer (%) <span
+                style="font-weight: normal; font-size: 0.75rem; color: var(--admin-text-muted);">(Optional 0 - 99%)</span></label>
+            <input type="number" id="productOffer" name="offer" class="admin-input" placeholder="e.g. 15 (leave empty for none)"
+              min="0" max="99.99" step="0.1" />
+          </div>
+          <div class="admin-form-group">
             <label class="admin-label" for="productStock">Initial Stock Qty</label>
             <input type="number" id="productStock" name="stock" class="admin-input" placeholder="15" required />
           </div>
@@ -577,6 +583,248 @@
   </div>
 
   <!-- ════════════════════════════════════════
-     8. REUSABLE TOAST CONTAINER
+     9. PRODUCT OFFER MODAL (INDIVIDUAL)
+════════════════════════════════════════ -->
+  <!-- ════════════════════════════════════════
+     9. PRODUCT OFFER & GIFTS MODAL
+════════════════════════════════════════ -->
+  <div class="admin-modal-backdrop" id="productOfferModal" role="dialog" aria-modal="true"
+    aria-labelledby="productOfferModalTitle" aria-hidden="true">
+    <div class="admin-modal" style="max-width: 580px; width: 92%;">
+      <div class="admin-modal__header" style="background: linear-gradient(to right, #f8fafc, #fdf2f8); border-bottom: 1px solid var(--color-border-light);">
+        <div>
+          <h3 class="admin-modal__title" id="productOfferModalTitle" style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">🎁</span> Product Offer & Free Gifts
+          </h3>
+          <p style="font-size: 11.5px; color: var(--color-text-muted); margin: 2px 0 0 0;">
+            Configure discount percentage and bundle free store items with purchase.
+          </p>
+        </div>
+        <button class="admin-modal__close" data-close-modal="productOfferModal" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="admin-modal__body" style="padding: var(--space-5); max-height: 75vh; overflow-y: auto;">
+        <input type="hidden" id="productOfferTargetId" value="" />
+        
+        <!-- Target Product Summary Card -->
+        <div class="modal-product-summary-card">
+          <img id="productOfferTargetImg" src="" class="modal-product-summary-thumb" alt="Product" onerror="this.src='/assets/images/placeholder.png'"/>
+          <div class="modal-product-summary-info">
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <span id="productOfferTargetCategory" class="badge" style="font-size: 10px; font-weight: 700; background: #e0e7ff; color: #3730a3;">Category</span>
+              <span id="productOfferTargetBrand" style="font-size: 11px; color: var(--color-text-muted); font-weight: 600;">Brand</span>
+            </div>
+            <div id="productOfferTargetName" style="font-weight: 700; color: var(--color-text-primary); font-size: 13.5px; line-height: 1.3; margin: 2px 0;">Product Name</div>
+            <div style="font-size: 12px; color: var(--color-text-muted); display: flex; align-items: center; gap: 6px;">
+              <span>Store Price:</span>
+              <strong id="productOfferOrigPrice" style="color: var(--color-text-primary); font-size: 14px;">₹0</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1. Offer Percentage Section -->
+        <div class="admin-form-group" style="margin-top: var(--space-4);">
+          <label class="admin-label" for="productOfferInput" style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700;">Promotional Discount Percentage (%)</span>
+            <span style="font-size: 11px; color: var(--color-text-muted); font-weight: normal;">Optional · 0 to 99.99%</span>
+          </label>
+          <div style="position: relative;">
+            <input type="number" id="productOfferInput" class="admin-input" placeholder="e.g. 15 (leave blank or 0 for no discount)"
+              min="0" max="99.99" step="0.1" style="padding-right: 40px; font-weight: 600; font-size: 14px;" />
+            <span style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-weight: 700; color: var(--color-text-muted); font-size: 14px;">%</span>
+          </div>
+          <p class="admin-form-hint" style="margin-top: 4px;">Original price will appear slashed with discount badge on storefront.</p>
+        </div>
+
+        <!-- Dynamic Calculation Card -->
+        <div id="productOfferPreview" style="display: none; background: #ecfdf5; border: 1.5px solid #a7f3d0; padding: 12px 16px; border-radius: var(--radius-md); margin-bottom: var(--space-4);">
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #065f46;">
+            <span>Price after discount:</span>
+            <strong id="productOfferCalculatedPrice" style="font-size: 15px; color: #047857;">₹0</strong>
+          </div>
+          <div id="productOfferSavingsText" style="font-size: 11px; color: #059669; margin-top: 2px;">
+            Customer saves ₹0
+          </div>
+        </div>
+
+        <!-- 2. Free Gifts Section -->
+        <div class="admin-form-group" style="border-top: 1px dashed var(--color-border-light); padding-top: var(--space-4); margin-bottom: 0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label class="admin-label" style="margin-bottom: 0; display: flex; align-items: center; gap: 6px; font-weight: 700;">
+              <span>🎁 Free Gifts Included with Purchase</span>
+            </label>
+            <span class="badge" style="background: #fdf2f8; color: #9d174d; border: 1px solid #fbcfe8; font-size: 10px; font-weight: 700;">Admin's Choice (0 to Many)</span>
+          </div>
+          <p class="admin-form-hint" style="margin-top: 0; margin-bottom: var(--space-3);">
+            Select items from store inventory (Home Theatres, Buds, Soundbars, etc.). Selected items are automatically hidden from the dropdown to prevent duplicates.
+          </p>
+
+          <!-- Search filter for gifts -->
+          <div class="gift-search-wrap" style="margin-bottom: var(--space-2); position: relative;">
+            <div style="position: relative; display: flex; align-items: center;">
+              <span style="position: absolute; left: 10px; color: var(--color-text-muted); font-size: 13px; pointer-events: none;">🔍</span>
+              <input type="text" id="productOfferGiftSearch" class="admin-input gift-search-input"
+                placeholder="Search store inventory by name, brand, or category to gift..."
+                style="padding-left: 32px; padding-right: 28px; font-size: 12.5px; height: 36px;" autocomplete="off" />
+              <button type="button" id="productOfferGiftSearchClear" style="position: absolute; right: 8px; background: none; border: none; color: var(--color-text-muted); font-size: 16px; cursor: pointer; display: none; line-height: 1; padding: 2px;" title="Clear search">&times;</button>
+            </div>
+            <div id="productOfferGiftSearchCount" style="font-size: 11px; color: var(--color-text-muted); margin-top: 3px; display: none;"></div>
+          </div>
+
+          <!-- Gift Selector Row: full width select and clean button -->
+          <div class="gift-picker-row">
+            <select id="productOfferGiftSelect" class="admin-select gift-picker-select">
+              <option value="">-- Choose a store item as free gift (e.g. Home Theatre, Buds) --</option>
+            </select>
+            <button type="button" class="btn btn--primary btn--sm gift-picker-add-btn" id="productOfferAddGiftBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>Add Gift</span>
+            </button>
+          </div>
+
+          <!-- Selected Gifts List -->
+          <div id="productOfferSelectedGiftsList" class="selected-gifts-container">
+            <!-- Selected gifts rendered dynamically -->
+          </div>
+
+          <div id="noGiftsHint" class="gift-empty-state">
+            <div style="font-size: 18px; margin-bottom: 2px;">🎁</div>
+            <div style="font-weight: 600; color: var(--color-text-secondary); font-size: 12px;">No free gifts attached yet</div>
+            <div style="font-size: 11px; color: var(--color-text-muted);">Choose an item above and click "Add Gift" to bundle free products with this purchase.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="admin-modal__footer" style="display: flex; justify-content: space-between; align-items: center; background: var(--color-bg-secondary); border-top: 1px solid var(--color-border-light); padding: var(--space-4) var(--space-5);">
+        <button type="button" class="btn btn--outline btn--sm" id="productOfferRemoveBtn" style="color: #dc2626; border-color: #fca5a5;">
+          Clear Offer & Gifts
+        </button>
+        <div style="display: flex; gap: var(--space-2);">
+          <button type="button" class="btn btn--outline btn--sm" data-close-modal="productOfferModal">Cancel</button>
+          <button type="button" class="btn btn--primary btn--sm" id="saveProductOfferBtn">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+     10. CATEGORY OFFER & GIFTS MODAL (BATCH)
+════════════════════════════════════════ -->
+  <div class="admin-modal-backdrop" id="categoryOfferModal" role="dialog" aria-modal="true"
+    aria-labelledby="categoryOfferModalTitle" aria-hidden="true">
+    <div class="admin-modal" style="max-width: 580px; width: 92%;">
+      <div class="admin-modal__header" style="background: linear-gradient(to right, #f8fafc, #fdf2f8); border-bottom: 1px solid var(--color-border-light);">
+        <div>
+          <h3 class="admin-modal__title" id="categoryOfferModalTitle" style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">⚡</span> Category Offers & Bundled Gifts
+          </h3>
+          <p style="font-size: 11.5px; color: var(--color-text-muted); margin: 2px 0 0 0;">
+            Apply promotional discount % and bundle free store gifts across an entire product category at once.
+          </p>
+        </div>
+        <button class="admin-modal__close" data-close-modal="categoryOfferModal" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="admin-modal__body" style="padding: var(--space-5); max-height: 75vh; overflow-y: auto;">
+        
+        <!-- Category Selection -->
+        <div class="admin-form-group">
+          <label class="admin-label" for="categoryOfferSelect" style="font-weight: 700;">Target Product Category</label>
+          <select id="categoryOfferSelect" class="admin-select" style="font-weight: 600;">
+            <option value="Mobiles">📱 Mobiles</option>
+            <option value="TVs">📺 TVs & Televisions</option>
+            <option value="Air Conditioners">❄️ Air Conditioners</option>
+            <option value="Refrigerators">🧊 Refrigerators</option>
+            <option value="Home Theatres">🔊 Home Theatres & Audio</option>
+            <option value="Kitchen Appliances">🍳 Kitchen Appliances</option>
+            <option value="all">🌐 All Categories (Store-wide Promotion)</option>
+          </select>
+          <p class="admin-form-hint">All products currently in this category will receive the configured offer and free gifts.</p>
+        </div>
+
+        <!-- Offer Discount (%) -->
+        <div class="admin-form-group">
+          <label class="admin-label" for="categoryOfferInput" style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700;">Category Discount Percentage (%)</span>
+            <span style="font-size: 11px; color: var(--color-text-muted); font-weight: normal;">Optional · 0 to 99.99%</span>
+          </label>
+          <div style="position: relative;">
+            <input type="number" id="categoryOfferInput" class="admin-input" placeholder="e.g. 20 (leave blank or 0 for no discount)"
+              min="0" max="99.99" step="0.1" style="padding-right: 40px; font-weight: 600; font-size: 14px;" />
+            <span style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-weight: 700; color: var(--color-text-muted); font-size: 14px;">%</span>
+          </div>
+          <p class="admin-form-hint">Applies to all products in this category. Slashes original prices on storefront.</p>
+        </div>
+
+        <!-- Category Free Gifts Section -->
+        <div class="admin-form-group" style="border-top: 1px dashed var(--color-border-light); padding-top: var(--space-4); margin-bottom: 0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label class="admin-label" style="margin-bottom: 0; display: flex; align-items: center; gap: 6px; font-weight: 700;">
+              <span>🎁 Free Gifts for this Category</span>
+            </label>
+            <span class="badge" style="background: #fdf2f8; color: #9d174d; border: 1px solid #fbcfe8; font-size: 10px; font-weight: 700;">Category-wide Bundle</span>
+          </div>
+          <p class="admin-form-hint" style="margin-top: 0; margin-bottom: var(--space-3);">
+            Select items from store inventory (e.g. Home Theatres, Buds, Soundbars) to be gifted with every product in this category. Added gifts are hidden from the dropdown to prevent duplicates.
+          </p>
+
+          <!-- Search filter for category gifts -->
+          <div class="gift-search-wrap" style="margin-bottom: var(--space-2); position: relative;">
+            <div style="position: relative; display: flex; align-items: center;">
+              <span style="position: absolute; left: 10px; color: var(--color-text-muted); font-size: 13px; pointer-events: none;">🔍</span>
+              <input type="text" id="categoryOfferGiftSearch" class="admin-input gift-search-input"
+                placeholder="Search store inventory by name, brand, or category to gift..."
+                style="padding-left: 32px; padding-right: 28px; font-size: 12.5px; height: 36px;" autocomplete="off" />
+              <button type="button" id="categoryOfferGiftSearchClear" style="position: absolute; right: 8px; background: none; border: none; color: var(--color-text-muted); font-size: 16px; cursor: pointer; display: none; line-height: 1; padding: 2px;" title="Clear search">&times;</button>
+            </div>
+            <div id="categoryOfferGiftSearchCount" style="font-size: 11px; color: var(--color-text-muted); margin-top: 3px; display: none;"></div>
+          </div>
+
+          <!-- Gift Selector Row -->
+          <div class="gift-picker-row">
+            <select id="categoryOfferGiftSelect" class="admin-select gift-picker-select">
+              <option value="">-- Choose a store item as category free gift (e.g. Soundbar, Buds) --</option>
+            </select>
+            <button type="button" class="btn btn--primary btn--sm gift-picker-add-btn" id="categoryOfferAddGiftBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>Add Gift</span>
+            </button>
+          </div>
+
+          <!-- Category Selected Gifts List -->
+          <div id="categoryOfferSelectedGiftsList" class="selected-gifts-container">
+            <!-- Category gifts rendered dynamically -->
+          </div>
+
+          <div id="noCategoryGiftsHint" class="gift-empty-state">
+            <div style="font-size: 18px; margin-bottom: 2px;">🎁</div>
+            <div style="font-weight: 600; color: var(--color-text-secondary); font-size: 12px;">No free gifts bundled with category yet</div>
+            <div style="font-size: 11px; color: var(--color-text-muted);">(Optional) Select an item above and click "Add Gift" to bundle free gifts with every product in this category.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="admin-modal__footer" style="display: flex; justify-content: space-between; align-items: center; background: var(--color-bg-secondary); border-top: 1px solid var(--color-border-light); padding: var(--space-4) var(--space-5);">
+        <button type="button" class="btn btn--outline btn--sm" id="clearCategoryOfferBtn" style="color: #dc2626; border-color: #fca5a5;">
+          Clear Category Offers & Gifts
+        </button>
+        <div style="display: flex; gap: var(--space-2);">
+          <button type="button" class="btn btn--outline btn--sm" data-close-modal="categoryOfferModal">Cancel</button>
+          <button type="button" class="btn btn--primary btn--sm" id="saveCategoryOfferBtn">Apply to Category</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+     11. REUSABLE TOAST CONTAINER
 ════════════════════════════════════════ -->
   <div class="admin-toast-container" id="adminToastContainer" aria-live="polite"></div>

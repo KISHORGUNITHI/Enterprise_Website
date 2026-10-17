@@ -32,8 +32,14 @@ router.delete('/banners/:id', AdminBannerController.remove);
 
 // Products
 router.get('/products', AdminProductController.list);
+router.get('/products/active-offers', AdminProductController.getActiveOffersAndGifts);
 router.post('/products', AdminProductController.create);
+router.post('/products/category-offer', AdminProductController.updateCategoryOffer);
 router.put('/products/:id', AdminProductController.update);
+router.patch('/products/:id/offer', AdminProductController.updateOffer);
+router.delete('/products/:id/offer', AdminProductController.cancelOffer);
+router.delete('/products/:id/gifts/:giftId', AdminProductController.removeGift);
+router.delete('/products/:id/gifts', AdminProductController.removeAllGifts);
 router.patch('/products/:id/visibility', AdminProductController.toggleVisibility);
 router.delete('/products/:id', AdminProductController.remove);
 

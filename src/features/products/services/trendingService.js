@@ -197,6 +197,7 @@ export class TrendingService {
       brand:        product.brand,
       description:  product.description,
       price,
+      offer:        product.offer ? parseFloat(product.offer) : 0,
       rating:       product.rating,
       reviews:      product.reviews,
       availability: product.availability,

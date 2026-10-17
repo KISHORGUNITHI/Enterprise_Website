@@ -56,6 +56,7 @@ model Product {
   description    String
   brand          String
   price          Decimal
+  offer          Decimal?             @db.Decimal(5, 2)
   availability   Status               @default(AVAILABLE)
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
@@ -69,8 +70,24 @@ model Product {
   interactions   ProductInteraction[]
   variants       ProductVariant[]
   productReviews Review[]
+  giftsGiven     ProductGift[]        @relation("ProductOffersGifts")
+  giftedIn       ProductGift[]        @relation("GiftProductItems")
 
   @@index([categoryId])
+}
+
+model ProductGift {
+  id            String   @id @default(cuid())
+  productId     String
+  giftProductId String
+  createdAt     DateTime @default(now())
+
+  product       Product  @relation("ProductOffersGifts", fields: [productId], references: [id], onDelete: Cascade)
+  giftProduct   Product  @relation("GiftProductItems", fields: [giftProductId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, giftProductId])
+  @@index([productId])
+  @@index([giftProductId])
 }
 
 model ProductImage {
