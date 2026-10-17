@@ -15,28 +15,38 @@
     <div class="prod-section__header">
       <div class="prod-section__header-text">
         <span class="section__eyebrow"><%= eyebrow %></span>
-        <h2 class="prod-section__title" id="ps-heading-<%= sectionId %>"><%= sectionTitle %></h2>
-      </div>
-      <div class="prod-section__header-right">
-        <div class="prod-section__controls">
-          <button class="prod-section__ctrl" data-dir="prev" aria-label="Scroll <%= sectionTitle %> left">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="10 12 6 8 10 4"/></svg>
-          </button>
-          <button class="prod-section__ctrl" data-dir="next" aria-label="Scroll <%= sectionTitle %> right">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 4 10 8 6 12"/></svg>
-          </button>
+        <div class="prod-section__title-row">
+          <h2 class="prod-section__title" id="ps-heading-<%= sectionId %>"><%= sectionTitle %></h2>
+          <a href="<%= viewAllHref %>" class="prod-section__view-all prod-section__view-all--inline" aria-label="View all <%= sectionTitle %>">
+            <span>View All</span>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+          </a>
         </div>
-        <a href="<%= viewAllHref %>" class="prod-section__view-all">
-          View All
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
-        </a>
       </div>
     </div>
 
   </div>
 
   <div class="prod-section__viewport" data-viewport="<%= sectionId %>">
-    <div class="prod-section__track" data-track="<%= sectionId %>" role="list"></div>
+    <div class="prod-section__track" data-track="<%= sectionId %>" role="list">
+      <% for (let i = 0; i < 6; i++) { %>
+        <div class="product-card product-card--skeleton" aria-hidden="true">
+          <div class="product-card__image-wrap skeleton-shimmer">
+            <span class="skeleton-badge skeleton-shimmer"></span>
+          </div>
+          <div class="product-card__body">
+            <span class="skeleton-bar skeleton-bar--brand skeleton-shimmer"></span>
+            <span class="skeleton-bar skeleton-bar--title-1 skeleton-shimmer"></span>
+            <span class="skeleton-bar skeleton-bar--title-2 skeleton-shimmer"></span>
+            <span class="skeleton-bar skeleton-bar--rating skeleton-shimmer"></span>
+            <span class="skeleton-bar skeleton-bar--price skeleton-shimmer"></span>
+          </div>
+          <div class="product-card__footer">
+            <span class="skeleton-bar skeleton-bar--cta skeleton-shimmer"></span>
+          </div>
+        </div>
+      <% } %>
+    </div>
   </div>
 
 </section>

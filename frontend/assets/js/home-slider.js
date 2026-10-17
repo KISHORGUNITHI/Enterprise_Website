@@ -89,6 +89,77 @@
       </article>`;
   }
 
+  const SECTION_CONFIG = {
+    trending: {
+      badge: 'All Deals',
+      title: 'View All',
+      desc: 'Discover more trending products & offers',
+      btnText: 'Explore Deals',
+      defaultHref: '/products/trending',
+    },
+    mobiles: {
+      badge: 'All Mobiles',
+      title: 'View All',
+      desc: 'Discover latest smartphones & accessories',
+      btnText: 'Explore Mobiles',
+      defaultHref: '/products/mobiles',
+    },
+    tvs: {
+      badge: 'All TVs',
+      title: 'View All',
+      desc: 'Discover smart, 4K & OLED televisions',
+      btnText: 'Explore TVs',
+      defaultHref: '/products/tvs',
+    },
+    acs: {
+      badge: 'All ACs',
+      title: 'View All',
+      desc: 'Discover split, inverter & 5-star ACs',
+      btnText: 'Explore ACs',
+      defaultHref: '/products/acs',
+    },
+    homeTheatres: {
+      badge: 'All Audio',
+      title: 'View All',
+      desc: 'Discover soundbars & home audio systems',
+      btnText: 'Explore Audio',
+      defaultHref: '/products/home-theatres',
+    },
+  };
+
+  function buildViewAllCard(sectionId, viewAllHref) {
+    const config = SECTION_CONFIG[sectionId] || {
+      badge: 'All Products',
+      title: 'View All',
+      desc: 'Discover more products & exclusive offers',
+      btnText: 'Explore More',
+      defaultHref: '/products',
+    };
+    const href = viewAllHref || config.defaultHref;
+    return `
+      <a href="${href}" class="product-card product-card--view-all" role="listitem" aria-label="View all ${config.badge}">
+        <div class="product-card__view-all-content">
+          <div class="product-card__view-all-icon-wrap" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </div>
+          <div class="product-card__view-all-text">
+            <span class="product-card__view-all-badge">${config.badge}</span>
+            <h3 class="product-card__view-all-title">${config.title}</h3>
+            <p class="product-card__view-all-desc">${config.desc}</p>
+          </div>
+          <div class="product-card__view-all-cta">
+            <span class="btn btn--accent btn--sm product-card__view-all-btn">
+              ${config.btnText}
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+            </span>
+          </div>
+        </div>
+      </a>`;
+  }
+
   // ─── Wire up each section ────────────────────────────────────────────────
 
   const KEY_MAP = {
@@ -101,11 +172,34 @@
     refrigerators:  'refrigerators',
   };
 
+  function buildSkeletonCard() {
+    return `
+      <div class="product-card product-card--skeleton" role="listitem" aria-hidden="true">
+        <div class="product-card__image-wrap skeleton-shimmer">
+          <span class="skeleton-badge skeleton-shimmer"></span>
+        </div>
+        <div class="product-card__body">
+          <span class="skeleton-bar skeleton-bar--brand skeleton-shimmer"></span>
+          <span class="skeleton-bar skeleton-bar--title-1 skeleton-shimmer"></span>
+          <span class="skeleton-bar skeleton-bar--title-2 skeleton-shimmer"></span>
+          <span class="skeleton-bar skeleton-bar--rating skeleton-shimmer"></span>
+          <span class="skeleton-bar skeleton-bar--price skeleton-shimmer"></span>
+        </div>
+        <div class="product-card__footer">
+          <span class="skeleton-bar skeleton-bar--cta skeleton-shimmer"></span>
+        </div>
+      </div>`;
+  }
+
+  function renderSkeletons(targetTrack, count = 6) {
+    if (!targetTrack) return;
+    targetTrack.innerHTML = Array.from({ length: count }, buildSkeletonCard).join('');
+  }
+
   document.querySelectorAll('[data-section]').forEach(section => {
     const id       = section.dataset.section;
     const dataKey  = KEY_MAP[id] || id;
-    const products = data[dataKey];
-    if (!products) return;
+    const products = data[dataKey] || [];
 
     const track    = section.querySelector(`[data-track="${id}"]`);
     const viewport = section.querySelector(`[data-viewport="${id}"]`);
@@ -114,8 +208,25 @@
 
     if (!track || !viewport) return;
 
-    // Render cards
-    track.innerHTML = products.map(buildCard).join('');
+    // Show skeletons initially if no products in memory yet
+    if (!products.length) {
+      if (track.children.length === 0) {
+        renderSkeletons(track, 6);
+      }
+    } else {
+      const viewAllHref = section.querySelector('.prod-section__view-all')?.getAttribute('href');
+      const viewAllCardHtml = buildViewAllCard(id, viewAllHref);
+      track.innerHTML = products.map(buildCard).join('') + viewAllCardHtml;
+    }
+
+    // Wire PRODUCT_VIEW tracking on every card's CTA click (event delegation on track)
+    track.addEventListener('click', e => {
+      const cta = e.target.closest('.product-card__cta');
+      if (!cta) return;
+      const href = cta.getAttribute('href') || '';
+      const productId = href.split('/product/')[1];
+      if (productId) recordInteraction(productId, 'PRODUCT_VIEW');
+    }, { passive: true });
 
     // ─── Scroll helpers ──────────────────────────────────────────────────
     const CARD_W    = 220 + 16; // card width + gap
@@ -208,7 +319,10 @@
         const section = document.querySelector(`[data-section="${sectionId}"]`);
         if (section) {
           const track = section.querySelector(`[data-track="${sectionId}"]`);
-          if (track) track.innerHTML = dbProducts.map(buildCard).join('');
+          if (track) {
+            const viewAllHref = section.querySelector('.prod-section__view-all')?.getAttribute('href');
+            track.innerHTML = dbProducts.map(buildCard).join('') + buildViewAllCard(sectionId, viewAllHref);
+          }
         }
       }
     } catch (err) {
@@ -229,6 +343,11 @@
   // ─── Fetch live ACs from Database API ────────────────────────────────────
   async function syncAcsFromDb() {
     return syncCategoryFromDb('acs', 'acs', '#0369a1');
+  }
+
+  // ─── Fetch live Home Theatres from Database API ───────────────────────────
+  async function syncHomeTheatresFromDb() {
+    return syncCategoryFromDb('home-theatres', 'homeTheatres', '#374151');
   }
 
   // ─── Interaction tracking helpers ────────────────────────────────────────────
@@ -317,7 +436,8 @@
       if (section) {
         const track = section.querySelector('[data-track="trending"]');
         if (track) {
-          track.innerHTML = trendingProducts.map(buildCard).join('');
+          const viewAllHref = section.querySelector('.prod-section__view-all')?.getAttribute('href') || '/products/trending';
+          track.innerHTML = trendingProducts.map(buildCard).join('') + buildViewAllCard('trending', viewAllHref);
 
           // Wire PRODUCT_VIEW tracking on every card's CTA click
           // Uses event delegation on the track to avoid per-card listeners.
@@ -338,9 +458,10 @@
     }
   }
 
+  syncTrendingFromApi();
   syncMobilesFromDb();
   syncTvsFromDb();
   syncAcsFromDb();
-  syncTrendingFromApi();
+  syncHomeTheatresFromDb();
 
 })();

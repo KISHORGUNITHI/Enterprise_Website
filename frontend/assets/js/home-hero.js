@@ -125,12 +125,7 @@
         }
       }
     } catch (e) {
-      console.warn('Could not load dynamic banners, using local fallback:', e);
-    }
-
-    // Fallback to static mock banners if DB is offline
-    if (window.homeBannersData && window.homeBannersData.length > 0) {
-      bannerList.fromArray(window.homeBannersData);
+      console.warn('Could not load dynamic banners from API:', e);
     }
   }
 
