@@ -370,11 +370,6 @@
     if (priceSave) {
       priceSave.textContent = save > 0 ? `Save ${fmt(save)}` : '';
     }
-    if (emiNote) {
-      emiNote.innerHTML = product.emi
-        ? `No cost EMI from <strong>${fmt(product.emi.from)}/mo</strong> · ${product.emi.months} months`
-        : '';
-    }
 
     // Render Free Gifts Banner
     const freeGiftsBanner = document.getElementById('pdpFreeGiftsBanner');
@@ -709,14 +704,6 @@
         if (priceDis) priceDis.textContent = offer > 0 ? `${offer}% off` : '';
         if (priceSave) priceSave.textContent = save > 0 ? `Save ${fmt(save)}` : '';
 
-        // Recalculate EMI
-        const emiMonthly = Math.ceil(finalSalePrice / 12);
-        if (emiNote) {
-          emiNote.innerHTML = `No cost EMI from <strong>${fmt(emiMonthly)}/mo</strong> · 12 months`;
-        }
-        if (barEmi) {
-          barEmi.textContent = `EMI from ${fmt(emiMonthly)}/mo`;
-        }
 
         // Update badge
         if (pdpBadge) {
@@ -889,26 +876,6 @@
             <p class="pdp-delivery__note">By certified technician within 24–48 hrs of delivery</p>
           </div>
         </div>` : ''}`;
-    }
-
-    // ─── EMI card ───────────────────────────────────────────────────────────
-    if (emiEl && product.emi) {
-      emiEl.innerHTML = `
-        <div class="pdp-emi__header">
-          <p class="pdp-emi__title">Need EMI?</p>
-          <span class="pdp-emi__badge">0% Interest</span>
-        </div>
-        <p class="pdp-emi__desc">Reach out to us to know your EMI eligibility. Instant approval, zero paperwork.</p>
-        <div class="pdp-emi__partners">
-          <div class="pdp-emi__partner" style="background:#cc0000;"><span>TVS Credit</span></div>
-          <div class="pdp-emi__partner" style="background:#00008b;"><span>Bajaj Finserv</span></div>
-        </div>
-        <a href="tel:9963657799" class="btn btn--accent pdp-emi__cta">
-          <svg class="icon icon--sm" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-          </svg>
-          Know Eligibility
-        </a>`;
     }
 
     // ─── Related products carousel ──────────────────────────────────────────
