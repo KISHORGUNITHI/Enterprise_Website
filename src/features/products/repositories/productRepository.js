@@ -15,8 +15,19 @@ const VARIANT_INCLUDE = {
 };
 
 export class ProductRepository {
-  async findAll() {
+  async findAll(searchQuery) {
+    const q = searchQuery ? String(searchQuery).trim() : '';
+    const where = q ? {
+      OR: [
+        { name: { contains: q, mode: 'insensitive' } },
+        { description: { contains: q, mode: 'insensitive' } },
+        { brand: { contains: q, mode: 'insensitive' } },
+        { category: { name: { contains: q, mode: 'insensitive' } } }
+      ]
+    } : {};
+
     return await prisma.product.findMany({
+      where,
       include: {
         productImages: true,
         category: true,
@@ -35,7 +46,7 @@ export class ProductRepository {
     });
   }
 
-  async findByCategory(categoryIdentifier) {
+  async findByCategory(categoryIdentifier, searchQuery) {
     if (!categoryIdentifier) return [];
 
     const norm = String(categoryIdentifier).trim().toLowerCase();
@@ -96,23 +107,38 @@ export class ProductRepository {
     const targetNames = target ? target.names : [categoryIdentifier];
     const targetIds = target ? target.ids : [categoryIdentifier];
 
-    return await prisma.product.findMany({
-      where: {
-        OR: [
-          { categoryId: { in: targetIds } },
-          { categoryId: { equals: categoryIdentifier } },
-          {
-            category: {
-              name: { in: targetNames, mode: 'insensitive' }
-            }
-          },
-          {
-            category: {
-              name: { contains: norm, mode: 'insensitive' }
-            }
+    const categoryCondition = {
+      OR: [
+        { categoryId: { in: targetIds } },
+        { categoryId: { equals: categoryIdentifier } },
+        {
+          category: {
+            name: { in: targetNames, mode: 'insensitive' }
           }
-        ]
-      },
+        },
+        {
+          category: {
+            name: { contains: norm, mode: 'insensitive' }
+          }
+        }
+      ]
+    };
+
+    const q = searchQuery ? String(searchQuery).trim() : '';
+    const searchFilter = q ? {
+      OR: [
+        { name: { contains: q, mode: 'insensitive' } },
+        { description: { contains: q, mode: 'insensitive' } },
+        { brand: { contains: q, mode: 'insensitive' } }
+      ]
+    } : null;
+
+    const where = searchFilter
+      ? { AND: [categoryCondition, searchFilter] }
+      : categoryCondition;
+
+    return await prisma.product.findMany({
+      where,
       include: {
         productImages: true,
         category: true,

@@ -972,7 +972,7 @@
   .plp-banner__illustration { display: none; }
   .plp-banner__content { padding: var(--space-5) var(--space-5); }
   .plp-toolbar {
-    top: calc(var(--cat-strip-height-mobile) + var(--header-height-mobile));
+    top: calc(var(--cat-strip-height-mobile) + 118px);
   }
 }
 

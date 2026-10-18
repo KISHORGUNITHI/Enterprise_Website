@@ -6,30 +6,25 @@
  */
 
 /* =============================================
-   STRIP POSITION — category page has a single-row
-   header, so the top offset is different from home page.
-   JS (category-header.js) updates this dynamically,
-   but CSS provides the correct first-paint fallback.
+   STRIP POSITION — aligned with shared home-header.
+   JS (home-header.js) updates this dynamically,
+   and CSS provides the correct first-paint fallback.
 ============================================= */
 
 .cat-strip--page {
-  /* Single-row header height: 72px desktop */
   top: 72px;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1024px) and (min-width: 769px) {
   .cat-strip--page { top: 68px; }
 }
 
 @media (max-width: 768px) {
-  /* Override the home-page mobile value (header-height-mobile = 60px).
-     Category header single row is 56px at this breakpoint. */
-  .cat-strip--page { top: 56px; }
+  .cat-strip--page { top: 118px; }
 }
 
 @media (max-width: 480px) {
-  /* Category header is 50px at this breakpoint */
-  .cat-strip--page { top: 50px; }
+  .cat-strip--page { top: 118px; }
 }
 
 /* =============================================

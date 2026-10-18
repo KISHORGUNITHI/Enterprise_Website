@@ -5,12 +5,12 @@ export class ProductService {
     this.productRepository = new ProductRepository();
   }
 
-  async getAllProducts() {
-    return await this.productRepository.findAll();
+  async getAllProducts(searchQuery) {
+    return await this.productRepository.findAll(searchQuery);
   }
 
-  async getProductsByCategory(categoryName) {
-    return await this.productRepository.findByCategory(categoryName);
+  async getProductsByCategory(categoryName, searchQuery) {
+    return await this.productRepository.findByCategory(categoryName, searchQuery);
   }
 
   async getProductByIdOrSlug(identifier) {

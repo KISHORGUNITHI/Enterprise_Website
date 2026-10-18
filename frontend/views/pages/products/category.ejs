@@ -33,7 +33,13 @@
 
 <body id="plpRoot" data-slug="<%= slug %>">
 
-  <!-- ── Existing: category header ── -->
+  <%# Category pages without promotional banner carousel %>
+  <%
+    const NO_BANNER_SLUGS = ['mobiles', 'mobile', 'tvs', 'tv', 'acs', 'ac', 'air-conditioners', 'home-theatres', 'home-theatre', 'all'];
+    const showBanner = !NO_BANNER_SLUGS.includes(slug);
+  %>
+
+  <!-- ── Category header (Desktop single-row, Mobile updated Home header) ── -->
   <%- include('../../partials/category-header') %>
 
   <!-- ── Existing: sticky category strip ── -->
@@ -41,10 +47,12 @@
 
   <main id="main-content" class="plp">
 
-    <!-- 1. Promo banner -->
-    <%- include('../../partials/category-promo-banner') %>
+    <!-- 1. Promo banner (omitted on Mobiles, TVs, ACs, and Home Theatres) -->
+    <% if (showBanner) { %>
+      <%- include('../../partials/category-promo-banner') %>
+    <% } %>
 
-    <!-- 2. Toolbar: title, count, sort, mobile filter btn -->
+    <!-- 2. Toolbar: title, count, sort -->
     <%- include('../../partials/category-toolbar') %>
 
     <!-- 3. Sidebar filters + product grid -->
@@ -95,12 +103,16 @@
 
   <!-- Data & Data Structures -->
   <script src="/assets/data/category-plp-data.js"></script>
-  <script src="/assets/js/banner-circular-list.js"></script>
+  <% if (showBanner) { %>
+    <script src="/assets/js/banner-circular-list.js"></script>
+  <% } %>
 
   <!-- JS -->
   <script src="/assets/js/category-header.js" defer></script>
   <script src="/assets/js/category-page.js"   defer></script>
-  <script src="/assets/js/category-banner.js" defer></script>
+  <% if (showBanner) { %>
+    <script src="/assets/js/category-banner.js" defer></script>
+  <% } %>
 
 </body>
 </html>

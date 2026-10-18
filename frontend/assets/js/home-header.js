@@ -11,7 +11,7 @@
   }
 
   const hdr      = document.getElementById('homeHeader');
-  const catStrip = document.getElementById('catStrip');
+  const catStrip = document.getElementById('catStrip') || document.getElementById('catStripPage');
   const input    = document.getElementById('hdrSearchInput');
   const suggestions = document.getElementById('hdrSuggestions');
   const form     = document.getElementById('hdrSearchForm');
@@ -60,13 +60,15 @@
   }
 
   function syncCatStrip() {
+    const sections = Array.from(document.querySelectorAll('[data-section]'));
+    if (!sections.length) return; // Keep server-rendered active tab on category pages
+
     // Offset = header height (row1 + row2) + strip height + a small buffer
     const headerH  = hdr  ? hdr.getBoundingClientRect().height  : 0;
     const stripH   = catStrip ? catStrip.getBoundingClientRect().height : 0;
     const offset   = headerH + stripH + 20;
 
     const scrollY  = window.scrollY + offset;
-    const sections = Array.from(document.querySelectorAll('[data-section]'));
 
     // Find the last section whose top is at or above the scroll position
     let activeKey = '';
@@ -84,7 +86,7 @@
       // Above all sections, or in "trending" → highlight "All" (href: /home)
       matchedLink = Array.from(catLinks).find(l => {
         const href = l.getAttribute('href') || '';
-        return href === '/home';
+        return href === '/home' || href === '/products';
       });
     } else if (targetSlug) {
       matchedLink = Array.from(catLinks).find(l => {
@@ -95,6 +97,14 @@
     }
 
     setActive(matchedLink || null);
+  }
+
+  function scrollActivePillIntoView() {
+    if (!catStrip) return;
+    const activeItem = catStrip.querySelector('.cat-strip__item--active, .cat-strip__item.active');
+    if (activeItem) {
+      activeItem.scrollIntoView({ inline: 'center', behavior: 'smooth', block: 'nearest' });
+    }
   }
 
   // ─── Search suggestions ───────────────────────────────────────────────────
@@ -111,6 +121,14 @@
   }
 
   if (input && suggestions) {
+    // Sync query string from URL if present
+    try {
+      const qParam = new URLSearchParams(window.location.search).get('q');
+      if (qParam && !input.value) {
+        input.value = qParam;
+      }
+    } catch (_) {}
+
     input.addEventListener('focus', showSuggestions);
     input.addEventListener('input', () => {
       input.value.trim().length > 0 ? showSuggestions() : hideSuggestions();
@@ -121,7 +139,14 @@
     document.addEventListener('click', e => {
       if (form && !form.contains(e.target)) hideSuggestions();
     });
-    form && form.addEventListener('submit', hideSuggestions);
+    form && form.addEventListener('submit', (e) => {
+      hideSuggestions();
+      const val = (input.value || '').trim();
+      if (!val) {
+        e.preventDefault();
+        window.location.href = '/products';
+      }
+    });
   }
 
   // ─── Location button (desktop & mobile) ─────────────────────────────────
@@ -175,5 +200,6 @@
   syncHeaderShadow();
   syncStripTop();
   syncCatStrip();
+  scrollActivePillIntoView();
 
 })();

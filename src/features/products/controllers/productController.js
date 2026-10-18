@@ -26,12 +26,13 @@ export class ProductController {
 
   async getProducts(req, res) {
     try {
-      const { category } = req.query;
+      const { category, search, q } = req.query;
+      const searchQuery = (q || search || '').trim();
       let products;
       if (category) {
-        products = await this.productService.getProductsByCategory(category);
+        products = await this.productService.getProductsByCategory(category, searchQuery);
       } else {
-        products = await this.productService.getAllProducts();
+        products = await this.productService.getAllProducts(searchQuery);
       }
       return res.status(200).json({
         success: true,
@@ -46,7 +47,9 @@ export class ProductController {
   async getProductsByCategory(req, res) {
     try {
       const categoryParam = req.params.category;
-      const products = await this.productService.getProductsByCategory(categoryParam);
+      const { search, q } = req.query;
+      const searchQuery = (q || search || '').trim();
+      const products = await this.productService.getProductsByCategory(categoryParam, searchQuery);
       return res.status(200).json({
         success: true,
         data: products,

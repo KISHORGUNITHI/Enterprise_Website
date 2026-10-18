@@ -76,11 +76,24 @@
   const SLUG     = document.getElementById('plpRoot')?.dataset.slug || 'mobiles';
   const PER_PAGE = 8;
 
+  const urlParams   = new URLSearchParams(window.location.search);
+  const searchParam = (urlParams.get('q') || urlParams.get('search') || '').trim();
+
   let currentPage  = 1;
   let isApiLoading = false;
   let apiError     = null;
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
+  function escapeHtml(str) {
+    return String(str || '').replace(/[&<>"']/g, m => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[m]));
+  }
+
   function fmt(n) {
     return '₹' + n.toLocaleString('en-IN');
   }
@@ -187,6 +200,15 @@
     const minDiscount = discountEl ? parseInt(discountEl.value) : 0;
 
     let result = all.filter(p => {
+      if (searchParam) {
+        const qLower = searchParam.toLowerCase();
+        const matchesQuery =
+          (p.name && p.name.toLowerCase().includes(qLower)) ||
+          (p.brand && p.brand.toLowerCase().includes(qLower)) ||
+          (p.description && p.description.toLowerCase().includes(qLower)) ||
+          (p.category && typeof p.category === 'string' && p.category.toLowerCase().includes(qLower));
+        if (!matchesQuery) return false;
+      }
       if (checkedBrands.length && !checkedBrands.includes(p.brand.toLowerCase())) return false;
       if (p.salePrice < min || p.salePrice > max) return false;
       if (p.rating < minRating)    return false;
@@ -293,6 +315,15 @@
     }
 
     if (total === 0) {
+      const hasSearch = Boolean(searchParam);
+      const emptyTitle = 'No Products Found';
+      const emptyDesc = hasSearch
+        ? `No products matched your search for "<strong>${escapeHtml(searchParam)}</strong>". Try checking for spelling errors or using more general terms.`
+        : 'Try changing or clearing your filters.';
+      const actionBtn = hasSearch
+        ? `<a href="/products" class="btn btn--outline" style="text-decoration:none; display:inline-flex; align-items:center;">View All Products</a>`
+        : `<button class="btn btn--outline" onclick="document.getElementById('plpClearFilters')?.click()">Clear Filters</button>`;
+
       grid.innerHTML = `
         <div class="plp-empty" style="grid-column: 1 / -1;">
           <div class="plp-empty__icon">
@@ -301,11 +332,9 @@
               <path d="M8 11h6M11 8v6"/>
             </svg>
           </div>
-          <h3 class="plp-empty__title">No Products Found</h3>
-          <p class="plp-empty__desc">Try changing or clearing your filters.</p>
-          <button class="btn btn--outline" onclick="document.getElementById('plpClearFilters')?.click()">
-            Clear Filters
-          </button>
+          <h3 class="plp-empty__title">${emptyTitle}</h3>
+          <p class="plp-empty__desc">${emptyDesc}</p>
+          ${actionBtn}
         </div>`;
     } else {
       grid.innerHTML = page.map(buildCard).join('');
@@ -318,18 +347,19 @@
 
   // Accent colour per category slug — used for placeholder SVGs when no image is available.
   const CATEGORY_COLORS = {
-    trending: '#f59e0b',
-    mobiles:  '#1e3d8f',
-    tvs:      '#b85e00',
-    acs:      '#0369a1',
+    all:             '#1e3d8f',
+    trending:        '#f59e0b',
+    mobiles:         '#1e3d8f',
+    tvs:             '#b85e00',
+    acs:             '#0369a1',
+    'home-theatres': '#374151',
   };
 
   // Slugs that are served live from the backend API (PostgreSQL + Cloudinary).
-  // Add a slug here when its products are seeded into the DB.
-  const API_SLUGS = ['trending', 'mobiles', 'mobile', 'tvs', 'tv', 'acs', 'ac'];
+  const API_SLUGS = ['all', 'trending', 'mobiles', 'mobile', 'tvs', 'tv', 'acs', 'ac', 'home-theatres', 'home-theatre'];
 
   // URL alias → canonical API slug used by /api/products/category/:slug
-  const SLUG_ALIASES = { mobile: 'mobiles', tv: 'tvs', ac: 'acs' };
+  const SLUG_ALIASES = { mobile: 'mobiles', tv: 'tvs', ac: 'acs', 'home-theatre': 'home-theatres' };
 
   /**
    * Dynamically add brand checkboxes to sidebar filter if not present
@@ -362,7 +392,7 @@
   }
 
   /**
-   * Fetch products for `slug` from /api/products/category/:slug or /api/products/trending,
+   * Fetch products for `slug` from /api/products, /api/products/category/:slug or /api/products/trending,
    * map the response to PLP card shape, write into categoryPlpData,
    * then re-render the grid.
    */
@@ -372,9 +402,15 @@
     renderProducts();
 
     try {
-      const endpoint = slug === 'trending'
-        ? '/api/products/trending?limit=100'
-        : `/api/products/category/${slug}`;
+      let endpoint;
+      if (slug === 'all') {
+        endpoint = `/api/products${searchParam ? '?q=' + encodeURIComponent(searchParam) : ''}`;
+      } else if (slug === 'trending') {
+        endpoint = `/api/products/trending?limit=100${searchParam ? '&q=' + encodeURIComponent(searchParam) : ''}`;
+      } else {
+        endpoint = `/api/products/category/${slug}${searchParam ? '?q=' + encodeURIComponent(searchParam) : ''}`;
+      }
+
       const res = await fetch(endpoint);
       if (!res.ok) throw new Error(`HTTP error ${res.status}`);
       const json = await res.json();
@@ -395,6 +431,7 @@
             dbId:          p.id,
             brand:         p.brand,
             name:          p.name,
+            category:      p.category?.name || '',
             description:   p.description,
             rating:        parseFloat(p.rating) || 0,
             reviews:       p.reviews || 0,
@@ -433,6 +470,12 @@
 
   // ─── Init ─────────────────────────────────────────────────────────────────
   function init() {
+    // Pre-populate search input if search query exists in URL
+    const searchInput = document.getElementById('hdrSearchInput') || document.getElementById('catSearchInput');
+    if (searchInput && searchParam) {
+      searchInput.value = searchParam;
+    }
+
     if (API_SLUGS.includes(SLUG)) {
       const apiSlug = SLUG_ALIASES[SLUG] || SLUG;
       loadCategoryFromApi(apiSlug);

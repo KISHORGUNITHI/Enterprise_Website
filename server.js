@@ -138,13 +138,15 @@ app.get('/home', (req, res) => {
   });
 });
 
-// /all route resolves to /home
+// /all and /products/all routes resolve to /products (all products / search hub)
 app.get('/all', (req, res) => {
-  res.redirect(301, '/home');
+  const q = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+  res.redirect(301, `/products${q}`);
 });
 
 app.get('/products/all', (req, res) => {
-  res.redirect(301, '/home');
+  const q = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+  res.redirect(301, `/products${q}`);
 });
 
 // Trending products route (renders all trending products from DB)
@@ -153,11 +155,14 @@ app.get('/trending', (req, res) => {
 });
 
 app.get('/products/trending', (req, res) => {
+  const query = (req.query.q || req.query.search || '').trim();
+  const pageLabel = query ? `Trending Deals — results for "${query}"` : 'Trending Deals & Products';
   res.render('pages/products/category', {
     title: `Trending Deals & Products — ${site.name}`,
-    pageLabel: 'Trending Deals & Products',
+    pageLabel,
     activeCategory: 'trending',
     slug: 'trending',
+    searchQuery: query,
     site,
   });
 });
@@ -166,23 +171,18 @@ app.get('/products/trending', (req, res) => {
 //  STUB ROUTES — render when designs are provided these become real pages
 // =====================================================================
 
-// Auth — combined /auth page + aliases
-// app.get('/auth', (req, res) => {
-//   res.render('pages/auth/auth', { title: `Sign In — ${site.name}`, site });
-// });
-// app.get('/login', (req, res) => {
-//   res.render('pages/auth/auth', { title: `Login — ${site.name}`, site });
-// });
-// app.get('/signup', (req, res) => {
-//   res.render('pages/auth/auth', { title: `Create Account — ${site.name}`, site });
-// });
-// app.get('/forgot-password', stub('Forgot Password'));
-// app.get('/otp',             stub('OTP Verification'));
-// app.get('/reset-password',  stub('Reset Password'));
-
-// Products — real category page (header + strip + content area)
+// Products — real category page & search results (header + strip + content area)
 app.get('/products', (req, res) => {
-  res.redirect('/home');
+  const query = (req.query.q || req.query.search || '').trim();
+  const pageLabel = query ? `Search results for "${query}"` : 'All Products';
+  res.render('pages/products/category', {
+    title: query ? `Search: ${query} — ${site.name}` : `All Products — ${site.name}`,
+    pageLabel,
+    activeCategory: 'all',
+    slug: 'all',
+    searchQuery: query,
+    site,
+  });
 });
 
 const categoryRoutes = [
@@ -202,11 +202,15 @@ categoryRoutes.forEach(({ path: routePath, label, slug }) => {
       return res.redirect(302, '/home');
     }
 
+    const query = (req.query.q || req.query.search || '').trim();
+    const pageLabel = query ? `${label} — results for "${query}"` : label;
+
     res.render('pages/products/category', {
       title: `${label} — ${site.name}`,
-      pageLabel: label,
+      pageLabel,
       activeCategory: slug,
       slug,
+      searchQuery: query,
       site,
     });
   });
