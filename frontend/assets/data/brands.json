@@ -1,0 +1,126 @@
+{
+  "topRow": [
+    {
+      "id": "apple",
+      "name": "Apple",
+      "displayName": "Apple",
+      "color": "#1d1d1f",
+      "href": "/products/mobiles",
+      "fontSize": 26,
+      "fontWeight": "800",
+      "viewBox": "0 0 60 60"
+    },
+    {
+      "id": "samsung",
+      "name": "Samsung",
+      "displayName": "SAMSUNG",
+      "color": "#1428A0",
+      "href": "/products/mobiles",
+      "fontSize": 15,
+      "fontWeight": "800",
+      "viewBox": "0 0 80 36"
+    },
+    {
+      "id": "oneplus",
+      "name": "OnePlus",
+      "displayName": "OnePlus",
+      "color": "#F5010C",
+      "href": "/products/mobiles",
+      "fontSize": 15,
+      "fontWeight": "800",
+      "viewBox": "0 0 80 36"
+    },
+    {
+      "id": "lg",
+      "name": "LG",
+      "displayName": "LG",
+      "color": "#A50034",
+      "href": "/products/tvs",
+      "fontSize": 22,
+      "fontWeight": "900",
+      "viewBox": "0 0 60 36"
+    },
+    {
+      "id": "sony",
+      "name": "Sony",
+      "displayName": "SONY",
+      "color": "#000000",
+      "href": "/products/tvs",
+      "fontSize": 18,
+      "fontWeight": "800",
+      "viewBox": "0 0 70 36"
+    },
+    {
+      "id": "tcl",
+      "name": "TCL",
+      "displayName": "TCL",
+      "color": "#1976D2",
+      "href": "/products/tvs",
+      "fontSize": 20,
+      "fontWeight": "900",
+      "viewBox": "0 0 60 36"
+    }
+  ],
+  "bottomRow": [
+    {
+      "id": "daikin",
+      "name": "Daikin",
+      "displayName": "DAIKIN",
+      "color": "#005BAA",
+      "href": "/products/acs",
+      "fontSize": 16,
+      "fontWeight": "800",
+      "viewBox": "0 0 80 36"
+    },
+    {
+      "id": "voltas",
+      "name": "Voltas",
+      "displayName": "VOLTAS",
+      "color": "#E8201D",
+      "href": "/products/acs",
+      "fontSize": 15,
+      "fontWeight": "800",
+      "viewBox": "0 0 80 36"
+    },
+    {
+      "id": "whirlpool",
+      "name": "Whirlpool",
+      "displayName": "WHIRLPOOL",
+      "color": "#00479D",
+      "href": "/products/refrigerators",
+      "fontSize": 13,
+      "fontWeight": "800",
+      "viewBox": "0 0 90 36"
+    },
+    {
+      "id": "bosch",
+      "name": "Bosch",
+      "displayName": "BOSCH",
+      "color": "#1E5799",
+      "href": "/products/kitchen",
+      "fontSize": 17,
+      "fontWeight": "800",
+      "viewBox": "0 0 80 36"
+    },
+    {
+      "id": "xiaomi",
+      "name": "Xiaomi",
+      "displayName": "Xiaomi",
+      "color": "#FF6900",
+      "href": "/products/mobiles",
+      "fontSize": 14,
+      "fontWeight": "800",
+      "viewBox": "0 0 80 36"
+    },
+    {
+      "id": "bose",
+      "name": "Bose",
+      "displayName": "BOSE",
+      "color": "#000000",
+      "href": "/products/home-theatres",
+      "fontSize": 17,
+      "fontWeight": "800",
+      "viewBox": "0 0 70 36"
+    }
+  ]
+}

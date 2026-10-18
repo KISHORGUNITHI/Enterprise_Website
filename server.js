@@ -1,4 +1,5 @@
 import express from 'express';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import "dotenv/config"
@@ -62,6 +63,31 @@ app.use("/api", orderRoutes);
 
 // Cart API Routes
 app.use("/api/cart", cartRoutes);
+
+// Brands JSON loader — easily managed via frontend/assets/data/brands.json
+const brandsFilePath = path.join(__dirname, 'frontend/assets/data/brands.json');
+function getBrandsData() {
+  try {
+    if (fs.existsSync(brandsFilePath)) {
+      const raw = fs.readFileSync(brandsFilePath, 'utf-8');
+      return JSON.parse(raw);
+    }
+  } catch (err) {
+    console.error('Error reading brands.json:', err);
+  }
+  return { topRow: [], bottomRow: [] };
+}
+
+// Public API endpoint for brands
+app.get('/api/brands', (req, res) => {
+  res.json({ success: true, data: getBrandsData() });
+});
+
+// Provide brandsData to all EJS templates
+app.use((req, res, next) => {
+  res.locals.brandsData = getBrandsData();
+  next();
+});
 
 
 // Admin API Routes (protected by JWT + admin guard)
