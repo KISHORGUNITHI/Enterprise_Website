@@ -134,6 +134,36 @@
         body: JSON.stringify(productData)
       });
     },
+    async updateProductOffer(productId, offer, giftProductIds) {
+      return this.fetch(`/products/${productId}/offer`, {
+        method: 'PATCH',
+        body: JSON.stringify({ offer, giftProductIds })
+      });
+    },
+    async getActiveOffersAndGifts() {
+      return this.fetch('/products/active-offers');
+    },
+    async cancelOffer(productId) {
+      return this.fetch(`/products/${productId}/offer`, {
+        method: 'DELETE'
+      });
+    },
+    async removeProductGift(productId, giftId) {
+      return this.fetch(`/products/${productId}/gifts/${giftId}`, {
+        method: 'DELETE'
+      });
+    },
+    async removeAllProductGifts(productId) {
+      return this.fetch(`/products/${productId}/gifts`, {
+        method: 'DELETE'
+      });
+    },
+    async updateCategoryOffer(category, offer, giftProductIds, clearGifts = false) {
+      return this.fetch('/products/category-offer', {
+        method: 'POST',
+        body: JSON.stringify({ category, offer, giftProductIds, clearGifts })
+      });
+    },
     async toggleProductVisibility(productId) {
       return this.fetch(`/products/${productId}/visibility`, {
         method: 'PATCH'
@@ -442,6 +472,7 @@
       const targetId = btn.getAttribute('data-open-modal');
       if (targetId === 'productModal') resetProductForm();
       if (targetId === 'bannerModal') resetBannerForm();
+      if (targetId === 'categoryOfferModal') initOrResetCategoryOfferModal();
       openModal(targetId);
     });
   });
@@ -1441,6 +1472,16 @@
             isPrimary: !!img.isPrimary
           }));
           const priceNum = parseFloat(p.price) || 0;
+          const offerNum = (p.offer !== undefined && p.offer !== null && p.offer !== '') ? parseFloat(p.offer) : 0;
+          const gifts = (p.giftsGiven || []).map(g => ({
+            giftLinkId: g.id,
+            id: g.giftProduct?.id,
+            name: g.giftProduct?.name,
+            brand: g.giftProduct?.brand,
+            price: parseFloat(g.giftProduct?.price) || 0,
+            slug: g.giftProduct?.slug,
+            primaryImage: g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || ''
+          }));
           return {
             id: p.id,
             name: p.name,
@@ -1449,6 +1490,7 @@
             categoryId: p.categoryId,
             price: priceNum,
             originalPrice: priceNum,
+            offer: offerNum,
             stock: (p.stock !== undefined && p.stock !== null) ? Number(p.stock) : 0,
             minStockThreshold: 4,
             status: (p.availability === 'NOT_AVAILABLE' || p.stock === 0) ? 'Out of Stock' : (Number(p.stock) < 5 ? 'Low Stock' : 'In Stock'),
@@ -1457,6 +1499,7 @@
             description: p.description || '',
             images,
             primaryImage: primaryImg,
+            gifts,
             variants: p.variants || []
           };
         });
@@ -1527,6 +1570,10 @@
              <line x1="12" y1="18" x2="12.01" y2="18"></line>
            </svg>`;
 
+      const offerNum = (p.offer !== undefined && p.offer !== null && p.offer !== '') ? parseFloat(p.offer) : 0;
+      const hasOffer = offerNum > 0;
+      const discountedPrice = hasOffer ? Math.round(p.price * (1 - offerNum / 100)) : p.price;
+
       return `
         <tr data-product-id="${p.id}">
           <td>
@@ -1544,7 +1591,30 @@
             <span style="font-weight:var(--font-medium); color:var(--color-text-secondary);">${p.category}</span>
           </td>
           <td>
-            <strong>${formatRupees(p.price)}</strong>
+            ${hasOffer ? `
+              <div style="display:flex; flex-direction:column; gap:2px;">
+                <strong class="admin-cell-product__discounted-price">${formatRupees(discountedPrice)}</strong>
+                <span class="admin-cell-product__slashed-price">${formatRupees(p.price)}</span>
+              </div>
+            ` : `
+              <strong>${formatRupees(p.price)}</strong>
+            `}
+          </td>
+          <td>
+            ${hasOffer ? `
+              <span class="admin-offer-badge">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                ${offerNum}% OFF
+              </span>
+            ` : ''}
+            ${(p.gifts && p.gifts.length > 0) ? `
+              <div class="admin-gift-badge" title="${p.gifts.map(g => g.name).join(', ')}">
+                🎁 ${p.gifts.length} Free Gift${p.gifts.length > 1 ? 's' : ''}
+              </div>
+            ` : ''}
+            ${(!hasOffer && (!p.gifts || p.gifts.length === 0)) ? `
+              <span style="font-size:12px; color:var(--color-text-muted);">—</span>
+            ` : ''}
           </td>
           <td>
             <div style="display:flex; align-items:center; gap:var(--space-2);">
@@ -1565,6 +1635,7 @@
           <td>
             <div class="admin-actions-cell">
               <button type="button" class="admin-btn-action" data-edit-product="${p.id}">Edit</button>
+              <button type="button" class="admin-btn-action" data-offer-product="${p.id}" style="color:var(--color-primary-600); font-weight:600;">Offer</button>
               <button type="button" class="admin-btn-action" data-stock-product="${p.id}">Stock</button>
               <button type="button" class="admin-btn-action admin-btn-action--danger" data-delete-product="${p.id}">Delete</button>
             </div>
@@ -1576,6 +1647,10 @@
     // Wire action buttons
     tbody.querySelectorAll('[data-edit-product]').forEach(btn => {
       btn.addEventListener('click', () => editProduct(btn.dataset.editProduct));
+    });
+
+    tbody.querySelectorAll('[data-offer-product]').forEach(btn => {
+      btn.addEventListener('click', () => openProductOfferModal(btn.dataset.offerProduct));
     });
 
     tbody.querySelectorAll('[data-stock-product]').forEach(btn => {
@@ -1643,6 +1718,10 @@
         }
       });
     });
+
+    if (typeof renderActiveOffersSection === 'function') {
+      await renderActiveOffersSection();
+    }
   }
 
   let productSlugManual = false;
@@ -2012,6 +2091,8 @@
     if (fileInput) fileInput.value = '';
     const descInput = document.getElementById('productDescription');
     if (descInput) descInput.value = '';
+    const offerInput = document.getElementById('productOffer');
+    if (offerInput) offerInput.value = '';
 
     // Reset variants container and add initial variant with 1 attribute row
     const varContainer = document.getElementById('productVariantsContainer');
@@ -2056,6 +2137,10 @@
     document.getElementById('productSlug').value = prod.slug;
     document.getElementById('productAvailability').value = prod.availability;
     document.getElementById('productDescription').value = prod.description || '';
+    const offerInput = document.getElementById('productOffer');
+    if (offerInput) {
+      offerInput.value = (prod.offer !== undefined && prod.offer !== null && Number(prod.offer) > 0) ? prod.offer : '';
+    }
 
     // Populate images
     if (Array.isArray(prod.images) && prod.images.length > 0) {
@@ -2100,6 +2185,17 @@
       let slug = document.getElementById('productSlug').value.trim();
       const availability = document.getElementById('productAvailability').value;
       let description = document.getElementById('productDescription') ? document.getElementById('productDescription').value.trim() : '';
+
+      const offerInputVal = document.getElementById('productOffer') ? document.getElementById('productOffer').value.trim() : '';
+      let offer = null;
+      if (offerInputVal !== '') {
+        const parsedOffer = parseFloat(offerInputVal);
+        if (isNaN(parsedOffer) || parsedOffer < 0 || parsedOffer >= 100) {
+          showAdminToast('Offer percentage must be between 0% and 99.99% (below 100% and no negative values).', 'warning');
+          return;
+        }
+        if (parsedOffer > 0) offer = parsedOffer;
+      }
 
       if (!name || !brand || price <= 0) {
         showAdminToast('Please fill in product name, brand, and a valid price.', 'error');
@@ -2156,6 +2252,7 @@
             brand,
             category,
             price,
+            offer,
             stock,
             slug,
             availability,
@@ -2165,10 +2262,18 @@
           };
           if (id) {
             await API.updateProduct(id, payload);
-            showAdminToast(`Product "${name}" updated successfully.`);
+            if (offer !== null) {
+              showAdminToast('offer updated successfully');
+            } else {
+              showAdminToast(`Product "${name}" updated successfully.`);
+            }
           } else {
             await API.createProduct(payload);
-            showAdminToast(`Product "${name}" created successfully.`);
+            if (offer !== null) {
+              showAdminToast('offer updated successfully');
+            } else {
+              showAdminToast(`Product "${name}" created successfully.`);
+            }
           }
           await loadLiveProducts();
           closeModal('productModal');
@@ -2310,6 +2415,776 @@
         renderProducts();
         initDashboard();
       }
+    });
+  }
+
+  /* =========================================================================
+     6B. PRODUCT OFFERS & FREE GIFTS CONTROLLER
+     ========================================================================= */
+
+  let currentModalGifts = [];
+
+  function updateSingleOfferPreview(originalPrice, offerVal) {
+    const previewBox = document.getElementById('productOfferPreview');
+    const calcPriceEl = document.getElementById('productOfferCalculatedPrice');
+    const savingsEl = document.getElementById('productOfferSavingsText');
+    if (!previewBox || !calcPriceEl) return;
+
+    const offerNum = parseFloat(offerVal);
+    if (!isNaN(offerNum) && offerNum > 0 && offerNum < 100) {
+      const discounted = Math.round(originalPrice * (1 - offerNum / 100));
+      const savings = originalPrice - discounted;
+      calcPriceEl.textContent = formatRupees(discounted);
+      if (savingsEl) {
+        savingsEl.textContent = `Customer saves ${formatRupees(savings)} (${offerNum}% discount off store price)`;
+      }
+      previewBox.style.display = 'block';
+    } else {
+      previewBox.style.display = 'none';
+    }
+  }
+
+  let currentProductOfferGiftSearchQuery = '';
+
+  function renderModalGiftsAndDropdown(currentProductId) {
+    const listEl = document.getElementById('productOfferSelectedGiftsList');
+    const selectEl = document.getElementById('productOfferGiftSelect');
+    const noGiftsHint = document.getElementById('noGiftsHint');
+    const searchClear = document.getElementById('productOfferGiftSearchClear');
+    const searchCount = document.getElementById('productOfferGiftSearchCount');
+
+    if (listEl) {
+      if (currentModalGifts.length === 0) {
+        listEl.innerHTML = '';
+        if (noGiftsHint) noGiftsHint.style.display = 'block';
+      } else {
+        if (noGiftsHint) noGiftsHint.style.display = 'none';
+        listEl.innerHTML = currentModalGifts.map(g => {
+          const thumbHtml = g.primaryImage
+            ? `<img src="${g.primaryImage}" class="selected-gift-item__thumb" alt="${g.name}" onerror="this.style.display='none'"/>`
+            : `<span style="font-size:16px;">🎁</span>`;
+          return `
+            <div class="selected-gift-item" data-modal-gift-id="${g.id}">
+              <div class="selected-gift-item__info">
+                ${thumbHtml}
+                <div>
+                  <strong style="color:var(--color-text-primary); font-size:12px;">${g.name}</strong>
+                  <div style="font-size:11px; color:var(--color-text-muted);">
+                    ${g.brand ? `${g.brand} &bull; ` : ''}Store Value: ${formatRupees(g.price)}
+                    <span class="badge badge--success" style="font-size:9px; padding:1px 5px; margin-left:4px;">FREE GIFT</span>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="selected-gift-item__remove" data-remove-modal-gift="${g.id}" title="Remove this gift">&times;</button>
+            </div>
+          `;
+        }).join('');
+
+        listEl.querySelectorAll('[data-remove-modal-gift]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const idToRemove = btn.dataset.removeModalGift;
+            currentModalGifts = currentModalGifts.filter(g => g.id !== idToRemove);
+            renderModalGiftsAndDropdown(currentProductId);
+          });
+        });
+      }
+    }
+
+    // Populate dropdown with store products, strictly filtering out:
+    // 1. The product itself (cannot self-gift)
+    // 2. Any gift already in currentModalGifts (no duplicates allowed!)
+    // 3. Admin's search query across name, brand, category, or price
+    if (selectEl) {
+      const selectedIds = new Set(currentModalGifts.map(g => g.id));
+      let availableProducts = (data.products || []).filter(p => p.id !== currentProductId && !selectedIds.has(p.id));
+
+      const q = (currentProductOfferGiftSearchQuery || '').trim().toLowerCase();
+      if (q) {
+        availableProducts = availableProducts.filter(p => {
+          const name = (p.name || '').toLowerCase();
+          const brand = (p.brand || '').toLowerCase();
+          const cat = (p.category || '').toLowerCase();
+          const priceStr = String(p.price || '');
+          return name.includes(q) || brand.includes(q) || cat.includes(q) || priceStr.includes(q);
+        });
+      }
+
+      if (searchClear) searchClear.style.display = q ? 'block' : 'none';
+      if (searchCount) {
+        if (q) {
+          searchCount.style.display = 'block';
+          searchCount.textContent = `Found ${availableProducts.length} matching store item${availableProducts.length === 1 ? '' : 's'}`;
+        } else {
+          searchCount.style.display = 'none';
+        }
+      }
+
+      if (availableProducts.length === 0) {
+        selectEl.innerHTML = `<option value="">-- No matching store items found ${q ? `for "${q}"` : ''} --</option>`;
+      } else {
+        const placeholder = q
+          ? `-- Select matching gift (${availableProducts.length} items found) --`
+          : '-- Choose a store item as free gift (e.g. Home Theatre, Buds) --';
+        selectEl.innerHTML = `<option value="">${placeholder}</option>` +
+          availableProducts.map(p => `
+            <option value="${p.id}">
+              ${p.name} (${p.brand || 'Brand'} · ${p.category || 'General'}) - ${formatRupees(p.price)}
+            </option>
+          `).join('');
+
+        // If exactly 1 match when searching, auto-select it for fast adding
+        if (q && availableProducts.length === 1) {
+          selectEl.value = availableProducts[0].id;
+        }
+      }
+    }
+  }
+
+  function openProductOfferModal(id) {
+    const prod = data.products.find(p => p.id === id);
+    if (!prod) return;
+
+    const targetIdInput = document.getElementById('productOfferTargetId');
+    if (targetIdInput) targetIdInput.value = prod.id;
+
+    const targetImg = document.getElementById('productOfferTargetImg');
+    if (targetImg) {
+      targetImg.src = prod.primaryImage || '/assets/images/placeholder.png';
+      targetImg.alt = prod.name;
+    }
+
+    const targetBrand = document.getElementById('productOfferTargetBrand');
+    if (targetBrand) targetBrand.textContent = prod.brand || 'Brand';
+
+    const targetCat = document.getElementById('productOfferTargetCategory');
+    if (targetCat) targetCat.textContent = prod.category || 'General';
+
+    const targetNameEl = document.getElementById('productOfferTargetName');
+    if (targetNameEl) targetNameEl.textContent = `${prod.name}`;
+
+    const origPriceEl = document.getElementById('productOfferOrigPrice');
+    if (origPriceEl) origPriceEl.textContent = formatRupees(prod.price);
+
+    const offerInput = document.getElementById('productOfferInput');
+    const existingOffer = (prod.offer !== undefined && prod.offer !== null && Number(prod.offer) > 0) ? prod.offer : '';
+    if (offerInput) offerInput.value = existingOffer;
+
+    // Reset search query
+    currentProductOfferGiftSearchQuery = '';
+    const giftSearchInput = document.getElementById('productOfferGiftSearch');
+    if (giftSearchInput) giftSearchInput.value = '';
+
+    // Load existing gifts for this product
+    currentModalGifts = Array.isArray(prod.gifts) ? [...prod.gifts] : [];
+    renderModalGiftsAndDropdown(prod.id);
+
+    updateSingleOfferPreview(prod.price, existingOffer);
+    openModal('productOfferModal');
+  }
+
+  const productOfferAddGiftBtn = document.getElementById('productOfferAddGiftBtn');
+  if (productOfferAddGiftBtn) {
+    productOfferAddGiftBtn.addEventListener('click', () => {
+      const selectEl = document.getElementById('productOfferGiftSelect');
+      const giftId = selectEl ? selectEl.value : '';
+      if (!giftId) {
+        showAdminToast('Please select a store product from the dropdown to add as a free gift.', 'warning');
+        return;
+      }
+      const prodId = document.getElementById('productOfferTargetId')?.value;
+      const giftProduct = (data.products || []).find(p => p.id === giftId);
+      if (giftProduct) {
+        currentModalGifts.push({
+          id: giftProduct.id,
+          name: giftProduct.name,
+          brand: giftProduct.brand,
+          price: giftProduct.price,
+          category: giftProduct.category,
+          slug: giftProduct.slug,
+          primaryImage: giftProduct.primaryImage
+        });
+        // Clear search query on add so dropdown resets
+        currentProductOfferGiftSearchQuery = '';
+        const searchInput = document.getElementById('productOfferGiftSearch');
+        if (searchInput) searchInput.value = '';
+        renderModalGiftsAndDropdown(prodId);
+      }
+    });
+  }
+
+  const productOfferGiftSearch = document.getElementById('productOfferGiftSearch');
+  const productOfferGiftSearchClear = document.getElementById('productOfferGiftSearchClear');
+  if (productOfferGiftSearch) {
+    productOfferGiftSearch.addEventListener('input', () => {
+      currentProductOfferGiftSearchQuery = productOfferGiftSearch.value;
+      const prodId = document.getElementById('productOfferTargetId')?.value;
+      renderModalGiftsAndDropdown(prodId);
+    });
+
+    productOfferGiftSearch.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const selectEl = document.getElementById('productOfferGiftSelect');
+        if (selectEl && selectEl.value) {
+          productOfferAddGiftBtn?.click();
+        } else if (selectEl && selectEl.options.length > 1) {
+          selectEl.selectedIndex = 1;
+          productOfferAddGiftBtn?.click();
+        }
+      }
+    });
+  }
+
+  if (productOfferGiftSearchClear) {
+    productOfferGiftSearchClear.addEventListener('click', () => {
+      currentProductOfferGiftSearchQuery = '';
+      if (productOfferGiftSearch) productOfferGiftSearch.value = '';
+      const prodId = document.getElementById('productOfferTargetId')?.value;
+      renderModalGiftsAndDropdown(prodId);
+      if (productOfferGiftSearch) productOfferGiftSearch.focus();
+    });
+  }
+
+  const singleOfferInputEl = document.getElementById('productOfferInput');
+  if (singleOfferInputEl) {
+    singleOfferInputEl.addEventListener('input', () => {
+      const prodId = document.getElementById('productOfferTargetId')?.value;
+      const prod = data.products.find(p => p.id === prodId);
+      if (prod) {
+        updateSingleOfferPreview(prod.price, singleOfferInputEl.value.trim());
+      }
+    });
+  }
+
+  const saveProductOfferBtn = document.getElementById('saveProductOfferBtn');
+  if (saveProductOfferBtn) {
+    saveProductOfferBtn.addEventListener('click', async () => {
+      const prodId = document.getElementById('productOfferTargetId').value;
+      const valStr = document.getElementById('productOfferInput').value.trim();
+
+      let offerVal = null;
+      if (valStr !== '') {
+        const num = parseFloat(valStr);
+        if (isNaN(num) || num < 0 || num >= 100) {
+          showAdminToast('Offer percentage must be between 0% and 99.99% (below 100% and no negative values).', 'warning');
+          return;
+        }
+        if (num > 0) offerVal = num;
+      }
+
+      const giftProductIds = currentModalGifts.map(g => g.id);
+
+      if (useApi) {
+        try {
+          await API.updateProductOffer(prodId, offerVal, giftProductIds);
+          showAdminToast('offer updated successfully');
+          closeModal('productOfferModal');
+          await loadLiveProducts();
+          await renderProducts();
+          return;
+        } catch (err) {
+          showAdminToast(`Failed to update offer: ${err.message}`, 'error');
+          return;
+        }
+      }
+
+      const prod = data.products.find(p => p.id === prodId);
+      if (prod) {
+        prod.offer = offerVal;
+        prod.gifts = [...currentModalGifts];
+        showAdminToast('offer updated successfully');
+        closeModal('productOfferModal');
+        renderProducts();
+      }
+    });
+  }
+
+  const productOfferRemoveBtn = document.getElementById('productOfferRemoveBtn');
+  if (productOfferRemoveBtn) {
+    productOfferRemoveBtn.addEventListener('click', async () => {
+      const prodId = document.getElementById('productOfferTargetId').value;
+      if (useApi) {
+        try {
+          await API.updateProductOffer(prodId, null, []);
+          showAdminToast('offer updated successfully');
+          closeModal('productOfferModal');
+          await loadLiveProducts();
+          await renderProducts();
+          return;
+        } catch (err) {
+          showAdminToast(`Failed to clear offer: ${err.message}`, 'error');
+          return;
+        }
+      }
+
+      const prod = data.products.find(p => p.id === prodId);
+      if (prod) {
+        prod.offer = null;
+        prod.gifts = [];
+        showAdminToast('offer updated successfully');
+        closeModal('productOfferModal');
+        renderProducts();
+      }
+    });
+  }
+
+  /* ── Active Offers & Free Gifts Showcase Section Controller ── */
+  async function renderActiveOffersSection() {
+    const container = document.getElementById('activeOffersListContainer');
+    const badge = document.getElementById('activeOffersCountBadge');
+    if (!container) return;
+
+    let items = [];
+    if (useApi) {
+      try {
+        const res = await API.getActiveOffersAndGifts();
+        if (res && res.success && Array.isArray(res.data)) {
+          items = res.data;
+        }
+      } catch (e) {
+        console.warn('Could not fetch active offers from API, fallback to local products:', e);
+      }
+    }
+
+    if (!items.length) {
+      items = (data.products || []).filter(p => (Number(p.offer) > 0) || (Array.isArray(p.gifts) && p.gifts.length > 0)).map(p => {
+        const offerNum = Number(p.offer) || 0;
+        const priceNum = Number(p.price) || 0;
+        return {
+          id: p.id,
+          name: p.name,
+          brand: p.brand,
+          category: p.category,
+          price: priceNum,
+          offer: offerNum,
+          discountedPrice: offerNum > 0 ? Math.round(priceNum * (1 - offerNum / 100)) : priceNum,
+          primaryImage: p.primaryImage || '',
+          gifts: p.gifts || []
+        };
+      });
+    }
+
+    if (badge) {
+      badge.textContent = `${items.length} Active`;
+      badge.className = items.length > 0 ? 'badge badge--success' : 'badge';
+    }
+
+    if (items.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: var(--space-5) var(--space-3); color: var(--color-text-muted); background: var(--color-bg-secondary); border-radius: var(--radius-md);">
+          <div style="font-size: 24px; margin-bottom: 6px;">🎁</div>
+          <div style="font-size: var(--text-sm); font-weight: 600; color: var(--color-text-primary);">No active discounts or free gifts configured</div>
+          <div style="font-size: var(--text-xs); margin-top: 4px;">Click <strong>Offer</strong> on any product in the inventory below to set a discount or attach free store items like Home Theatres, Buds, etc.</div>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = items.map(item => {
+      const hasDiscount = item.offer > 0;
+      const gifts = item.gifts || [];
+      const hasGifts = gifts.length > 0;
+
+      const imgHtml = item.primaryImage
+        ? `<img src="${item.primaryImage}" alt="${item.name}" class="active-offer-card__thumb" onerror="this.style.display='none'"/>`
+        : `<div class="active-offer-card__thumb" style="display:flex;align-items:center;justify-content:center;color:var(--color-text-muted);font-size:18px;">🎁</div>`;
+
+      const giftsHtml = hasGifts
+        ? gifts.map(g => `
+            <span class="active-gift-chip">
+              🎁 <strong>${g.name}</strong> <span style="font-size: 11px; opacity: 0.8;">(${formatRupees(g.price)})</span>
+              <button type="button" class="gift-chip-remove-btn" data-remove-gift="${g.id}" data-parent-product="${item.id}" title="Remove ${g.name} as gift">&times;</button>
+            </span>
+          `).join('')
+        : `<span style="font-size: 11.5px; color: var(--color-text-muted); font-style: italic;">No free gifts attached</span>`;
+
+      return `
+        <div class="active-offer-card" data-active-product-id="${item.id}">
+          <div class="active-offer-card__product">
+            ${imgHtml}
+            <div class="active-offer-card__details">
+              <span class="active-offer-card__title">${item.name}</span>
+              <span class="active-offer-card__meta">${item.brand} &bull; ${item.category}</span>
+            </div>
+          </div>
+
+          <div class="active-offer-card__pricing">
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              ${hasDiscount ? `
+                <strong style="color: #047857; font-size: var(--text-sm);">${formatRupees(item.discountedPrice)}</strong>
+                <span class="admin-cell-product__slashed-price">${formatRupees(item.price)}</span>
+                <span class="admin-offer-badge" style="padding: 1px 6px; font-size: 10px;">${item.offer}% OFF</span>
+              ` : `
+                <strong style="font-size: var(--text-sm);">${formatRupees(item.price)}</strong>
+                <span style="font-size: 11px; color: var(--color-text-muted);">(No discount)</span>
+              `}
+            </div>
+            ${hasDiscount ? `
+              <div style="margin-top: 3px;">
+                <button type="button" class="btn btn--outline btn--xs" data-cancel-offer="${item.id}" style="color: #dc2626; border-color: #fca5a5; font-size: 10.5px; padding: 1px 6px;">
+                  Cancel % Offer
+                </button>
+              </div>
+            ` : ''}
+          </div>
+
+          <div class="active-offer-card__gifts-col">
+            <div style="font-size: 11px; font-weight: 700; color: var(--color-text-secondary); display: flex; align-items: center; justify-content: space-between;">
+              <span>Bundled Free Gifts (${gifts.length})</span>
+              ${gifts.length > 1 ? `
+                <button type="button" class="btn btn--outline btn--xs" data-remove-all-gifts="${item.id}" style="color: #dc2626; border-color: #fca5a5; font-size: 10px; padding: 1px 6px;">
+                  Remove All Gifts
+                </button>
+              ` : ''}
+            </div>
+            <div class="active-gifts-list">
+              ${giftsHtml}
+            </div>
+          </div>
+
+          <div class="active-offer-card__actions">
+            <button type="button" class="btn btn--outline btn--xs" data-manage-offer="${item.id}" style="font-weight: 600;">
+              Manage Offer / Gifts
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Wire actions
+    container.querySelectorAll('[data-cancel-offer]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const prodId = btn.dataset.cancelOffer;
+        if (useApi) {
+          try {
+            await API.cancelOffer(prodId);
+            showAdminToast('offer updated successfully');
+            await loadLiveProducts();
+            await renderProducts();
+            return;
+          } catch (err) {
+            showAdminToast(`Failed to cancel offer: ${err.message}`, 'error');
+            return;
+          }
+        }
+        const prod = data.products.find(p => p.id === prodId);
+        if (prod) {
+          prod.offer = null;
+          showAdminToast('offer updated successfully');
+          renderProducts();
+        }
+      });
+    });
+
+    container.querySelectorAll('[data-remove-gift]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const giftId = btn.dataset.removeGift;
+        const parentId = btn.dataset.parentProduct;
+        if (useApi) {
+          try {
+            await API.removeProductGift(parentId, giftId);
+            showAdminToast('offer updated successfully');
+            await loadLiveProducts();
+            await renderProducts();
+            return;
+          } catch (err) {
+            showAdminToast(`Failed to remove gift: ${err.message}`, 'error');
+            return;
+          }
+        }
+        const prod = data.products.find(p => p.id === parentId);
+        if (prod && prod.gifts) {
+          prod.gifts = prod.gifts.filter(g => g.id !== giftId);
+          showAdminToast('offer updated successfully');
+          renderProducts();
+        }
+      });
+    });
+
+    container.querySelectorAll('[data-remove-all-gifts]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const parentId = btn.dataset.removeAllGifts;
+        if (useApi) {
+          try {
+            await API.removeAllProductGifts(parentId);
+            showAdminToast('offer updated successfully');
+            await loadLiveProducts();
+            await renderProducts();
+            return;
+          } catch (err) {
+            showAdminToast(`Failed to remove all gifts: ${err.message}`, 'error');
+            return;
+          }
+        }
+        const prod = data.products.find(p => p.id === parentId);
+        if (prod) {
+          prod.gifts = [];
+          showAdminToast('offer updated successfully');
+          renderProducts();
+        }
+      });
+    });
+
+    container.querySelectorAll('[data-manage-offer]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        openProductOfferModal(btn.dataset.manageOffer);
+      });
+    });
+  }
+
+  const refreshActiveOffersBtn = document.getElementById('refreshActiveOffersBtn');
+  if (refreshActiveOffersBtn) {
+    refreshActiveOffersBtn.addEventListener('click', () => {
+      renderActiveOffersSection();
+    });
+  }
+
+  // Category Offer & Bundled Gifts Modal Handlers
+  let currentCategoryModalGifts = [];
+  let currentCategoryOfferGiftSearchQuery = '';
+
+  function renderCategoryModalGiftsAndDropdown() {
+    const listEl = document.getElementById('categoryOfferSelectedGiftsList');
+    const selectEl = document.getElementById('categoryOfferGiftSelect');
+    const noGiftsHint = document.getElementById('noCategoryGiftsHint');
+    const searchClear = document.getElementById('categoryOfferGiftSearchClear');
+    const searchCount = document.getElementById('categoryOfferGiftSearchCount');
+
+    if (listEl) {
+      if (currentCategoryModalGifts.length === 0) {
+        listEl.innerHTML = '';
+        if (noGiftsHint) noGiftsHint.style.display = 'block';
+      } else {
+        if (noGiftsHint) noGiftsHint.style.display = 'none';
+        listEl.innerHTML = currentCategoryModalGifts.map(g => {
+          const thumbHtml = g.primaryImage
+            ? `<img src="${g.primaryImage}" class="selected-gift-item__thumb" alt="${g.name}" onerror="this.style.display='none'"/>`
+            : `<span style="font-size:16px;">🎁</span>`;
+          return `
+            <div class="selected-gift-item" data-category-gift-id="${g.id}">
+              <div class="selected-gift-item__info">
+                ${thumbHtml}
+                <div>
+                  <strong style="color:var(--color-text-primary); font-size:12px;">${g.name}</strong>
+                  <div style="font-size:11px; color:var(--color-text-muted);">
+                    ${g.brand ? `${g.brand} &bull; ` : ''}Store Value: ${formatRupees(g.price)}
+                    <span class="badge badge--success" style="font-size:9px; padding:1px 5px; margin-left:4px;">FREE GIFT</span>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="selected-gift-item__remove" data-remove-category-gift="${g.id}" title="Remove this gift">&times;</button>
+            </div>
+          `;
+        }).join('');
+
+        listEl.querySelectorAll('[data-remove-category-gift]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const idToRemove = btn.dataset.removeCategoryGift;
+            currentCategoryModalGifts = currentCategoryModalGifts.filter(g => g.id !== idToRemove);
+            renderCategoryModalGiftsAndDropdown();
+          });
+        });
+      }
+    }
+
+    if (selectEl) {
+      const selectedIds = new Set(currentCategoryModalGifts.map(g => g.id));
+      let availableProducts = (data.products || []).filter(p => !selectedIds.has(p.id));
+
+      const q = (currentCategoryOfferGiftSearchQuery || '').trim().toLowerCase();
+      if (q) {
+        availableProducts = availableProducts.filter(p => {
+          const name = (p.name || '').toLowerCase();
+          const brand = (p.brand || '').toLowerCase();
+          const cat = (p.category || '').toLowerCase();
+          const priceStr = String(p.price || '');
+          return name.includes(q) || brand.includes(q) || cat.includes(q) || priceStr.includes(q);
+        });
+      }
+
+      if (searchClear) searchClear.style.display = q ? 'block' : 'none';
+      if (searchCount) {
+        if (q) {
+          searchCount.style.display = 'block';
+          searchCount.textContent = `Found ${availableProducts.length} matching store item${availableProducts.length === 1 ? '' : 's'}`;
+        } else {
+          searchCount.style.display = 'none';
+        }
+      }
+
+      if (availableProducts.length === 0) {
+        selectEl.innerHTML = `<option value="">-- No matching store items found ${q ? `for "${q}"` : ''} --</option>`;
+      } else {
+        const placeholder = q
+          ? `-- Select matching gift (${availableProducts.length} items found) --`
+          : '-- Choose a store item as category free gift (e.g. Soundbar, Buds) --';
+        selectEl.innerHTML = `<option value="">${placeholder}</option>` +
+          availableProducts.map(p => `
+            <option value="${p.id}">
+              ${p.name} (${p.brand || 'Brand'} · ${p.category || 'General'}) - ${formatRupees(p.price)}
+            </option>
+          `).join('');
+
+        // If exactly 1 match when searching, auto-select it for fast adding
+        if (q && availableProducts.length === 1) {
+          selectEl.value = availableProducts[0].id;
+        }
+      }
+    }
+  }
+
+  function initOrResetCategoryOfferModal() {
+    currentCategoryModalGifts = [];
+    currentCategoryOfferGiftSearchQuery = '';
+    const searchInput = document.getElementById('categoryOfferGiftSearch');
+    if (searchInput) searchInput.value = '';
+    const input = document.getElementById('categoryOfferInput');
+    if (input) input.value = '';
+    renderCategoryModalGiftsAndDropdown();
+  }
+
+  const categoryOfferAddGiftBtn = document.getElementById('categoryOfferAddGiftBtn');
+  if (categoryOfferAddGiftBtn) {
+    categoryOfferAddGiftBtn.addEventListener('click', () => {
+      const selectEl = document.getElementById('categoryOfferGiftSelect');
+      const giftId = selectEl ? selectEl.value : '';
+      if (!giftId) {
+        showAdminToast('Please select a store product from the dropdown to add as a free gift.', 'warning');
+        return;
+      }
+      const giftProduct = (data.products || []).find(p => p.id === giftId);
+      if (giftProduct) {
+        currentCategoryModalGifts.push({
+          id: giftProduct.id,
+          name: giftProduct.name,
+          brand: giftProduct.brand,
+          price: giftProduct.price,
+          category: giftProduct.category,
+          slug: giftProduct.slug,
+          primaryImage: giftProduct.primaryImage
+        });
+        // Clear search on add so list resets
+        currentCategoryOfferGiftSearchQuery = '';
+        const searchInput = document.getElementById('categoryOfferGiftSearch');
+        if (searchInput) searchInput.value = '';
+        renderCategoryModalGiftsAndDropdown();
+      }
+    });
+  }
+
+  const categoryOfferGiftSearch = document.getElementById('categoryOfferGiftSearch');
+  const categoryOfferGiftSearchClear = document.getElementById('categoryOfferGiftSearchClear');
+  if (categoryOfferGiftSearch) {
+    categoryOfferGiftSearch.addEventListener('input', () => {
+      currentCategoryOfferGiftSearchQuery = categoryOfferGiftSearch.value;
+      renderCategoryModalGiftsAndDropdown();
+    });
+
+    categoryOfferGiftSearch.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const selectEl = document.getElementById('categoryOfferGiftSelect');
+        if (selectEl && selectEl.value) {
+          categoryOfferAddGiftBtn?.click();
+        } else if (selectEl && selectEl.options.length > 1) {
+          selectEl.selectedIndex = 1;
+          categoryOfferAddGiftBtn?.click();
+        }
+      }
+    });
+  }
+
+  if (categoryOfferGiftSearchClear) {
+    categoryOfferGiftSearchClear.addEventListener('click', () => {
+      currentCategoryOfferGiftSearchQuery = '';
+      if (categoryOfferGiftSearch) categoryOfferGiftSearch.value = '';
+      renderCategoryModalGiftsAndDropdown();
+      if (categoryOfferGiftSearch) categoryOfferGiftSearch.focus();
+    });
+  }
+
+  const saveCategoryOfferBtn = document.getElementById('saveCategoryOfferBtn');
+  if (saveCategoryOfferBtn) {
+    saveCategoryOfferBtn.addEventListener('click', async () => {
+      const category = document.getElementById('categoryOfferSelect').value;
+      const valStr = document.getElementById('categoryOfferInput').value.trim();
+      const giftProductIds = currentCategoryModalGifts.map(g => g.id);
+
+      let offerVal = null;
+      if (valStr !== '') {
+        const num = parseFloat(valStr);
+        if (isNaN(num) || num < 0 || num >= 100) {
+          showAdminToast('Offer percentage must be between 0% and 99.99% (below 100% and no negative values).', 'warning');
+          return;
+        }
+        if (num > 0) offerVal = num;
+      }
+
+      if (offerVal === null && giftProductIds.length === 0) {
+        showAdminToast('Please enter an offer percentage or select at least one free gift to apply to this category.', 'warning');
+        return;
+      }
+
+      if (useApi) {
+        try {
+          await API.updateCategoryOffer(category, offerVal, giftProductIds, false);
+          showAdminToast('offer updated successfully');
+          closeModal('categoryOfferModal');
+          await loadLiveProducts();
+          await renderProducts();
+          return;
+        } catch (err) {
+          showAdminToast(`Failed to update category offer: ${err.message}`, 'error');
+          return;
+        }
+      }
+
+      // Mock update fallback
+      data.products.forEach(p => {
+        if (category === 'all' || p.category.toLowerCase() === category.toLowerCase()) {
+          if (offerVal !== null) p.offer = offerVal;
+          if (giftProductIds.length > 0) {
+            p.gifts = [...currentCategoryModalGifts];
+          }
+        }
+      });
+      showAdminToast('offer updated successfully');
+      closeModal('categoryOfferModal');
+      renderProducts();
+    });
+  }
+
+  const clearCategoryOfferBtn = document.getElementById('clearCategoryOfferBtn');
+  if (clearCategoryOfferBtn) {
+    clearCategoryOfferBtn.addEventListener('click', async () => {
+      const category = document.getElementById('categoryOfferSelect').value;
+      if (useApi) {
+        try {
+          await API.updateCategoryOffer(category, null, [], true);
+          showAdminToast('offer updated successfully');
+          closeModal('categoryOfferModal');
+          await loadLiveProducts();
+          await renderProducts();
+          return;
+        } catch (err) {
+          showAdminToast(`Failed to clear category offers: ${err.message}`, 'error');
+          return;
+        }
+      }
+
+      // Mock update fallback
+      data.products.forEach(p => {
+        if (category === 'all' || p.category.toLowerCase() === category.toLowerCase()) {
+          p.offer = null;
+          p.gifts = [];
+        }
+      });
+      showAdminToast('offer updated successfully');
+      closeModal('categoryOfferModal');
+      renderProducts();
     });
   }
 

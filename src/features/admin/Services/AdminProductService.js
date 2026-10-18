@@ -186,6 +186,16 @@ export class AdminProductService {
         stock: data.stock !== undefined ? Math.max(0, parseInt(data.stock, 10) || 0) : 0
       };
 
+      if (data.offer !== undefined && data.offer !== null && data.offer !== '') {
+        const offerNum = parseFloat(data.offer);
+        if (isNaN(offerNum) || offerNum < 0 || offerNum >= 100) {
+          const error = new Error('Offer percentage must be between 0% and 99.99% (below 100% and no negative values)');
+          error.status = 400;
+          throw error;
+        }
+        createData.offer = offerNum > 0 ? offerNum : null;
+      }
+
       const rawImages = data.images || data.productImages;
       if (Array.isArray(rawImages) && rawImages.length > 0) {
         const resolvedImages = await this._resolveProductImageList(rawImages, category.name || data.category);
@@ -217,6 +227,11 @@ export class AdminProductService {
             });
           }
         }
+      }
+
+      // If gifts provided, sync them linked to the product
+      if (Array.isArray(data.giftProductIds) && data.giftProductIds.length > 0) {
+        await this.repository.syncProductGifts(product.id, data.giftProductIds);
       }
 
       return {
@@ -278,6 +293,20 @@ export class AdminProductService {
         }
       }
 
+      if (data.offer !== undefined) {
+        if (data.offer === null || data.offer === '' || Number(data.offer) === 0) {
+          updateData.offer = null;
+        } else {
+          const offerNum = parseFloat(data.offer);
+          if (isNaN(offerNum) || offerNum < 0 || offerNum >= 100) {
+            const error = new Error('Offer percentage must be between 0% and 99.99% (below 100% and no negative values)');
+            error.status = 400;
+            throw error;
+          }
+          updateData.offer = offerNum;
+        }
+      }
+
       // If category or categoryId is being updated, check if category exists
       const categoryIdentifier = data.categoryId || data.category;
       if (categoryIdentifier) {
@@ -325,6 +354,11 @@ export class AdminProductService {
             });
           }
         }
+      }
+
+      // If gifts explicitly provided, re-sync them
+      if (Array.isArray(data.giftProductIds)) {
+        await this.repository.syncProductGifts(id, data.giftProductIds);
       }
 
       return {
@@ -392,6 +426,157 @@ export class AdminProductService {
     } catch (err) {
       const error = err.status ? err : new Error(`Failed to toggle visibility: ${err.message}`);
       if (!error.status) error.status = 500;
+      throw error;
+    }
+  }
+
+  /**
+   * Update offer and gifts for a specific product
+   */
+  async updateOffer(id, offer, giftProductIds = undefined) {
+    try {
+      const existing = await this.repository.findById(id);
+      if (!existing) {
+        const error = new Error('Product not found');
+        error.status = 404;
+        throw error;
+      }
+
+      let parsedOffer = null;
+      if (offer !== undefined && offer !== null && offer !== '') {
+        parsedOffer = parseFloat(offer);
+        if (isNaN(parsedOffer) || parsedOffer < 0 || parsedOffer >= 100) {
+          const error = new Error('Offer percentage must be between 0% and 99.99% (below 100% and no negative values)');
+          error.status = 400;
+          throw error;
+        }
+        if (parsedOffer === 0) parsedOffer = null;
+      }
+
+      const updated = await this.repository.updateOffer(id, parsedOffer);
+
+      if (giftProductIds !== undefined) {
+        await this.repository.syncProductGifts(id, giftProductIds);
+      }
+
+      const gifts = await this.repository.getProductGifts(id);
+
+      return {
+        success: true,
+        message: 'offer updated successfully',
+        data: {
+          ...updated,
+          gifts
+        }
+      };
+    } catch (err) {
+      const error = err.status ? err : new Error(`Failed to update offer: ${err.message}`);
+      if (!error.status) error.status = 500;
+      throw error;
+    }
+  }
+
+  /**
+   * Update offer for an entire category
+   */
+  async updateCategoryOffer(categoryIdentifier, offer, giftProductIds, clearGifts = false) {
+    try {
+      if (!categoryIdentifier) {
+        const error = new Error('Category is required');
+        error.status = 400;
+        throw error;
+      }
+
+      let parsedOffer = null;
+      if (offer !== undefined && offer !== null && offer !== '') {
+        parsedOffer = parseFloat(offer);
+        if (isNaN(parsedOffer) || parsedOffer < 0 || parsedOffer >= 100) {
+          const error = new Error('Offer percentage must be between 0% and 99.99% (below 100% and no negative values)');
+          error.status = 400;
+          throw error;
+        }
+        if (parsedOffer === 0) parsedOffer = null;
+      }
+
+      const result = await this.repository.updateCategoryOffer(categoryIdentifier, parsedOffer, giftProductIds, clearGifts);
+
+      return {
+        success: true,
+        message: 'offer updated successfully',
+        data: result
+      };
+    } catch (err) {
+      const error = err.status ? err : new Error(`Failed to update category offer: ${err.message}`);
+      if (!error.status) error.status = 500;
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch active offers and gifts
+   */
+  async getActiveOffersAndGifts() {
+    try {
+      const items = await this.repository.getActiveOffersAndGifts();
+      return {
+        success: true,
+        count: items.length,
+        data: items
+      };
+    } catch (err) {
+      const error = new Error(`Failed to fetch active offers and gifts: ${err.message}`);
+      error.status = 500;
+      throw error;
+    }
+  }
+
+  /**
+   * Remove a single gift link
+   */
+  async removeGift(productId, giftProductId) {
+    try {
+      await this.repository.removeGift(productId, giftProductId);
+      return {
+        success: true,
+        message: 'Gift removed successfully'
+      };
+    } catch (err) {
+      const error = new Error(`Failed to remove gift: ${err.message}`);
+      error.status = 500;
+      throw error;
+    }
+  }
+
+  /**
+   * Remove all gifts from a product
+   */
+  async removeAllGifts(productId) {
+    try {
+      await this.repository.removeAllGifts(productId);
+      return {
+        success: true,
+        message: 'All gifts removed successfully'
+      };
+    } catch (err) {
+      const error = new Error(`Failed to remove all gifts: ${err.message}`);
+      error.status = 500;
+      throw error;
+    }
+  }
+
+  /**
+   * Cancel / clear discount offer on a product
+   */
+  async cancelOffer(productId) {
+    try {
+      await this.repository.updateOffer(productId, null);
+      return {
+        success: true,
+        message: 'Offer cancelled successfully'
+      };
+    } catch (err) {
+      const error = new Error(`Failed to cancel offer: ${err.message}`);
+      error.status = 500;
       throw error;
     }
   }

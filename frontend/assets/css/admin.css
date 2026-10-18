@@ -2522,4 +2522,304 @@
   color: var(--color-danger-600, #dc2626);
 }
 
+/* ── Product Offers Styling ── */
+.admin-offer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+  padding: 2px 8px;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.admin-cell-product__slashed-price {
+  font-size: 11px;
+  text-decoration: line-through;
+  color: var(--color-text-muted);
+}
+
+.admin-cell-product__discounted-price {
+  font-weight: var(--font-bold);
+  color: #047857;
+}
+
+/* ── Free Gifts & Active Offers Section Styling ── */
+.admin-gift-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #fdf2f8;
+  color: #be185d;
+  border: 1px solid #fbcfe8;
+  padding: 2px 7px;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-top: 3px;
+}
+
+.active-offer-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-primary, #ffffff);
+  border: 1px solid var(--color-border-light, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  margin-bottom: var(--space-3);
+  transition: all 0.2s ease;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.active-offer-card:hover {
+  border-color: #f472b6;
+  box-shadow: 0 2px 10px rgba(219, 39, 119, 0.06);
+}
+
+.active-offer-card:last-child {
+  margin-bottom: 0;
+}
+
+.active-offer-card__product {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 220px;
+  flex: 1 1 240px;
+}
+
+.active-offer-card__thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md, 6px);
+  background: var(--color-bg-secondary, #f1f5f9);
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border-light, #e2e8f0);
+}
+
+.active-offer-card__details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.active-offer-card__title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+}
+
+.active-offer-card__meta {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.active-offer-card__pricing {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 140px;
+}
+
+.active-offer-card__gifts-col {
+  flex: 2 1 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.active-gifts-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.active-gift-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fdf4ff;
+  border: 1px solid #f0abfc;
+  color: #701a75;
+  padding: 3px 8px;
+  border-radius: var(--radius-md, 6px);
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+.gift-chip-remove-btn {
+  background: none;
+  border: none;
+  color: #a21caf;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1;
+  padding: 0 3px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.gift-chip-remove-btn:hover {
+  color: #ffffff;
+  background: #dc2626;
+}
+
+.active-offer-card__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* Modal gift selection list */
+.selected-gifts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: var(--space-2);
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.selected-gift-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-bg-secondary, #f8fafc);
+  border: 1px solid var(--color-border-light, #e2e8f0);
+  border-radius: var(--radius-md, 6px);
+  padding: 6px 10px;
+  font-size: 12.5px;
+}
+
+.selected-gift-item__info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.selected-gift-item__thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  object-fit: cover;
+  background: #e2e8f0;
+  flex-shrink: 0;
+}
+
+.selected-gift-item__remove {
+  background: none;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+
+.selected-gift-item__remove:hover {
+  background: #fee2e2;
+}
+
+/* Product target preview in modal */
+.modal-product-summary-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--color-bg-secondary, #f8fafc);
+  border: 1px solid var(--color-border-light, #e2e8f0);
+  padding: 12px 14px;
+  border-radius: var(--radius-md, 8px);
+  margin-bottom: var(--space-4);
+}
+
+.modal-product-summary-thumb {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid var(--color-border-light, #e2e8f0);
+  flex-shrink: 0;
+}
+
+.modal-product-summary-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+  flex: 1;
+}
+
+/* Gift picker row: clean wide select + robust button */
+.gift-picker-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+
+.gift-picker-select {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.gift-picker-add-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+}
+
+.gift-search-wrap {
+  width: 100%;
+}
+
+.gift-search-input {
+  width: 100%;
+  background: var(--color-bg-primary, #ffffff);
+  border: 1px solid var(--color-border-light, #cbd5e1);
+  border-radius: var(--radius-md, 6px);
+  transition: all 0.2s ease;
+}
+
+.gift-search-input:focus {
+  border-color: var(--color-primary-600, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  outline: none;
+}
+
+.gift-empty-state {
+  text-align: center;
+  padding: 14px 12px;
+  background: var(--color-bg-secondary, #f8fafc);
+  border: 1px dashed var(--color-border-light, #cbd5e1);
+  border-radius: var(--radius-md, 8px);
+  margin-top: 6px;
+}
+
+
+
+
 

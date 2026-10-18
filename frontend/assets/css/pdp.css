@@ -633,13 +633,53 @@
   transition: max-height 0.4s var(--ease-out);
 }
 
-.pdp-description__body--collapsed { max-height: 1.625em; }
-.pdp-description__body--expanded  { max-height: 1000px; }
+.pdp-description__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2-5, 10px);
+}
+
+.pdp-description__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3, 12px);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+.pdp-description__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-primary-700);
+  flex-shrink: 0;
+  margin-top: 7px;
+}
+
+.pdp-description__text {
+  flex: 1;
+}
+
+.pdp-description__body--collapsed {
+  max-height: 88px;
+  -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
+}
+
+.pdp-description__body--expanded {
+  max-height: 2500px;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
 
 .pdp-description__toggle {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: 6px;
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
   color: var(--color-primary-700);
@@ -647,14 +687,23 @@
   border: none;
   cursor: pointer;
   margin-top: var(--space-3);
-  padding: 0;
+  padding: 4px 0;
   font-family: inherit;
   transition: color 0.15s ease;
 }
 
-.pdp-description__toggle:hover { color: var(--color-primary-800); }
-.pdp-description__toggle svg { width: 16px; height: 16px; transition: transform 0.25s ease; }
-.pdp-description__toggle.expanded svg { transform: rotate(180deg); }
+.pdp-description__toggle:hover {
+  color: var(--color-primary-800);
+}
+
+.pdp-description__toggle .pdp-desc-arrow {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
 
 /* =============================================
    SPECIFICATIONS TABLE

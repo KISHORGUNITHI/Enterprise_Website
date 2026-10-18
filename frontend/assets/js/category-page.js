@@ -150,6 +150,13 @@
               ? `<span class="plp-card__price-discount">${p.discount}% off</span>`
               : ''}
           </div>
+          ${(p.gifts && p.gifts.length > 0) ? `
+            <div style="margin-top: 6px;">
+              <span style="display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; color:#9d174d; background:#fdf2f8; border:1px solid #fbcfe8; border-radius:4px; padding:2px 6px;">
+                🎁 Free Gift: ${p.gifts[0].name}${p.gifts.length > 1 ? ` +${p.gifts.length - 1} more` : ''}
+              </span>
+            </div>
+          ` : ''}
         </div>
         <div class="plp-card__footer">
           <a href="${route}" class="btn btn--primary plp-card__cta">
@@ -392,13 +399,21 @@
             rating:        parseFloat(p.rating) || 0,
             reviews:       p.reviews || 0,
             originalPrice: price,
-            salePrice:     price,
-            discount:      0,
+            salePrice:     (p.offer && parseFloat(p.offer) > 0) ? Math.round(price * (1 - parseFloat(p.offer) / 100)) : price,
+            discount:      (p.offer && parseFloat(p.offer) > 0) ? parseFloat(p.offer) : 0,
             availability:  p.availability,
             badge:         isAvailable ? (SLUG === 'trending' ? 'Trending' : 'In Stock') : 'Out of Stock',
             badgeType:     isAvailable ? (SLUG === 'trending' ? 'accent' : 'success') : 'primary',
             color:         CATEGORY_COLORS[slug] || '#1e3d8f',
             imageUrl:      primaryImg,
+            gifts: (p.giftsGiven || []).map(g => ({
+              id: g.giftProduct?.id,
+              name: g.giftProduct?.name,
+              brand: g.giftProduct?.brand,
+              price: parseFloat(g.giftProduct?.price) || 0,
+              slug: g.giftProduct?.slug,
+              imageUrl: g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || ''
+            })),
           };
         });
 

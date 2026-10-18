@@ -21,6 +21,15 @@ export class ProductRepository {
         productImages: true,
         category: true,
         variants: VARIANT_INCLUDE,
+        giftsGiven: {
+          include: {
+            giftProduct: {
+              include: {
+                productImages: true
+              }
+            }
+          }
+        },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -108,6 +117,15 @@ export class ProductRepository {
         productImages: true,
         category: true,
         variants: VARIANT_INCLUDE,
+        giftsGiven: {
+          include: {
+            giftProduct: {
+              include: {
+                productImages: true
+              }
+            }
+          }
+        },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -125,6 +143,15 @@ export class ProductRepository {
         productImages: true,
         category: true,
         variants: VARIANT_INCLUDE,
+        giftsGiven: {
+          include: {
+            giftProduct: {
+              include: {
+                productImages: true
+              }
+            }
+          }
+        },
         productReviews: {
           include: { user: true },
           orderBy: { createdAt: 'desc' },

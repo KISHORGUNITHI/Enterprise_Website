@@ -116,11 +116,17 @@
     const displayList = products.slice(0, 10);
 
     track.innerHTML = displayList.map((p) => {
-      const price         = parseFloat(p.price) || 0;
-      const originalPrice = parseFloat(p.originalPrice) || 0;
+      const basePrice     = parseFloat(p.price) || 0;
+      const offer         = parseFloat(p.offer) || 0;
+      let price           = basePrice;
+      let originalPrice   = parseFloat(p.originalPrice) || 0;
       let discount        = parseInt(p.discount, 10) || 0;
 
-      if (!discount && originalPrice > price) {
+      if (offer > 0) {
+        discount = offer;
+        originalPrice = basePrice;
+        price = Math.round(basePrice * (1 - offer / 100));
+      } else if (!discount && originalPrice > price) {
         discount = Math.round(((originalPrice - price) / originalPrice) * 100);
       }
 

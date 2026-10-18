@@ -95,6 +95,27 @@
     toast.hideTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
   }
 
+  function escapeHtml(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[&<>"']/g, m => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[m]);
+  }
+
+  function formatDescriptionToBullets(desc) {
+    if (!desc || typeof desc !== 'string') return [];
+    // Break content right after comma (,) or period (.), preserving decimals (1.5), thousands (50,000), and common abbreviations (sq.ft, etc.)
+    const re = /(?<=(?:\D,|[0-9],(?!\d)|(?<!\b(?:sq|approx|etc|eg|ie))\.(?!\d)))\s*(?![.,])|\n+/i;
+    return desc
+      .split(re)
+      .map(s => s.replace(/^[-•*]\s*/, '').trim())
+      .filter(s => /[a-zA-Z0-9]/.test(s));
+  }
+
   // ─── DOM refs ─────────────────────────────────────────────────────────────
   const mainImg     = document.getElementById('pdpMainImg');
   const pdpBadge    = document.getElementById('pdpBadge');
@@ -313,7 +334,12 @@
         selectedVariants[g] = av.displayValue || av.value;
       });
       if (currentSelectedVariant.priceOverride) {
-        product.salePrice = parseFloat(currentSelectedVariant.priceOverride);
+        const rawOverride = parseFloat(currentSelectedVariant.priceOverride);
+        product.basePrice = rawOverride;
+        product.originalPrice = rawOverride;
+        product.salePrice = (product.discount && product.discount > 0)
+          ? Math.round(rawOverride * (1 - product.discount / 100))
+          : rawOverride;
       }
       product.availability = currentSelectedVariant.availability;
     }
@@ -365,10 +391,42 @@
     if (priceSave) {
       priceSave.textContent = save > 0 ? `Save ${fmt(save)}` : '';
     }
-    if (emiNote) {
-      emiNote.innerHTML = product.emi
-        ? `No cost EMI from <strong>${fmt(product.emi.from)}/mo</strong> · ${product.emi.months} months`
-        : '';
+
+    // Render Free Gifts Banner
+    const freeGiftsBanner = document.getElementById('pdpFreeGiftsBanner');
+    if (freeGiftsBanner) {
+      const gifts = product.gifts || [];
+      if (gifts.length > 0) {
+        freeGiftsBanner.style.display = 'block';
+        freeGiftsBanner.innerHTML = `
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 8px;">
+            <div style="display:flex; align-items:center; gap: 8px;">
+              <span style="font-size: 20px;">🎁</span>
+              <div>
+                <strong style="color: #831843; font-size: 14px;">Special Promotional Offer: Free Gift${gifts.length > 1 ? 's' : ''} Included!</strong>
+                <div style="font-size: 11.5px; color: #9d174d;">You will receive this store item 100% free with your purchase.</div>
+              </div>
+            </div>
+            <span class="badge badge--success" style="font-size: 11px; font-weight: 700; background: #059669; color: white;">FREE GIFT</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap: 8px; margin-top: 6px;">
+            ${gifts.map(g => `
+              <div style="display:flex; align-items:center; justify-content:space-between; background: rgba(255,255,255,0.9); border-radius: 8px; padding: 8px 12px; border: 1px solid #fbcfe8;">
+                <div style="display:flex; align-items:center; gap: 10px;">
+                  ${g.imageUrl ? `<img src="${g.imageUrl}" style="width: 38px; height: 38px; object-fit: cover; border-radius: 6px; border: 1px solid #f472b6;" alt="${g.name}"/>` : `<span style="font-size: 20px;">🎁</span>`}
+                  <div>
+                    <strong style="color: #1e293b; font-size: 13px;">${g.name}</strong>
+                    <div style="font-size: 11px; color: #64748b;">${g.brand ? `${g.brand} &bull; ` : ''}Store Value: <span style="text-decoration: line-through;">${fmt(g.price)}</span> <strong style="color: #059669; margin-left: 4px;">₹0 Free</strong></div>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        freeGiftsBanner.style.display = 'none';
+        freeGiftsBanner.innerHTML = '';
+      }
     }
 
     // Sticky bar price
@@ -656,22 +714,17 @@
         }
 
         // Update displayed prices
-        const origPrice = product.originalPrice || activePrice;
-        const save = origPrice - activePrice;
+        const offer = (currentProductData && currentProductData.discount) || 0;
+        const origPrice = activePrice;
+        const finalSalePrice = offer > 0 ? Math.round(activePrice * (1 - offer / 100)) : activePrice;
+        const save = origPrice - finalSalePrice;
 
-        if (priceSale) priceSale.textContent = fmt(activePrice);
-        if (barPrice) barPrice.textContent = fmt(activePrice);
+        if (priceSale) priceSale.textContent = fmt(finalSalePrice);
+        if (barPrice) barPrice.textContent = fmt(finalSalePrice);
         if (priceOrig) priceOrig.textContent = save > 0 ? fmt(origPrice) : '';
+        if (priceDis) priceDis.textContent = offer > 0 ? `${offer}% off` : '';
         if (priceSave) priceSave.textContent = save > 0 ? `Save ${fmt(save)}` : '';
 
-        // Recalculate EMI
-        const emiMonthly = Math.ceil(activePrice / 12);
-        if (emiNote) {
-          emiNote.innerHTML = `No cost EMI from <strong>${fmt(emiMonthly)}/mo</strong> · 12 months`;
-        }
-        if (barEmi) {
-          barEmi.textContent = `EMI from ${fmt(emiMonthly)}/mo`;
-        }
 
         // Update badge
         if (pdpBadge) {
@@ -757,35 +810,66 @@
       ).join('');
     }
 
+    // ─── Description ────────────────────────────────────────────────────────
+    function updateDescToggleUI(expanded) {
+      if (!descToggle) return;
+      descToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      descToggle.innerHTML = expanded
+        ? `Read Less <svg class="pdp-desc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>`
+        : `Read More <svg class="pdp-desc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>`;
+    }
+
     if (descBody && product.description) {
-      descBody.textContent = product.description;
-      
+      const bullets = formatDescriptionToBullets(product.description);
+      if (bullets.length > 0) {
+        descBody.innerHTML = `
+          <ul class="pdp-description__list">
+            ${bullets.map(b => `
+              <li class="pdp-description__item">
+                <span class="pdp-description__dot" aria-hidden="true"></span>
+                <span class="pdp-description__text">${escapeHtml(b)}</span>
+              </li>`).join('')}
+          </ul>`;
+      } else {
+        descBody.textContent = product.description;
+      }
+
       // Temporarily expand to measure total height
       descBody.classList.remove('pdp-description__body--collapsed');
+      descBody.classList.remove('pdp-description__body--expanded');
       descBody.style.maxHeight = 'none';
-      
+
       const scrollHeight = descBody.scrollHeight;
-      
-      // 1 line is ~23px (14px * 1.625). 2 lines is ~46px.
-      // Safe threshold to distinguish 1 line from 2+ lines is 34px.
-      if (scrollHeight <= 34) {
+      descBody.style.maxHeight = '';
+
+      // If description fits comfortably in 2 bullet items (approx <= 88px) or has <= 2 bullets, hide toggle
+      if (bullets.length <= 2 && scrollHeight <= 88) {
+        descBody.classList.remove('pdp-description__body--collapsed');
+        descBody.classList.remove('pdp-description__body--expanded');
         if (descToggle) descToggle.style.display = 'none';
       } else {
         descBody.classList.add('pdp-description__body--collapsed');
-        if (descToggle) descToggle.style.display = 'inline-flex';
+        descBody.classList.remove('pdp-description__body--expanded');
+        if (descToggle) {
+          descToggle.classList.remove('expanded');
+          descToggle.style.display = 'inline-flex';
+          updateDescToggleUI(false);
+        }
       }
-      descBody.style.maxHeight = '';
+    } else {
+      if (descBody) descBody.innerHTML = '';
+      if (descToggle) descToggle.style.display = 'none';
     }
 
     if (descToggle) {
-      descToggle.addEventListener('click', () => {
-        const expanded = descToggle.classList.toggle('expanded');
-        descBody.classList.toggle('pdp-description__body--collapsed', !expanded);
-        descBody.classList.toggle('pdp-description__body--expanded',   expanded);
-        descToggle.innerHTML = expanded
-          ? `Read Less <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="4 10 8 6 12 10"/></svg>`
-          : `Read More <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="4 6 8 10 12 6"/></svg>`;
-      });
+      descToggle.onclick = () => {
+        const isCurrentlyExpanded = descBody.classList.contains('pdp-description__body--expanded');
+        const willExpand = !isCurrentlyExpanded;
+        descToggle.classList.toggle('expanded', willExpand);
+        descBody.classList.toggle('pdp-description__body--collapsed', !willExpand);
+        descBody.classList.toggle('pdp-description__body--expanded', willExpand);
+        updateDescToggleUI(willExpand);
+      };
     }
 
     // ─── Specifications ─────────────────────────────────────────────────────
@@ -846,26 +930,6 @@
         </div>` : ''}`;
     }
 
-    // ─── EMI card ───────────────────────────────────────────────────────────
-    if (emiEl && product.emi) {
-      emiEl.innerHTML = `
-        <div class="pdp-emi__header">
-          <p class="pdp-emi__title">Need EMI?</p>
-          <span class="pdp-emi__badge">0% Interest</span>
-        </div>
-        <p class="pdp-emi__desc">Reach out to us to know your EMI eligibility. Instant approval, zero paperwork.</p>
-        <div class="pdp-emi__partners">
-          <div class="pdp-emi__partner" style="background:#cc0000;"><span>TVS Credit</span></div>
-          <div class="pdp-emi__partner" style="background:#00008b;"><span>Bajaj Finserv</span></div>
-        </div>
-        <a href="tel:9963657799" class="btn btn--accent pdp-emi__cta">
-          <svg class="icon icon--sm" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-          </svg>
-          Know Eligibility
-        </a>`;
-    }
-
     // ─── Related products carousel ──────────────────────────────────────────
     loadRelatedProducts(product);
 
@@ -877,27 +941,61 @@
   async function loadRelatedProducts(currentProduct) {
     if (!relTrack) return;
 
-    const cat = currentProduct.relatedCategory || currentProduct.category;
+    let cat = currentProduct.relatedCategory || currentProduct.category;
+    if (typeof cat === 'object' && cat !== null) {
+      cat = cat.slug || cat.name || cat.id || '';
+    }
     if (!cat) return;
 
+    const SLUG_ALIASES = { mobile: 'mobiles', tv: 'tvs', ac: 'acs' };
+    const normalizedCat = SLUG_ALIASES[cat.toLowerCase()] || cat;
+
     try {
-      const res = await fetch(`/api/products/category/${encodeURIComponent(cat)}`);
+      const res = await fetch(`/api/products/category/${encodeURIComponent(normalizedCat)}`);
       const json = await res.json();
       
       if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-        const others = json.data.filter(p => p.slug !== currentProduct.slug && p.id !== currentProduct.dbId);
+        const others = json.data.filter(p => p.slug !== currentProduct.slug && p.id !== currentProduct.dbId && p.id !== currentProduct.id);
         
         if (others.length > 0) {
-          renderRelatedTrack(others.map(p => ({
-            id: p.slug || p.id,
-            brand: p.brand,
-            name: p.name,
-            salePrice: parseFloat(p.price) || 0,
-            discount: 0,
-            imageUrl: p.productImages?.[0]?.imageUrl || '',
-            badge: p.availability === 'AVAILABLE' ? 'In Stock' : 'Out of Stock',
-            badgeType: p.availability === 'AVAILABLE' ? 'success' : 'primary',
-          })));
+          renderRelatedTrack(others.map(p => {
+            const rawPrice = parseFloat(p.price) || 0;
+            const offerVal = (p.offer !== undefined && p.offer !== null && !isNaN(parseFloat(p.offer))) ? parseFloat(p.offer) : 0;
+            const hasOffer = offerVal > 0;
+            const salePrice = hasOffer ? Math.round(rawPrice * (1 - offerVal / 100)) : rawPrice;
+            const originalPrice = hasOffer ? rawPrice : ((p.originalPrice && p.originalPrice > rawPrice) ? p.originalPrice : rawPrice);
+            const discount = hasOffer ? offerVal : (p.discount || 0);
+
+            const primaryImg = p.productImages?.find(img => img.isPrimary)?.imageUrl
+              || p.productImages?.[0]?.imageUrl
+              || p.imageUrl
+              || '';
+
+            const isAvailable = p.availability === 'AVAILABLE';
+            const badgeText = isAvailable
+              ? (hasOffer ? `${offerVal}% OFF` : 'In Stock')
+              : 'Out of Stock';
+            const badgeType = isAvailable
+              ? (hasOffer ? 'accent' : 'success')
+              : 'primary';
+
+            return {
+              id: p.slug || p.id,
+              brand: p.brand,
+              name: p.name,
+              originalPrice,
+              salePrice,
+              discount,
+              imageUrl: primaryImg,
+              badge: badgeText,
+              badgeType,
+              gifts: (p.giftsGiven || []).map(g => ({
+                id: g.giftProduct?.id,
+                name: g.giftProduct?.name,
+                brand: g.giftProduct?.brand
+              }))
+            };
+          }));
           return;
         }
       }
@@ -915,13 +1013,17 @@
 
   function renderRelatedTrack(products) {
     if (!relTrack) return;
-    relTrack.innerHTML = products.map(p => `
+    relTrack.innerHTML = products.map(p => {
+      const hasOffer = (p.discount && p.discount > 0) || (p.originalPrice && p.originalPrice > p.salePrice);
+      const origPrice = p.originalPrice || (hasOffer ? Math.round(p.salePrice / (1 - p.discount / 100)) : null);
+
+      return `
       <article class="plp-card" role="listitem" style="width:200px; flex-shrink:0;">
         <div class="plp-card__image-wrap">
-          ${p.badge ? `<span class="plp-card__badge plp-card__badge--${p.badgeType || 'primary'}">${p.badge}</span>` : ''}
+          ${p.badge ? `<span class="plp-card__badge plp-card__badge--${p.badgeType || 'primary'}">${escapeHtml(p.badge)}</span>` : ''}
           <div class="plp-card__image-placeholder" aria-hidden="true">
             ${p.imageUrl
-              ? `<img src="${p.imageUrl}" alt="${p.brand} ${p.name}" class="plp-card__img" loading="lazy" />`
+              ? `<img src="${p.imageUrl}" alt="${escapeHtml(p.brand || '')} ${escapeHtml(p.name || '')}" class="plp-card__img" loading="lazy" />`
               : `<svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect width="200" height="200" fill="var(--color-bg-tertiary)"/>
                   <rect x="50" y="38" width="100" height="124" rx="9" fill="#1e3d8f14" stroke="#1e3d8f35" stroke-width="1.5"/>
@@ -933,20 +1035,32 @@
           </div>
         </div>
         <div class="plp-card__body">
-          <p class="plp-card__brand">${p.brand}</p>
-          <h3 class="plp-card__name">${p.name}</h3>
+          <p class="plp-card__brand">${escapeHtml(p.brand || '')}</p>
+          <h3 class="plp-card__name">${escapeHtml(p.name || '')}</h3>
           <div class="plp-card__price">
-            <span class="plp-card__price-sale">₹${p.salePrice.toLocaleString('en-IN')}</span>
-            ${p.discount ? `<span class="plp-card__price-discount">${p.discount}% off</span>` : ''}
+            <span class="plp-card__price-sale">₹${Number(p.salePrice).toLocaleString('en-IN')}</span>
+            ${(origPrice && origPrice > p.salePrice)
+              ? `<span class="plp-card__price-original">₹${Number(origPrice).toLocaleString('en-IN')}</span>`
+              : ''}
+            ${(p.discount && p.discount > 0)
+              ? `<span class="plp-card__price-discount">${p.discount}% off</span>`
+              : ''}
           </div>
+          ${(p.gifts && p.gifts.length > 0) ? `
+            <div style="margin-top: 6px;">
+              <span style="display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:600; color:#9d174d; background:#fdf2f8; border:1px solid #fbcfe8; border-radius:4px; padding:2px 6px;">
+                🎁 Free Gift${p.gifts.length > 1 ? ` (${p.gifts.length})` : ''}
+              </span>
+            </div>
+          ` : ''}
         </div>
         <div class="plp-card__footer">
           <a href="/product/${p.id}" class="btn btn--primary plp-card__cta">
             View Details
           </a>
         </div>
-      </article>`
-    ).join('');
+      </article>`;
+    }).join('');
 
     // Scroll controls
     const SCROLL = 220;
@@ -1044,6 +1158,19 @@
             });
           }
 
+          const offer = (p.offer && parseFloat(p.offer) > 0) ? parseFloat(p.offer) : 0;
+          const originalPrice = price;
+          const salePrice = offer > 0 ? Math.round(price * (1 - offer / 100)) : price;
+
+          const gifts = (p.giftsGiven || []).map(g => ({
+            id: g.giftProduct?.id,
+            name: g.giftProduct?.name,
+            brand: g.giftProduct?.brand,
+            price: parseFloat(g.giftProduct?.price) || 0,
+            slug: g.giftProduct?.slug,
+            imageUrl: g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || ''
+          }));
+
           const backendProduct = {
             id: p.slug || p.id,
             slug: p.slug,
@@ -1052,10 +1179,11 @@
             brand: p.brand,
             name: p.name,
             tagline: `${p.brand} Official Product · 100% Genuine`,
-            originalPrice: price,
-            salePrice: price,
+            originalPrice: originalPrice,
+            salePrice: salePrice,
             basePrice: price,
-            discount: 0,
+            discount: offer,
+            gifts: gifts,
             rating: parseFloat(p.rating) || 0,
             reviews: p.reviews || 0,
             productReviews: p.productReviews || [],
