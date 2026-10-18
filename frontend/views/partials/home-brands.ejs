@@ -6,71 +6,68 @@
 %>
 
 <%
-  // Extract brands from server locals or fallback
+  /* Extract brands from server locals or fallback */
   const bData = (typeof brandsData !== 'undefined' && brandsData) ? brandsData : null;
   const topBrands = (bData && Array.isArray(bData.topRow)) ? bData.topRow : [];
   const bottomBrands = (bData && Array.isArray(bData.bottomRow)) ? bData.bottomRow : [];
 
-  function renderCard(brand, isDuplicate) {
-    const displayName = brand.displayName || brand.name;
+  function renderCard(brand) {
+    /* Display only brand name — no URL slugs, category slugs, or action links */
+    const brandName = brand.displayName || brand.name || '';
     const color = brand.color || '#1d1d1f';
     const fontSize = brand.fontSize || 16;
     const fontWeight = brand.fontWeight || '800';
     const fontFamily = brand.fontFamily || 'Arial,sans-serif';
     const viewBox = brand.viewBox || '0 0 80 36';
-    const href = brand.href || '/products';
-    const ariaLabel = `${brand.name} products`;
-    const tabAttr = isDuplicate ? 'tabindex="-1"' : '';
+    const ariaLabel = `${brand.name || brandName}`;
 
     let logoMarkup = '';
     if (brand.logoSvg) {
       logoMarkup = brand.logoSvg;
     } else if (brand.logoUrl) {
-      logoMarkup = `<img src="${brand.logoUrl}" alt="${brand.name}" class="brands-marquee__img" loading="lazy" />`;
+      logoMarkup = `<img src="${brand.logoUrl}" alt="${brand.name || brandName}" class="brands-marquee__img" loading="lazy" />`;
     } else {
-      logoMarkup = `<svg viewBox="${viewBox}" fill="none"><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-size="${fontSize}" font-family="${fontFamily}" font-weight="${fontWeight}" fill="${color}">${displayName}</text></svg>`;
+      logoMarkup = `<svg viewBox="${viewBox}" fill="none"><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-size="${fontSize}" font-family="${fontFamily}" font-weight="${fontWeight}" fill="${color}">${brandName}</text></svg>`;
     }
 
     return `
-      <a href="${href}" class="brands-marquee__card" aria-label="${ariaLabel}" ${tabAttr}>
+      <div class="brands-marquee__card" aria-label="${ariaLabel}">
         <div class="brands-marquee__logo" aria-hidden="true">
           ${logoMarkup}
         </div>
-      </a>
+      </div>
     `;
   }
 %>
 
-<section class="brands section" id="brands" aria-labelledby="brands-heading">
+<section class="brands" id="brands" aria-labelledby="brands-heading">
   <div class="container--wide">
-    <div class="section__header reveal">
-      <span class="section__eyebrow">Our Partners</span>
-      <h2 class="section__title" id="brands-heading">Brands We Sell</h2>
-      <p class="section__subtitle">Official authorized dealer for 100+ top electronics brands.</p>
+    <div class="brands__header">
+      <h2 class="brands__title" id="brands-heading">Our Brands</h2>
     </div>
   </div>
 
-  <div class="brands-marquee" aria-label="Brands we sell showcase">
+  <div class="brands-marquee" aria-label="Our brands showcase">
 
     <!-- Top Row: Moves Left to Right -->
     <div class="brands-marquee__row brands-marquee__row--top" aria-label="Featured Brands Row 1">
       <div class="brands-marquee__track brands-marquee__track--to-right">
-        <!-- Group 1: Accessible items -->
+        <!-- Group 1: Items -->
         <div class="brands-marquee__group">
           <% topBrands.forEach(function(b) { %>
-            <%- renderCard(b, false) %>
+            <%- renderCard(b) %>
           <% }); %>
           <% topBrands.forEach(function(b) { %>
-            <%- renderCard(b, true) %>
+            <%- renderCard(b) %>
           <% }); %>
         </div>
         <!-- Group 2: Duplicate group for seamless infinite loop -->
         <div class="brands-marquee__group" aria-hidden="true">
           <% topBrands.forEach(function(b) { %>
-            <%- renderCard(b, true) %>
+            <%- renderCard(b) %>
           <% }); %>
           <% topBrands.forEach(function(b) { %>
-            <%- renderCard(b, true) %>
+            <%- renderCard(b) %>
           <% }); %>
         </div>
       </div>
@@ -79,22 +76,22 @@
     <!-- Bottom Row: Moves Right to Left -->
     <div class="brands-marquee__row brands-marquee__row--bottom" aria-label="Featured Brands Row 2">
       <div class="brands-marquee__track brands-marquee__track--to-left">
-        <!-- Group 1: Accessible items -->
+        <!-- Group 1: Items -->
         <div class="brands-marquee__group">
           <% bottomBrands.forEach(function(b) { %>
-            <%- renderCard(b, false) %>
+            <%- renderCard(b) %>
           <% }); %>
           <% bottomBrands.forEach(function(b) { %>
-            <%- renderCard(b, true) %>
+            <%- renderCard(b) %>
           <% }); %>
         </div>
         <!-- Group 2: Duplicate group for seamless infinite loop -->
         <div class="brands-marquee__group" aria-hidden="true">
           <% bottomBrands.forEach(function(b) { %>
-            <%- renderCard(b, true) %>
+            <%- renderCard(b) %>
           <% }); %>
           <% bottomBrands.forEach(function(b) { %>
-            <%- renderCard(b, true) %>
+            <%- renderCard(b) %>
           <% }); %>
         </div>
       </div>

@@ -56,3 +56,226 @@
   }
   .home-footer__col--brand { grid-column: span 1; }
 }
+
+/* =============================================
+   MOBILE BOTTOM NAVIGATION BAR
+   Home | You | ⭕ Call | Cart | Orders
+============================================= */
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Prevent page content from being obscured by the fixed bottom navigation */
+  body {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .mobile-bottom-nav {
+    display: block !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 280;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--color-border-light, #e2e8f0);
+    box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.08);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    overflow: visible;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .mobile-nav__bar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    height: 58px;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 0 4px;
+    position: relative;
+    box-sizing: border-box;
+  }
+
+  .mobile-nav__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 6px 2px 7px;
+    text-decoration: none;
+    color: var(--color-text-muted, #64748b);
+    transition: color 0.15s ease, transform 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    box-sizing: border-box;
+  }
+
+  .mobile-nav__item:active {
+    transform: scale(0.94);
+  }
+
+  .mobile-nav__icon-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-bottom: 3px;
+  }
+
+  .mobile-nav__icon {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    stroke-width: 1.85;
+    transition: stroke 0.15s ease, stroke-width 0.15s ease, transform 0.15s ease;
+  }
+
+  .mobile-nav__label {
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: inherit;
+    line-height: 1.15;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  /* Active State */
+  .mobile-nav__item--active {
+    color: var(--color-primary-700, #1e3d8f);
+  }
+
+  .mobile-nav__item--active .mobile-nav__icon {
+    stroke: var(--color-primary-700, #1e3d8f);
+    stroke-width: 2.35;
+    transform: scale(1.05);
+  }
+
+  .mobile-nav__item--active .mobile-nav__label {
+    color: var(--color-primary-700, #1e3d8f);
+    font-weight: 700;
+  }
+
+  .mobile-nav__item--active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 2.5px;
+    background-color: var(--color-accent-500, #f97316);
+    border-radius: 0 0 3px 3px;
+  }
+
+  /* Center Elevated Circular Call Button */
+  .mobile-nav__item--call {
+    overflow: visible;
+    position: relative;
+    padding-bottom: 7px;
+    z-index: 2;
+  }
+
+  .mobile-nav__item--call:active {
+    transform: none;
+  }
+
+  .mobile-nav__call-circle {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-primary-700, #1e3d8f) 0%, var(--color-primary-900, #0f172a) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    box-shadow: 0 0 0 3.5px #ffffff, 0 6px 16px rgba(30, 61, 143, 0.32);
+    margin-top: -18px;
+    margin-bottom: 3px;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .mobile-nav__item--call:active .mobile-nav__call-circle {
+    transform: scale(0.92);
+    box-shadow: 0 0 0 3.5px #ffffff, 0 3px 10px rgba(30, 61, 143, 0.4);
+  }
+
+  .mobile-nav__call-icon {
+    width: 22px;
+    height: 22px;
+    fill: #ffffff;
+    display: block;
+  }
+
+  .mobile-nav__label--call {
+    color: var(--color-primary-700, #1e3d8f);
+    font-weight: 700;
+  }
+
+  /* Cart Count Badge */
+  .mobile-nav__badge {
+    position: absolute;
+    top: -5px;
+    right: -9px;
+    background: var(--color-accent-500, #f97316);
+    color: #ffffff;
+    font-size: 9.5px;
+    font-weight: 800;
+    min-width: 17px;
+    height: 17px;
+    line-height: 17px;
+    padding: 0 3.5px;
+    border-radius: 9px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border: 1.5px solid #ffffff;
+  }
+
+  /* Coordination with PDP sticky buy bar */
+  .pdp-buy-bar {
+    bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  body.has-pdp-buy-bar {
+    padding-bottom: calc(124px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .mobile-nav__label {
+    font-size: 9.5px;
+  }
+  .mobile-nav__call-circle {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    margin-top: -15px;
+  }
+  .mobile-nav__call-icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+

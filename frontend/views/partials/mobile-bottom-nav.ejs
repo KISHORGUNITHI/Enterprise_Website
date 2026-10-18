@@ -1,0 +1,147 @@
+<!--
+  mobile-bottom-nav.ejs — Premium Amazon-inspired mobile bottom navigation bar.
+  Layout: Home | You | ⭕ Call | Cart | Orders
+  Active state highlights matching tab. Cart badge syncs with localStorage and header badge.
+-->
+
+<nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile Navigation">
+  <div class="mobile-nav__bar">
+
+    <!-- 1. Home -->
+    <a href="/home" class="mobile-nav__item" data-nav="home" id="mobileNavHome" aria-label="Home">
+      <div class="mobile-nav__icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mobile-nav__icon" aria-hidden="true">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+      <span class="mobile-nav__label">Home</span>
+    </a>
+
+    <!-- 2. You (Profile / Account) -->
+    <a href="/profile" class="mobile-nav__item" data-nav="you" id="mobileNavYou" aria-label="Account">
+      <div class="mobile-nav__icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mobile-nav__icon" aria-hidden="true">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <span class="mobile-nav__label">You</span>
+    </a>
+
+    <!-- 3. Raised Circular Call Action -->
+    <a href="tel:9963657799" class="mobile-nav__item mobile-nav__item--call" id="mobileNavCall" aria-label="Call Kishor Enterprises at 9963657799">
+      <div class="mobile-nav__call-circle" aria-hidden="true">
+        <svg class="mobile-nav__call-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.02-.24 11.45 11.45 0 003.58.57 1 1 0 011 1v3.49a1 1 0 01-1 1A17.93 17.93 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.45 11.45 0 00.57 3.58 1 1 0 01-.25 1.02l-2.2 2.19z"/>
+        </svg>
+      </div>
+      <span class="mobile-nav__label mobile-nav__label--call">Call</span>
+    </a>
+
+    <!-- 4. Cart (with Badge) -->
+    <a href="/cart" class="mobile-nav__item" data-nav="cart" id="mobileNavCart" aria-label="Shopping Cart">
+      <div class="mobile-nav__icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mobile-nav__icon" aria-hidden="true">
+          <circle cx="9" cy="21" r="1"/>
+          <circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+        </svg>
+        <span class="mobile-nav__badge" id="mobileNavCartBadge" aria-label="Cart items count" style="display: none;">0</span>
+      </div>
+      <span class="mobile-nav__label">Cart</span>
+    </a>
+
+    <!-- 5. Orders -->
+    <a href="/orders" class="mobile-nav__item" data-nav="orders" id="mobileNavOrders" aria-label="My Orders">
+      <div class="mobile-nav__icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mobile-nav__icon" aria-hidden="true">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+      </div>
+      <span class="mobile-nav__label">Orders</span>
+    </a>
+
+  </div>
+</nav>
+
+<script>
+(function() {
+  // Sync Cart Item Count Badge
+  function syncMobileCartBadge() {
+    try {
+      var badge = document.getElementById('mobileNavCartBadge');
+      if (!badge) return;
+      var count = 0;
+      var raw = localStorage.getItem('ks_cart');
+      if (raw) {
+        var cart = JSON.parse(raw);
+        if (Array.isArray(cart)) {
+          for (var i = 0; i < cart.length; i++) {
+            count += (parseInt(cart[i].quantity, 10) || 1);
+          }
+        }
+      }
+      // Fallback check: sync with header badge if present
+      if (count === 0) {
+        var hdrBadge = document.querySelector('.hdr__badge');
+        if (hdrBadge && hdrBadge.textContent) {
+          var n = parseInt(hdrBadge.textContent.trim(), 10);
+          if (!isNaN(n) && n > 0) count = n;
+        }
+      }
+      if (count > 0) {
+        badge.textContent = count > 99 ? '99+' : count;
+        badge.style.display = 'flex';
+        badge.setAttribute('aria-label', count + ' items in cart');
+      } else {
+        badge.style.display = 'none';
+        badge.textContent = '0';
+      }
+    } catch (e) {}
+  }
+
+  // Active State Highlighting
+  function syncMobileNavActive() {
+    var path = (window.location.pathname || '').toLowerCase();
+    var items = document.querySelectorAll('.mobile-nav__item[data-nav]');
+    items.forEach(function(item) {
+      item.classList.remove('mobile-nav__item--active');
+    });
+
+    var targetNav = '';
+    if (path === '/' || path === '/home' || path.startsWith('/products')) {
+      targetNav = 'home';
+    } else if (path.startsWith('/profile') || path.startsWith('/account')) {
+      targetNav = 'you';
+    } else if (path.startsWith('/cart') || path.startsWith('/checkout')) {
+      targetNav = 'cart';
+    } else if (path.startsWith('/orders')) {
+      targetNav = 'orders';
+    }
+
+    if (targetNav) {
+      var activeEl = document.querySelector('.mobile-nav__item[data-nav="' + targetNav + '"]');
+      if (activeEl) {
+        activeEl.classList.add('mobile-nav__item--active');
+      }
+    }
+  }
+
+  // Initial execution & event hooks
+  syncMobileCartBadge();
+  syncMobileNavActive();
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      syncMobileCartBadge();
+      syncMobileNavActive();
+    });
+  }
+
+  window.addEventListener('storage', syncMobileCartBadge);
+  document.addEventListener('cart:updated', syncMobileCartBadge);
+})();
+</script>
