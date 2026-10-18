@@ -134,10 +134,13 @@
         body: JSON.stringify(productData)
       });
     },
-    async updateProductOffer(productId, offer, giftProductIds) {
+    async updateProductOffer(productId, offer, giftsInput) {
+      const giftProductIds = Array.isArray(giftsInput)
+        ? giftsInput.map(g => (typeof g === 'string' ? g : (g.giftProductId || (!g.isCustom && !g.customGiftName ? g.id : null)))).filter(Boolean)
+        : [];
       return this.fetch(`/products/${productId}/offer`, {
         method: 'PATCH',
-        body: JSON.stringify({ offer, giftProductIds })
+        body: JSON.stringify({ offer, giftProductIds, gifts: giftsInput })
       });
     },
     async getActiveOffersAndGifts() {
@@ -158,10 +161,13 @@
         method: 'DELETE'
       });
     },
-    async updateCategoryOffer(category, offer, giftProductIds, clearGifts = false) {
+    async updateCategoryOffer(category, offer, giftsInput, clearGifts = false) {
+      const giftProductIds = Array.isArray(giftsInput)
+        ? giftsInput.map(g => (typeof g === 'string' ? g : (g.giftProductId || (!g.isCustom && !g.customGiftName ? g.id : null)))).filter(Boolean)
+        : [];
       return this.fetch('/products/category-offer', {
         method: 'POST',
-        body: JSON.stringify({ category, offer, giftProductIds, clearGifts })
+        body: JSON.stringify({ category, offer, giftProductIds, gifts: giftsInput, clearGifts })
       });
     },
     async toggleProductVisibility(productId) {
@@ -1473,15 +1479,40 @@
           }));
           const priceNum = parseFloat(p.price) || 0;
           const offerNum = (p.offer !== undefined && p.offer !== null && p.offer !== '') ? parseFloat(p.offer) : 0;
-          const gifts = (p.giftsGiven || []).map(g => ({
-            giftLinkId: g.id,
-            id: g.giftProduct?.id,
-            name: g.giftProduct?.name,
-            brand: g.giftProduct?.brand,
-            price: parseFloat(g.giftProduct?.price) || 0,
-            slug: g.giftProduct?.slug,
-            primaryImage: g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || ''
-          }));
+          const gifts = Array.isArray(p.gifts) && p.gifts.length > 0
+            ? p.gifts
+            : (p.giftsGiven || []).map(g => {
+                const isCustom = Boolean(!g.giftProductId || g.customGiftName);
+                if (isCustom) {
+                  const customImg = g.customGiftImage || '';
+                  return {
+                    giftLinkId: g.id,
+                    id: g.id,
+                    name: g.customGiftName || 'Free Gift',
+                    brand: null,
+                    price: 0,
+                    slug: null,
+                    primaryImage: customImg,
+                    imageUrl: customImg,
+                    customGiftName: g.customGiftName,
+                    customGiftImage: g.customGiftImage,
+                    isCustom: true
+                  };
+                } else {
+                  const primaryImg = g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || '';
+                  return {
+                    giftLinkId: g.id,
+                    id: g.giftProduct?.id || g.giftProductId,
+                    name: g.giftProduct?.name || 'Store Item',
+                    brand: g.giftProduct?.brand || null,
+                    price: parseFloat(g.giftProduct?.price) || 0,
+                    slug: g.giftProduct?.slug,
+                    primaryImage: primaryImg,
+                    imageUrl: primaryImg,
+                    isCustom: false
+                  };
+                }
+              });
           return {
             id: p.id,
             name: p.name,
@@ -2445,13 +2476,55 @@
   }
 
   let currentProductOfferGiftSearchQuery = '';
+  let currentProductOfferCustomImage = '';
+
+  function resetProductOfferCustomInputs() {
+    currentProductOfferCustomImage = '';
+    const nameInput = document.getElementById('productOfferCustomName');
+    if (nameInput) nameInput.value = '';
+    const urlInput = document.getElementById('productOfferCustomImgUrl');
+    if (urlInput) urlInput.value = '';
+    const fileInput = document.getElementById('productOfferCustomFile');
+    if (fileInput) fileInput.value = '';
+    const previewBox = document.getElementById('productOfferCustomImgPreviewBox');
+    if (previewBox) previewBox.style.display = 'none';
+    const previewImg = document.getElementById('productOfferCustomImgPreview');
+    if (previewImg) previewImg.src = '';
+    const spinner = document.getElementById('productOfferCustomUploadSpinner');
+    if (spinner) spinner.style.display = 'none';
+  }
+
+  function switchProductOfferGiftTab(tabName) {
+    const storeTabBtn = document.getElementById('productOfferTabStore');
+    const customTabBtn = document.getElementById('productOfferTabCustom');
+    const storePanel = document.getElementById('productOfferStorePanel');
+    const customPanel = document.getElementById('productOfferCustomPanel');
+
+    if (tabName === 'custom') {
+      if (customTabBtn) customTabBtn.classList.add('active');
+      if (storeTabBtn) storeTabBtn.classList.remove('active');
+      if (customPanel) customPanel.style.display = 'block';
+      if (storePanel) storePanel.style.display = 'none';
+      document.getElementById('productOfferCustomName')?.focus();
+    } else {
+      if (storeTabBtn) storeTabBtn.classList.add('active');
+      if (customTabBtn) customTabBtn.classList.remove('active');
+      if (storePanel) storePanel.style.display = 'block';
+      if (customPanel) customPanel.style.display = 'none';
+    }
+  }
 
   function renderModalGiftsAndDropdown(currentProductId) {
+    if (!currentProductId) {
+      currentProductId = document.getElementById('productOfferTargetId')?.value;
+    }
     const listEl = document.getElementById('productOfferSelectedGiftsList');
     const selectEl = document.getElementById('productOfferGiftSelect');
     const noGiftsHint = document.getElementById('noGiftsHint');
     const searchClear = document.getElementById('productOfferGiftSearchClear');
     const searchCount = document.getElementById('productOfferGiftSearchCount');
+    const quickPrompt = document.getElementById('productOfferCustomQuickPrompt');
+    const quickPromptName = document.getElementById('productOfferQuickPromptName');
 
     if (listEl) {
       if (currentModalGifts.length === 0) {
@@ -2459,31 +2532,47 @@
         if (noGiftsHint) noGiftsHint.style.display = 'block';
       } else {
         if (noGiftsHint) noGiftsHint.style.display = 'none';
-        listEl.innerHTML = currentModalGifts.map(g => {
-          const thumbHtml = g.primaryImage
-            ? `<img src="${g.primaryImage}" class="selected-gift-item__thumb" alt="${g.name}" onerror="this.style.display='none'"/>`
-            : `<span style="font-size:16px;">🎁</span>`;
+        listEl.innerHTML = currentModalGifts.map((g, idx) => {
+          const isCustom = Boolean(g.isCustom || (g.id && String(g.id).startsWith('custom-')) || (!g.id && g.customGiftName));
+          const imgUrl = g.primaryImage || g.imageUrl || '';
+          const giftIdentifier = g.id || g.giftLinkId || `gift-idx-${idx}`;
+          const thumbHtml = imgUrl
+            ? `<img src="${imgUrl}" class="selected-gift-item__thumb" alt="${g.name}" onerror="this.onerror=null;this.parentElement.innerHTML='<span style=\\'font-size:18px;\\'>🎁</span>';"/>`
+            : `<div class="selected-gift-item__thumb" title="Text-only gift" style="background:#fdf2f8; border:1px solid #fbcfe8; color:#db2777; font-size:18px;">🎁</div>`;
+
+          const metaHtml = isCustom
+            ? `<div style="font-size:11px; color:var(--color-text-muted); display:flex; align-items:center; gap:4px; margin-top:1px;">
+                <span class="badge" style="background:#f3e8ff; color:#7e22ce; border:1px solid #e9d5ff; font-size:9px; padding:1px 5px; font-weight:700;">CUSTOM GIFT</span>
+                ${imgUrl ? '<span style="color:#059669; font-size:10px;">• Image attached</span>' : '<span style="color:var(--color-text-muted); font-size:10px;">• Text only</span>'}
+               </div>`
+            : `<div style="font-size:11px; color:var(--color-text-muted); margin-top:1px;">
+                ${g.brand ? `${g.brand} &bull; ` : ''}Store Value: ${formatRupees(g.price)}
+                <span class="badge badge--success" style="font-size:9px; padding:1px 5px; margin-left:4px;">STORE INVENTORY</span>
+               </div>`;
+
           return `
-            <div class="selected-gift-item" data-modal-gift-id="${g.id}">
+            <div class="selected-gift-item" data-modal-gift-id="${giftIdentifier}">
               <div class="selected-gift-item__info">
                 ${thumbHtml}
-                <div>
-                  <strong style="color:var(--color-text-primary); font-size:12px;">${g.name}</strong>
-                  <div style="font-size:11px; color:var(--color-text-muted);">
-                    ${g.brand ? `${g.brand} &bull; ` : ''}Store Value: ${formatRupees(g.price)}
-                    <span class="badge badge--success" style="font-size:9px; padding:1px 5px; margin-left:4px;">FREE GIFT</span>
-                  </div>
+                <div style="min-width:0; overflow:hidden;">
+                  <strong style="color:var(--color-text-primary); font-size:12px; display:block; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${g.name}</strong>
+                  ${metaHtml}
                 </div>
               </div>
-              <button type="button" class="selected-gift-item__remove" data-remove-modal-gift="${g.id}" title="Remove this gift">&times;</button>
+              <button type="button" class="selected-gift-item__remove" data-remove-modal-gift="${giftIdentifier}" data-gift-index="${idx}" title="Remove this gift">&times;</button>
             </div>
           `;
         }).join('');
 
         listEl.querySelectorAll('[data-remove-modal-gift]').forEach(btn => {
           btn.addEventListener('click', () => {
-            const idToRemove = btn.dataset.removeModalGift;
-            currentModalGifts = currentModalGifts.filter(g => g.id !== idToRemove);
+            const idxToRemove = Number(btn.dataset.giftIndex);
+            if (!isNaN(idxToRemove) && idxToRemove >= 0 && idxToRemove < currentModalGifts.length) {
+              currentModalGifts.splice(idxToRemove, 1);
+            } else {
+              const idToRemove = btn.dataset.removeModalGift;
+              currentModalGifts = currentModalGifts.filter((g, i) => (g.id !== idToRemove && g.giftLinkId !== idToRemove && `gift-idx-${i}` !== idToRemove));
+            }
             renderModalGiftsAndDropdown(currentProductId);
           });
         });
@@ -2492,11 +2581,15 @@
 
     // Populate dropdown with store products, strictly filtering out:
     // 1. The product itself (cannot self-gift)
-    // 2. Any gift already in currentModalGifts (no duplicates allowed!)
+    // 2. Any store gift already in currentModalGifts (no duplicates allowed!)
     // 3. Admin's search query across name, brand, category, or price
     if (selectEl) {
-      const selectedIds = new Set(currentModalGifts.map(g => g.id));
-      let availableProducts = (data.products || []).filter(p => p.id !== currentProductId && !selectedIds.has(p.id));
+      const selectedStoreIds = new Set(
+        currentModalGifts
+          .filter(g => !g.isCustom && g.id && !String(g.id).startsWith('custom-'))
+          .map(g => g.id)
+      );
+      let availableProducts = (data.products || []).filter(p => p.id !== currentProductId && !selectedStoreIds.has(p.id));
 
       const q = (currentProductOfferGiftSearchQuery || '').trim().toLowerCase();
       if (q) {
@@ -2516,6 +2609,16 @@
           searchCount.textContent = `Found ${availableProducts.length} matching store item${availableProducts.length === 1 ? '' : 's'}`;
         } else {
           searchCount.style.display = 'none';
+        }
+      }
+
+      // Quick prompt to add typed query as custom non-store gift
+      if (quickPrompt && quickPromptName) {
+        if (q) {
+          quickPrompt.style.display = 'flex';
+          quickPromptName.textContent = currentProductOfferGiftSearchQuery.trim();
+        } else {
+          quickPrompt.style.display = 'none';
         }
       }
 
@@ -2569,19 +2672,166 @@
     const existingOffer = (prod.offer !== undefined && prod.offer !== null && Number(prod.offer) > 0) ? prod.offer : '';
     if (offerInput) offerInput.value = existingOffer;
 
-    // Reset search query
+    // Reset search query & custom gift inputs, default to Store tab
     currentProductOfferGiftSearchQuery = '';
     const giftSearchInput = document.getElementById('productOfferGiftSearch');
     if (giftSearchInput) giftSearchInput.value = '';
+    resetProductOfferCustomInputs();
+    switchProductOfferGiftTab('store');
 
     // Load existing gifts for this product
-    currentModalGifts = Array.isArray(prod.gifts) ? [...prod.gifts] : [];
+    currentModalGifts = Array.isArray(prod.gifts) ? prod.gifts.map(g => ({ ...g })) : [];
     renderModalGiftsAndDropdown(prod.id);
 
     updateSingleOfferPreview(prod.price, existingOffer);
     openModal('productOfferModal');
   }
 
+  // Gift Tab Switching
+  const productOfferTabStore = document.getElementById('productOfferTabStore');
+  const productOfferTabCustom = document.getElementById('productOfferTabCustom');
+  if (productOfferTabStore) {
+    productOfferTabStore.addEventListener('click', () => switchProductOfferGiftTab('store'));
+  }
+  if (productOfferTabCustom) {
+    productOfferTabCustom.addEventListener('click', () => switchProductOfferGiftTab('custom'));
+  }
+
+  // Quick switch to custom from search prompt
+  const productOfferSwitchToCustomBtn = document.getElementById('productOfferSwitchToCustomBtn');
+  if (productOfferSwitchToCustomBtn) {
+    productOfferSwitchToCustomBtn.addEventListener('click', () => {
+      const q = (currentProductOfferGiftSearchQuery || '').trim();
+      switchProductOfferGiftTab('custom');
+      const nameInput = document.getElementById('productOfferCustomName');
+      if (nameInput && q) {
+        nameInput.value = q;
+        nameInput.focus();
+      }
+    });
+  }
+
+  // Custom Gift Image upload (local file)
+  const productOfferCustomUploadBtn = document.getElementById('productOfferCustomUploadBtn');
+  const productOfferCustomFile = document.getElementById('productOfferCustomFile');
+  if (productOfferCustomUploadBtn && productOfferCustomFile) {
+    productOfferCustomUploadBtn.addEventListener('click', () => {
+      productOfferCustomFile.click();
+    });
+
+    productOfferCustomFile.addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const spinner = document.getElementById('productOfferCustomUploadSpinner');
+      const previewBox = document.getElementById('productOfferCustomImgPreviewBox');
+      const previewImg = document.getElementById('productOfferCustomImgPreview');
+      const urlInput = document.getElementById('productOfferCustomImgUrl');
+
+      if (spinner) spinner.style.display = 'inline-flex';
+      try {
+        if (useApi) {
+          const res = await API.uploadImage(file, 'product');
+          if (res && res.success && res.url) {
+            currentProductOfferCustomImage = res.url;
+            if (urlInput) urlInput.value = res.url;
+            if (previewImg) previewImg.src = res.url;
+            if (previewBox) previewBox.style.display = 'flex';
+            showAdminToast('Gift image uploaded to Cloudinary!');
+            return;
+          }
+        }
+        // Fallback / mock mode
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          currentProductOfferCustomImage = ev.target.result;
+          if (urlInput) urlInput.value = ev.target.result;
+          if (previewImg) previewImg.src = ev.target.result;
+          if (previewBox) previewBox.style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+      } catch (err) {
+        console.error('Gift image upload error:', err);
+        showAdminToast(`Image upload failed: ${err.message}`, 'error');
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          currentProductOfferCustomImage = ev.target.result;
+          if (urlInput) urlInput.value = ev.target.result;
+          if (previewImg) previewImg.src = ev.target.result;
+          if (previewBox) previewBox.style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+      } finally {
+        if (spinner) spinner.style.display = 'none';
+      }
+    });
+  }
+
+  // Custom Gift Image URL input
+  const productOfferCustomImgUrl = document.getElementById('productOfferCustomImgUrl');
+  if (productOfferCustomImgUrl) {
+    productOfferCustomImgUrl.addEventListener('input', () => {
+      const val = productOfferCustomImgUrl.value.trim();
+      const previewBox = document.getElementById('productOfferCustomImgPreviewBox');
+      const previewImg = document.getElementById('productOfferCustomImgPreview');
+      currentProductOfferCustomImage = val;
+      if (val) {
+        if (previewImg) previewImg.src = val;
+        if (previewBox) previewBox.style.display = 'flex';
+      } else {
+        if (previewBox) previewBox.style.display = 'none';
+      }
+    });
+  }
+
+  // Custom Gift Image Clear
+  const productOfferCustomImgClearBtn = document.getElementById('productOfferCustomImgClearBtn');
+  if (productOfferCustomImgClearBtn) {
+    productOfferCustomImgClearBtn.addEventListener('click', () => {
+      currentProductOfferCustomImage = '';
+      const urlInput = document.getElementById('productOfferCustomImgUrl');
+      if (urlInput) urlInput.value = '';
+      const fileInput = document.getElementById('productOfferCustomFile');
+      if (fileInput) fileInput.value = '';
+      const previewBox = document.getElementById('productOfferCustomImgPreviewBox');
+      if (previewBox) previewBox.style.display = 'none';
+    });
+  }
+
+  // Add Custom Gift Button
+  const productOfferAddCustomGiftBtn = document.getElementById('productOfferAddCustomGiftBtn');
+  if (productOfferAddCustomGiftBtn) {
+    productOfferAddCustomGiftBtn.addEventListener('click', () => {
+      const nameInput = document.getElementById('productOfferCustomName');
+      const name = (nameInput?.value || '').trim();
+      if (!name) {
+        showAdminToast('Please type the product name for the custom gift.', 'warning');
+        nameInput?.focus();
+        return;
+      }
+
+      const prodId = document.getElementById('productOfferTargetId')?.value;
+      const customImg = currentProductOfferCustomImage || null;
+
+      currentModalGifts.push({
+        id: 'custom-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+        name: name,
+        brand: null,
+        price: 0,
+        slug: null,
+        primaryImage: customImg || '',
+        imageUrl: customImg || '',
+        customGiftName: name,
+        customGiftImage: customImg,
+        isCustom: true
+      });
+
+      resetProductOfferCustomInputs();
+      renderModalGiftsAndDropdown(prodId);
+      showAdminToast(`Added "${name}" as custom gift!`);
+    });
+  }
+
+  // Add Store Gift Button
   const productOfferAddGiftBtn = document.getElementById('productOfferAddGiftBtn');
   if (productOfferAddGiftBtn) {
     productOfferAddGiftBtn.addEventListener('click', () => {
@@ -2601,9 +2851,10 @@
           price: giftProduct.price,
           category: giftProduct.category,
           slug: giftProduct.slug,
-          primaryImage: giftProduct.primaryImage
+          primaryImage: giftProduct.primaryImage,
+          imageUrl: giftProduct.primaryImage,
+          isCustom: false
         });
-        // Clear search query on add so dropdown resets
         currentProductOfferGiftSearchQuery = '';
         const searchInput = document.getElementById('productOfferGiftSearch');
         if (searchInput) searchInput.value = '';
@@ -2672,11 +2923,25 @@
         if (num > 0) offerVal = num;
       }
 
-      const giftProductIds = currentModalGifts.map(g => g.id);
+      const giftsPayload = currentModalGifts.map(g => {
+        const isCustom = Boolean(g.isCustom || (g.id && String(g.id).startsWith('custom-')) || (!g.id && g.customGiftName));
+        if (isCustom) {
+          return {
+            customGiftName: g.name || g.customGiftName,
+            customGiftImage: g.primaryImage || g.imageUrl || g.customGiftImage || null,
+            isCustom: true
+          };
+        } else {
+          return {
+            giftProductId: g.id || g.giftProductId,
+            isCustom: false
+          };
+        }
+      });
 
       if (useApi) {
         try {
-          await API.updateProductOffer(prodId, offerVal, giftProductIds);
+          await API.updateProductOffer(prodId, offerVal, giftsPayload);
           showAdminToast('offer updated successfully');
           closeModal('productOfferModal');
           await loadLiveProducts();
@@ -2790,12 +3055,22 @@
         : `<div class="active-offer-card__thumb" style="display:flex;align-items:center;justify-content:center;color:var(--color-text-muted);font-size:18px;">🎁</div>`;
 
       const giftsHtml = hasGifts
-        ? gifts.map(g => `
-            <span class="active-gift-chip">
-              🎁 <strong>${g.name}</strong> <span style="font-size: 11px; opacity: 0.8;">(${formatRupees(g.price)})</span>
-              <button type="button" class="gift-chip-remove-btn" data-remove-gift="${g.id}" data-parent-product="${item.id}" title="Remove ${g.name} as gift">&times;</button>
-            </span>
-          `).join('')
+        ? gifts.map(g => {
+            const isCustom = Boolean(g.isCustom || (g.id && String(g.id).startsWith('custom-')) || (!g.id && g.customGiftName));
+            const imgUrl = g.primaryImage || g.imageUrl || '';
+            const thumb = imgUrl
+              ? `<img src="${imgUrl}" style="width:20px;height:20px;min-width:20px;object-fit:contain;background:#fff;border-radius:3px;border:1px solid #e2e8f0;vertical-align:middle;margin-right:4px;" alt="${g.name}"/>`
+              : `<span style="margin-right:3px;">🎁</span>`;
+            const badgeText = isCustom
+              ? `<span class="badge" style="background:#f3e8ff; color:#7e22ce; border:1px solid #e9d5ff; font-size:9px; padding:0 4px; margin-left:3px; font-weight:700;">CUSTOM</span>`
+              : `<span style="font-size: 11px; opacity: 0.8;">(${formatRupees(g.price)})</span>`;
+            return `
+              <span class="active-gift-chip">
+                ${thumb}<strong>${g.name}</strong> ${badgeText}
+                <button type="button" class="gift-chip-remove-btn" data-remove-gift="${g.giftLinkId || g.id}" data-parent-product="${item.id}" title="Remove ${g.name} as gift">&times;</button>
+              </span>
+            `;
+          }).join('')
         : `<span style="font-size: 11.5px; color: var(--color-text-muted); font-style: italic;">No free gifts attached</span>`;
 
       return `
@@ -2945,6 +3220,96 @@
   // Category Offer & Bundled Gifts Modal Handlers
   let currentCategoryModalGifts = [];
   let currentCategoryOfferGiftSearchQuery = '';
+  let currentCategoryOfferCustomImage = '';
+
+  function resetCategoryOfferCustomInputs() {
+    currentCategoryOfferCustomImage = '';
+    const nameInput = document.getElementById('categoryOfferCustomName');
+    if (nameInput) nameInput.value = '';
+    const urlInput = document.getElementById('categoryOfferCustomImgUrl');
+    if (urlInput) urlInput.value = '';
+    const fileInput = document.getElementById('categoryOfferCustomFile');
+    if (fileInput) fileInput.value = '';
+    const previewBox = document.getElementById('categoryOfferCustomImgPreviewBox');
+    if (previewBox) previewBox.style.display = 'none';
+    const previewImg = document.getElementById('categoryOfferCustomImgPreview');
+    if (previewImg) previewImg.src = '';
+    const spinner = document.getElementById('categoryOfferCustomUploadSpinner');
+    if (spinner) spinner.style.display = 'none';
+  }
+
+  function switchCategoryOfferGiftTab(tabName) {
+    const storeTabBtn = document.getElementById('categoryOfferTabStore');
+    const customTabBtn = document.getElementById('categoryOfferTabCustom');
+    const storePanel = document.getElementById('categoryOfferStorePanel');
+    const customPanel = document.getElementById('categoryOfferCustomPanel');
+
+    if (tabName === 'custom') {
+      if (customTabBtn) customTabBtn.classList.add('active');
+      if (storeTabBtn) storeTabBtn.classList.remove('active');
+      if (customPanel) customPanel.style.display = 'block';
+      if (storePanel) storePanel.style.display = 'none';
+      document.getElementById('categoryOfferCustomName')?.focus();
+    } else {
+      if (storeTabBtn) storeTabBtn.classList.add('active');
+      if (customTabBtn) customTabBtn.classList.remove('active');
+      if (storePanel) storePanel.style.display = 'block';
+      if (customPanel) customPanel.style.display = 'none';
+    }
+  }
+
+  function isProductInCategory(p, catValue) {
+    if (!catValue || catValue.toLowerCase() === 'all') return true;
+    const val = catValue.trim().toLowerCase();
+    const pCatName = (p.category && typeof p.category === 'object' ? p.category.name : (p.category || '')).trim().toLowerCase();
+    if (pCatName === val) return true;
+    if (val === 'mobiles' && (pCatName === 'mobile' || pCatName === 'mobiles' || pCatName === 'smartphone' || pCatName === 'smartphones')) return true;
+    if (val === 'tvs' && (pCatName === 'tv' || pCatName === 'tvs' || pCatName === 'television' || pCatName === 'televisions')) return true;
+    if ((val.includes('air conditioner') || val === 'acs' || val === 'ac') && (pCatName.includes('air conditioner') || pCatName === 'ac' || pCatName === 'acs')) return true;
+    if ((val.includes('home theat') || val === 'home-theatres' || val.includes('audio')) && (pCatName.includes('home theat') || pCatName.includes('audio') || pCatName.includes('soundbar'))) return true;
+    if (val.includes('kitchen') && pCatName.includes('kitchen')) return true;
+    if (val.includes('refrigerator') && (pCatName.includes('refrigerator') || pCatName.includes('fridge'))) return true;
+    return pCatName.includes(val) || val.includes(pCatName);
+  }
+
+  function loadCategoryOfferExistingGifts(selectedCat) {
+    if (!selectedCat) {
+      selectedCat = document.getElementById('categoryOfferSelect')?.value || 'Mobiles';
+    }
+
+    const matchingProds = (data.products || []).filter(p => isProductInCategory(p, selectedCat));
+
+    // Prefill existing category offer discount if present
+    const offerInput = document.getElementById('categoryOfferInput');
+    const prodsWithOffers = matchingProds.filter(p => Number(p.offer) > 0);
+    if (offerInput) {
+      offerInput.value = prodsWithOffers.length > 0 ? prodsWithOffers[0].offer : '';
+    }
+
+    // Collect all existing gifts configured across products in this category
+    const giftMap = new Map();
+    matchingProds.forEach(p => {
+      if (Array.isArray(p.gifts)) {
+        p.gifts.forEach(g => {
+          const isCustom = Boolean(g.isCustom || (g.id && String(g.id).startsWith('custom-')) || (!g.id && g.customGiftName));
+          const key = isCustom
+            ? `custom::${(g.name || g.customGiftName || '').toLowerCase()}`
+            : `store::${g.id || g.giftProductId}`;
+          if (!giftMap.has(key)) {
+            giftMap.set(key, { ...g, isCustom });
+          }
+        });
+      }
+    });
+
+    currentCategoryModalGifts = Array.from(giftMap.values());
+    currentCategoryOfferGiftSearchQuery = '';
+    const searchInput = document.getElementById('categoryOfferGiftSearch');
+    if (searchInput) searchInput.value = '';
+    resetCategoryOfferCustomInputs();
+    switchCategoryOfferGiftTab('store');
+    renderCategoryModalGiftsAndDropdown();
+  }
 
   function renderCategoryModalGiftsAndDropdown() {
     const listEl = document.getElementById('categoryOfferSelectedGiftsList');
@@ -2952,6 +3317,8 @@
     const noGiftsHint = document.getElementById('noCategoryGiftsHint');
     const searchClear = document.getElementById('categoryOfferGiftSearchClear');
     const searchCount = document.getElementById('categoryOfferGiftSearchCount');
+    const quickPrompt = document.getElementById('categoryOfferCustomQuickPrompt');
+    const quickPromptName = document.getElementById('categoryOfferQuickPromptName');
 
     if (listEl) {
       if (currentCategoryModalGifts.length === 0) {
@@ -2959,31 +3326,47 @@
         if (noGiftsHint) noGiftsHint.style.display = 'block';
       } else {
         if (noGiftsHint) noGiftsHint.style.display = 'none';
-        listEl.innerHTML = currentCategoryModalGifts.map(g => {
-          const thumbHtml = g.primaryImage
-            ? `<img src="${g.primaryImage}" class="selected-gift-item__thumb" alt="${g.name}" onerror="this.style.display='none'"/>`
-            : `<span style="font-size:16px;">🎁</span>`;
+        listEl.innerHTML = currentCategoryModalGifts.map((g, idx) => {
+          const isCustom = Boolean(g.isCustom || (g.id && String(g.id).startsWith('custom-')) || (!g.id && g.customGiftName));
+          const imgUrl = g.primaryImage || g.imageUrl || '';
+          const giftIdentifier = g.id || g.giftLinkId || `cat-gift-${idx}`;
+          const thumbHtml = imgUrl
+            ? `<img src="${imgUrl}" class="selected-gift-item__thumb" alt="${g.name}" onerror="this.onerror=null;this.parentElement.innerHTML='<span style=\\'font-size:18px;\\'>🎁</span>';"/>`
+            : `<div class="selected-gift-item__thumb" title="Text-only gift" style="background:#fdf2f8; border:1px solid #fbcfe8; color:#db2777; font-size:18px;">🎁</div>`;
+
+          const metaHtml = isCustom
+            ? `<div style="font-size:11px; color:var(--color-text-muted); display:flex; align-items:center; gap:4px; margin-top:1px;">
+                <span class="badge" style="background:#f3e8ff; color:#7e22ce; border:1px solid #e9d5ff; font-size:9px; padding:1px 5px; font-weight:700;">CUSTOM GIFT</span>
+                ${imgUrl ? '<span style="color:#059669; font-size:10px;">• Image attached</span>' : '<span style="color:var(--color-text-muted); font-size:10px;">• Text only</span>'}
+               </div>`
+            : `<div style="font-size:11px; color:var(--color-text-muted); margin-top:1px;">
+                ${g.brand ? `${g.brand} &bull; ` : ''}Store Value: ${formatRupees(g.price)}
+                <span class="badge badge--success" style="font-size:9px; padding:1px 5px; margin-left:4px;">STORE INVENTORY</span>
+               </div>`;
+
           return `
-            <div class="selected-gift-item" data-category-gift-id="${g.id}">
+            <div class="selected-gift-item" data-category-gift-id="${giftIdentifier}">
               <div class="selected-gift-item__info">
                 ${thumbHtml}
-                <div>
-                  <strong style="color:var(--color-text-primary); font-size:12px;">${g.name}</strong>
-                  <div style="font-size:11px; color:var(--color-text-muted);">
-                    ${g.brand ? `${g.brand} &bull; ` : ''}Store Value: ${formatRupees(g.price)}
-                    <span class="badge badge--success" style="font-size:9px; padding:1px 5px; margin-left:4px;">FREE GIFT</span>
-                  </div>
+                <div style="min-width:0; overflow:hidden;">
+                  <strong style="color:var(--color-text-primary); font-size:12px; display:block; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${g.name}</strong>
+                  ${metaHtml}
                 </div>
               </div>
-              <button type="button" class="selected-gift-item__remove" data-remove-category-gift="${g.id}" title="Remove this gift">&times;</button>
+              <button type="button" class="selected-gift-item__remove" data-remove-category-gift="${giftIdentifier}" data-cat-gift-index="${idx}" title="Remove this gift">&times;</button>
             </div>
           `;
         }).join('');
 
         listEl.querySelectorAll('[data-remove-category-gift]').forEach(btn => {
           btn.addEventListener('click', () => {
-            const idToRemove = btn.dataset.removeCategoryGift;
-            currentCategoryModalGifts = currentCategoryModalGifts.filter(g => g.id !== idToRemove);
+            const idxToRemove = Number(btn.dataset.catGiftIndex);
+            if (!isNaN(idxToRemove) && idxToRemove >= 0 && idxToRemove < currentCategoryModalGifts.length) {
+              currentCategoryModalGifts.splice(idxToRemove, 1);
+            } else {
+              const idToRemove = btn.dataset.removeCategoryGift;
+              currentCategoryModalGifts = currentCategoryModalGifts.filter((g, i) => (g.id !== idToRemove && g.giftLinkId !== idToRemove && `cat-gift-${i}` !== idToRemove));
+            }
             renderCategoryModalGiftsAndDropdown();
           });
         });
@@ -2991,8 +3374,12 @@
     }
 
     if (selectEl) {
-      const selectedIds = new Set(currentCategoryModalGifts.map(g => g.id));
-      let availableProducts = (data.products || []).filter(p => !selectedIds.has(p.id));
+      const selectedStoreIds = new Set(
+        currentCategoryModalGifts
+          .filter(g => !g.isCustom && g.id && !String(g.id).startsWith('custom-'))
+          .map(g => g.id)
+      );
+      let availableProducts = (data.products || []).filter(p => !selectedStoreIds.has(p.id));
 
       const q = (currentCategoryOfferGiftSearchQuery || '').trim().toLowerCase();
       if (q) {
@@ -3012,6 +3399,16 @@
           searchCount.textContent = `Found ${availableProducts.length} matching store item${availableProducts.length === 1 ? '' : 's'}`;
         } else {
           searchCount.style.display = 'none';
+        }
+      }
+
+      // Quick prompt to add typed query as custom non-store category gift
+      if (quickPrompt && quickPromptName) {
+        if (q) {
+          quickPrompt.style.display = 'flex';
+          quickPromptName.textContent = currentCategoryOfferGiftSearchQuery.trim();
+        } else {
+          quickPrompt.style.display = 'none';
         }
       }
 
@@ -3037,15 +3434,154 @@
   }
 
   function initOrResetCategoryOfferModal() {
-    currentCategoryModalGifts = [];
-    currentCategoryOfferGiftSearchQuery = '';
-    const searchInput = document.getElementById('categoryOfferGiftSearch');
-    if (searchInput) searchInput.value = '';
-    const input = document.getElementById('categoryOfferInput');
-    if (input) input.value = '';
-    renderCategoryModalGiftsAndDropdown();
+    const sel = document.getElementById('categoryOfferSelect');
+    const cat = sel ? sel.value : 'Mobiles';
+    loadCategoryOfferExistingGifts(cat);
   }
 
+  // Category Gift Tab Switching
+  const categoryOfferTabStore = document.getElementById('categoryOfferTabStore');
+  const categoryOfferTabCustom = document.getElementById('categoryOfferTabCustom');
+  if (categoryOfferTabStore) {
+    categoryOfferTabStore.addEventListener('click', () => switchCategoryOfferGiftTab('store'));
+  }
+  if (categoryOfferTabCustom) {
+    categoryOfferTabCustom.addEventListener('click', () => switchCategoryOfferGiftTab('custom'));
+  }
+
+  // Category quick switch to custom from search prompt
+  const categoryOfferSwitchToCustomBtn = document.getElementById('categoryOfferSwitchToCustomBtn');
+  if (categoryOfferSwitchToCustomBtn) {
+    categoryOfferSwitchToCustomBtn.addEventListener('click', () => {
+      const q = (currentCategoryOfferGiftSearchQuery || '').trim();
+      switchCategoryOfferGiftTab('custom');
+      const nameInput = document.getElementById('categoryOfferCustomName');
+      if (nameInput && q) {
+        nameInput.value = q;
+        nameInput.focus();
+      }
+    });
+  }
+
+  // Category Custom Gift Image Upload
+  const categoryOfferCustomUploadBtn = document.getElementById('categoryOfferCustomUploadBtn');
+  const categoryOfferCustomFile = document.getElementById('categoryOfferCustomFile');
+  if (categoryOfferCustomUploadBtn && categoryOfferCustomFile) {
+    categoryOfferCustomUploadBtn.addEventListener('click', () => {
+      categoryOfferCustomFile.click();
+    });
+
+    categoryOfferCustomFile.addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const spinner = document.getElementById('categoryOfferCustomUploadSpinner');
+      const previewBox = document.getElementById('categoryOfferCustomImgPreviewBox');
+      const previewImg = document.getElementById('categoryOfferCustomImgPreview');
+      const urlInput = document.getElementById('categoryOfferCustomImgUrl');
+
+      if (spinner) spinner.style.display = 'inline-flex';
+      try {
+        if (useApi) {
+          const res = await API.uploadImage(file, 'product');
+          if (res && res.success && res.url) {
+            currentCategoryOfferCustomImage = res.url;
+            if (urlInput) urlInput.value = res.url;
+            if (previewImg) previewImg.src = res.url;
+            if (previewBox) previewBox.style.display = 'flex';
+            showAdminToast('Gift image uploaded to Cloudinary!');
+            return;
+          }
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          currentCategoryOfferCustomImage = ev.target.result;
+          if (urlInput) urlInput.value = ev.target.result;
+          if (previewImg) previewImg.src = ev.target.result;
+          if (previewBox) previewBox.style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+      } catch (err) {
+        console.error('Gift image upload error:', err);
+        showAdminToast(`Image upload failed: ${err.message}`, 'error');
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          currentCategoryOfferCustomImage = ev.target.result;
+          if (urlInput) urlInput.value = ev.target.result;
+          if (previewImg) previewImg.src = ev.target.result;
+          if (previewBox) previewBox.style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+      } finally {
+        if (spinner) spinner.style.display = 'none';
+      }
+    });
+  }
+
+  // Category Custom Gift Image URL
+  const categoryOfferCustomImgUrl = document.getElementById('categoryOfferCustomImgUrl');
+  if (categoryOfferCustomImgUrl) {
+    categoryOfferCustomImgUrl.addEventListener('input', () => {
+      const val = categoryOfferCustomImgUrl.value.trim();
+      const previewBox = document.getElementById('categoryOfferCustomImgPreviewBox');
+      const previewImg = document.getElementById('categoryOfferCustomImgPreview');
+      currentCategoryOfferCustomImage = val;
+      if (val) {
+        if (previewImg) previewImg.src = val;
+        if (previewBox) previewBox.style.display = 'flex';
+      } else {
+        if (previewBox) previewBox.style.display = 'none';
+      }
+    });
+  }
+
+  // Category Custom Gift Image Clear
+  const categoryOfferCustomImgClearBtn = document.getElementById('categoryOfferCustomImgClearBtn');
+  if (categoryOfferCustomImgClearBtn) {
+    categoryOfferCustomImgClearBtn.addEventListener('click', () => {
+      currentCategoryOfferCustomImage = '';
+      const urlInput = document.getElementById('categoryOfferCustomImgUrl');
+      if (urlInput) urlInput.value = '';
+      const fileInput = document.getElementById('categoryOfferCustomFile');
+      if (fileInput) fileInput.value = '';
+      const previewBox = document.getElementById('categoryOfferCustomImgPreviewBox');
+      if (previewBox) previewBox.style.display = 'none';
+    });
+  }
+
+  // Category Add Custom Gift Button
+  const categoryOfferAddCustomGiftBtn = document.getElementById('categoryOfferAddCustomGiftBtn');
+  if (categoryOfferAddCustomGiftBtn) {
+    categoryOfferAddCustomGiftBtn.addEventListener('click', () => {
+      const nameInput = document.getElementById('categoryOfferCustomName');
+      const name = (nameInput?.value || '').trim();
+      if (!name) {
+        showAdminToast('Please type the product name for the category custom gift.', 'warning');
+        nameInput?.focus();
+        return;
+      }
+
+      const customImg = currentCategoryOfferCustomImage || null;
+
+      currentCategoryModalGifts.push({
+        id: 'custom-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+        name: name,
+        brand: null,
+        price: 0,
+        slug: null,
+        primaryImage: customImg || '',
+        imageUrl: customImg || '',
+        customGiftName: name,
+        customGiftImage: customImg,
+        isCustom: true
+      });
+
+      resetCategoryOfferCustomInputs();
+      renderCategoryModalGiftsAndDropdown();
+      showAdminToast(`Added "${name}" as category custom gift!`);
+    });
+  }
+
+  // Category Add Store Gift Button
   const categoryOfferAddGiftBtn = document.getElementById('categoryOfferAddGiftBtn');
   if (categoryOfferAddGiftBtn) {
     categoryOfferAddGiftBtn.addEventListener('click', () => {
@@ -3064,9 +3600,10 @@
           price: giftProduct.price,
           category: giftProduct.category,
           slug: giftProduct.slug,
-          primaryImage: giftProduct.primaryImage
+          primaryImage: giftProduct.primaryImage,
+          imageUrl: giftProduct.primaryImage,
+          isCustom: false
         });
-        // Clear search on add so list resets
         currentCategoryOfferGiftSearchQuery = '';
         const searchInput = document.getElementById('categoryOfferGiftSearch');
         if (searchInput) searchInput.value = '';
@@ -3106,12 +3643,18 @@
     });
   }
 
+  const categoryOfferSelectEl = document.getElementById('categoryOfferSelect');
+  if (categoryOfferSelectEl) {
+    categoryOfferSelectEl.addEventListener('change', () => {
+      loadCategoryOfferExistingGifts(categoryOfferSelectEl.value);
+    });
+  }
+
   const saveCategoryOfferBtn = document.getElementById('saveCategoryOfferBtn');
   if (saveCategoryOfferBtn) {
     saveCategoryOfferBtn.addEventListener('click', async () => {
       const category = document.getElementById('categoryOfferSelect').value;
       const valStr = document.getElementById('categoryOfferInput').value.trim();
-      const giftProductIds = currentCategoryModalGifts.map(g => g.id);
 
       let offerVal = null;
       if (valStr !== '') {
@@ -3123,14 +3666,30 @@
         if (num > 0) offerVal = num;
       }
 
-      if (offerVal === null && giftProductIds.length === 0) {
+      if (offerVal === null && currentCategoryModalGifts.length === 0) {
         showAdminToast('Please enter an offer percentage or select at least one free gift to apply to this category.', 'warning');
         return;
       }
 
+      const giftsPayload = currentCategoryModalGifts.map(g => {
+        const isCustom = Boolean(g.isCustom || (g.id && String(g.id).startsWith('custom-')) || (!g.id && g.customGiftName));
+        if (isCustom) {
+          return {
+            customGiftName: g.name || g.customGiftName,
+            customGiftImage: g.primaryImage || g.imageUrl || g.customGiftImage || null,
+            isCustom: true
+          };
+        } else {
+          return {
+            giftProductId: g.id || g.giftProductId,
+            isCustom: false
+          };
+        }
+      });
+
       if (useApi) {
         try {
-          await API.updateCategoryOffer(category, offerVal, giftProductIds, false);
+          await API.updateCategoryOffer(category, offerVal, giftsPayload, false);
           showAdminToast('offer updated successfully');
           closeModal('categoryOfferModal');
           await loadLiveProducts();
@@ -3146,7 +3705,7 @@
       data.products.forEach(p => {
         if (category === 'all' || p.category.toLowerCase() === category.toLowerCase()) {
           if (offerVal !== null) p.offer = offerVal;
-          if (giftProductIds.length > 0) {
+          if (currentCategoryModalGifts.length > 0) {
             p.gifts = [...currentCategoryModalGifts];
           }
         }

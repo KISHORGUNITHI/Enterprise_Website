@@ -63,6 +63,8 @@ export class AdminProductRepository {
           select: {
             id: true,
             giftProductId: true,
+            customGiftName: true,
+            customGiftImage: true,
             giftProduct: {
               select: {
                 id: true,
@@ -95,15 +97,37 @@ export class AdminProductRepository {
         ...p,
         variantsCount: p._count?.variants || (p.variants?.length || 0),
         primaryImage: p.productImages?.find(img => img.isPrimary) || p.productImages?.[0] || null,
-        gifts: (p.giftsGiven || []).map(g => ({
-          giftLinkId: g.id,
-          id: g.giftProduct?.id,
-          name: g.giftProduct?.name,
-          brand: g.giftProduct?.brand,
-          price: g.giftProduct?.price,
-          slug: g.giftProduct?.slug,
-          primaryImage: g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || ''
-        })),
+        gifts: (p.giftsGiven || []).map(g => {
+          if (g.giftProductId && g.giftProduct) {
+            const primaryImg = g.giftProduct.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct.productImages?.[0]?.imageUrl || '';
+            return {
+              giftLinkId: g.id,
+              id: g.giftProduct.id,
+              name: g.giftProduct.name,
+              brand: g.giftProduct.brand,
+              price: parseFloat(g.giftProduct.price) || 0,
+              slug: g.giftProduct.slug,
+              primaryImage: primaryImg,
+              imageUrl: primaryImg,
+              isCustom: false
+            };
+          } else {
+            const customImg = g.customGiftImage || '';
+            return {
+              giftLinkId: g.id,
+              id: g.id,
+              name: g.customGiftName || 'Free Gift',
+              brand: null,
+              price: 0,
+              slug: null,
+              primaryImage: customImg,
+              imageUrl: customImg,
+              customGiftName: g.customGiftName,
+              customGiftImage: g.customGiftImage,
+              isCustom: true
+            };
+          }
+        }),
         _count: undefined
       })),
       total
@@ -169,6 +193,8 @@ export class AdminProductRepository {
           select: {
             id: true,
             giftProductId: true,
+            customGiftName: true,
+            customGiftImage: true,
             giftProduct: {
               select: {
                 id: true,
@@ -450,52 +476,74 @@ export class AdminProductRepository {
   }
 
   /**
-   * Sync gifts for a product (ensuring uniqueness and no self-gifting)
+   * Sync gifts for a product (ensuring uniqueness and no self-gifting, supporting store & custom non-store gifts)
    */
-  async syncProductGifts(productId, giftProductIds = []) {
-    // Filter out null/undefined, self-referencing IDs, and ensure unique IDs
-    const uniqueGiftIds = [...new Set(
-      (Array.isArray(giftProductIds) ? giftProductIds : [])
-        .map(id => String(id).trim())
-        .filter(id => Boolean(id) && id !== productId)
-    )];
+  async syncProductGifts(productId, giftsInput = []) {
+    const giftsArray = Array.isArray(giftsInput) ? giftsInput : [];
 
-    // Fetch existing gifts
-    const existing = await prisma.productGift.findMany({
-      where: { productId },
-      select: { giftProductId: true }
-    });
-    const existingIds = new Set(existing.map(g => g.giftProductId));
+    const itemsToCreate = [];
+    const seenStoreIds = new Set();
+    const seenCustomGifts = new Set();
 
-    // Determine IDs to remove
-    const idsToRemove = [...existingIds].filter(id => !uniqueGiftIds.includes(id));
-    if (idsToRemove.length > 0) {
-      await prisma.productGift.deleteMany({
-        where: {
-          productId,
-          giftProductId: { in: idsToRemove }
+    for (const item of giftsArray) {
+      if (typeof item === 'string') {
+        const trimmed = item.trim();
+        if (trimmed && trimmed !== productId && !seenStoreIds.has(trimmed)) {
+          seenStoreIds.add(trimmed);
+          itemsToCreate.push({
+            productId,
+            giftProductId: trimmed,
+            customGiftName: null,
+            customGiftImage: null
+          });
         }
-      });
+      } else if (item && typeof item === 'object') {
+        const isStoreProduct = Boolean(item.giftProductId || (item.id && !item.isCustom && !item.customGiftName));
+        if (isStoreProduct) {
+          const gId = String(item.giftProductId || item.id).trim();
+          if (gId && gId !== productId && !seenStoreIds.has(gId)) {
+            seenStoreIds.add(gId);
+            itemsToCreate.push({
+              productId,
+              giftProductId: gId,
+              customGiftName: null,
+              customGiftImage: null
+            });
+          }
+        } else {
+          // Custom non-store gift
+          const customName = String(item.customGiftName || item.name || '').trim();
+          const customImage = (item.customGiftImage || item.imageUrl || item.primaryImage || '').trim() || null;
+          if (customName) {
+            const key = `${customName.toLowerCase()}::${customImage || ''}`;
+            if (!seenCustomGifts.has(key)) {
+              seenCustomGifts.add(key);
+              itemsToCreate.push({
+                productId,
+                giftProductId: null,
+                customGiftName: customName,
+                customGiftImage: customImage
+              });
+            }
+          }
+        }
+      }
     }
 
-    // Determine IDs to add
-    const idsToAdd = uniqueGiftIds.filter(id => !existingIds.has(id));
-    if (idsToAdd.length > 0) {
-      await prisma.productGift.createMany({
-        data: idsToAdd.map(giftProductId => ({
-          productId,
-          giftProductId
-        })),
-        skipDuplicates: true
-      });
-    }
+    await prisma.$transaction(async (tx) => {
+      await tx.productGift.deleteMany({ where: { productId } });
+      if (itemsToCreate.length > 0) {
+        await tx.productGift.createMany({
+          data: itemsToCreate
+        });
+      }
+    });
 
-    // Return updated gifts
     return this.getProductGifts(productId);
   }
 
   /**
-   * Get all gifts for a product
+   * Get all gifts for a product (both store inventory & custom gifts)
    */
   async getProductGifts(productId) {
     const gifts = await prisma.productGift.findMany({
@@ -503,6 +551,8 @@ export class AdminProductRepository {
       select: {
         id: true,
         giftProductId: true,
+        customGiftName: true,
+        customGiftImage: true,
         giftProduct: {
           select: {
             id: true,
@@ -519,25 +569,50 @@ export class AdminProductRepository {
       }
     });
 
-    return gifts.map(g => ({
-      giftLinkId: g.id,
-      id: g.giftProduct?.id,
-      name: g.giftProduct?.name,
-      brand: g.giftProduct?.brand,
-      price: g.giftProduct?.price,
-      slug: g.giftProduct?.slug,
-      primaryImage: g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || ''
-    }));
+    return gifts.map(g => {
+      if (g.giftProductId && g.giftProduct) {
+        const primaryImage = g.giftProduct.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct.productImages?.[0]?.imageUrl || '';
+        return {
+          giftLinkId: g.id,
+          id: g.giftProduct.id,
+          name: g.giftProduct.name,
+          brand: g.giftProduct.brand,
+          price: parseFloat(g.giftProduct.price) || 0,
+          slug: g.giftProduct.slug,
+          primaryImage,
+          imageUrl: primaryImage,
+          isCustom: false
+        };
+      } else {
+        const image = g.customGiftImage || '';
+        return {
+          giftLinkId: g.id,
+          id: g.id,
+          name: g.customGiftName || 'Free Gift',
+          brand: null,
+          price: 0,
+          slug: null,
+          primaryImage: image,
+          imageUrl: image,
+          customGiftName: g.customGiftName,
+          customGiftImage: g.customGiftImage,
+          isCustom: true
+        };
+      }
+    });
   }
 
   /**
-   * Remove a single gift from a product
+   * Remove a single gift from a product (by link ID or giftProductId)
    */
-  async removeGift(productId, giftProductId) {
+  async removeGift(productId, giftIdOrLinkId) {
     await prisma.productGift.deleteMany({
       where: {
         productId,
-        giftProductId
+        OR: [
+          { id: giftIdOrLinkId },
+          { giftProductId: giftIdOrLinkId }
+        ]
       }
     });
   }
@@ -583,6 +658,8 @@ export class AdminProductRepository {
           select: {
             id: true,
             giftProductId: true,
+            customGiftName: true,
+            customGiftImage: true,
             giftProduct: {
               select: {
                 id: true,
@@ -616,15 +693,37 @@ export class AdminProductRepository {
         offer: offerNum,
         discountedPrice,
         primaryImage: p.productImages?.find(img => img.isPrimary)?.imageUrl || p.productImages?.[0]?.imageUrl || '',
-        gifts: (p.giftsGiven || []).map(g => ({
-          giftLinkId: g.id,
-          id: g.giftProduct?.id,
-          name: g.giftProduct?.name,
-          brand: g.giftProduct?.brand,
-          price: parseFloat(g.giftProduct?.price) || 0,
-          slug: g.giftProduct?.slug,
-          primaryImage: g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || ''
-        }))
+        gifts: (p.giftsGiven || []).map(g => {
+          if (g.giftProductId && g.giftProduct) {
+            const primaryImg = g.giftProduct.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct.productImages?.[0]?.imageUrl || '';
+            return {
+              giftLinkId: g.id,
+              id: g.giftProduct.id,
+              name: g.giftProduct.name,
+              brand: g.giftProduct.brand,
+              price: parseFloat(g.giftProduct.price) || 0,
+              slug: g.giftProduct.slug,
+              primaryImage: primaryImg,
+              imageUrl: primaryImg,
+              isCustom: false
+            };
+          } else {
+            const customImg = g.customGiftImage || '';
+            return {
+              giftLinkId: g.id,
+              id: g.id,
+              name: g.customGiftName || 'Free Gift',
+              brand: null,
+              price: 0,
+              slug: null,
+              primaryImage: customImg,
+              imageUrl: customImg,
+              customGiftName: g.customGiftName,
+              customGiftImage: g.customGiftImage,
+              isCustom: true
+            };
+          }
+        })
       };
     });
   }

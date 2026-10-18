@@ -229,9 +229,10 @@ export class AdminProductService {
         }
       }
 
-      // If gifts provided, sync them linked to the product
-      if (Array.isArray(data.giftProductIds) && data.giftProductIds.length > 0) {
-        await this.repository.syncProductGifts(product.id, data.giftProductIds);
+      // If gifts provided, sync them linked to the product (store or custom gifts)
+      const giftsToSync = data.gifts !== undefined ? data.gifts : data.giftProductIds;
+      if (Array.isArray(giftsToSync) && giftsToSync.length > 0) {
+        await this.repository.syncProductGifts(product.id, giftsToSync);
       }
 
       return {
@@ -356,9 +357,10 @@ export class AdminProductService {
         }
       }
 
-      // If gifts explicitly provided, re-sync them
-      if (Array.isArray(data.giftProductIds)) {
-        await this.repository.syncProductGifts(id, data.giftProductIds);
+      // If gifts explicitly provided, re-sync them (store or custom gifts)
+      const giftsToSync = data.gifts !== undefined ? data.gifts : data.giftProductIds;
+      if (Array.isArray(giftsToSync)) {
+        await this.repository.syncProductGifts(id, giftsToSync);
       }
 
       return {
@@ -431,9 +433,9 @@ export class AdminProductService {
   }
 
   /**
-   * Update offer and gifts for a specific product
+   * Update offer and gifts for a specific product (supports store & custom non-store gifts)
    */
-  async updateOffer(id, offer, giftProductIds = undefined) {
+  async updateOffer(id, offer, giftsInput = undefined) {
     try {
       const existing = await this.repository.findById(id);
       if (!existing) {
@@ -455,8 +457,8 @@ export class AdminProductService {
 
       const updated = await this.repository.updateOffer(id, parsedOffer);
 
-      if (giftProductIds !== undefined) {
-        await this.repository.syncProductGifts(id, giftProductIds);
+      if (giftsInput !== undefined) {
+        await this.repository.syncProductGifts(id, giftsInput);
       }
 
       const gifts = await this.repository.getProductGifts(id);
@@ -479,7 +481,7 @@ export class AdminProductService {
   /**
    * Update offer for an entire category
    */
-  async updateCategoryOffer(categoryIdentifier, offer, giftProductIds, clearGifts = false) {
+  async updateCategoryOffer(categoryIdentifier, offer, giftsInput, clearGifts = false) {
     try {
       if (!categoryIdentifier) {
         const error = new Error('Category is required');
@@ -498,7 +500,7 @@ export class AdminProductService {
         if (parsedOffer === 0) parsedOffer = null;
       }
 
-      const result = await this.repository.updateCategoryOffer(categoryIdentifier, parsedOffer, giftProductIds, clearGifts);
+      const result = await this.repository.updateCategoryOffer(categoryIdentifier, parsedOffer, giftsInput, clearGifts);
 
       return {
         success: true,

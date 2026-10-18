@@ -32,6 +32,15 @@ export class TrendingRepository {
           include: {
             category:      true,
             productImages: true,
+            giftsGiven: {
+              include: {
+                giftProduct: {
+                  include: {
+                    productImages: true
+                  }
+                }
+              }
+            }
           },
         },
       },
@@ -60,6 +69,15 @@ export class TrendingRepository {
       include: {
         category:      true,
         productImages: true,
+        giftsGiven: {
+          include: {
+            giftProduct: {
+              include: {
+                productImages: true
+              }
+            }
+          }
+        }
       },
       orderBy: { createdAt: "desc" },
       take: limit,

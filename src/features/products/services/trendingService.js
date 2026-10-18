@@ -204,6 +204,7 @@ export class TrendingService {
       category:     product.category?.name || "",
       imageUrl:     primaryImg,
       productImages: product.productImages,
+      giftsGiven:   product.giftsGiven || [],
       // trendingScore intentionally omitted from public response
     };
   }

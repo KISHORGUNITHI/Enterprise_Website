@@ -404,23 +404,38 @@
               <span style="font-size: 20px;">🎁</span>
               <div>
                 <strong style="color: #831843; font-size: 14px;">Special Promotional Offer: Free Gift${gifts.length > 1 ? 's' : ''} Included!</strong>
-                <div style="font-size: 11.5px; color: #9d174d;">You will receive this store item 100% free with your purchase.</div>
+                <div style="font-size: 11.5px; color: #9d174d;">You will receive this bonus gift 100% free with your purchase.</div>
               </div>
             </div>
             <span class="badge badge--success" style="font-size: 11px; font-weight: 700; background: #059669; color: white;">FREE GIFT</span>
           </div>
           <div style="display:flex; flex-direction:column; gap: 8px; margin-top: 6px;">
-            ${gifts.map(g => `
-              <div style="display:flex; align-items:center; justify-content:space-between; background: rgba(255,255,255,0.9); border-radius: 8px; padding: 8px 12px; border: 1px solid #fbcfe8;">
-                <div style="display:flex; align-items:center; gap: 10px;">
-                  ${g.imageUrl ? `<img src="${g.imageUrl}" style="width: 38px; height: 38px; object-fit: cover; border-radius: 6px; border: 1px solid #f472b6;" alt="${g.name}"/>` : `<span style="font-size: 20px;">🎁</span>`}
-                  <div>
-                    <strong style="color: #1e293b; font-size: 13px;">${g.name}</strong>
-                    <div style="font-size: 11px; color: #64748b;">${g.brand ? `${g.brand} &bull; ` : ''}Store Value: <span style="text-decoration: line-through;">${fmt(g.price)}</span> <strong style="color: #059669; margin-left: 4px;">₹0 Free</strong></div>
+            ${gifts.map(g => {
+              const hasImg = Boolean(g.imageUrl && g.imageUrl.trim());
+              const isCustom = Boolean(g.isCustom || !g.slug);
+              const thumbHtml = hasImg
+                ? `<img src="${g.imageUrl}" style="width: 44px; height: 44px; min-width: 44px; object-fit: contain; background: #ffffff; border-radius: 6px; border: 1px solid #f472b6; padding: 2px;" alt="${g.name}" onerror="this.onerror=null;this.parentElement.innerHTML='<div style=\\'width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:#fdf2f8;border-radius:6px;border:1px solid #fbcfe8;font-size:20px;\\'>🎁</div>';"/>`
+                : `<div style="width: 44px; height: 44px; min-width: 44px; display: flex; align-items: center; justify-content: center; background: #fdf2f8; border-radius: 6px; border: 1px solid #fbcfe8; font-size: 20px;">🎁</div>`;
+
+              const priceHtml = (g.price && g.price > 0)
+                ? `<div style="font-size: 11.5px; color: #64748b;">${g.brand ? `${g.brand} &bull; ` : ''}Store Value: <span style="text-decoration: line-through;">${fmt(g.price)}</span> <strong style="color: #059669; margin-left: 4px;">₹0 Free</strong></div>`
+                : `<div style="font-size: 11.5px; color: #059669; font-weight: 600;">Complimentary Gift &bull; ₹0 Free</div>`;
+
+              return `
+                <div style="display:flex; align-items:center; justify-content:space-between; background: rgba(255,255,255,0.95); border-radius: 8px; padding: 8px 12px; border: 1px solid #fbcfe8;">
+                  <div style="display:flex; align-items:center; gap: 10px; min-width: 0;">
+                    ${thumbHtml}
+                    <div style="min-width: 0;">
+                      <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                        <strong style="color: #1e293b; font-size: 13px;">${g.name}</strong>
+                        ${isCustom ? `<span class="badge" style="background:#f3e8ff; color:#7e22ce; border:1px solid #e9d5ff; font-size:9.5px; font-weight:700; padding:1px 5px;">SPECIAL GIFT</span>` : ''}
+                      </div>
+                      ${priceHtml}
+                    </div>
                   </div>
                 </div>
-              </div>
-            `).join('')}
+              `;
+            }).join('')}
           </div>
         `;
       } else {
@@ -990,9 +1005,11 @@
               badge: badgeText,
               badgeType,
               gifts: (p.giftsGiven || []).map(g => ({
-                id: g.giftProduct?.id,
-                name: g.giftProduct?.name,
-                brand: g.giftProduct?.brand
+                id: g.giftProduct?.id || g.id,
+                name: g.giftProduct?.name || g.customGiftName || 'Free Gift',
+                brand: g.giftProduct?.brand || null,
+                imageUrl: g.giftProduct?.primaryImage || g.customGiftImage || null,
+                isCustom: !g.giftProductId
               }))
             };
           }));
@@ -1162,14 +1179,21 @@
           const originalPrice = price;
           const salePrice = offer > 0 ? Math.round(price * (1 - offer / 100)) : price;
 
-          const gifts = (p.giftsGiven || []).map(g => ({
-            id: g.giftProduct?.id,
-            name: g.giftProduct?.name,
-            brand: g.giftProduct?.brand,
-            price: parseFloat(g.giftProduct?.price) || 0,
-            slug: g.giftProduct?.slug,
-            imageUrl: g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || ''
-          }));
+          const gifts = (p.giftsGiven || []).map(g => {
+            const isCustom = !g.giftProductId;
+            const imgUrl = isCustom
+              ? (g.customGiftImage || '')
+              : (g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || '');
+            return {
+              id: g.giftProduct?.id || g.id,
+              name: g.giftProduct?.name || g.customGiftName || 'Free Gift',
+              brand: g.giftProduct?.brand || null,
+              price: parseFloat(g.giftProduct?.price) || 0,
+              slug: g.giftProduct?.slug || null,
+              imageUrl: imgUrl,
+              isCustom
+            };
+          });
 
           const backendProduct = {
             id: p.slug || p.id,

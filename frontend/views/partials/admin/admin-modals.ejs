@@ -653,35 +653,116 @@
             <label class="admin-label" style="margin-bottom: 0; display: flex; align-items: center; gap: 6px; font-weight: 700;">
               <span>🎁 Free Gifts Included with Purchase</span>
             </label>
-            <span class="badge" style="background: #fdf2f8; color: #9d174d; border: 1px solid #fbcfe8; font-size: 10px; font-weight: 700;">Admin's Choice (0 to Many)</span>
+            <span class="badge" style="background: #fdf2f8; color: #9d174d; border: 1px solid #fbcfe8; font-size: 10px; font-weight: 700;">Store & Custom Items</span>
           </div>
           <p class="admin-form-hint" style="margin-top: 0; margin-bottom: var(--space-3);">
-            Select items from store inventory (Home Theatres, Buds, Soundbars, etc.). Selected items are automatically hidden from the dropdown to prevent duplicates.
+            Select from store inventory or type any external product to gift (with optional gift image).
           </p>
 
-          <!-- Search filter for gifts -->
-          <div class="gift-search-wrap" style="margin-bottom: var(--space-2); position: relative;">
-            <div style="position: relative; display: flex; align-items: center;">
-              <span style="position: absolute; left: 10px; color: var(--color-text-muted); font-size: 13px; pointer-events: none;">🔍</span>
-              <input type="text" id="productOfferGiftSearch" class="admin-input gift-search-input"
-                placeholder="Search store inventory by name, brand, or category to gift..."
-                style="padding-left: 32px; padding-right: 28px; font-size: 12.5px; height: 36px;" autocomplete="off" />
-              <button type="button" id="productOfferGiftSearchClear" style="position: absolute; right: 8px; background: none; border: none; color: var(--color-text-muted); font-size: 16px; cursor: pointer; display: none; line-height: 1; padding: 2px;" title="Clear search">&times;</button>
-            </div>
-            <div id="productOfferGiftSearchCount" style="font-size: 11px; color: var(--color-text-muted); margin-top: 3px; display: none;"></div>
+          <!-- Source Tabs: Store Inventory vs Custom / Not in Store -->
+          <div class="gift-source-tabs" style="display: flex; gap: 6px; margin-bottom: var(--space-3); background: var(--color-bg-secondary); padding: 3px; border-radius: var(--radius-md); border: 1px solid var(--color-border-light);">
+            <button type="button" class="btn btn--xs gift-source-tab-btn active" id="productOfferTabStore" style="flex: 1; padding: 6px 10px; font-size: 11.5px; font-weight: 600; border-radius: 4px; border: none; cursor: pointer; background: var(--color-bg-primary); color: var(--color-text-primary); box-shadow: 0 1px 2px rgba(0,0,0,0.06);">
+              🏪 Store Inventory
+            </button>
+            <button type="button" class="btn btn--xs gift-source-tab-btn" id="productOfferTabCustom" style="flex: 1; padding: 6px 10px; font-size: 11.5px; font-weight: 600; border-radius: 4px; border: none; cursor: pointer; background: transparent; color: var(--color-text-secondary);">
+              ✨ Custom Gift (Not in Store)
+            </button>
           </div>
 
-          <!-- Gift Selector Row: full width select and clean button -->
-          <div class="gift-picker-row">
-            <select id="productOfferGiftSelect" class="admin-select gift-picker-select">
-              <option value="">-- Choose a store item as free gift (e.g. Home Theatre, Buds) --</option>
-            </select>
-            <button type="button" class="btn btn--primary btn--sm gift-picker-add-btn" id="productOfferAddGiftBtn">
+          <!-- Tab 1: Store Inventory Picker -->
+          <div id="productOfferStorePanel">
+            <!-- Search filter for gifts -->
+            <div class="gift-search-wrap" style="margin-bottom: var(--space-2); position: relative;">
+              <div style="position: relative; display: flex; align-items: center;">
+                <span style="position: absolute; left: 10px; color: var(--color-text-muted); font-size: 13px; pointer-events: none;">🔍</span>
+                <input type="text" id="productOfferGiftSearch" class="admin-input gift-search-input"
+                  placeholder="Search store inventory by name, brand, or category to gift..."
+                  style="padding-left: 32px; padding-right: 28px; font-size: 12.5px; height: 36px;" autocomplete="off" />
+                <button type="button" id="productOfferGiftSearchClear" style="position: absolute; right: 8px; background: none; border: none; color: var(--color-text-muted); font-size: 16px; cursor: pointer; display: none; line-height: 1; padding: 2px;" title="Clear search">&times;</button>
+              </div>
+              <div id="productOfferGiftSearchCount" style="font-size: 11px; color: var(--color-text-muted); margin-top: 3px; display: none;"></div>
+            </div>
+
+            <!-- Quick prompt if item not found in store -->
+            <div id="productOfferCustomQuickPrompt" style="display: none; margin-bottom: var(--space-2); padding: 8px 12px; background: #fdf2f8; border: 1px dashed #f472b6; border-radius: 6px; font-size: 11.5px; color: #9d174d; align-items: center; justify-content: space-between;">
+              <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 8px;">
+                <span>Item not in store? Add "</span><strong id="productOfferQuickPromptName"></strong><span>" as custom gift!</span>
+              </div>
+              <button type="button" class="btn btn--xs" id="productOfferSwitchToCustomBtn" style="background: #db2777; color: white; border: none; padding: 3px 8px; font-size: 11px; font-weight: 600; border-radius: 4px; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
+                + Add as Custom Gift
+              </button>
+            </div>
+
+            <!-- Gift Selector Row: full width select and clean button -->
+            <div class="gift-picker-row">
+              <select id="productOfferGiftSelect" class="admin-select gift-picker-select">
+                <option value="">-- Choose a store item as free gift (e.g. Home Theatre, Buds) --</option>
+              </select>
+              <button type="button" class="btn btn--primary btn--sm gift-picker-add-btn" id="productOfferAddGiftBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Add Gift</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab 2: Custom Non-Store Gift Panel -->
+          <div id="productOfferCustomPanel" style="display: none; background: #faf5ff; border: 1px solid #e9d5ff; border-radius: var(--radius-md); padding: 12px; margin-bottom: var(--space-3);">
+            <div style="margin-bottom: 8px;">
+              <label class="admin-label" style="font-size: 11.5px; font-weight: 700; margin-bottom: 4px; color: #581c87;">
+                Gift Product Name <span style="color: #dc2626;">*</span>
+              </label>
+              <input type="text" id="productOfferCustomName" class="admin-input"
+                placeholder="Type product wanted to be gifted (e.g. Boat Rockerz 450, Wireless Earbuds, Backpack)..."
+                style="font-size: 12.5px; height: 36px; background: #ffffff;" autocomplete="off" />
+            </div>
+
+            <!-- Optional Image for Custom Gift -->
+            <div style="margin-top: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <label class="admin-label" style="font-size: 11.5px; font-weight: 700; margin-bottom: 0; color: #581c87;">
+                  Gift Image <span style="font-weight: 400; color: var(--color-text-muted);">(Optional — leave empty for text-only)</span>
+                </label>
+                <span class="badge" style="font-size: 9.5px; background: #ede9fe; color: #6b21a8; border: 1px solid #ddd6fe;">Size: 1:1 Square (200×200 to 400×400)</span>
+              </div>
+
+              <!-- Upload local file or paste URL -->
+              <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px; flex-wrap: wrap;">
+                <input type="file" id="productOfferCustomFile" accept="image/*" style="display: none;" />
+                <button type="button" class="btn btn--outline btn--xs" id="productOfferCustomUploadBtn" style="font-size: 11px; padding: 4px 8px; border-color: #c4b5fd; color: #6d28d9; background: #ffffff;">
+                  📁 Browse Image File
+                </button>
+                <span style="font-size: 11px; color: var(--color-text-muted);">or paste image URL below:</span>
+                <span id="productOfferCustomUploadSpinner" style="display: none; font-size: 11px; color: #7c3aed; font-weight: 600;">
+                  <span class="spinner-sm" style="display:inline-block; vertical-align:middle; width:12px; height:12px;"></span> Uploading...
+                </span>
+              </div>
+
+              <input type="url" id="productOfferCustomImgUrl" class="admin-input"
+                placeholder="Image URL (optional): https://example.com/gift-image.jpg"
+                style="font-size: 12px; height: 32px; background: #ffffff;" />
+
+              <!-- Image Preview Thumbnail (Dimensions: 44x44 max) -->
+              <div id="productOfferCustomImgPreviewBox" style="display: none; align-items: center; gap: 10px; margin-top: 8px; padding: 6px 10px; background: #ffffff; border: 1px solid #ddd6fe; border-radius: 6px;">
+                <img id="productOfferCustomImgPreview" src="" alt="Gift Preview" style="width: 44px; height: 44px; min-width: 44px; object-fit: contain; border-radius: 4px; border: 1px solid #e2e8f0; background: #fff;" />
+                <div style="flex: 1; min-width: 0;">
+                  <div style="font-size: 11px; font-weight: 600; color: #1e293b;">Image Attached</div>
+                  <div style="font-size: 10px; color: #059669;">Will display in 44×44px square on product page</div>
+                </div>
+                <button type="button" id="productOfferCustomImgClearBtn" class="btn btn--outline btn--xs" style="color: #dc2626; border-color: #fca5a5; padding: 1px 6px; font-size: 10px;" title="Remove image">
+                  Remove
+                </button>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn--primary btn--sm" id="productOfferAddCustomGiftBtn" style="margin-top: 12px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; background: #7c3aed; border-color: #6d28d9;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
-              <span>Add Gift</span>
+              <span>Add Custom Non-Store Gift</span>
             </button>
           </div>
 
@@ -693,7 +774,7 @@
           <div id="noGiftsHint" class="gift-empty-state">
             <div style="font-size: 18px; margin-bottom: 2px;">🎁</div>
             <div style="font-weight: 600; color: var(--color-text-secondary); font-size: 12px;">No free gifts attached yet</div>
-            <div style="font-size: 11px; color: var(--color-text-muted);">Choose an item above and click "Add Gift" to bundle free products with this purchase.</div>
+            <div style="font-size: 11px; color: var(--color-text-muted);">Select a store item or type a custom gift above to bundle free items with this purchase.</div>
           </div>
         </div>
 
@@ -766,35 +847,116 @@
             <label class="admin-label" style="margin-bottom: 0; display: flex; align-items: center; gap: 6px; font-weight: 700;">
               <span>🎁 Free Gifts for this Category</span>
             </label>
-            <span class="badge" style="background: #fdf2f8; color: #9d174d; border: 1px solid #fbcfe8; font-size: 10px; font-weight: 700;">Category-wide Bundle</span>
+            <span class="badge" style="background: #fdf2f8; color: #9d174d; border: 1px solid #fbcfe8; font-size: 10px; font-weight: 700;">Store & Custom Items</span>
           </div>
           <p class="admin-form-hint" style="margin-top: 0; margin-bottom: var(--space-3);">
-            Select items from store inventory (e.g. Home Theatres, Buds, Soundbars) to be gifted with every product in this category. Added gifts are hidden from the dropdown to prevent duplicates.
+            Select from store inventory or type any external product to bundle with every product in this category.
           </p>
 
-          <!-- Search filter for category gifts -->
-          <div class="gift-search-wrap" style="margin-bottom: var(--space-2); position: relative;">
-            <div style="position: relative; display: flex; align-items: center;">
-              <span style="position: absolute; left: 10px; color: var(--color-text-muted); font-size: 13px; pointer-events: none;">🔍</span>
-              <input type="text" id="categoryOfferGiftSearch" class="admin-input gift-search-input"
-                placeholder="Search store inventory by name, brand, or category to gift..."
-                style="padding-left: 32px; padding-right: 28px; font-size: 12.5px; height: 36px;" autocomplete="off" />
-              <button type="button" id="categoryOfferGiftSearchClear" style="position: absolute; right: 8px; background: none; border: none; color: var(--color-text-muted); font-size: 16px; cursor: pointer; display: none; line-height: 1; padding: 2px;" title="Clear search">&times;</button>
-            </div>
-            <div id="categoryOfferGiftSearchCount" style="font-size: 11px; color: var(--color-text-muted); margin-top: 3px; display: none;"></div>
+          <!-- Source Tabs: Store Inventory vs Custom / Not in Store -->
+          <div class="gift-source-tabs" style="display: flex; gap: 6px; margin-bottom: var(--space-3); background: var(--color-bg-secondary); padding: 3px; border-radius: var(--radius-md); border: 1px solid var(--color-border-light);">
+            <button type="button" class="btn btn--xs gift-source-tab-btn active" id="categoryOfferTabStore" style="flex: 1; padding: 6px 10px; font-size: 11.5px; font-weight: 600; border-radius: 4px; border: none; cursor: pointer; background: var(--color-bg-primary); color: var(--color-text-primary); box-shadow: 0 1px 2px rgba(0,0,0,0.06);">
+              🏪 Store Inventory
+            </button>
+            <button type="button" class="btn btn--xs gift-source-tab-btn" id="categoryOfferTabCustom" style="flex: 1; padding: 6px 10px; font-size: 11.5px; font-weight: 600; border-radius: 4px; border: none; cursor: pointer; background: transparent; color: var(--color-text-secondary);">
+              ✨ Custom Gift (Not in Store)
+            </button>
           </div>
 
-          <!-- Gift Selector Row -->
-          <div class="gift-picker-row">
-            <select id="categoryOfferGiftSelect" class="admin-select gift-picker-select">
-              <option value="">-- Choose a store item as category free gift (e.g. Soundbar, Buds) --</option>
-            </select>
-            <button type="button" class="btn btn--primary btn--sm gift-picker-add-btn" id="categoryOfferAddGiftBtn">
+          <!-- Tab 1: Store Inventory Picker -->
+          <div id="categoryOfferStorePanel">
+            <!-- Search filter for category gifts -->
+            <div class="gift-search-wrap" style="margin-bottom: var(--space-2); position: relative;">
+              <div style="position: relative; display: flex; align-items: center;">
+                <span style="position: absolute; left: 10px; color: var(--color-text-muted); font-size: 13px; pointer-events: none;">🔍</span>
+                <input type="text" id="categoryOfferGiftSearch" class="admin-input gift-search-input"
+                  placeholder="Search store inventory by name, brand, or category to gift..."
+                  style="padding-left: 32px; padding-right: 28px; font-size: 12.5px; height: 36px;" autocomplete="off" />
+                <button type="button" id="categoryOfferGiftSearchClear" style="position: absolute; right: 8px; background: none; border: none; color: var(--color-text-muted); font-size: 16px; cursor: pointer; display: none; line-height: 1; padding: 2px;" title="Clear search">&times;</button>
+              </div>
+              <div id="categoryOfferGiftSearchCount" style="font-size: 11px; color: var(--color-text-muted); margin-top: 3px; display: none;"></div>
+            </div>
+
+            <!-- Quick prompt if item not found in store -->
+            <div id="categoryOfferCustomQuickPrompt" style="display: none; margin-bottom: var(--space-2); padding: 8px 12px; background: #fdf2f8; border: 1px dashed #f472b6; border-radius: 6px; font-size: 11.5px; color: #9d174d; align-items: center; justify-content: space-between;">
+              <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 8px;">
+                <span>Item not in store? Add "</span><strong id="categoryOfferQuickPromptName"></strong><span>" as custom gift!</span>
+              </div>
+              <button type="button" class="btn btn--xs" id="categoryOfferSwitchToCustomBtn" style="background: #db2777; color: white; border: none; padding: 3px 8px; font-size: 11px; font-weight: 600; border-radius: 4px; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
+                + Add as Custom Gift
+              </button>
+            </div>
+
+            <!-- Gift Selector Row -->
+            <div class="gift-picker-row">
+              <select id="categoryOfferGiftSelect" class="admin-select gift-picker-select">
+                <option value="">-- Choose a store item as category free gift (e.g. Soundbar, Buds) --</option>
+              </select>
+              <button type="button" class="btn btn--primary btn--sm gift-picker-add-btn" id="categoryOfferAddGiftBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Add Gift</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab 2: Custom Non-Store Gift Panel -->
+          <div id="categoryOfferCustomPanel" style="display: none; background: #faf5ff; border: 1px solid #e9d5ff; border-radius: var(--radius-md); padding: 12px; margin-bottom: var(--space-3);">
+            <div style="margin-bottom: 8px;">
+              <label class="admin-label" style="font-size: 11.5px; font-weight: 700; margin-bottom: 4px; color: #581c87;">
+                Category Gift Product Name <span style="color: #dc2626;">*</span>
+              </label>
+              <input type="text" id="categoryOfferCustomName" class="admin-input"
+                placeholder="Type product wanted to be gifted with this category (e.g. Soundbar, Wireless Buds)..."
+                style="font-size: 12.5px; height: 36px; background: #ffffff;" autocomplete="off" />
+            </div>
+
+            <!-- Optional Image for Category Custom Gift -->
+            <div style="margin-top: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <label class="admin-label" style="font-size: 11.5px; font-weight: 700; margin-bottom: 0; color: #581c87;">
+                  Gift Image <span style="font-weight: 400; color: var(--color-text-muted);">(Optional — leave empty for text-only)</span>
+                </label>
+                <span class="badge" style="font-size: 9.5px; background: #ede9fe; color: #6b21a8; border: 1px solid #ddd6fe;">Size: 1:1 Square (200×200 to 400×400)</span>
+              </div>
+
+              <!-- Upload local file or paste URL -->
+              <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px; flex-wrap: wrap;">
+                <input type="file" id="categoryOfferCustomFile" accept="image/*" style="display: none;" />
+                <button type="button" class="btn btn--outline btn--xs" id="categoryOfferCustomUploadBtn" style="font-size: 11px; padding: 4px 8px; border-color: #c4b5fd; color: #6d28d9; background: #ffffff;">
+                  📁 Browse Image File
+                </button>
+                <span style="font-size: 11px; color: var(--color-text-muted);">or paste image URL below:</span>
+                <span id="categoryOfferCustomUploadSpinner" style="display: none; font-size: 11px; color: #7c3aed; font-weight: 600;">
+                  <span class="spinner-sm" style="display:inline-block; vertical-align:middle; width:12px; height:12px;"></span> Uploading...
+                </span>
+              </div>
+
+              <input type="url" id="categoryOfferCustomImgUrl" class="admin-input"
+                placeholder="Image URL (optional): https://example.com/gift-image.jpg"
+                style="font-size: 12px; height: 32px; background: #ffffff;" />
+
+              <!-- Image Preview Thumbnail (Dimensions: 44x44 max) -->
+              <div id="categoryOfferCustomImgPreviewBox" style="display: none; align-items: center; gap: 10px; margin-top: 8px; padding: 6px 10px; background: #ffffff; border: 1px solid #ddd6fe; border-radius: 6px;">
+                <img id="categoryOfferCustomImgPreview" src="" alt="Gift Preview" style="width: 44px; height: 44px; min-width: 44px; object-fit: contain; border-radius: 4px; border: 1px solid #e2e8f0; background: #fff;" />
+                <div style="flex: 1; min-width: 0;">
+                  <div style="font-size: 11px; font-weight: 600; color: #1e293b;">Image Attached</div>
+                  <div style="font-size: 10px; color: #059669;">Will display in 44×44px square on product page</div>
+                </div>
+                <button type="button" id="categoryOfferCustomImgClearBtn" class="btn btn--outline btn--xs" style="color: #dc2626; border-color: #fca5a5; padding: 1px 6px; font-size: 10px;" title="Remove image">
+                  Remove
+                </button>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn--primary btn--sm" id="categoryOfferAddCustomGiftBtn" style="margin-top: 12px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; background: #7c3aed; border-color: #6d28d9;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
-              <span>Add Gift</span>
+              <span>Add Custom Non-Store Gift</span>
             </button>
           </div>
 
@@ -806,7 +968,7 @@
           <div id="noCategoryGiftsHint" class="gift-empty-state">
             <div style="font-size: 18px; margin-bottom: 2px;">🎁</div>
             <div style="font-weight: 600; color: var(--color-text-secondary); font-size: 12px;">No free gifts bundled with category yet</div>
-            <div style="font-size: 11px; color: var(--color-text-muted);">(Optional) Select an item above and click "Add Gift" to bundle free gifts with every product in this category.</div>
+            <div style="font-size: 11px; color: var(--color-text-muted);">(Optional) Select a store item or type a custom gift above to bundle with every product in this category.</div>
           </div>
         </div>
 

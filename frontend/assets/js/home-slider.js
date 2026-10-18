@@ -50,12 +50,39 @@
   function buildCard(p) {
     const route = `/product/${p.slug || p.id}`;
     const isAvailable = p.availability ? p.availability === 'AVAILABLE' : true;
-    const badgeText = p.badge || (isAvailable ? 'In Stock' : 'Out of Stock');
-    const badgeType = p.badgeType || (isAvailable ? 'success' : 'primary');
+    const hasDiscount = p.discount && p.discount > 0;
+    const hasGifts = Array.isArray(p.gifts) && p.gifts.length > 0;
+
+    let badgeText = p.badge;
+    let badgeType = p.badgeType;
+
+    if (!badgeText || badgeText === 'In Stock') {
+      if (!isAvailable) {
+        badgeText = 'Out of Stock';
+        badgeType = 'primary';
+      } else if (hasDiscount) {
+        badgeText = `${Math.round(p.discount)}% OFF`;
+        badgeType = 'accent';
+      } else if (hasGifts) {
+        badgeText = '🎁 Free Gift';
+        badgeType = 'accent';
+      } else {
+        badgeText = 'In Stock';
+        badgeType = 'success';
+      }
+    }
 
     const imageContent = p.imageUrl
       ? `<img src="${p.imageUrl}" alt="${p.brand} ${p.name}" class="product-card__img" loading="lazy" />`
       : placeholder(p.color || '#1e3d8f');
+
+    const giftHtml = hasGifts ? `
+      <div class="product-card__gift-tag" style="margin-top: 6px;">
+        <span style="display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; color:#9d174d; background:#fdf2f8; border:1px solid #fbcfe8; border-radius:4px; padding:2px 6px;">
+          🎁 Free Gift: ${p.gifts[0].name}${p.gifts.length > 1 ? ` (+${p.gifts.length - 1})` : ''}
+        </span>
+      </div>
+    ` : '';
 
     return `
       <article class="product-card" role="listitem" aria-label="${p.brand} ${p.name}">
@@ -78,6 +105,7 @@
             ${p.originalPrice && p.originalPrice > p.salePrice ? `<span class="product-card__price-original">${fmt(p.originalPrice)}</span>` : ''}
             ${p.discount && p.discount > 0 ? `<span class="product-card__price-discount">${p.discount}% off</span>` : ''}
           </div>
+          ${giftHtml}
         </div>
 
         <div class="product-card__footer">
@@ -291,6 +319,41 @@
             || '';
           const price = parseFloat(p.price) || 0;
           const isAvailable = p.availability === 'AVAILABLE';
+          const offerVal = (p.offer && parseFloat(p.offer) > 0) ? parseFloat(p.offer) : 0;
+          const originalPrice = price;
+          const salePrice = offerVal > 0 ? Math.round(price * (1 - offerVal / 100)) : price;
+
+          const gifts = (p.giftsGiven || []).map(g => {
+            const isCustom = !g.giftProductId;
+            const imgUrl = isCustom
+              ? (g.customGiftImage || '')
+              : (g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || '');
+            return {
+              id: g.giftProduct?.id || g.id,
+              name: g.giftProduct?.name || g.customGiftName || 'Free Gift',
+              brand: g.giftProduct?.brand || null,
+              price: parseFloat(g.giftProduct?.price) || 0,
+              slug: g.giftProduct?.slug || null,
+              imageUrl: imgUrl,
+              isCustom
+            };
+          });
+
+          const hasDiscount = offerVal > 0;
+          const hasGifts = gifts.length > 0;
+
+          let badge = isAvailable ? 'In Stock' : 'Out of Stock';
+          let badgeType = isAvailable ? 'success' : 'primary';
+
+          if (isAvailable) {
+            if (hasDiscount) {
+              badge = `${Math.round(offerVal)}% OFF`;
+              badgeType = 'accent';
+            } else if (hasGifts) {
+              badge = '🎁 Free Gift';
+              badgeType = 'accent';
+            }
+          }
 
           return {
             id: p.slug || p.id,
@@ -301,12 +364,13 @@
             description: p.description,
             rating: parseFloat(p.rating) || 0,
             reviews: p.reviews || 0,
-            originalPrice: price,
-            salePrice: (p.offer && parseFloat(p.offer) > 0) ? Math.round(price * (1 - parseFloat(p.offer) / 100)) : price,
-            discount: (p.offer && parseFloat(p.offer) > 0) ? parseFloat(p.offer) : 0,
+            originalPrice,
+            salePrice,
+            discount: offerVal,
             availability: p.availability,
-            badge: isAvailable ? 'In Stock' : 'Out of Stock',
-            badgeType: isAvailable ? 'success' : 'primary',
+            badge,
+            badgeType,
+            gifts,
             color,
             imageUrl: primaryImg,
           };
@@ -407,6 +471,41 @@
           || '';
         const price = parseFloat(p.price) || 0;
         const isAvailable = p.availability === 'AVAILABLE';
+        const offerVal = (p.offer && parseFloat(p.offer) > 0) ? parseFloat(p.offer) : 0;
+        const originalPrice = price;
+        const salePrice = offerVal > 0 ? Math.round(price * (1 - offerVal / 100)) : price;
+
+        const gifts = (p.giftsGiven || []).map(g => {
+          const isCustom = !g.giftProductId;
+          const imgUrl = isCustom
+            ? (g.customGiftImage || '')
+            : (g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || '');
+          return {
+            id: g.giftProduct?.id || g.id,
+            name: g.giftProduct?.name || g.customGiftName || 'Free Gift',
+            brand: g.giftProduct?.brand || null,
+            price: parseFloat(g.giftProduct?.price) || 0,
+            slug: g.giftProduct?.slug || null,
+            imageUrl: imgUrl,
+            isCustom
+          };
+        });
+
+        const hasDiscount = offerVal > 0;
+        const hasGifts = gifts.length > 0;
+
+        let badge = isAvailable ? 'Trending' : 'Out of Stock';
+        let badgeType = isAvailable ? 'accent' : 'primary';
+
+        if (isAvailable) {
+          if (hasDiscount) {
+            badge = `${Math.round(offerVal)}% OFF`;
+            badgeType = 'accent';
+          } else if (hasGifts) {
+            badge = '🎁 Free Gift';
+            badgeType = 'accent';
+          }
+        }
 
         return {
           id:           p.slug || p.id,
@@ -417,12 +516,13 @@
           description:  p.description,
           rating:       parseFloat(p.rating) || 0,
           reviews:      p.reviews || 0,
-          originalPrice: price,
-          salePrice:    (p.offer && parseFloat(p.offer) > 0) ? Math.round(price * (1 - parseFloat(p.offer) / 100)) : price,
-          discount:     (p.offer && parseFloat(p.offer) > 0) ? parseFloat(p.offer) : 0,
+          originalPrice,
+          salePrice,
+          discount:     offerVal,
           availability: p.availability,
-          badge:        isAvailable ? 'Trending' : 'Out of Stock',
-          badgeType:    isAvailable ? 'accent'   : 'primary',
+          badge,
+          badgeType,
+          gifts,
           color:        '#1e3d8f',
           imageUrl:     primaryImg,
         };

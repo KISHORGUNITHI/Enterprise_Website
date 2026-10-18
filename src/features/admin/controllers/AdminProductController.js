@@ -83,8 +83,9 @@ export class AdminProductController {
   updateOffer = async (req, res) => {
     try {
       const { id } = req.params;
-      const { offer, giftProductIds } = req.body;
-      const result = await this.service.updateOffer(id, offer, giftProductIds);
+      const { offer, giftProductIds, gifts } = req.body;
+      const giftsToSync = gifts !== undefined ? gifts : giftProductIds;
+      const result = await this.service.updateOffer(id, offer, giftsToSync);
       return res.json(result);
     } catch (err) {
       const status = err.status || 500;
@@ -97,9 +98,10 @@ export class AdminProductController {
 
   updateCategoryOffer = async (req, res) => {
     try {
-      const { category, categoryId, offer, giftProductIds, clearGifts } = req.body;
+      const { category, categoryId, offer, giftProductIds, gifts, clearGifts } = req.body;
       const categoryIdentifier = categoryId || category;
-      const result = await this.service.updateCategoryOffer(categoryIdentifier, offer, giftProductIds, clearGifts);
+      const giftsToSync = gifts !== undefined ? gifts : giftProductIds;
+      const result = await this.service.updateCategoryOffer(categoryIdentifier, offer, giftsToSync, clearGifts);
       return res.json(result);
     } catch (err) {
       const status = err.status || 500;
