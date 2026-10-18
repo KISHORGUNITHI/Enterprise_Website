@@ -11,7 +11,7 @@ import cartRoutes from './src/features/cart/routes/routes.js'
 import adminRoutes from './src/features/admin/routes/adminRoutes.js'
 import adminApiRoutes from './src/features/admin/routes/adminApiRoutes.js'
 import jwtAuthenticate from './src/middleware/jwtmiddleware.js'
-import adminGuard from './src/middleware/adminguard.js'
+import adminGuard from './src/middleware/adminGuard.js'
 import jwt from 'jsonwebtoken';
 import { isCategoryInactive } from './src/config/categoryConfig.js'
 import bannerRoutes from './src/features/banners/routes/bannerRoutes.js'
