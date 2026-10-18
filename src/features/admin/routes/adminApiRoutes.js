@@ -1,5 +1,5 @@
 import express from 'express';
-import adminGuard from '../../../middleware/adminguard.js';
+import adminGuard from '../../../middleware/adminGuard.js';
 import AdminStatsController from '../controllers/AdminStatsController.js';
 import AdminBannerController from '../controllers/AdminBannerController.js';
 import AdminProductController from '../controllers/AdminProductController.js';
