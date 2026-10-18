@@ -608,14 +608,16 @@
               || p.productImages?.[0]?.imageUrl
               || rawItem.imageUrl
               || '';
-            let price = Number(rawItem.price) || Number(p.price) || 0;
+            let basePrice = Number(p.price) || 0;
             if (rawItem.variantId && p.variants && p.variants.length > 0) {
               const matchedVar = p.variants.find(v => v.id === rawItem.variantId);
               if (matchedVar && matchedVar.priceOverride) {
-                price = Number(matchedVar.priceOverride);
+                basePrice = Number(matchedVar.priceOverride);
               }
             }
-            const originalPrice = rawItem.originalPrice || Math.round(price * 1.15);
+            const offerVal = (p.offer !== undefined && p.offer !== null && !isNaN(parseFloat(p.offer))) ? parseFloat(p.offer) : 0;
+            let price = offerVal > 0 ? Math.round(basePrice * (1 - offerVal / 100)) : (Number(rawItem.price) || basePrice);
+            const originalPrice = rawItem.originalPrice || basePrice || Math.round(price * 1.15);
 
             checkoutItems.push({
               productId: p.id,

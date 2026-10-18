@@ -77,6 +77,12 @@ export class CartService {
         }
       }
 
+      // Apply product offer / promotional discount if applicable
+      const offer = (product.offer && parseFloat(product.offer) > 0) ? parseFloat(product.offer) : 0;
+      if (offer > 0) {
+        unitPrice = Math.round(unitPrice * (1 - offer / 100));
+      }
+
       const primaryImage = product.productImages?.find((img) => img.isPrimary)?.imageUrl ||
                            product.productImages?.[0]?.imageUrl || '';
 

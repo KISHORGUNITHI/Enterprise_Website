@@ -115,6 +115,12 @@ export class OrderService {
         }
       }
 
+      // Apply product offer / promotional discount if applicable
+      const offer = (product.offer && parseFloat(product.offer) > 0) ? parseFloat(product.offer) : 0;
+      if (offer > 0) {
+        unitPrice = Math.round(unitPrice * (1 - offer / 100));
+      }
+
       if (isNaN(unitPrice) || unitPrice <= 0) {
         const error = new Error(`Invalid price configuration for product "${product.name}".`);
         error.status = 400;

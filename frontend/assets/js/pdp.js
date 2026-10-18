@@ -295,9 +295,14 @@
       }
 
       // Update price and availability
-      const effectivePrice = (currentSelectedVariant && currentSelectedVariant.priceOverride)
+      const rawOverride = (currentSelectedVariant && currentSelectedVariant.priceOverride)
         ? parseFloat(currentSelectedVariant.priceOverride)
-        : (currentProductData.originalPrice || currentProductData.salePrice);
+        : (currentProductData.originalPrice || currentProductData.basePrice || currentProductData.salePrice);
+      const offer = (currentProductData && currentProductData.discount) || 0;
+      const effectivePrice = offer > 0 ? Math.round(rawOverride * (1 - offer / 100)) : rawOverride;
+      currentProductData.originalPrice = rawOverride;
+      currentProductData.salePrice = effectivePrice;
+      currentProductData.activePrice = effectivePrice;
       const isAvail = currentSelectedVariant
         ? currentSelectedVariant.availability === 'AVAILABLE'
         : true;
@@ -693,7 +698,6 @@
           }
         }
 
-        currentProductData.activePrice = activePrice;
         currentProductData.selectedVariantId = matchedVariantId;
         currentProductData.isVariantAvailable = isVariantAvailable;
 
@@ -733,6 +737,10 @@
         const origPrice = activePrice;
         const finalSalePrice = offer > 0 ? Math.round(activePrice * (1 - offer / 100)) : activePrice;
         const save = origPrice - finalSalePrice;
+
+        currentProductData.originalPrice = origPrice;
+        currentProductData.salePrice = finalSalePrice;
+        currentProductData.activePrice = finalSalePrice;
 
         if (priceSale) priceSale.textContent = fmt(finalSalePrice);
         if (barPrice) barPrice.textContent = fmt(finalSalePrice);
@@ -1404,7 +1412,8 @@
         return;
       }
       if (currentProductData) {
-        const activePrice = currentProductData.activePrice || currentProductData.salePrice || currentProductData.originalPrice || currentProductData.price;
+        const finalPrice = currentProductData.salePrice || currentProductData.activePrice || currentProductData.price;
+        const origPrice = currentProductData.originalPrice || currentProductData.basePrice || finalPrice;
         const variantDesc = Object.entries(selectedVariants).map(([k, v]) => `${k}: ${v}`).join(', ') || '1 Year Official Warranty';
         const itemToCheckout = {
           id: currentProductData.slug || currentProductData.id || currentProductData.dbId,
@@ -1414,8 +1423,8 @@
           slug: currentProductData.slug,
           name: currentProductData.name,
           brand: currentProductData.brand,
-          price: activePrice,
-          originalPrice: currentProductData.originalPrice || activePrice,
+          price: finalPrice,
+          originalPrice: origPrice,
           imageUrl: currentProductData.imageUrl || (currentProductData.images && currentProductData.images[0]) || '',
           quantity: 1,
           variantDescription: variantDesc,
@@ -1434,7 +1443,8 @@
         return;
       }
       if (currentProductData) {
-        const activePrice = currentProductData.activePrice || currentProductData.salePrice || currentProductData.originalPrice || currentProductData.price;
+        const finalPrice = currentProductData.salePrice || currentProductData.activePrice || currentProductData.price;
+        const origPrice = currentProductData.originalPrice || currentProductData.basePrice || finalPrice;
         const variantDesc = Object.entries(selectedVariants).map(([k, v]) => `${k}: ${v}`).join(', ') || '1 Year Official Warranty';
         const itemToCart = {
           id: currentProductData.slug || currentProductData.id || currentProductData.dbId,
@@ -1444,8 +1454,8 @@
           slug: currentProductData.slug,
           name: currentProductData.name,
           brand: currentProductData.brand,
-          price: activePrice,
-          originalPrice: currentProductData.originalPrice || activePrice,
+          price: finalPrice,
+          originalPrice: origPrice,
           imageUrl: currentProductData.imageUrl || (currentProductData.images && currentProductData.images[0]) || '',
           quantity: 1,
           variantDescription: variantDesc,
