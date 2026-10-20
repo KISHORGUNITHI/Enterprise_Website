@@ -7,62 +7,62 @@
   'use strict';
 
   // ─── DOM References ────────────────────────────────────────────────────────
-  const checkoutGrid         = document.getElementById('checkoutGrid');
-  const alertBanner          = document.getElementById('checkoutAlert');
-  const alertMsg             = document.getElementById('checkoutAlertMsg');
-  const alertClose           = document.getElementById('checkoutAlertClose');
+  const checkoutGrid = document.getElementById('checkoutGrid');
+  const alertBanner = document.getElementById('checkoutAlert');
+  const alertMsg = document.getElementById('checkoutAlertMsg');
+  const alertClose = document.getElementById('checkoutAlertClose');
 
   // Address Section
-  const addressSkeleton      = document.getElementById('addressSkeleton');
-  const selectedAddressCard  = document.getElementById('selectedAddressCard');
-  const noAddressCard        = document.getElementById('noAddressCard');
+  const addressSkeleton = document.getElementById('addressSkeleton');
+  const selectedAddressCard = document.getElementById('selectedAddressCard');
+  const noAddressCard = document.getElementById('noAddressCard');
   const openChangeAddressBtn = document.getElementById('openChangeAddressBtn');
-  const noAddrAddBtn         = document.getElementById('noAddrAddBtn');
+  const noAddrAddBtn = document.getElementById('noAddrAddBtn');
 
-  const selectedAddrName     = document.getElementById('selectedAddrName');
-  const selectedAddrType     = document.getElementById('selectedAddrType');
-  const selectedAddrDefault  = document.getElementById('selectedAddrDefault');
-  const selectedAddrText     = document.getElementById('selectedAddrText');
-  const selectedAddrPhone    = document.getElementById('selectedAddrPhone');
+  const selectedAddrName = document.getElementById('selectedAddrName');
+  const selectedAddrType = document.getElementById('selectedAddrType');
+  const selectedAddrDefault = document.getElementById('selectedAddrDefault');
+  const selectedAddrText = document.getElementById('selectedAddrText');
+  const selectedAddrPhone = document.getElementById('selectedAddrPhone');
 
   // Address Modal / Drawer
-  const addressModalBackdrop   = document.getElementById('addressModalBackdrop');
-  const closeAddressModalBtn   = document.getElementById('closeAddressModalBtn');
-  const addressListView        = document.getElementById('addressListView');
-  const addressFormView        = document.getElementById('addressFormView');
-  const modalSavedCount        = document.getElementById('modalSavedCount');
-  const modalAddressCardsList  = document.getElementById('modalAddressCardsList');
-  const showNewAddressFormBtn  = document.getElementById('showNewAddressFormBtn');
-  const backToAddressListBtn   = document.getElementById('backToAddressListBtn');
-  const cancelAddressFormBtn   = document.getElementById('cancelAddressFormBtn');
-  const checkoutAddressForm    = document.getElementById('checkoutAddressForm');
-  const saveAddressBtn         = document.getElementById('saveAddressBtn');
-  const saveAddrSpinner        = document.getElementById('saveAddrSpinner');
-  const saveAddrBtnText        = document.getElementById('saveAddrBtnText');
-  const useCurrentLocationBtn  = document.getElementById('useCurrentLocationBtn');
-  const addrLocationStatus     = document.getElementById('addrLocationStatus');
+  const addressModalBackdrop = document.getElementById('addressModalBackdrop');
+  const closeAddressModalBtn = document.getElementById('closeAddressModalBtn');
+  const addressListView = document.getElementById('addressListView');
+  const addressFormView = document.getElementById('addressFormView');
+  const modalSavedCount = document.getElementById('modalSavedCount');
+  const modalAddressCardsList = document.getElementById('modalAddressCardsList');
+  const showNewAddressFormBtn = document.getElementById('showNewAddressFormBtn');
+  const backToAddressListBtn = document.getElementById('backToAddressListBtn');
+  const cancelAddressFormBtn = document.getElementById('cancelAddressFormBtn');
+  const checkoutAddressForm = document.getElementById('checkoutAddressForm');
+  const saveAddressBtn = document.getElementById('saveAddressBtn');
+  const saveAddrSpinner = document.getElementById('saveAddrSpinner');
+  const saveAddrBtnText = document.getElementById('saveAddrBtnText');
+  const useCurrentLocationBtn = document.getElementById('useCurrentLocationBtn');
+  const addrLocationStatus = document.getElementById('addrLocationStatus');
 
   // Items & Summary
-  const checkoutItemsCount     = document.getElementById('checkoutItemsCount');
-  const checkoutItemsList      = document.getElementById('checkoutItemsList');
-  const checkoutEmptyItems     = document.getElementById('checkoutEmptyItems');
-  const summaryItemCount       = document.getElementById('summaryItemCount');
-  const summarySubtotal        = document.getElementById('summarySubtotal');
-  const summaryDiscountRow     = document.getElementById('summaryDiscountRow');
-  const summaryDiscount        = document.getElementById('summaryDiscount');
-  const summaryTotalAmount     = document.getElementById('summaryTotalAmount');
-  const savingsBanner          = document.getElementById('savingsBanner');
-  const savingsAmountText      = document.getElementById('savingsAmountText');
+  const checkoutItemsCount = document.getElementById('checkoutItemsCount');
+  const checkoutItemsList = document.getElementById('checkoutItemsList');
+  const checkoutEmptyItems = document.getElementById('checkoutEmptyItems');
+  const summaryItemCount = document.getElementById('summaryItemCount');
+  const summarySubtotal = document.getElementById('summarySubtotal');
+  const summaryDiscountRow = document.getElementById('summaryDiscountRow');
+  const summaryDiscount = document.getElementById('summaryDiscount');
+  const summaryTotalAmount = document.getElementById('summaryTotalAmount');
+  const savingsBanner = document.getElementById('savingsBanner');
+  const savingsAmountText = document.getElementById('savingsAmountText');
 
   // Order Placement
-  const placeOrderBtn          = document.getElementById('placeOrderBtn');
-  const placeOrderSpinner      = document.getElementById('placeOrderSpinner');
+  const placeOrderBtn = document.getElementById('placeOrderBtn');
+  const placeOrderSpinner = document.getElementById('placeOrderSpinner');
 
   // Success Modal
-  const orderSuccessModal      = document.getElementById('orderSuccessModal');
-  const successOrderShortId    = document.getElementById('successOrderShortId');
-  const successOrderTotal      = document.getElementById('successOrderTotal');
-  const successOrderPayment    = document.getElementById('successOrderPayment');
+  const orderSuccessModal = document.getElementById('orderSuccessModal');
+  const successOrderShortId = document.getElementById('successOrderShortId');
+  const successOrderTotal = document.getElementById('successOrderTotal');
+  const successOrderPayment = document.getElementById('successOrderPayment');
 
   // ─── State ────────────────────────────────────────────────────────────────
   let userAddresses = [];
@@ -206,7 +206,7 @@
 
     if (selectedAddressCard) {
       selectedAddrName && (selectedAddrName.textContent = addr.full_name);
-      
+
       const typeKey = (addr.address_type || 'HOME').toUpperCase();
       if (selectedAddrType) {
         selectedAddrType.textContent = typeKey;
@@ -706,9 +706,9 @@
         <div class="checkout-item-card" data-idx="${idx}">
           <div class="checkout-item-thumb">
             ${item.imageUrl
-              ? `<img src="${item.imageUrl}" alt="${escapeHtml(item.name)}" />`
-              : `<svg viewBox="0 0 60 60" fill="none" width="40" height="40"><rect width="60" height="60" rx="8" fill="#e8edf5"/><path d="M20 20h20v20H20z" fill="#1e3d8f20"/></svg>`
-            }
+          ? `<img src="${item.imageUrl}" alt="${escapeHtml(item.name)}" />`
+          : `<svg viewBox="0 0 60 60" fill="none" width="40" height="40"><rect width="60" height="60" rx="8" fill="#e8edf5"/><path d="M20 20h20v20H20z" fill="#1e3d8f20"/></svg>`
+        }
           </div>
 
           <div class="checkout-item-info">
@@ -717,8 +717,8 @@
             <span class="checkout-item-variant">${escapeHtml(item.variantDescription)}</span>
 
             <div class="checkout-item-pricing">
-              <span class="checkout-item-price-current">${fmt(item.price * item.quantity)}</span>
-              ${item.originalPrice > item.price ? `<span class="checkout-item-price-original">${fmt(item.originalPrice * item.quantity)}</span>` : ''}
+              <span class="checkout-item-price-current">${fmt(item.price)}</span>
+              ${item.originalPrice > item.price ? `<span class="checkout-item-price-original">${fmt(item.originalPrice)}</span>` : ''}
               ${discountPct > 0 ? `<span class="checkout-item-discount-badge">${discountPct}% off</span>` : ''}
             </div>
 
