@@ -45,26 +45,6 @@
     <main class="checkout-page" id="main-content">
       <div class="checkout-container">
 
-        <!-- Breadcrumbs / Steps Indicator -->
-        <nav class="checkout-breadcrumb" aria-label="Checkout Progress">
-          <ol class="checkout-steps">
-            <li class="checkout-step checkout-step--completed">
-              <span class="checkout-step__num">✓</span>
-              <span class="checkout-step__label">Bag</span>
-            </li>
-            <li class="checkout-step checkout-step--separator">›</li>
-            <li class="checkout-step checkout-step--active">
-              <span class="checkout-step__num">1</span>
-              <span class="checkout-step__label">Address & Items</span>
-            </li>
-            <li class="checkout-step checkout-step--separator">›</li>
-            <li class="checkout-step">
-              <span class="checkout-step__num">2</span>
-              <span class="checkout-step__label">Payment</span>
-            </li>
-          </ol>
-        </nav>
-
         <!-- Alert Notification Banner -->
         <div id="checkoutAlert" class="checkout-alert" role="alert" hidden>
           <span class="checkout-alert__icon" id="checkoutAlertIcon"></span>
@@ -185,14 +165,17 @@
 
               <dl class="checkout-price-breakdown">
                 <div class="checkout-price-row">
-                  <dt class="checkout-price-row__label">Price (<span id="summaryItemCount">0</span> items)</dt>
+                  <dt class="checkout-price-row__label" id="summarySubtotalLabel">Price (<span id="summaryItemCount">0</span> items)</dt>
                   <dd class="checkout-price-row__val" id="summarySubtotal">₹0</dd>
                 </div>
 
                 <div class="checkout-price-row checkout-price-row--discount" id="summaryDiscountRow">
-                  <dt class="checkout-price-row__label">Discount</dt>
+                  <dt class="checkout-price-row__label">Product Discount</dt>
                   <dd class="checkout-price-row__val checkout-text-success" id="summaryDiscount">-₹0</dd>
                 </div>
+
+                <!-- Dynamic Gift Price Breakdown Rows (Gifts one by one with -sign means FREE) -->
+                <div id="summaryGiftsBreakdown" class="checkout-summary-gifts-breakdown"></div>
 
                 <div class="checkout-price-row">
                   <dt class="checkout-price-row__label">Delivery Charges</dt>

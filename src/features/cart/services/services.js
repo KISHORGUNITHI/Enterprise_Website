@@ -90,6 +90,22 @@ export class CartService {
       calculatedSubtotal += lineTotal;
       totalQuantity += rawItem.quantity;
 
+      const mappedGifts = (product.giftsGiven || []).map((g) => {
+        const isCustom = !g.giftProductId;
+        const imgUrl = isCustom
+          ? (g.customGiftImage || '')
+          : (g.giftProduct?.productImages?.find((img) => img.isPrimary)?.imageUrl ||
+             g.giftProduct?.productImages?.[0]?.imageUrl || '');
+        return {
+          id: g.giftProduct?.id || g.id,
+          name: g.giftProduct?.name || g.customGiftName || 'Free Gift',
+          brand: g.giftProduct?.brand || null,
+          price: Number(g.giftProduct?.price) || 0,
+          imageUrl: imgUrl,
+          isCustom,
+        };
+      });
+
       enrichedItems.push({
         id: rawItem.id,
         productId: product.id,
@@ -99,6 +115,7 @@ export class CartService {
         lineTotal,
         createdAt: rawItem.createdAt,
         updatedAt: rawItem.updatedAt,
+        gifts: mappedGifts,
         product: {
           id: product.id,
           name: product.name,
@@ -108,6 +125,7 @@ export class CartService {
           availability: product.availability,
           stock: product.stock,
           image: primaryImage,
+          gifts: mappedGifts,
         },
         variant: variantInfo,
       });

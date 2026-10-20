@@ -193,6 +193,15 @@ export class CartRepository {
             },
           },
         },
+        giftsGiven: {
+          include: {
+            giftProduct: {
+              include: {
+                productImages: true,
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -213,6 +222,15 @@ export class CartRepository {
             attributeValues: {
               include: {
                 attribute: true,
+              },
+            },
+          },
+        },
+        giftsGiven: {
+          include: {
+            giftProduct: {
+              include: {
+                productImages: true,
               },
             },
           },

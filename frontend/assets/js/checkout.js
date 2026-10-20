@@ -48,8 +48,10 @@
   const checkoutEmptyItems = document.getElementById('checkoutEmptyItems');
   const summaryItemCount = document.getElementById('summaryItemCount');
   const summarySubtotal = document.getElementById('summarySubtotal');
+  const summarySubtotalLabel = document.getElementById('summarySubtotalLabel');
   const summaryDiscountRow = document.getElementById('summaryDiscountRow');
   const summaryDiscount = document.getElementById('summaryDiscount');
+  const summaryGiftsBreakdown = document.getElementById('summaryGiftsBreakdown');
   const summaryTotalAmount = document.getElementById('summaryTotalAmount');
   const savingsBanner = document.getElementById('savingsBanner');
   const savingsAmountText = document.getElementById('savingsAmountText');
@@ -619,6 +621,34 @@
             let price = offerVal > 0 ? Math.round(basePrice * (1 - offerVal / 100)) : (Number(rawItem.price) || basePrice);
             const originalPrice = rawItem.originalPrice || basePrice || Math.round(price * 1.15);
 
+            // Extract gifts from product or rawItem
+            let itemGifts = [];
+            if (Array.isArray(p.giftsGiven) && p.giftsGiven.length > 0) {
+              itemGifts = p.giftsGiven.map(g => {
+                const isCustom = !g.giftProductId;
+                const imgUrl = isCustom
+                  ? (g.customGiftImage || '')
+                  : (g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || '');
+                return {
+                  id: g.giftProduct?.id || g.id,
+                  name: g.giftProduct?.name || g.customGiftName || 'Free Gift',
+                  brand: g.giftProduct?.brand || null,
+                  price: Number(g.giftProduct?.price) || 0,
+                  imageUrl: imgUrl,
+                  isCustom,
+                };
+              });
+            } else if (Array.isArray(rawItem.gifts) && rawItem.gifts.length > 0) {
+              itemGifts = rawItem.gifts.map(g => ({
+                id: g.id || `gift_${Math.random()}`,
+                name: g.name || g.customGiftName || 'Free Gift',
+                brand: g.brand || null,
+                price: Number(g.price) || 0,
+                imageUrl: g.imageUrl || g.customGiftImage || '',
+                isCustom: Boolean(g.isCustom),
+              }));
+            }
+
             checkoutItems.push({
               productId: p.id,
               dbId: p.id,
@@ -631,6 +661,7 @@
               quantity: Math.max(1, parseInt(rawItem.quantity, 10) || 1),
               variantDescription: rawItem.variantDescription || '100% Genuine · 1 Year Warranty',
               variantId: rawItem.variantId || null,
+              gifts: itemGifts,
             });
             continue;
           }
@@ -640,6 +671,15 @@
       }
 
       // Fallback using rawItem
+      const fallbackGifts = Array.isArray(rawItem.gifts) ? rawItem.gifts.map(g => ({
+        id: g.id || `gift_${Math.random()}`,
+        name: g.name || g.customGiftName || 'Free Gift',
+        brand: g.brand || null,
+        price: Number(g.price) || 0,
+        imageUrl: g.imageUrl || g.customGiftImage || '',
+        isCustom: Boolean(g.isCustom),
+      })) : [];
+
       checkoutItems.push({
         productId: rawItem.productId || rawItem.dbId || rawItem.id,
         dbId: rawItem.dbId || rawItem.id,
@@ -652,6 +692,7 @@
         quantity: Math.max(1, parseInt(rawItem.quantity, 10) || 1),
         variantDescription: rawItem.variantDescription || 'Official Warranty Included',
         variantId: rawItem.variantId || null,
+        gifts: fallbackGifts,
       });
     }
 
@@ -702,42 +743,93 @@
         ? Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)
         : 0;
 
+      const hasGifts = Array.isArray(item.gifts) && item.gifts.length > 0;
+      const giftsHtml = hasGifts ? `
+        <div class="checkout-item-gifts-box">
+          <div class="checkout-item-gifts-header">
+            <div class="checkout-item-gifts-title-wrap">
+              <span class="checkout-item-gifts-icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                  <path fill-rule="evenodd" d="M5 5a3 3 0 015-2.236A3 3 0 0115 5h1a2 2 0 012 2v1a2 2 0 01-2 2v7a2 2 0 01-2 2H6a2 2 0 01-2-2V10a2 2 0 01-2-2V7a2 2 0 012-2h1zm3.05-1.164A1 1 0 007 5h2.86a2.98 2.98 0 01-1.81-1.164zM11.14 5H13a1 1 0 00-.86-1.164A2.98 2.98 0 0011.14 5zM4 7v2h12V7H4zm2 4v6h8v-6H6z" clip-rule="evenodd"/>
+                </svg>
+              </span>
+              <span class="checkout-item-gifts-title">Shopkeeper Offer: Free Gift${item.gifts.length > 1 ? 's' : ''} Included</span>
+            </div>
+            <span class="checkout-item-gifts-count-badge">${item.gifts.length} Free Item${item.gifts.length > 1 ? 's' : ''}</span>
+          </div>
+
+          <div class="checkout-item-gifts-list">
+            ${item.gifts.map(gift => `
+              <div class="checkout-gift-row">
+                <div class="checkout-gift-thumb">
+                  ${gift.imageUrl
+                    ? `<img src="${gift.imageUrl}" alt="${escapeHtml(gift.name)}" loading="lazy" />`
+                    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="20" height="20">
+                         <path d="M20 12v10H4V12"/>
+                         <path d="M2 7h20v5H2z"/>
+                         <path d="M12 22V7"/>
+                         <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+                         <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                       </svg>`
+                  }
+                </div>
+                <div class="checkout-gift-info">
+                  <div class="checkout-gift-name-wrap">
+                    <span class="checkout-gift-pill">FREE GIFT</span>
+                    <span class="checkout-gift-name" title="${escapeHtml(gift.name)}">${escapeHtml(gift.name)}</span>
+                    ${item.quantity > 1 ? `<span class="checkout-gift-qty-tag">x${item.quantity}</span>` : ''}
+                  </div>
+                  <div class="checkout-gift-price-wrap">
+                    ${gift.price > 0 ? `<span class="checkout-gift-mrp">${fmt(gift.price * item.quantity)}</span>` : ''}
+                    <span class="checkout-gift-free-text">FREE</span>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : '';
+
       return `
         <div class="checkout-item-card" data-idx="${idx}">
-          <div class="checkout-item-thumb">
-            ${item.imageUrl
-          ? `<img src="${item.imageUrl}" alt="${escapeHtml(item.name)}" />`
-          : `<svg viewBox="0 0 60 60" fill="none" width="40" height="40"><rect width="60" height="60" rx="8" fill="#e8edf5"/><path d="M20 20h20v20H20z" fill="#1e3d8f20"/></svg>`
-        }
-          </div>
-
-          <div class="checkout-item-info">
-            <span class="checkout-item-brand">${escapeHtml(item.brand)}</span>
-            <h3 class="checkout-item-title">${escapeHtml(item.name)}</h3>
-            <span class="checkout-item-variant">${escapeHtml(item.variantDescription)}</span>
-
-            <div class="checkout-item-pricing">
-              <span class="checkout-item-price-current">${fmt(item.price)}</span>
-              ${item.originalPrice > item.price ? `<span class="checkout-item-price-original">${fmt(item.originalPrice)}</span>` : ''}
-              ${discountPct > 0 ? `<span class="checkout-item-discount-badge">${discountPct}% off</span>` : ''}
+          <div class="checkout-item-main">
+            <div class="checkout-item-thumb">
+              ${item.imageUrl
+                ? `<img src="${item.imageUrl}" alt="${escapeHtml(item.name)}" />`
+                : `<svg viewBox="0 0 60 60" fill="none" width="40" height="40"><rect width="60" height="60" rx="8" fill="#e8edf5"/><path d="M20 20h20v20H20z" fill="#1e3d8f20"/></svg>`
+              }
             </div>
 
-            <div class="checkout-item-bottom">
-              <div class="checkout-qty-control">
-                <button type="button" class="checkout-qty-btn" data-action="dec" data-idx="${idx}" aria-label="Decrease quantity" ${item.quantity <= 1 ? 'disabled' : ''}>−</button>
-                <span class="checkout-qty-val">${item.quantity}</span>
-                <button type="button" class="checkout-qty-btn" data-action="inc" data-idx="${idx}" aria-label="Increase quantity">+</button>
+            <div class="checkout-item-info">
+              <span class="checkout-item-brand">${escapeHtml(item.brand)}</span>
+              <h3 class="checkout-item-title">${escapeHtml(item.name)}</h3>
+              <span class="checkout-item-variant">${escapeHtml(item.variantDescription)}</span>
+
+              <div class="checkout-item-pricing">
+                <span class="checkout-item-price-current">${fmt(item.price)}</span>
+                ${item.originalPrice > item.price ? `<span class="checkout-item-price-original">${fmt(item.originalPrice)}</span>` : ''}
+                ${discountPct > 0 ? `<span class="checkout-item-discount-badge">${discountPct}% off</span>` : ''}
               </div>
 
-              <span class="checkout-item-delivery-est">
-                ⚡ Express Delivery: 3-5 Days
-              </span>
+              <div class="checkout-item-bottom">
+                <div class="checkout-qty-control">
+                  <button type="button" class="checkout-qty-btn" data-action="dec" data-idx="${idx}" aria-label="Decrease quantity" ${item.quantity <= 1 ? 'disabled' : ''}>−</button>
+                  <span class="checkout-qty-val">${item.quantity}</span>
+                  <button type="button" class="checkout-qty-btn" data-action="inc" data-idx="${idx}" aria-label="Increase quantity">+</button>
+                </div>
 
-              <button type="button" class="checkout-item-remove-btn" data-action="remove" data-idx="${idx}">
-                REMOVE
-              </button>
+                <span class="checkout-item-delivery-est">
+                  ⚡ Express Delivery: 3-5 Days
+                </span>
+
+                <button type="button" class="checkout-item-remove-btn" data-action="remove" data-idx="${idx}">
+                  REMOVE
+                </button>
+              </div>
             </div>
           </div>
+
+          ${giftsHtml}
         </div>`;
     }).join('');
 
@@ -777,30 +869,96 @@
   }
 
   function recalculateTotals() {
-    let totalMRP = 0;
+    let productsMRP = 0;
     let totalSale = 0;
+    let totalItemsQty = 0;
+
+    // Collect all gifts across all items
+    const allGifts = [];
 
     checkoutItems.forEach(it => {
-      totalMRP += (it.originalPrice || it.price) * it.quantity;
-      totalSale += it.price * it.quantity;
+      const qty = it.quantity || 1;
+      totalItemsQty += qty;
+      productsMRP += (it.originalPrice || it.price) * qty;
+      totalSale += it.price * qty;
+
+      if (Array.isArray(it.gifts)) {
+        it.gifts.forEach(g => {
+          const unitPrice = Number(g.price) || 0;
+          allGifts.push({
+            name: g.name,
+            unitPrice,
+            quantity: qty,
+            totalPrice: unitPrice * qty,
+            isCustom: Boolean(g.isCustom),
+          });
+        });
+      }
     });
 
-    const discount = Math.max(0, totalMRP - totalSale);
+    const giftsTotalMRP = allGifts.reduce((sum, g) => sum + g.totalPrice, 0);
+    const grossPrice = productsMRP + giftsTotalMRP;
+    const productDiscount = Math.max(0, productsMRP - totalSale);
     const deliveryFee = 0; // Free delivery
     const totalAmount = totalSale + deliveryFee;
+    const totalSavings = productDiscount + giftsTotalMRP;
 
-    summarySubtotal && (summarySubtotal.textContent = fmt(totalMRP));
-    summaryTotalAmount && (summaryTotalAmount.textContent = fmt(totalAmount));
+    // 1. Update Subtotal Label and Value
+    if (summarySubtotalLabel) {
+      const itemsLabel = `${totalItemsQty} item${totalItemsQty > 1 ? 's' : ''}`;
+      const giftsCountLabel = allGifts.length > 0
+        ? ` + ${allGifts.length} free gift${allGifts.length > 1 ? 's' : ''}`
+        : '';
+      summarySubtotalLabel.innerHTML = `Price (${itemsLabel}${giftsCountLabel})`;
+    } else if (summaryItemCount) {
+      summaryItemCount.textContent = totalItemsQty;
+    }
 
-    if (discount > 0) {
-      summaryDiscount && (summaryDiscount.textContent = `-${fmt(discount)}`);
+    summarySubtotal && (summarySubtotal.textContent = fmt(grossPrice));
+
+    // 2. Update Product Discount Row
+    if (productDiscount > 0) {
+      summaryDiscount && (summaryDiscount.textContent = `-${fmt(productDiscount)}`);
       summaryDiscountRow && summaryDiscountRow.removeAttribute('hidden');
-      if (savingsBanner && savingsAmountText) {
-        savingsAmountText.textContent = fmt(discount);
-        savingsBanner.removeAttribute('hidden');
-      }
     } else {
       summaryDiscountRow && summaryDiscountRow.setAttribute('hidden', '');
+    }
+
+    // 3. Render Gifts Breakdown rows (gifts one by one with -sign means FREE)
+    if (summaryGiftsBreakdown) {
+      if (allGifts.length > 0) {
+        summaryGiftsBreakdown.innerHTML = allGifts.map(g => {
+          const qtyText = g.quantity > 1 ? ` (x${g.quantity})` : '';
+          const valHtml = g.totalPrice > 0
+            ? `<span class="checkout-price-original">${fmt(g.totalPrice)}</span> <span class="checkout-text-success font-semibold">-${fmt(g.totalPrice)}</span>`
+            : `<span class="checkout-text-success font-semibold">-₹0 (FREE)</span>`;
+
+          return `
+            <div class="checkout-price-row checkout-price-row--gift">
+              <dt class="checkout-price-row__label">
+                <span class="checkout-gift-badge-sm">🎁 Free Gift</span>
+                <span class="checkout-price-gift-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}${qtyText}</span>
+              </dt>
+              <dd class="checkout-price-row__val">
+                ${valHtml}
+              </dd>
+            </div>`;
+        }).join('');
+        summaryGiftsBreakdown.removeAttribute('hidden');
+      } else {
+        summaryGiftsBreakdown.innerHTML = '';
+        summaryGiftsBreakdown.setAttribute('hidden', '');
+      }
+    }
+
+    // 4. Update Final Total Amount
+    summaryTotalAmount && (summaryTotalAmount.textContent = fmt(totalAmount));
+
+    // 5. Update Savings Banner
+    if (totalSavings > 0) {
+      if (savingsAmountText) savingsAmountText.textContent = fmt(totalSavings);
+      savingsBanner && savingsBanner.removeAttribute('hidden');
+    } else {
       savingsBanner && savingsBanner.setAttribute('hidden', '');
     }
   }

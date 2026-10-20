@@ -1428,6 +1428,7 @@
           imageUrl: currentProductData.imageUrl || (currentProductData.images && currentProductData.images[0]) || '',
           quantity: 1,
           variantDescription: variantDesc,
+          gifts: currentProductData.gifts || [],
         };
         try {
           localStorage.setItem('ks_checkout_item', JSON.stringify(itemToCheckout));
@@ -1459,6 +1460,7 @@
           imageUrl: currentProductData.imageUrl || (currentProductData.images && currentProductData.images[0]) || '',
           quantity: 1,
           variantDescription: variantDesc,
+          gifts: currentProductData.gifts || [],
         };
         try {
           let cart = [];
