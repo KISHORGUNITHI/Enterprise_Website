@@ -71,12 +71,12 @@
             <li><a href="/profile" class="footer__nav-link">My Profile</a></li>
             <li><a href="/orders" class="footer__nav-link">My Orders</a></li>
             <li><a href="/cart" class="footer__nav-link">Cart</a></li>
-            <li id="footerLoginLi"><a href="/login" class="footer__nav-link">Login</a></li>
-            <li id="footerSignupLi"><a href="/signup" class="footer__nav-link">Create Account</a></li>
-            <li id="footerLogoutLi" style="display: none;"><button type="button" class="footer__nav-link"
-                id="footerLogoutBtn"
+            <li id="footerLogoutLi" style="display: <%= locals.isAuthenticated ? 'block' : 'none' %>;">
+              <button type="button" class="footer__nav-link" id="footerLogoutBtn"
                 style="background:none;border:none;padding:0;color:inherit;cursor:pointer;font-family:inherit;font-size:inherit;">Logout</button>
             </li>
+            <li id="footerLoginLi" style="display: <%= locals.isAuthenticated ? 'none' : 'block' %>;"><a href="/login" class="footer__nav-link">Login</a></li>
+            <li id="footerSignupLi" style="display: <%= locals.isAuthenticated ? 'none' : 'block' %>;"><a href="/signup" class="footer__nav-link">Create Account</a></li>
             <li><a href="#" class="footer__nav-link">Help &amp; FAQ</a></li>
             <li><a href="#" class="footer__nav-link">Return Policy</a></li>
           </ul>
@@ -143,41 +143,7 @@
 <%- include('mobile-bottom-nav') %>
 <script>
   (function () {
-    document.getElementById('homeFooterYear').textContent = new Date().getFullYear();
-
-    function syncFooterAuth() {
-      try {
-        var raw = localStorage.getItem('authUser');
-        if (raw) {
-          var u = JSON.parse(raw);
-          if (u && (u.id || u.email)) {
-            var loginLi = document.getElementById('footerLoginLi');
-            var signupLi = document.getElementById('footerSignupLi');
-            var logoutLi = document.getElementById('footerLogoutLi');
-            if (loginLi) loginLi.style.display = 'none';
-            if (signupLi) signupLi.style.display = 'none';
-            if (logoutLi) logoutLi.style.display = 'block';
-          }
-        }
-      } catch (_) { }
-    }
-
-    syncFooterAuth();
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', syncFooterAuth);
-    }
-
-    var logoutBtn = document.getElementById('footerLogoutBtn');
-    if (logoutBtn) {
-      logoutBtn.addEventListener('click', function () {
-        fetch('/logout', { method: 'POST', credentials: 'same-origin' })
-          .finally(function () {
-            localStorage.removeItem('authUser');
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('pendingRoute');
-            window.location.href = '/';
-          });
-      });
-    }
+    var yearEl = document.getElementById('homeFooterYear');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
   })();
 </script>

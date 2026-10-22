@@ -85,7 +85,7 @@
       <nav class="hdr__actions" aria-label="Account and shopping">
 
         <!-- Admin Panel Link (Shown only for ADMIN users) -->
-        <a href="/admin/dashboard" class="hdr__action-btn hdr__action-btn--admin" id="catHdrAdminBtn" aria-label="Admin Dashboard" style="display: none;">
+        <a href="/admin/dashboard" class="hdr__action-btn hdr__action-btn--admin" id="catHdrAdminBtn" aria-label="Admin Dashboard" style="display: <%= locals.isAdmin ? 'flex' : 'none' %>;">
           <div class="hdr__action-icon-wrap" style="color: var(--color-accent-500);">
             <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <rect x="3" y="3" width="7" height="7" rx="1.5"/>
@@ -114,7 +114,7 @@
               <circle cx="10" cy="19" r="1.5" fill="currentColor" stroke="none"/>
               <circle cx="18" cy="19" r="1.5" fill="currentColor" stroke="none"/>
             </svg>
-            <span class="hdr__badge" id="catHdrCartBadge" aria-label="Shopping Cart">3</span>
+            <span class="hdr__badge" id="catHdrCartBadge" aria-label="Shopping Cart" style="display: none;">0</span>
           </div>
           <span class="hdr__action-label">Cart</span>
         </a>
@@ -129,7 +129,7 @@
           <span class="hdr__action-label">Orders</span>
         </a>
 
-        <button class="hdr__action-btn hdr__action-btn--logout" id="catHdrLogoutBtn" aria-label="Logout">
+        <button class="hdr__action-btn hdr__action-btn--logout" id="catHdrLogoutBtn" aria-label="Logout" style="display: <%= locals.isAuthenticated ? 'flex' : 'none' %>;">
           <div class="hdr__action-icon-wrap">
             <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M9 3H5a2 2 0 00-2 2v12a2 2 0 002 2h4"/>
@@ -139,6 +139,17 @@
           </div>
           <span class="hdr__action-label">Logout</span>
         </button>
+
+        <a href="/login" class="hdr__action-btn hdr__action-btn--login" id="catHdrLoginBtn" aria-label="Login" style="display: <%= locals.isAuthenticated ? 'none' : 'flex' %>;">
+          <div class="hdr__action-icon-wrap">
+            <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
+              <polyline points="10 17 15 12 10 7"/>
+              <line x1="15" y1="12" x2="3" y2="12"/>
+            </svg>
+          </div>
+          <span class="hdr__action-label">Login</span>
+        </a>
 
       </nav>
 
@@ -165,12 +176,22 @@
       </a>
 
       <!-- Mobile Logout Button -->
-      <button class="hdr__mobile-logout" id="catMobileLogoutBtn" aria-label="Logout">
+      <button class="hdr__mobile-logout" id="catMobileLogoutBtn" aria-label="Logout" style="display: <%= locals.isAuthenticated ? 'inline-flex' : 'none' %>;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
         </svg>
         <span>Logout</span>
       </button>
+
+      <!-- Mobile Login Button -->
+      <a href="/login" class="hdr__mobile-login" id="catMobileLoginBtn" aria-label="Login" style="display: <%= locals.isAuthenticated ? 'none' : 'inline-flex' %>;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
+          <polyline points="10 17 15 12 10 7"/>
+          <line x1="15" y1="12" x2="3" y2="12"/>
+        </svg>
+        <span>Login</span>
+      </a>
     </div>
 
     <!-- Row 2: Product Search & Call (Sticky with Frosted Glass Effect) -->
@@ -260,39 +281,31 @@
 
 <script>
 (function () {
-  // Check if logged-in user is ADMIN to reveal Admin Panel button
-  function checkAdmin() {
+  // Sync Cart Badge
+  function syncCatCartBadge() {
     try {
-      var raw = localStorage.getItem('authUser');
+      var badge = document.getElementById('catHdrCartBadge');
+      if (!badge) return;
+      var count = 0;
+      var raw = localStorage.getItem('ks_cart');
       if (raw) {
-        var u = JSON.parse(raw);
-        if (u && (u.role === 'ADMIN' || u.role === 'admin')) {
-          var adminBtn = document.getElementById('catHdrAdminBtn');
-          if (adminBtn) adminBtn.style.display = 'inline-flex';
+        var cart = JSON.parse(raw);
+        if (Array.isArray(cart)) {
+          for (var i = 0; i < cart.length; i++) {
+            count += (parseInt(cart[i].quantity, 10) || 1);
+          }
         }
       }
-    } catch (e) {}
+      if (count > 0) {
+        badge.textContent = count > 99 ? '99+' : count;
+        badge.style.display = 'inline-flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    } catch (_) {}
   }
-
-  checkAdmin();
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkAdmin);
-  }
-
-  function handleLogout() {
-    fetch('/logout', { method: 'POST', credentials: 'same-origin' })
-      .finally(function () {
-        localStorage.removeItem('authUser');
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('pendingRoute');
-        window.location.href = '/';
-      });
-  }
-
-  var logoutBtn = document.getElementById('catHdrLogoutBtn');
-  if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
-
-  var mobileLogoutBtn = document.getElementById('catMobileLogoutBtn');
-  if (mobileLogoutBtn) mobileLogoutBtn.addEventListener('click', handleLogout);
+  syncCatCartBadge();
+  window.addEventListener('storage', syncCatCartBadge);
 }());
 </script>
+<script src="/assets/js/auth-state.js" defer></script>

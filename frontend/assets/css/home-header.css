@@ -555,9 +555,9 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0;
   font: inherit;
 }
+
 
 .hdr__action-btn--logout:hover .hdr__action-icon-wrap,
 .hdr__action-btn--logout:focus-visible .hdr__action-icon-wrap {
@@ -583,9 +583,30 @@
   border-color: var(--color-accent-500);
 }
 
+.hdr__action-btn--login {
+  color: #ffffff;
+}
+.hdr__action-btn--login .hdr__action-icon-wrap {
+  color: #ffffff;
+}
+.hdr__action-btn--login:hover,
+.hdr__action-btn--login:focus-visible {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+
 /* ─── Mobile-only header elements: hidden on desktop / tablet ─── */
-.hdr__mobile-logout {
+.hdr__mobile-logout,
+.hdr__mobile-login {
   display: none;
+}
+
+.hdr__mobile-logout[style*="display: none"],
+.hdr__mobile-login[style*="display: none"],
+.hdr__action-btn--logout[style*="display: none"],
+.hdr__action-btn--login[style*="display: none"] {
+  display: none !important;
 }
 
 .hdr__mobile-call-btn {
@@ -697,7 +718,7 @@ body.home-page {
   }
 
   .home-page .hdr__mobile-logout {
-    display: inline-flex !important;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
@@ -724,6 +745,41 @@ body.home-page {
   }
 
   .home-page .hdr__mobile-logout svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    flex-shrink: 0;
+  }
+
+  .home-page .hdr__mobile-login {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 14px !important;
+    font-size: 12px !important;
+    font-weight: var(--font-semibold, 600);
+    color: #ffffff !important;
+    background-color: var(--color-primary-700, #1d4ed8) !important;
+    border: 1px solid var(--color-primary-700, #1d4ed8) !important;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: var(--transition-fast, 0.15s ease);
+  }
+
+  .home-page .hdr__mobile-login:hover,
+  .home-page .hdr__mobile-login:active {
+    background-color: var(--color-primary-800, #1e40af) !important;
+    border-color: var(--color-primary-800, #1e40af) !important;
+    color: #ffffff !important;
+  }
+
+  .home-page .hdr__mobile-login svg {
     width: 14px;
     height: 14px;
     stroke: currentColor;

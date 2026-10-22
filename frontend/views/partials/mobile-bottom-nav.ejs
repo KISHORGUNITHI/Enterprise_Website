@@ -84,10 +84,10 @@
           }
         }
       }
-      // Fallback check: sync with header badge if present
+      // Fallback check: sync with header badge if present and visible
       if (count === 0) {
         var hdrBadge = document.querySelector('.hdr__badge');
-        if (hdrBadge && hdrBadge.textContent) {
+        if (hdrBadge && hdrBadge.style.display !== 'none' && hdrBadge.textContent) {
           var n = parseInt(hdrBadge.textContent.trim(), 10);
           if (!isNaN(n) && n > 0) count = n;
         }

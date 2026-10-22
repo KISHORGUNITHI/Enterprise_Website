@@ -41,7 +41,7 @@
         </svg>
         <span>Call Us</span>
       </a>
-      <a href="/admin/dashboard" class="btn btn--accent btn--sm" id="navAdminBtn" style="display: none;">
+      <a href="/admin/dashboard" class="btn btn--accent btn--sm" id="navAdminBtn" style="display: <%= locals.isAdmin ? 'inline-flex' : 'none' %>;">
         <svg class="icon icon--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="2" y="2" width="6" height="6" rx="1.5"/>
           <rect x="12" y="2" width="6" height="6" rx="1.5"/>
@@ -50,16 +50,16 @@
         </svg>
         Admin
       </a>
-      <a href="/profile" class="btn btn--outline btn--sm" id="navProfileBtn" style="display: none;">
+      <a href="/profile" class="btn btn--outline btn--sm" id="navProfileBtn" style="display: <%= locals.isAuthenticated ? 'inline-flex' : 'none' %>;">
         Profile
       </a>
-      <button type="button" class="btn btn--ghost btn--sm" id="navLogoutBtn" style="display: none; color: var(--color-text-primary);" aria-label="Log out">
+      <button type="button" class="btn btn--ghost btn--sm" id="navLogoutBtn" style="display: <%= locals.isAuthenticated ? 'inline-flex' : 'none' %>; color: var(--color-text-primary);" aria-label="Log out">
         <svg class="icon icon--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M13 16l4-4-4-4M17 12H7M7 4H4a1 1 0 00-1 1v14a1 1 0 001 1h3"></path>
         </svg>
         <span>Logout</span>
       </button>
-      <a href="/login" class="btn btn--primary btn--sm navbar__login-btn" id="navbarLoginBtn">
+      <a href="/login" class="btn btn--primary btn--sm navbar__login-btn" id="navbarLoginBtn" style="display: <%= locals.isAuthenticated ? 'none' : 'inline-flex' %>;">
         <svg class="icon icon--sm" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
           <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
         </svg>
@@ -99,8 +99,8 @@
           </svg>
           Call: 9963 657 799
         </a>
-        <a href="/login" class="btn btn--primary btn--lg w-full" id="navMobileLoginBtn">Login</a>
-        <a href="/profile" class="btn btn--primary btn--lg w-full" id="navMobileProfileBtn" style="display: none;">My Profile</a>
+        <a href="/login" class="btn btn--primary btn--lg w-full" id="navMobileLoginBtn" style="display: <%= locals.isAuthenticated ? 'none' : 'block' %>;">Login</a>
+        <a href="/profile" class="btn btn--primary btn--lg w-full" id="navMobileProfileBtn" style="display: <%= locals.isAuthenticated ? 'block' : 'none' %>;">My Profile</a>
       </div>
     </nav>
   </div>
@@ -110,9 +110,9 @@
 <div class="navbar__spacer" aria-hidden="true"></div>
 
 <!-- Mobile Fixed Bottom Action Bar (Authenticated Only) -->
-<nav class="mobile-bottom-bar" id="mobileBottomBar" aria-label="Quick actions" style="display: none;">
+<nav class="mobile-bottom-bar" id="mobileBottomBar" aria-label="Quick actions" style="display: <%= locals.isAuthenticated ? '' : 'none' %>;">
   <!-- Admin Bottom Bar: 3 actions (Admin, circular Call, View Store) -->
-  <div class="mobile-bottom-bar__admin" id="mobileBottomBarAdmin" style="display: none;">
+  <div class="mobile-bottom-bar__admin" id="mobileBottomBarAdmin" style="display: <%= locals.isAdmin ? '' : 'none' %>;">
     <a href="/admin/dashboard" class="mobile-bottom-bar__action mobile-bottom-bar__action--admin" id="mobileBottomAdminBtn">
       <div class="mobile-bottom-bar__icon-wrap">
         <svg class="mobile-bottom-bar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -149,7 +149,7 @@
   </div>
 
   <!-- Regular User Bottom Bar: 2 actions (Rectangular Call, Rectangular View Store) -->
-  <div class="mobile-bottom-bar__user" id="mobileBottomBarUser" style="display: none;">
+  <div class="mobile-bottom-bar__user" id="mobileBottomBarUser" style="display: <%= locals.isAuthenticated && !locals.isAdmin ? '' : 'none' %>;">
     <a href="tel:9963657799" class="mobile-bottom-bar__user-btn mobile-bottom-bar__user-btn--call" id="mobileBottomUserCallBtn">
       <svg class="mobile-bottom-bar__btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
         <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.61 21 3 13.39 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.45.57 3.57a1 1 0 01-.25 1.02l-2.2 2.2z"/>
@@ -167,98 +167,5 @@
   </div>
 </nav>
 
-<script>
-(function() {
-  function syncAuthUI() {
-    try {
-      var raw = localStorage.getItem('authUser');
-      if (raw) {
-        var u = JSON.parse(raw);
-        if (u && (u.id || u.email)) {
-          var isAdmin = (u.role === 'ADMIN' || u.role === 'admin');
+<script src="/assets/js/auth-state.js" defer></script>
 
-          if (document.body) {
-            document.body.classList.add('is-authenticated');
-            document.body.classList.add('has-mobile-bottom-bar');
-            if (isAdmin) {
-              document.body.classList.add('is-admin');
-              document.body.classList.remove('is-user');
-            } else {
-              document.body.classList.add('is-user');
-              document.body.classList.remove('is-admin');
-            }
-          }
-
-          var loginBtn = document.getElementById('navbarLoginBtn');
-          var profileBtn = document.getElementById('navProfileBtn');
-          var logoutBtn = document.getElementById('navLogoutBtn');
-          var mobileLogin = document.getElementById('navMobileLoginBtn');
-          var mobileProfile = document.getElementById('navMobileProfileBtn');
-          var adminBtn = document.getElementById('navAdminBtn');
-
-          if (loginBtn) loginBtn.style.display = 'none';
-          if (profileBtn) profileBtn.style.display = 'inline-flex';
-          if (logoutBtn) logoutBtn.style.display = 'inline-flex';
-          if (mobileLogin) mobileLogin.style.display = 'none';
-          if (mobileProfile) mobileProfile.style.display = 'block';
-
-          if (adminBtn) {
-            adminBtn.style.display = isAdmin ? 'inline-flex' : 'none';
-          }
-
-          var bottomBar = document.getElementById('mobileBottomBar');
-          var adminBottom = document.getElementById('mobileBottomBarAdmin');
-          var userBottom = document.getElementById('mobileBottomBarUser');
-          if (bottomBar) bottomBar.style.display = '';
-          if (adminBottom) adminBottom.style.display = isAdmin ? '' : 'none';
-          if (userBottom) userBottom.style.display = isAdmin ? 'none' : '';
-          return;
-        }
-      }
-
-      // Unauthenticated state
-      if (document.body) {
-        document.body.classList.remove('is-authenticated', 'has-mobile-bottom-bar', 'is-admin', 'is-user');
-      }
-      var loginBtn = document.getElementById('navbarLoginBtn');
-      var profileBtn = document.getElementById('navProfileBtn');
-      var logoutBtn = document.getElementById('navLogoutBtn');
-      var mobileLogin = document.getElementById('navMobileLoginBtn');
-      var mobileProfile = document.getElementById('navMobileProfileBtn');
-      var adminBtn = document.getElementById('navAdminBtn');
-      var bottomBar = document.getElementById('mobileBottomBar');
-      var adminBottom = document.getElementById('mobileBottomBarAdmin');
-      var userBottom = document.getElementById('mobileBottomBarUser');
-
-      if (loginBtn) loginBtn.style.display = '';
-      if (profileBtn) profileBtn.style.display = 'none';
-      if (logoutBtn) logoutBtn.style.display = 'none';
-      if (mobileLogin) mobileLogin.style.display = '';
-      if (mobileProfile) mobileProfile.style.display = 'none';
-      if (adminBtn) adminBtn.style.display = 'none';
-      if (bottomBar) bottomBar.style.display = 'none';
-      if (adminBottom) adminBottom.style.display = 'none';
-      if (userBottom) userBottom.style.display = 'none';
-    } catch (e) {}
-  }
-
-  syncAuthUI();
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', syncAuthUI);
-  }
-  window.addEventListener('storage', syncAuthUI);
-
-  var logoutBtn = document.getElementById('navLogoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', function () {
-      fetch('/logout', { method: 'POST', credentials: 'same-origin' })
-        .finally(function () {
-          localStorage.removeItem('authUser');
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('pendingRoute');
-          window.location.href = '/';
-        });
-    });
-  }
-})();
-</script>

@@ -188,6 +188,23 @@
     })
     .catch(err => console.error("Error fetching location:", err));
 
+  // ─── Cart badge sync ──────────────────────────────────────────────────────
+  function syncHomeCartBadge() {
+    fetch('/api/cart')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data) {
+          const count = data.data.items?.length || data.data.itemCount || 0;
+          const badge = document.getElementById('hdrCartBadge');
+          if (badge) {
+            badge.textContent = count > 99 ? '99+' : count;
+            badge.style.display = count > 0 ? 'inline-flex' : 'none';
+          }
+        }
+      })
+      .catch(() => {});
+  }
+
   // ─── Bind scroll / resize ─────────────────────────────────────────────────
   window.addEventListener('scroll', () => {
     syncHeaderShadow();
@@ -201,5 +218,6 @@
   syncStripTop();
   syncCatStrip();
   scrollActivePillIntoView();
+  syncHomeCartBadge();
 
 })();

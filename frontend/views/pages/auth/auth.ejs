@@ -440,18 +440,11 @@
         }
       } catch (_) {}
 
-      // If already logged in, redirect directly rather than showing login form
-      (function checkActiveSession() {
-        try {
-          const cached = localStorage.getItem('authUser');
-          if (cached) {
-            const u = JSON.parse(cached);
-            if (u && (u.id || u.email)) {
-              redirectAfterAuth(u.role);
-            }
-          }
-        } catch (_) {}
-      })();
+      // When server renders the auth page, clear any stale client storage
+      try {
+        localStorage.removeItem('authUser');
+        localStorage.removeItem('authToken');
+      } catch (_) {}
 
       // Validate a field only if it has been touched OR forceAll is true
       function validateField(inputId, fieldId, errorId, rule, forceAll) {

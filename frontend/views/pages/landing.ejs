@@ -71,7 +71,7 @@
 
 </head>
 
-<body class="page-loading">
+<body class="page-loading <%= locals.isAuthenticated ? 'is-authenticated has-mobile-bottom-bar ' + (locals.isAdmin ? 'is-admin' : 'is-user') : '' %>">
 
   <%# ============================================================
       PARTIALS — Each maps to one future React component.

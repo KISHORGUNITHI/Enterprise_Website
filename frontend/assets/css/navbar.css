@@ -425,9 +425,15 @@
     display: none;
   }
 
+  #navbarLoginBtn[style*="display: none"],
+  #navLogoutBtn[style*="display: none"],
+  .navbar__login-btn[style*="display: none"] {
+    display: none !important;
+  }
+
   /* Login action */
   .navbar__login-btn {
-    display: inline-flex !important;
+    display: inline-flex;
     align-items: center;
     gap: 5px;
     height: 36px;

@@ -46,6 +46,58 @@ app.use((error, req, res, next) => {
   next(error);
 });
 
+// Robust cookie parser helper
+function getCookie(req, name) {
+  const header = req.headers.cookie || '';
+  const match  = header.split(';').map(c => c.trim()).find(c => c.startsWith(name + '='));
+  if (!match) return null;
+  let val = match.slice(name.length + 1);
+  if (val.startsWith('"') && val.endsWith('"')) {
+    val = val.slice(1, -1);
+  }
+  return decodeURIComponent(val);
+}
+
+// Global Authentication-State Middleware: verifies HttpOnly authToken cookie
+app.use((req, res, next) => {
+  let user = null;
+  const token = getCookie(req, 'authToken');
+
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      if (decoded && (decoded.userId || decoded.id)) {
+        user = {
+          id: decoded.userId || decoded.id,
+          email: decoded.email || '',
+          role: decoded.role || 'USER',
+          username: decoded.username || (decoded.email ? decoded.email.split('@')[0] : 'User')
+        };
+      }
+    } catch (_) {
+      res.clearCookie('authToken', { path: '/' });
+      user = null;
+    }
+  }
+
+  req.user = user;
+  res.locals.user = user;
+  res.locals.isAuthenticated = Boolean(user);
+  res.locals.isAdmin = Boolean(user && (user.role === 'ADMIN' || user.role === 'admin'));
+  next();
+});
+
+// Prevent stale browser caching for all dynamic HTML pages to ensure login/logout consistency on back/forward navigation
+app.use((req, res, next) => {
+  if (req.method === 'GET' && !req.path.startsWith('/assets') && !req.path.startsWith('/public') && !req.path.startsWith('/icons')) {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+  next();
+});
+
+
 // Authentication Routes
 app.use("/", authRoutes);
 
@@ -226,19 +278,9 @@ app.get('/product/:id', (req, res) => {
 
 // ─── Auth Guard for Customer Pages ──────────────────────────────────────────
 function requireAuthPage(req, res, next) {
-  const header = req.headers.cookie || '';
-  const match = header.split(';').map(c => c.trim()).find(c => c.startsWith('authToken='));
-  let token = match ? decodeURIComponent(match.slice('authToken='.length)) : null;
-  if (token && token.startsWith('"') && token.endsWith('"')) token = token.slice(1, -1);
-
-  if (token) {
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = decoded;
-      return next();
-    } catch (_) { }
+  if (req.user) {
+    return next();
   }
-
   return res.redirect(`/login?pendingRoute=${encodeURIComponent(req.originalUrl || req.path)}`);
 }
 

@@ -117,7 +117,15 @@
       if (data.success && data.data) {
         const count = data.data.items?.length || data.data.itemCount || 0;
         const badge = document.getElementById('catHdrCartBadge');
-        if (badge) badge.textContent = count;
+        if (badge) {
+          badge.textContent = count > 99 ? '99+' : count;
+          badge.style.display = count > 0 ? 'inline-flex' : 'none';
+        }
+        const hdrBadge = document.getElementById('hdrCartBadge');
+        if (hdrBadge) {
+          hdrBadge.textContent = count > 99 ? '99+' : count;
+          hdrBadge.style.display = count > 0 ? 'inline-flex' : 'none';
+        }
       }
     })
     .catch(() => {});

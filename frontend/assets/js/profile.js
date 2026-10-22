@@ -947,13 +947,18 @@
   // 5. SIDEBAR LOGOUT
   // ═════════════════════════════════════════════════════════════════════════
 
-  profileSidebarLogoutBtn && profileSidebarLogoutBtn.addEventListener('click', function () {
-    fetch('/logout', { method: 'POST', credentials: 'same-origin' })
-      .finally(function () {
-        localStorage.removeItem('authUser');
-        localStorage.removeItem(STORAGE_KEY_PENDING);
-        window.location.href = '/';
-      });
+  profileSidebarLogoutBtn && profileSidebarLogoutBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    if (window.EnterpriseAuth && typeof window.EnterpriseAuth.logout === 'function') {
+      window.EnterpriseAuth.logout();
+    } else {
+      fetch('/logout', { method: 'POST', credentials: 'same-origin' })
+        .finally(function () {
+          localStorage.removeItem('authUser');
+          localStorage.removeItem(STORAGE_KEY_PENDING);
+          window.location.href = '/home';
+        });
+    }
   });
 
   async function fetchAddresses() {
