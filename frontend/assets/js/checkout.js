@@ -45,6 +45,7 @@
   // Items & Summary
   const checkoutItemsCount = document.getElementById('checkoutItemsCount');
   const checkoutItemsList = document.getElementById('checkoutItemsList');
+  const checkoutItemsSkeleton = document.getElementById('checkoutItemsSkeleton');
   const checkoutEmptyItems = document.getElementById('checkoutEmptyItems');
   const summaryItemCount = document.getElementById('summaryItemCount');
   const summarySubtotal = document.getElementById('summarySubtotal');
@@ -53,6 +54,8 @@
   const summaryDiscount = document.getElementById('summaryDiscount');
   const summaryGiftsBreakdown = document.getElementById('summaryGiftsBreakdown');
   const summaryTotalAmount = document.getElementById('summaryTotalAmount');
+  const checkoutPriceSkeleton = document.getElementById('checkoutPriceSkeleton');
+  const checkoutPriceBreakdown = document.getElementById('checkoutPriceBreakdown');
   const savingsBanner = document.getElementById('savingsBanner');
   const savingsAmountText = document.getElementById('savingsAmountText');
 
@@ -263,7 +266,9 @@
 
       return `
         <div class="checkout-addr-card-item ${isSelected ? 'checkout-addr-card-item--selected' : ''}" data-addr-id="${addr.id}">
-          <input type="radio" name="modal_selected_addr" class="checkout-addr-radio" value="${addr.id}" ${isSelected ? 'checked' : ''} aria-label="Select address for ${addr.full_name}"/>
+          <label for="modal_addr_${addr.id}" class="checkout-addr-radio-wrap" aria-label="Select address for ${escapeHtml(addr.full_name)}">
+            <input type="radio" id="modal_addr_${addr.id}" name="modal_selected_addr" class="checkout-addr-radio" value="${addr.id}" ${isSelected ? 'checked' : ''} />
+          </label>
           <div class="checkout-addr-card-content">
             <div class="checkout-addr-card-header">
               <span class="checkout-addr-card-name">${escapeHtml(addr.full_name)}</span>
@@ -535,169 +540,183 @@
   // ═════════════════════════════════════════════════════════════════════════
 
   async function loadCheckoutItems() {
-    let items = [];
+    checkoutItemsSkeleton && checkoutItemsSkeleton.removeAttribute('hidden');
+    checkoutItemsList && checkoutItemsList.setAttribute('hidden', '');
+    checkoutPriceSkeleton && checkoutPriceSkeleton.removeAttribute('hidden');
+    checkoutPriceBreakdown && checkoutPriceBreakdown.setAttribute('hidden', '');
 
-    // 1. Priority A: Direct Buy Now item in localStorage
     try {
-      const buyNowRaw = localStorage.getItem('ks_checkout_item');
-      if (buyNowRaw) {
-        const item = JSON.parse(buyNowRaw);
-        if (item && (item.id || item.productId || item.slug)) {
-          items = [item];
-        }
-      }
-    } catch (e) { }
+      let items = [];
 
-    // 2. Priority B: URL Parameter (?productId=... or ?slug=...)
-    if (items.length === 0) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const paramId = urlParams.get('productId') || urlParams.get('slug') || urlParams.get('id');
-      if (paramId) {
-        items = [{ id: paramId, quantity: parseInt(urlParams.get('qty'), 10) || 1 }];
-      }
-    }
-
-    // 3. Priority C: Cart in localStorage
-    if (items.length === 0) {
+      // 1. Priority A: Direct Buy Now item in localStorage
       try {
-        const cartRaw = localStorage.getItem('ks_cart');
-        if (cartRaw) {
-          const parsed = JSON.parse(cartRaw);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            items = parsed;
+        const buyNowRaw = localStorage.getItem('ks_checkout_item');
+        if (buyNowRaw) {
+          const item = JSON.parse(buyNowRaw);
+          if (item && (item.id || item.productId || item.slug)) {
+            items = [item];
           }
         }
       } catch (e) { }
-    }
 
-    // 4. Default demonstration fallback if empty
-    if (items.length === 0) {
-      try {
-        const trendingRes = await fetch('/api/products?limit=1');
-        if (trendingRes.ok) {
-          const trendingJson = await trendingRes.json();
-          const firstProd = (trendingJson.data && trendingJson.data[0]) || null;
-          if (firstProd) {
-            items = [{
-              id: firstProd.slug || firstProd.id,
-              dbId: firstProd.id,
-              name: firstProd.name,
-              brand: firstProd.brand,
-              price: Number(firstProd.price),
-              originalPrice: Math.round(Number(firstProd.price) * 1.15),
-              imageUrl: firstProd.productImages?.[0]?.imageUrl || '',
-              quantity: 1,
-              variantDescription: 'Standard Official Warranty',
-            }];
-          }
+      // 2. Priority B: URL Parameter (?productId=... or ?slug=...)
+      if (items.length === 0) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const paramId = urlParams.get('productId') || urlParams.get('slug') || urlParams.get('id');
+        if (paramId) {
+          items = [{ id: paramId, quantity: parseInt(urlParams.get('qty'), 10) || 1 }];
         }
-      } catch (e) { }
-    }
+      }
 
-    // Hydrate item details from backend product API
-    checkoutItems = [];
-    for (const rawItem of items) {
-      const prodId = rawItem.productId || rawItem.dbId || rawItem.id || rawItem.slug;
-      if (!prodId) continue;
+      // 3. Priority C: Cart in localStorage
+      if (items.length === 0) {
+        try {
+          const cartRaw = localStorage.getItem('ks_cart');
+          if (cartRaw) {
+            const parsed = JSON.parse(cartRaw);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              items = parsed;
+            }
+          }
+        } catch (e) { }
+      }
 
-      try {
-        const res = await fetch(`/api/products/${encodeURIComponent(prodId)}`);
-        if (res.ok) {
-          const pJson = await res.json();
-          if (pJson.success && pJson.data) {
-            const p = pJson.data;
-            const primaryImg = p.productImages?.find(img => img.isPrimary)?.imageUrl
-              || p.productImages?.[0]?.imageUrl
-              || rawItem.imageUrl
-              || '';
-            let basePrice = Number(p.price) || 0;
-            if (rawItem.variantId && p.variants && p.variants.length > 0) {
-              const matchedVar = p.variants.find(v => v.id === rawItem.variantId);
-              if (matchedVar && matchedVar.priceOverride) {
-                basePrice = Number(matchedVar.priceOverride);
+      // 4. Default demonstration fallback if empty
+      if (items.length === 0) {
+        try {
+          const trendingRes = await fetch('/api/products?limit=1');
+          if (trendingRes.ok) {
+            const trendingJson = await trendingRes.json();
+            const firstProd = (trendingJson.data && trendingJson.data[0]) || null;
+            if (firstProd) {
+              items = [{
+                id: firstProd.slug || firstProd.id,
+                dbId: firstProd.id,
+                name: firstProd.name,
+                brand: firstProd.brand,
+                price: Number(firstProd.price),
+                originalPrice: Math.round(Number(firstProd.price) * 1.15),
+                imageUrl: firstProd.productImages?.[0]?.imageUrl || '',
+                quantity: 1,
+                variantDescription: 'Standard Official Warranty',
+              }];
+            }
+          }
+        } catch (e) { }
+      }
+
+      // Hydrate item details from backend product API
+      checkoutItems = [];
+      for (const rawItem of items) {
+        const prodId = rawItem.productId || rawItem.dbId || rawItem.id || rawItem.slug;
+        if (!prodId) continue;
+
+        try {
+          const res = await fetch(`/api/products/${encodeURIComponent(prodId)}`);
+          if (res.ok) {
+            const pJson = await res.json();
+            if (pJson.success && pJson.data) {
+              const p = pJson.data;
+              const primaryImg = p.productImages?.find(img => img.isPrimary)?.imageUrl
+                || p.productImages?.[0]?.imageUrl
+                || rawItem.imageUrl
+                || '';
+              let basePrice = Number(p.price) || 0;
+              if (rawItem.variantId && p.variants && p.variants.length > 0) {
+                const matchedVar = p.variants.find(v => v.id === rawItem.variantId);
+                if (matchedVar && matchedVar.priceOverride) {
+                  basePrice = Number(matchedVar.priceOverride);
+                }
               }
-            }
-            const offerVal = (p.offer !== undefined && p.offer !== null && !isNaN(parseFloat(p.offer))) ? parseFloat(p.offer) : 0;
-            let price = offerVal > 0 ? Math.round(basePrice * (1 - offerVal / 100)) : (Number(rawItem.price) || basePrice);
-            const originalPrice = rawItem.originalPrice || basePrice || Math.round(price * 1.15);
+              const offerVal = (p.offer !== undefined && p.offer !== null && !isNaN(parseFloat(p.offer))) ? parseFloat(p.offer) : 0;
+              let price = offerVal > 0 ? Math.round(basePrice * (1 - offerVal / 100)) : (Number(rawItem.price) || basePrice);
+              const originalPrice = rawItem.originalPrice || basePrice || Math.round(price * 1.15);
 
-            // Extract gifts from product or rawItem
-            let itemGifts = [];
-            if (Array.isArray(p.giftsGiven) && p.giftsGiven.length > 0) {
-              itemGifts = p.giftsGiven.map(g => {
-                const isCustom = !g.giftProductId;
-                const imgUrl = isCustom
-                  ? (g.customGiftImage || '')
-                  : (g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || '');
-                return {
-                  id: g.giftProduct?.id || g.id,
-                  name: g.giftProduct?.name || g.customGiftName || 'Free Gift',
-                  brand: g.giftProduct?.brand || null,
-                  price: Number(g.giftProduct?.price) || 0,
-                  imageUrl: imgUrl,
-                  isCustom,
-                };
+              // Extract gifts from product or rawItem
+              let itemGifts = [];
+              if (Array.isArray(p.giftsGiven) && p.giftsGiven.length > 0) {
+                itemGifts = p.giftsGiven.map(g => {
+                  const isCustom = !g.giftProductId;
+                  const imgUrl = isCustom
+                    ? (g.customGiftImage || '')
+                    : (g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || '');
+                  return {
+                    id: g.giftProduct?.id || g.id,
+                    name: g.giftProduct?.name || g.customGiftName || 'Free Gift',
+                    brand: g.giftProduct?.brand || null,
+                    price: Number(g.giftProduct?.price) || 0,
+                    imageUrl: imgUrl,
+                    isCustom,
+                  };
+                });
+              } else if (Array.isArray(rawItem.gifts) && rawItem.gifts.length > 0) {
+                itemGifts = rawItem.gifts.map(g => ({
+                  id: g.id || `gift_${Math.random()}`,
+                  name: g.name || g.customGiftName || 'Free Gift',
+                  brand: g.brand || null,
+                  price: Number(g.price) || 0,
+                  imageUrl: g.imageUrl || g.customGiftImage || '',
+                  isCustom: Boolean(g.isCustom),
+                }));
+              }
+
+              checkoutItems.push({
+                productId: p.id,
+                dbId: p.id,
+                slug: p.slug,
+                name: p.name,
+                brand: p.brand || 'Enterprise Store',
+                price,
+                originalPrice,
+                imageUrl: primaryImg,
+                quantity: Math.max(1, parseInt(rawItem.quantity, 10) || 1),
+                variantDescription: rawItem.variantDescription || '100% Genuine · 1 Year Warranty',
+                variantId: rawItem.variantId || null,
+                gifts: itemGifts,
               });
-            } else if (Array.isArray(rawItem.gifts) && rawItem.gifts.length > 0) {
-              itemGifts = rawItem.gifts.map(g => ({
-                id: g.id || `gift_${Math.random()}`,
-                name: g.name || g.customGiftName || 'Free Gift',
-                brand: g.brand || null,
-                price: Number(g.price) || 0,
-                imageUrl: g.imageUrl || g.customGiftImage || '',
-                isCustom: Boolean(g.isCustom),
-              }));
+              continue;
             }
-
-            checkoutItems.push({
-              productId: p.id,
-              dbId: p.id,
-              slug: p.slug,
-              name: p.name,
-              brand: p.brand || 'Enterprise Store',
-              price,
-              originalPrice,
-              imageUrl: primaryImg,
-              quantity: Math.max(1, parseInt(rawItem.quantity, 10) || 1),
-              variantDescription: rawItem.variantDescription || '100% Genuine · 1 Year Warranty',
-              variantId: rawItem.variantId || null,
-              gifts: itemGifts,
-            });
-            continue;
           }
+        } catch (err) {
+          console.warn('Could not fetch product detail for checkout:', err);
         }
-      } catch (err) {
-        console.warn('Could not fetch product detail for checkout:', err);
+
+        // Fallback using rawItem
+        const fallbackGifts = Array.isArray(rawItem.gifts) ? rawItem.gifts.map(g => ({
+          id: g.id || `gift_${Math.random()}`,
+          name: g.name || g.customGiftName || 'Free Gift',
+          brand: g.brand || null,
+          price: Number(g.price) || 0,
+          imageUrl: g.imageUrl || g.customGiftImage || '',
+          isCustom: Boolean(g.isCustom),
+        })) : [];
+
+        checkoutItems.push({
+          productId: rawItem.productId || rawItem.dbId || rawItem.id,
+          dbId: rawItem.dbId || rawItem.id,
+          slug: rawItem.slug || rawItem.id,
+          name: rawItem.name || 'Electronics Product',
+          brand: rawItem.brand || 'Kishor Enterprises',
+          price: Number(rawItem.price || rawItem.salePrice || 999),
+          originalPrice: Number(rawItem.originalPrice || rawItem.price || 1299),
+          imageUrl: rawItem.imageUrl || '',
+          quantity: Math.max(1, parseInt(rawItem.quantity, 10) || 1),
+          variantDescription: rawItem.variantDescription || 'Official Warranty Included',
+          variantId: rawItem.variantId || null,
+          gifts: fallbackGifts,
+        });
       }
 
-      // Fallback using rawItem
-      const fallbackGifts = Array.isArray(rawItem.gifts) ? rawItem.gifts.map(g => ({
-        id: g.id || `gift_${Math.random()}`,
-        name: g.name || g.customGiftName || 'Free Gift',
-        brand: g.brand || null,
-        price: Number(g.price) || 0,
-        imageUrl: g.imageUrl || g.customGiftImage || '',
-        isCustom: Boolean(g.isCustom),
-      })) : [];
-
-      checkoutItems.push({
-        productId: rawItem.productId || rawItem.dbId || rawItem.id,
-        dbId: rawItem.dbId || rawItem.id,
-        slug: rawItem.slug || rawItem.id,
-        name: rawItem.name || 'Electronics Product',
-        brand: rawItem.brand || 'Kishor Enterprises',
-        price: Number(rawItem.price || rawItem.salePrice || 999),
-        originalPrice: Number(rawItem.originalPrice || rawItem.price || 1299),
-        imageUrl: rawItem.imageUrl || '',
-        quantity: Math.max(1, parseInt(rawItem.quantity, 10) || 1),
-        variantDescription: rawItem.variantDescription || 'Official Warranty Included',
-        variantId: rawItem.variantId || null,
-        gifts: fallbackGifts,
-      });
+      renderCheckoutItems();
+      recalculateTotals();
+    } catch (err) {
+      console.error('Error loading checkout items:', err);
+    } finally {
+      checkoutItemsSkeleton && checkoutItemsSkeleton.setAttribute('hidden', '');
+      checkoutItemsList && checkoutItemsList.removeAttribute('hidden');
+      checkoutPriceSkeleton && checkoutPriceSkeleton.setAttribute('hidden', '');
+      checkoutPriceBreakdown && checkoutPriceBreakdown.removeAttribute('hidden');
     }
-
-    renderCheckoutItems();
-    recalculateTotals();
   }
 
   function updatePlaceOrderBtnState() {

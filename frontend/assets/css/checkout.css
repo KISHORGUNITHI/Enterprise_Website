@@ -344,6 +344,17 @@
 }
 
 /* ── Skeletons ──────────────────────────────────────────────────────────── */
+[hidden] {
+  display: none !important;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #f1f3f5 25%, #e5e7eb 50%, #f1f3f5 75%);
+  background-size: 200% 100%;
+  animation: skeletonLoading 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm, 4px);
+}
+
 .checkout-address-skeleton {
   display: flex;
   flex-direction: column;
@@ -370,6 +381,127 @@
 .skeleton-line--phone {
   width: 30%;
 }
+
+/* ── Checkout Items Skeleton ────────────────────────────────────────────── */
+.checkout-items-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.checkout-item-skeleton-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-secondary-100);
+}
+
+.checkout-item-skeleton-card:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.checkout-item-skeleton-main {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+.checkout-skeleton-thumb {
+  width: 88px;
+  height: 88px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.checkout-skeleton-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+}
+
+.checkout-skeleton-brand {
+  height: 11px;
+  width: 25%;
+}
+
+.checkout-skeleton-title {
+  height: 16px;
+  width: 75%;
+}
+
+.checkout-skeleton-variant {
+  height: 12px;
+  width: 42%;
+}
+
+.checkout-skeleton-price {
+  height: 20px;
+  width: 30%;
+  margin-top: 2px;
+}
+
+.checkout-skeleton-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.checkout-skeleton-qty {
+  height: 26px;
+  width: 85px;
+  border-radius: var(--radius-sm);
+}
+
+.checkout-skeleton-delivery {
+  height: 13px;
+  width: 120px;
+}
+
+.checkout-skeleton-gifts-box {
+  height: 52px;
+  width: 100%;
+  border-radius: var(--radius-md);
+  margin-top: var(--space-2);
+}
+
+/* ── Checkout Price Summary Skeleton ────────────────────────────────────── */
+.checkout-price-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 4px 0 12px;
+}
+
+.checkout-skeleton-price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.checkout-skeleton-price-row--total {
+  padding-top: 8px;
+}
+
+.checkout-skeleton-price-row--total .checkout-skeleton-line {
+  height: 18px;
+}
+
+.checkout-skeleton-line {
+  height: 14px;
+  border-radius: 4px;
+}
+
+.checkout-skeleton-line--w20 { width: 20%; }
+.checkout-skeleton-line--w25 { width: 25%; }
+.checkout-skeleton-line--w30 { width: 30%; }
+.checkout-skeleton-line--w35 { width: 35%; }
+.checkout-skeleton-line--w40 { width: 40%; }
+.checkout-skeleton-line--w45 { width: 45%; }
 
 @keyframes skeletonLoading {
   0% { background-position: 200% 0; }

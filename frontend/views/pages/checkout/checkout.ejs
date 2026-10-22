@@ -131,6 +131,26 @@
               </div>
 
               <div class="checkout-card__body">
+                <!-- Loading Skeleton for Items -->
+                <div class="checkout-items-skeleton" id="checkoutItemsSkeleton" hidden>
+                  <div class="checkout-item-skeleton-card">
+                    <div class="checkout-item-skeleton-main">
+                      <div class="skeleton-shimmer checkout-skeleton-thumb"></div>
+                      <div class="checkout-skeleton-info">
+                        <div class="skeleton-shimmer checkout-skeleton-brand"></div>
+                        <div class="skeleton-shimmer checkout-skeleton-title"></div>
+                        <div class="skeleton-shimmer checkout-skeleton-variant"></div>
+                        <div class="skeleton-shimmer checkout-skeleton-price"></div>
+                        <div class="checkout-skeleton-bottom">
+                          <div class="skeleton-shimmer checkout-skeleton-qty"></div>
+                          <div class="skeleton-shimmer checkout-skeleton-delivery"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="skeleton-shimmer checkout-skeleton-gifts-box"></div>
+                  </div>
+                </div>
+
                 <!-- Items List -->
                 <div class="checkout-items-list" id="checkoutItemsList">
                   <!-- Injected via JavaScript -->
@@ -163,7 +183,28 @@
               <h2 class="checkout-price-card__title">PRICE DETAILS</h2>
               <div class="checkout-price-card__divider"></div>
 
-              <dl class="checkout-price-breakdown">
+              <!-- Loading Skeleton for Price Details -->
+              <div class="checkout-price-skeleton" id="checkoutPriceSkeleton" hidden>
+                <div class="checkout-skeleton-price-row">
+                  <div class="skeleton-shimmer checkout-skeleton-line checkout-skeleton-line--w40"></div>
+                  <div class="skeleton-shimmer checkout-skeleton-line checkout-skeleton-line--w20"></div>
+                </div>
+                <div class="checkout-skeleton-price-row">
+                  <div class="skeleton-shimmer checkout-skeleton-line checkout-skeleton-line--w35"></div>
+                  <div class="skeleton-shimmer checkout-skeleton-line checkout-skeleton-line--w25"></div>
+                </div>
+                <div class="checkout-skeleton-price-row">
+                  <div class="skeleton-shimmer checkout-skeleton-line checkout-skeleton-line--w30"></div>
+                  <div class="skeleton-shimmer checkout-skeleton-line checkout-skeleton-line--w20"></div>
+                </div>
+                <div class="checkout-price-card__divider checkout-price-card__divider--dashed"></div>
+                <div class="checkout-skeleton-price-row checkout-skeleton-price-row--total">
+                  <div class="skeleton-shimmer checkout-skeleton-line checkout-skeleton-line--w45"></div>
+                  <div class="skeleton-shimmer checkout-skeleton-line checkout-skeleton-line--w30"></div>
+                </div>
+              </div>
+
+              <dl class="checkout-price-breakdown" id="checkoutPriceBreakdown">
                 <div class="checkout-price-row">
                   <dt class="checkout-price-row__label" id="summarySubtotalLabel">Price (<span id="summaryItemCount">0</span> items)</dt>
                   <dd class="checkout-price-row__val" id="summarySubtotal">₹0</dd>
@@ -206,18 +247,18 @@
 
               <!-- Payment Method Selection -->
               <div class="checkout-payment-section">
-                <label class="checkout-payment-section__title" id="paymentMethodTitle">Payment Mode</label>
+                <span class="checkout-payment-section__title" id="paymentMethodTitle">Payment Mode</span>
                 <div class="checkout-payment-options" role="radiogroup" aria-labelledby="paymentMethodTitle">
-                  <label class="checkout-payment-opt checkout-payment-opt--selected">
-                    <input type="radio" name="payment_mode" value="COD" checked class="checkout-payment-radio" />
+                  <label for="payment_mode_cod" class="checkout-payment-opt checkout-payment-opt--selected">
+                    <input type="radio" id="payment_mode_cod" name="payment_mode" value="COD" checked class="checkout-payment-radio" />
                     <div class="checkout-payment-opt__info">
                       <span class="checkout-payment-opt__name">Cash on Delivery (COD)</span>
                       <span class="checkout-payment-opt__sub">Pay cash or UPI at the time of delivery</span>
                     </div>
                   </label>
 
-                  <label class="checkout-payment-opt">
-                    <input type="radio" name="payment_mode" value="UPI" class="checkout-payment-radio" />
+                  <label for="payment_mode_upi" class="checkout-payment-opt">
+                    <input type="radio" id="payment_mode_upi" name="payment_mode" value="UPI" class="checkout-payment-radio" />
                     <div class="checkout-payment-opt__info">
                       <span class="checkout-payment-opt__name">UPI / Online Payment</span>
                       <span class="checkout-payment-opt__sub">Instant payment via GPay, PhonePe, Cards</span>
@@ -409,18 +450,18 @@
 
               <!-- Address Type (HOME / WORK / OTHER) -->
               <div class="checkout-form-group checkout-form-group--full checkout-form-type-group">
-                <label class="checkout-form-label">Address Type</label>
-                <div class="checkout-type-radios">
-                  <label class="checkout-type-radio-label">
-                    <input type="radio" name="address_type" value="HOME" checked />
+                <span class="checkout-form-label" id="addrTypeGroupLabel">Address Type</span>
+                <div class="checkout-type-radios" role="radiogroup" aria-labelledby="addrTypeGroupLabel">
+                  <label for="addrTypeHome" class="checkout-type-radio-label">
+                    <input type="radio" id="addrTypeHome" name="address_type" value="HOME" checked />
                     <span class="checkout-type-pill">HOME</span>
                   </label>
-                  <label class="checkout-type-radio-label">
-                    <input type="radio" name="address_type" value="WORK" />
+                  <label for="addrTypeWork" class="checkout-type-radio-label">
+                    <input type="radio" id="addrTypeWork" name="address_type" value="WORK" />
                     <span class="checkout-type-pill">WORK</span>
                   </label>
-                  <label class="checkout-type-radio-label">
-                    <input type="radio" name="address_type" value="OTHER" />
+                  <label for="addrTypeOther" class="checkout-type-radio-label">
+                    <input type="radio" id="addrTypeOther" name="address_type" value="OTHER" />
                     <span class="checkout-type-pill">OTHER</span>
                   </label>
                 </div>
@@ -428,7 +469,7 @@
 
               <!-- Make Default Checkbox -->
               <div class="checkout-form-group checkout-form-group--full checkout-form-default-check">
-                <label class="checkout-checkbox-label">
+                <label for="addrFormIsDefault" class="checkout-checkbox-label">
                   <input type="checkbox" id="addrFormIsDefault" />
                   <span>Set as my default delivery address</span>
                 </label>
