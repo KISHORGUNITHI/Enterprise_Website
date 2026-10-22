@@ -77,15 +77,16 @@ model Product {
 }
 
 model ProductGift {
-  id            String   @id @default(cuid())
-  productId     String
-  giftProductId String
-  createdAt     DateTime @default(now())
+  id              String   @id @default(cuid())
+  productId       String
+  giftProductId   String?
+  customGiftName  String?
+  customGiftImage String?
+  createdAt       DateTime @default(now())
 
-  product       Product  @relation("ProductOffersGifts", fields: [productId], references: [id], onDelete: Cascade)
-  giftProduct   Product  @relation("GiftProductItems", fields: [giftProductId], references: [id], onDelete: Cascade)
+  product         Product  @relation("ProductOffersGifts", fields: [productId], references: [id], onDelete: Cascade)
+  giftProduct     Product? @relation("GiftProductItems", fields: [giftProductId], references: [id], onDelete: Cascade)
 
-  @@unique([productId, giftProductId])
   @@index([productId])
   @@index([giftProductId])
 }

@@ -77,12 +77,34 @@ export class CartService {
         }
       }
 
+      // Apply product offer / promotional discount if applicable
+      const offer = (product.offer && parseFloat(product.offer) > 0) ? parseFloat(product.offer) : 0;
+      if (offer > 0) {
+        unitPrice = Math.round(unitPrice * (1 - offer / 100));
+      }
+
       const primaryImage = product.productImages?.find((img) => img.isPrimary)?.imageUrl ||
                            product.productImages?.[0]?.imageUrl || '';
 
       const lineTotal = unitPrice * rawItem.quantity;
       calculatedSubtotal += lineTotal;
       totalQuantity += rawItem.quantity;
+
+      const mappedGifts = (product.giftsGiven || []).map((g) => {
+        const isCustom = !g.giftProductId;
+        const imgUrl = isCustom
+          ? (g.customGiftImage || '')
+          : (g.giftProduct?.productImages?.find((img) => img.isPrimary)?.imageUrl ||
+             g.giftProduct?.productImages?.[0]?.imageUrl || '');
+        return {
+          id: g.giftProduct?.id || g.id,
+          name: g.giftProduct?.name || g.customGiftName || 'Free Gift',
+          brand: g.giftProduct?.brand || null,
+          price: Number(g.giftProduct?.price) || 0,
+          imageUrl: imgUrl,
+          isCustom,
+        };
+      });
 
       enrichedItems.push({
         id: rawItem.id,
@@ -93,6 +115,7 @@ export class CartService {
         lineTotal,
         createdAt: rawItem.createdAt,
         updatedAt: rawItem.updatedAt,
+        gifts: mappedGifts,
         product: {
           id: product.id,
           name: product.name,
@@ -102,6 +125,7 @@ export class CartService {
           availability: product.availability,
           stock: product.stock,
           image: primaryImage,
+          gifts: mappedGifts,
         },
         variant: variantInfo,
       });

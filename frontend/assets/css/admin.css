@@ -2710,12 +2710,29 @@
 }
 
 .selected-gift-item__thumb {
-  width: 28px;
-  height: 28px;
-  border-radius: 4px;
-  object-fit: cover;
-  background: #e2e8f0;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 6px;
+  object-fit: contain;
+  background: #ffffff;
+  border: 1px solid var(--color-border-light, #e2e8f0);
+  padding: 2px;
+  box-sizing: border-box;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gift-source-tab-btn {
+  transition: all 0.15s ease;
+}
+
+.gift-source-tab-btn.active {
+  background: var(--color-bg-primary, #ffffff) !important;
+  color: var(--color-text-primary, #0f172a) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
 }
 
 .selected-gift-item__remove {

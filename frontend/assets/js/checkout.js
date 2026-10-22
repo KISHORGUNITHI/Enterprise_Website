@@ -7,62 +7,67 @@
   'use strict';
 
   // ─── DOM References ────────────────────────────────────────────────────────
-  const checkoutGrid         = document.getElementById('checkoutGrid');
-  const alertBanner          = document.getElementById('checkoutAlert');
-  const alertMsg             = document.getElementById('checkoutAlertMsg');
-  const alertClose           = document.getElementById('checkoutAlertClose');
+  const checkoutGrid = document.getElementById('checkoutGrid');
+  const alertBanner = document.getElementById('checkoutAlert');
+  const alertMsg = document.getElementById('checkoutAlertMsg');
+  const alertClose = document.getElementById('checkoutAlertClose');
 
   // Address Section
-  const addressSkeleton      = document.getElementById('addressSkeleton');
-  const selectedAddressCard  = document.getElementById('selectedAddressCard');
-  const noAddressCard        = document.getElementById('noAddressCard');
+  const addressSkeleton = document.getElementById('addressSkeleton');
+  const selectedAddressCard = document.getElementById('selectedAddressCard');
+  const noAddressCard = document.getElementById('noAddressCard');
   const openChangeAddressBtn = document.getElementById('openChangeAddressBtn');
-  const noAddrAddBtn         = document.getElementById('noAddrAddBtn');
+  const noAddrAddBtn = document.getElementById('noAddrAddBtn');
 
-  const selectedAddrName     = document.getElementById('selectedAddrName');
-  const selectedAddrType     = document.getElementById('selectedAddrType');
-  const selectedAddrDefault  = document.getElementById('selectedAddrDefault');
-  const selectedAddrText     = document.getElementById('selectedAddrText');
-  const selectedAddrPhone    = document.getElementById('selectedAddrPhone');
+  const selectedAddrName = document.getElementById('selectedAddrName');
+  const selectedAddrType = document.getElementById('selectedAddrType');
+  const selectedAddrDefault = document.getElementById('selectedAddrDefault');
+  const selectedAddrText = document.getElementById('selectedAddrText');
+  const selectedAddrPhone = document.getElementById('selectedAddrPhone');
 
   // Address Modal / Drawer
-  const addressModalBackdrop   = document.getElementById('addressModalBackdrop');
-  const closeAddressModalBtn   = document.getElementById('closeAddressModalBtn');
-  const addressListView        = document.getElementById('addressListView');
-  const addressFormView        = document.getElementById('addressFormView');
-  const modalSavedCount        = document.getElementById('modalSavedCount');
-  const modalAddressCardsList  = document.getElementById('modalAddressCardsList');
-  const showNewAddressFormBtn  = document.getElementById('showNewAddressFormBtn');
-  const backToAddressListBtn   = document.getElementById('backToAddressListBtn');
-  const cancelAddressFormBtn   = document.getElementById('cancelAddressFormBtn');
-  const checkoutAddressForm    = document.getElementById('checkoutAddressForm');
-  const saveAddressBtn         = document.getElementById('saveAddressBtn');
-  const saveAddrSpinner        = document.getElementById('saveAddrSpinner');
-  const saveAddrBtnText        = document.getElementById('saveAddrBtnText');
-  const useCurrentLocationBtn  = document.getElementById('useCurrentLocationBtn');
-  const addrLocationStatus     = document.getElementById('addrLocationStatus');
+  const addressModalBackdrop = document.getElementById('addressModalBackdrop');
+  const closeAddressModalBtn = document.getElementById('closeAddressModalBtn');
+  const addressListView = document.getElementById('addressListView');
+  const addressFormView = document.getElementById('addressFormView');
+  const modalSavedCount = document.getElementById('modalSavedCount');
+  const modalAddressCardsList = document.getElementById('modalAddressCardsList');
+  const showNewAddressFormBtn = document.getElementById('showNewAddressFormBtn');
+  const backToAddressListBtn = document.getElementById('backToAddressListBtn');
+  const cancelAddressFormBtn = document.getElementById('cancelAddressFormBtn');
+  const checkoutAddressForm = document.getElementById('checkoutAddressForm');
+  const saveAddressBtn = document.getElementById('saveAddressBtn');
+  const saveAddrSpinner = document.getElementById('saveAddrSpinner');
+  const saveAddrBtnText = document.getElementById('saveAddrBtnText');
+  const useCurrentLocationBtn = document.getElementById('useCurrentLocationBtn');
+  const addrLocationStatus = document.getElementById('addrLocationStatus');
 
   // Items & Summary
-  const checkoutItemsCount     = document.getElementById('checkoutItemsCount');
-  const checkoutItemsList      = document.getElementById('checkoutItemsList');
-  const checkoutEmptyItems     = document.getElementById('checkoutEmptyItems');
-  const summaryItemCount       = document.getElementById('summaryItemCount');
-  const summarySubtotal        = document.getElementById('summarySubtotal');
-  const summaryDiscountRow     = document.getElementById('summaryDiscountRow');
-  const summaryDiscount        = document.getElementById('summaryDiscount');
-  const summaryTotalAmount     = document.getElementById('summaryTotalAmount');
-  const savingsBanner          = document.getElementById('savingsBanner');
-  const savingsAmountText      = document.getElementById('savingsAmountText');
+  const checkoutItemsCount = document.getElementById('checkoutItemsCount');
+  const checkoutItemsList = document.getElementById('checkoutItemsList');
+  const checkoutItemsSkeleton = document.getElementById('checkoutItemsSkeleton');
+  const checkoutEmptyItems = document.getElementById('checkoutEmptyItems');
+  const summaryItemCount = document.getElementById('summaryItemCount');
+  const summarySubtotal = document.getElementById('summarySubtotal');
+  const summarySubtotalLabel = document.getElementById('summarySubtotalLabel');
+  const summaryDiscountRow = document.getElementById('summaryDiscountRow');
+  const summaryDiscount = document.getElementById('summaryDiscount');
+  const summaryGiftsBreakdown = document.getElementById('summaryGiftsBreakdown');
+  const summaryTotalAmount = document.getElementById('summaryTotalAmount');
+  const checkoutPriceSkeleton = document.getElementById('checkoutPriceSkeleton');
+  const checkoutPriceBreakdown = document.getElementById('checkoutPriceBreakdown');
+  const savingsBanner = document.getElementById('savingsBanner');
+  const savingsAmountText = document.getElementById('savingsAmountText');
 
   // Order Placement
-  const placeOrderBtn          = document.getElementById('placeOrderBtn');
-  const placeOrderSpinner      = document.getElementById('placeOrderSpinner');
+  const placeOrderBtn = document.getElementById('placeOrderBtn');
+  const placeOrderSpinner = document.getElementById('placeOrderSpinner');
 
   // Success Modal
-  const orderSuccessModal      = document.getElementById('orderSuccessModal');
-  const successOrderShortId    = document.getElementById('successOrderShortId');
-  const successOrderTotal      = document.getElementById('successOrderTotal');
-  const successOrderPayment    = document.getElementById('successOrderPayment');
+  const orderSuccessModal = document.getElementById('orderSuccessModal');
+  const successOrderShortId = document.getElementById('successOrderShortId');
+  const successOrderTotal = document.getElementById('successOrderTotal');
+  const successOrderPayment = document.getElementById('successOrderPayment');
 
   // ─── State ────────────────────────────────────────────────────────────────
   let userAddresses = [];
@@ -206,7 +211,7 @@
 
     if (selectedAddressCard) {
       selectedAddrName && (selectedAddrName.textContent = addr.full_name);
-      
+
       const typeKey = (addr.address_type || 'HOME').toUpperCase();
       if (selectedAddrType) {
         selectedAddrType.textContent = typeKey;
@@ -261,7 +266,9 @@
 
       return `
         <div class="checkout-addr-card-item ${isSelected ? 'checkout-addr-card-item--selected' : ''}" data-addr-id="${addr.id}">
-          <input type="radio" name="modal_selected_addr" class="checkout-addr-radio" value="${addr.id}" ${isSelected ? 'checked' : ''} aria-label="Select address for ${addr.full_name}"/>
+          <label for="modal_addr_${addr.id}" class="checkout-addr-radio-wrap" aria-label="Select address for ${escapeHtml(addr.full_name)}">
+            <input type="radio" id="modal_addr_${addr.id}" name="modal_selected_addr" class="checkout-addr-radio" value="${addr.id}" ${isSelected ? 'checked' : ''} />
+          </label>
           <div class="checkout-addr-card-content">
             <div class="checkout-addr-card-header">
               <span class="checkout-addr-card-name">${escapeHtml(addr.full_name)}</span>
@@ -533,128 +540,183 @@
   // ═════════════════════════════════════════════════════════════════════════
 
   async function loadCheckoutItems() {
-    let items = [];
+    checkoutItemsSkeleton && checkoutItemsSkeleton.removeAttribute('hidden');
+    checkoutItemsList && checkoutItemsList.setAttribute('hidden', '');
+    checkoutPriceSkeleton && checkoutPriceSkeleton.removeAttribute('hidden');
+    checkoutPriceBreakdown && checkoutPriceBreakdown.setAttribute('hidden', '');
 
-    // 1. Priority A: Direct Buy Now item in localStorage
     try {
-      const buyNowRaw = localStorage.getItem('ks_checkout_item');
-      if (buyNowRaw) {
-        const item = JSON.parse(buyNowRaw);
-        if (item && (item.id || item.productId || item.slug)) {
-          items = [item];
-        }
-      }
-    } catch (e) { }
+      let items = [];
 
-    // 2. Priority B: URL Parameter (?productId=... or ?slug=...)
-    if (items.length === 0) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const paramId = urlParams.get('productId') || urlParams.get('slug') || urlParams.get('id');
-      if (paramId) {
-        items = [{ id: paramId, quantity: parseInt(urlParams.get('qty'), 10) || 1 }];
-      }
-    }
-
-    // 3. Priority C: Cart in localStorage
-    if (items.length === 0) {
+      // 1. Priority A: Direct Buy Now item in localStorage
       try {
-        const cartRaw = localStorage.getItem('ks_cart');
-        if (cartRaw) {
-          const parsed = JSON.parse(cartRaw);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            items = parsed;
+        const buyNowRaw = localStorage.getItem('ks_checkout_item');
+        if (buyNowRaw) {
+          const item = JSON.parse(buyNowRaw);
+          if (item && (item.id || item.productId || item.slug)) {
+            items = [item];
           }
         }
       } catch (e) { }
-    }
 
-    // 4. Default demonstration fallback if empty
-    if (items.length === 0) {
-      try {
-        const trendingRes = await fetch('/api/products?limit=1');
-        if (trendingRes.ok) {
-          const trendingJson = await trendingRes.json();
-          const firstProd = (trendingJson.data && trendingJson.data[0]) || null;
-          if (firstProd) {
-            items = [{
-              id: firstProd.slug || firstProd.id,
-              dbId: firstProd.id,
-              name: firstProd.name,
-              brand: firstProd.brand,
-              price: Number(firstProd.price),
-              originalPrice: Math.round(Number(firstProd.price) * 1.15),
-              imageUrl: firstProd.productImages?.[0]?.imageUrl || '',
-              quantity: 1,
-              variantDescription: 'Standard Official Warranty',
-            }];
-          }
+      // 2. Priority B: URL Parameter (?productId=... or ?slug=...)
+      if (items.length === 0) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const paramId = urlParams.get('productId') || urlParams.get('slug') || urlParams.get('id');
+        if (paramId) {
+          items = [{ id: paramId, quantity: parseInt(urlParams.get('qty'), 10) || 1 }];
         }
-      } catch (e) { }
-    }
+      }
 
-    // Hydrate item details from backend product API
-    checkoutItems = [];
-    for (const rawItem of items) {
-      const prodId = rawItem.productId || rawItem.dbId || rawItem.id || rawItem.slug;
-      if (!prodId) continue;
-
-      try {
-        const res = await fetch(`/api/products/${encodeURIComponent(prodId)}`);
-        if (res.ok) {
-          const pJson = await res.json();
-          if (pJson.success && pJson.data) {
-            const p = pJson.data;
-            const primaryImg = p.productImages?.find(img => img.isPrimary)?.imageUrl
-              || p.productImages?.[0]?.imageUrl
-              || rawItem.imageUrl
-              || '';
-            let price = Number(rawItem.price) || Number(p.price) || 0;
-            if (rawItem.variantId && p.variants && p.variants.length > 0) {
-              const matchedVar = p.variants.find(v => v.id === rawItem.variantId);
-              if (matchedVar && matchedVar.priceOverride) {
-                price = Number(matchedVar.priceOverride);
-              }
+      // 3. Priority C: Cart in localStorage
+      if (items.length === 0) {
+        try {
+          const cartRaw = localStorage.getItem('ks_cart');
+          if (cartRaw) {
+            const parsed = JSON.parse(cartRaw);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              items = parsed;
             }
-            const originalPrice = rawItem.originalPrice || Math.round(price * 1.15);
-
-            checkoutItems.push({
-              productId: p.id,
-              dbId: p.id,
-              slug: p.slug,
-              name: p.name,
-              brand: p.brand || 'Enterprise Store',
-              price,
-              originalPrice,
-              imageUrl: primaryImg,
-              quantity: Math.max(1, parseInt(rawItem.quantity, 10) || 1),
-              variantDescription: rawItem.variantDescription || '100% Genuine · 1 Year Warranty',
-              variantId: rawItem.variantId || null,
-            });
-            continue;
           }
-        }
-      } catch (err) {
-        console.warn('Could not fetch product detail for checkout:', err);
+        } catch (e) { }
       }
 
-      // Fallback using rawItem
-      checkoutItems.push({
-        productId: rawItem.productId || rawItem.dbId || rawItem.id,
-        dbId: rawItem.dbId || rawItem.id,
-        slug: rawItem.slug || rawItem.id,
-        name: rawItem.name || 'Electronics Product',
-        brand: rawItem.brand || 'Kishor Enterprises',
-        price: Number(rawItem.price || rawItem.salePrice || 999),
-        originalPrice: Number(rawItem.originalPrice || rawItem.price || 1299),
-        imageUrl: rawItem.imageUrl || '',
-        quantity: Math.max(1, parseInt(rawItem.quantity, 10) || 1),
-        variantDescription: rawItem.variantDescription || 'Official Warranty Included',
-        variantId: rawItem.variantId || null,
-      });
-    }
+      // 4. Default demonstration fallback if empty
+      if (items.length === 0) {
+        try {
+          const trendingRes = await fetch('/api/products?limit=1');
+          if (trendingRes.ok) {
+            const trendingJson = await trendingRes.json();
+            const firstProd = (trendingJson.data && trendingJson.data[0]) || null;
+            if (firstProd) {
+              items = [{
+                id: firstProd.slug || firstProd.id,
+                dbId: firstProd.id,
+                name: firstProd.name,
+                brand: firstProd.brand,
+                price: Number(firstProd.price),
+                originalPrice: Math.round(Number(firstProd.price) * 1.15),
+                imageUrl: firstProd.productImages?.[0]?.imageUrl || '',
+                quantity: 1,
+                variantDescription: 'Standard Official Warranty',
+              }];
+            }
+          }
+        } catch (e) { }
+      }
 
-    renderCheckoutItems();
-    recalculateTotals();
+      // Hydrate item details from backend product API
+      checkoutItems = [];
+      for (const rawItem of items) {
+        const prodId = rawItem.productId || rawItem.dbId || rawItem.id || rawItem.slug;
+        if (!prodId) continue;
+
+        try {
+          const res = await fetch(`/api/products/${encodeURIComponent(prodId)}`);
+          if (res.ok) {
+            const pJson = await res.json();
+            if (pJson.success && pJson.data) {
+              const p = pJson.data;
+              const primaryImg = p.productImages?.find(img => img.isPrimary)?.imageUrl
+                || p.productImages?.[0]?.imageUrl
+                || rawItem.imageUrl
+                || '';
+              let basePrice = Number(p.price) || 0;
+              if (rawItem.variantId && p.variants && p.variants.length > 0) {
+                const matchedVar = p.variants.find(v => v.id === rawItem.variantId);
+                if (matchedVar && matchedVar.priceOverride) {
+                  basePrice = Number(matchedVar.priceOverride);
+                }
+              }
+              const offerVal = (p.offer !== undefined && p.offer !== null && !isNaN(parseFloat(p.offer))) ? parseFloat(p.offer) : 0;
+              let price = offerVal > 0 ? Math.round(basePrice * (1 - offerVal / 100)) : (Number(rawItem.price) || basePrice);
+              const originalPrice = rawItem.originalPrice || basePrice || Math.round(price * 1.15);
+
+              // Extract gifts from product or rawItem
+              let itemGifts = [];
+              if (Array.isArray(p.giftsGiven) && p.giftsGiven.length > 0) {
+                itemGifts = p.giftsGiven.map(g => {
+                  const isCustom = !g.giftProductId;
+                  const imgUrl = isCustom
+                    ? (g.customGiftImage || '')
+                    : (g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || '');
+                  return {
+                    id: g.giftProduct?.id || g.id,
+                    name: g.giftProduct?.name || g.customGiftName || 'Free Gift',
+                    brand: g.giftProduct?.brand || null,
+                    price: Number(g.giftProduct?.price) || 0,
+                    imageUrl: imgUrl,
+                    isCustom,
+                  };
+                });
+              } else if (Array.isArray(rawItem.gifts) && rawItem.gifts.length > 0) {
+                itemGifts = rawItem.gifts.map(g => ({
+                  id: g.id || `gift_${Math.random()}`,
+                  name: g.name || g.customGiftName || 'Free Gift',
+                  brand: g.brand || null,
+                  price: Number(g.price) || 0,
+                  imageUrl: g.imageUrl || g.customGiftImage || '',
+                  isCustom: Boolean(g.isCustom),
+                }));
+              }
+
+              checkoutItems.push({
+                productId: p.id,
+                dbId: p.id,
+                slug: p.slug,
+                name: p.name,
+                brand: p.brand || 'Enterprise Store',
+                price,
+                originalPrice,
+                imageUrl: primaryImg,
+                quantity: Math.max(1, parseInt(rawItem.quantity, 10) || 1),
+                variantDescription: rawItem.variantDescription || '100% Genuine · 1 Year Warranty',
+                variantId: rawItem.variantId || null,
+                gifts: itemGifts,
+              });
+              continue;
+            }
+          }
+        } catch (err) {
+          console.warn('Could not fetch product detail for checkout:', err);
+        }
+
+        // Fallback using rawItem
+        const fallbackGifts = Array.isArray(rawItem.gifts) ? rawItem.gifts.map(g => ({
+          id: g.id || `gift_${Math.random()}`,
+          name: g.name || g.customGiftName || 'Free Gift',
+          brand: g.brand || null,
+          price: Number(g.price) || 0,
+          imageUrl: g.imageUrl || g.customGiftImage || '',
+          isCustom: Boolean(g.isCustom),
+        })) : [];
+
+        checkoutItems.push({
+          productId: rawItem.productId || rawItem.dbId || rawItem.id,
+          dbId: rawItem.dbId || rawItem.id,
+          slug: rawItem.slug || rawItem.id,
+          name: rawItem.name || 'Electronics Product',
+          brand: rawItem.brand || 'Kishor Enterprises',
+          price: Number(rawItem.price || rawItem.salePrice || 999),
+          originalPrice: Number(rawItem.originalPrice || rawItem.price || 1299),
+          imageUrl: rawItem.imageUrl || '',
+          quantity: Math.max(1, parseInt(rawItem.quantity, 10) || 1),
+          variantDescription: rawItem.variantDescription || 'Official Warranty Included',
+          variantId: rawItem.variantId || null,
+          gifts: fallbackGifts,
+        });
+      }
+
+      renderCheckoutItems();
+      recalculateTotals();
+    } catch (err) {
+      console.error('Error loading checkout items:', err);
+    } finally {
+      checkoutItemsSkeleton && checkoutItemsSkeleton.setAttribute('hidden', '');
+      checkoutItemsList && checkoutItemsList.removeAttribute('hidden');
+      checkoutPriceSkeleton && checkoutPriceSkeleton.setAttribute('hidden', '');
+      checkoutPriceBreakdown && checkoutPriceBreakdown.removeAttribute('hidden');
+    }
   }
 
   function updatePlaceOrderBtnState() {
@@ -700,42 +762,93 @@
         ? Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)
         : 0;
 
+      const hasGifts = Array.isArray(item.gifts) && item.gifts.length > 0;
+      const giftsHtml = hasGifts ? `
+        <div class="checkout-item-gifts-box">
+          <div class="checkout-item-gifts-header">
+            <div class="checkout-item-gifts-title-wrap">
+              <span class="checkout-item-gifts-icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                  <path fill-rule="evenodd" d="M5 5a3 3 0 015-2.236A3 3 0 0115 5h1a2 2 0 012 2v1a2 2 0 01-2 2v7a2 2 0 01-2 2H6a2 2 0 01-2-2V10a2 2 0 01-2-2V7a2 2 0 012-2h1zm3.05-1.164A1 1 0 007 5h2.86a2.98 2.98 0 01-1.81-1.164zM11.14 5H13a1 1 0 00-.86-1.164A2.98 2.98 0 0011.14 5zM4 7v2h12V7H4zm2 4v6h8v-6H6z" clip-rule="evenodd"/>
+                </svg>
+              </span>
+              <span class="checkout-item-gifts-title">Shopkeeper Offer: Free Gift${item.gifts.length > 1 ? 's' : ''} Included</span>
+            </div>
+            <span class="checkout-item-gifts-count-badge">${item.gifts.length} Free Item${item.gifts.length > 1 ? 's' : ''}</span>
+          </div>
+
+          <div class="checkout-item-gifts-list">
+            ${item.gifts.map(gift => `
+              <div class="checkout-gift-row">
+                <div class="checkout-gift-thumb">
+                  ${gift.imageUrl
+                    ? `<img src="${gift.imageUrl}" alt="${escapeHtml(gift.name)}" loading="lazy" />`
+                    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="20" height="20">
+                         <path d="M20 12v10H4V12"/>
+                         <path d="M2 7h20v5H2z"/>
+                         <path d="M12 22V7"/>
+                         <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+                         <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                       </svg>`
+                  }
+                </div>
+                <div class="checkout-gift-info">
+                  <div class="checkout-gift-name-wrap">
+                    <span class="checkout-gift-pill">FREE GIFT</span>
+                    <span class="checkout-gift-name" title="${escapeHtml(gift.name)}">${escapeHtml(gift.name)}</span>
+                    ${item.quantity > 1 ? `<span class="checkout-gift-qty-tag">x${item.quantity}</span>` : ''}
+                  </div>
+                  <div class="checkout-gift-price-wrap">
+                    ${gift.price > 0 ? `<span class="checkout-gift-mrp">${fmt(gift.price * item.quantity)}</span>` : ''}
+                    <span class="checkout-gift-free-text">FREE</span>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : '';
+
       return `
         <div class="checkout-item-card" data-idx="${idx}">
-          <div class="checkout-item-thumb">
-            ${item.imageUrl
-              ? `<img src="${item.imageUrl}" alt="${escapeHtml(item.name)}" />`
-              : `<svg viewBox="0 0 60 60" fill="none" width="40" height="40"><rect width="60" height="60" rx="8" fill="#e8edf5"/><path d="M20 20h20v20H20z" fill="#1e3d8f20"/></svg>`
-            }
-          </div>
-
-          <div class="checkout-item-info">
-            <span class="checkout-item-brand">${escapeHtml(item.brand)}</span>
-            <h3 class="checkout-item-title">${escapeHtml(item.name)}</h3>
-            <span class="checkout-item-variant">${escapeHtml(item.variantDescription)}</span>
-
-            <div class="checkout-item-pricing">
-              <span class="checkout-item-price-current">${fmt(item.price * item.quantity)}</span>
-              ${item.originalPrice > item.price ? `<span class="checkout-item-price-original">${fmt(item.originalPrice * item.quantity)}</span>` : ''}
-              ${discountPct > 0 ? `<span class="checkout-item-discount-badge">${discountPct}% off</span>` : ''}
+          <div class="checkout-item-main">
+            <div class="checkout-item-thumb">
+              ${item.imageUrl
+                ? `<img src="${item.imageUrl}" alt="${escapeHtml(item.name)}" />`
+                : `<svg viewBox="0 0 60 60" fill="none" width="40" height="40"><rect width="60" height="60" rx="8" fill="#e8edf5"/><path d="M20 20h20v20H20z" fill="#1e3d8f20"/></svg>`
+              }
             </div>
 
-            <div class="checkout-item-bottom">
-              <div class="checkout-qty-control">
-                <button type="button" class="checkout-qty-btn" data-action="dec" data-idx="${idx}" aria-label="Decrease quantity" ${item.quantity <= 1 ? 'disabled' : ''}>−</button>
-                <span class="checkout-qty-val">${item.quantity}</span>
-                <button type="button" class="checkout-qty-btn" data-action="inc" data-idx="${idx}" aria-label="Increase quantity">+</button>
+            <div class="checkout-item-info">
+              <span class="checkout-item-brand">${escapeHtml(item.brand)}</span>
+              <h3 class="checkout-item-title">${escapeHtml(item.name)}</h3>
+              <span class="checkout-item-variant">${escapeHtml(item.variantDescription)}</span>
+
+              <div class="checkout-item-pricing">
+                <span class="checkout-item-price-current">${fmt(item.price)}</span>
+                ${item.originalPrice > item.price ? `<span class="checkout-item-price-original">${fmt(item.originalPrice)}</span>` : ''}
+                ${discountPct > 0 ? `<span class="checkout-item-discount-badge">${discountPct}% off</span>` : ''}
               </div>
 
-              <span class="checkout-item-delivery-est">
-                ⚡ Express Delivery: 3-5 Days
-              </span>
+              <div class="checkout-item-bottom">
+                <div class="checkout-qty-control">
+                  <button type="button" class="checkout-qty-btn" data-action="dec" data-idx="${idx}" aria-label="Decrease quantity" ${item.quantity <= 1 ? 'disabled' : ''}>−</button>
+                  <span class="checkout-qty-val">${item.quantity}</span>
+                  <button type="button" class="checkout-qty-btn" data-action="inc" data-idx="${idx}" aria-label="Increase quantity">+</button>
+                </div>
 
-              <button type="button" class="checkout-item-remove-btn" data-action="remove" data-idx="${idx}">
-                REMOVE
-              </button>
+                <span class="checkout-item-delivery-est">
+                  ⚡ Express Delivery: 3-5 Days
+                </span>
+
+                <button type="button" class="checkout-item-remove-btn" data-action="remove" data-idx="${idx}">
+                  REMOVE
+                </button>
+              </div>
             </div>
           </div>
+
+          ${giftsHtml}
         </div>`;
     }).join('');
 
@@ -775,30 +888,96 @@
   }
 
   function recalculateTotals() {
-    let totalMRP = 0;
+    let productsMRP = 0;
     let totalSale = 0;
+    let totalItemsQty = 0;
+
+    // Collect all gifts across all items
+    const allGifts = [];
 
     checkoutItems.forEach(it => {
-      totalMRP += (it.originalPrice || it.price) * it.quantity;
-      totalSale += it.price * it.quantity;
+      const qty = it.quantity || 1;
+      totalItemsQty += qty;
+      productsMRP += (it.originalPrice || it.price) * qty;
+      totalSale += it.price * qty;
+
+      if (Array.isArray(it.gifts)) {
+        it.gifts.forEach(g => {
+          const unitPrice = Number(g.price) || 0;
+          allGifts.push({
+            name: g.name,
+            unitPrice,
+            quantity: qty,
+            totalPrice: unitPrice * qty,
+            isCustom: Boolean(g.isCustom),
+          });
+        });
+      }
     });
 
-    const discount = Math.max(0, totalMRP - totalSale);
+    const giftsTotalMRP = allGifts.reduce((sum, g) => sum + g.totalPrice, 0);
+    const grossPrice = productsMRP + giftsTotalMRP;
+    const productDiscount = Math.max(0, productsMRP - totalSale);
     const deliveryFee = 0; // Free delivery
     const totalAmount = totalSale + deliveryFee;
+    const totalSavings = productDiscount + giftsTotalMRP;
 
-    summarySubtotal && (summarySubtotal.textContent = fmt(totalMRP));
-    summaryTotalAmount && (summaryTotalAmount.textContent = fmt(totalAmount));
+    // 1. Update Subtotal Label and Value
+    if (summarySubtotalLabel) {
+      const itemsLabel = `${totalItemsQty} item${totalItemsQty > 1 ? 's' : ''}`;
+      const giftsCountLabel = allGifts.length > 0
+        ? ` + ${allGifts.length} free gift${allGifts.length > 1 ? 's' : ''}`
+        : '';
+      summarySubtotalLabel.innerHTML = `Price (${itemsLabel}${giftsCountLabel})`;
+    } else if (summaryItemCount) {
+      summaryItemCount.textContent = totalItemsQty;
+    }
 
-    if (discount > 0) {
-      summaryDiscount && (summaryDiscount.textContent = `-${fmt(discount)}`);
+    summarySubtotal && (summarySubtotal.textContent = fmt(grossPrice));
+
+    // 2. Update Product Discount Row
+    if (productDiscount > 0) {
+      summaryDiscount && (summaryDiscount.textContent = `-${fmt(productDiscount)}`);
       summaryDiscountRow && summaryDiscountRow.removeAttribute('hidden');
-      if (savingsBanner && savingsAmountText) {
-        savingsAmountText.textContent = fmt(discount);
-        savingsBanner.removeAttribute('hidden');
-      }
     } else {
       summaryDiscountRow && summaryDiscountRow.setAttribute('hidden', '');
+    }
+
+    // 3. Render Gifts Breakdown rows (gifts one by one with -sign means FREE)
+    if (summaryGiftsBreakdown) {
+      if (allGifts.length > 0) {
+        summaryGiftsBreakdown.innerHTML = allGifts.map(g => {
+          const qtyText = g.quantity > 1 ? ` (x${g.quantity})` : '';
+          const valHtml = g.totalPrice > 0
+            ? `<span class="checkout-price-original">${fmt(g.totalPrice)}</span> <span class="checkout-text-success font-semibold">-${fmt(g.totalPrice)}</span>`
+            : `<span class="checkout-text-success font-semibold">-₹0 (FREE)</span>`;
+
+          return `
+            <div class="checkout-price-row checkout-price-row--gift">
+              <dt class="checkout-price-row__label">
+                <span class="checkout-gift-badge-sm">🎁 Free Gift</span>
+                <span class="checkout-price-gift-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}${qtyText}</span>
+              </dt>
+              <dd class="checkout-price-row__val">
+                ${valHtml}
+              </dd>
+            </div>`;
+        }).join('');
+        summaryGiftsBreakdown.removeAttribute('hidden');
+      } else {
+        summaryGiftsBreakdown.innerHTML = '';
+        summaryGiftsBreakdown.setAttribute('hidden', '');
+      }
+    }
+
+    // 4. Update Final Total Amount
+    summaryTotalAmount && (summaryTotalAmount.textContent = fmt(totalAmount));
+
+    // 5. Update Savings Banner
+    if (totalSavings > 0) {
+      if (savingsAmountText) savingsAmountText.textContent = fmt(totalSavings);
+      savingsBanner && savingsBanner.removeAttribute('hidden');
+    } else {
       savingsBanner && savingsBanner.setAttribute('hidden', '');
     }
   }

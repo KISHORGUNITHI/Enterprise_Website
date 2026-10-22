@@ -443,14 +443,21 @@
             badgeType:     isAvailable ? (SLUG === 'trending' ? 'accent' : 'success') : 'primary',
             color:         CATEGORY_COLORS[slug] || '#1e3d8f',
             imageUrl:      primaryImg,
-            gifts: (p.giftsGiven || []).map(g => ({
-              id: g.giftProduct?.id,
-              name: g.giftProduct?.name,
-              brand: g.giftProduct?.brand,
-              price: parseFloat(g.giftProduct?.price) || 0,
-              slug: g.giftProduct?.slug,
-              imageUrl: g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || ''
-            })),
+            gifts: (p.giftsGiven || []).map(g => {
+              const isCustom = !g.giftProductId;
+              const imgUrl = isCustom
+                ? (g.customGiftImage || '')
+                : (g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || '');
+              return {
+                id: g.giftProduct?.id || g.id,
+                name: g.giftProduct?.name || g.customGiftName || 'Free Gift',
+                brand: g.giftProduct?.brand || null,
+                price: parseFloat(g.giftProduct?.price) || 0,
+                slug: g.giftProduct?.slug || null,
+                imageUrl: imgUrl,
+                isCustom
+              };
+            }),
           };
         });
 

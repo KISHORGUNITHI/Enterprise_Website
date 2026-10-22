@@ -1,7 +1,8 @@
 import prisma from '../../../config/prisma.js';
 import crypto from 'crypto';
 
-let isTableEnsured = true;
+let isTableEnsured = false;
+let tableEnsuredPromise = null;
 
 export class CartRepository {
   /**
@@ -9,22 +10,30 @@ export class CartRepository {
    */
   async ensureTable() {
     if (isTableEnsured) return;
-    try {
-      await prisma.$executeRawUnsafe(`
-        CREATE TABLE IF NOT EXISTS "CartItem" (
-          "id" TEXT PRIMARY KEY,
-          "userId" TEXT NOT NULL REFERENCES "User"("id") ON DELETE CASCADE,
-          "productId" TEXT NOT NULL REFERENCES "Product"("id") ON DELETE CASCADE,
-          "variantId" TEXT REFERENCES "ProductVariant"("id") ON DELETE CASCADE,
-          "quantity" INTEGER NOT NULL DEFAULT 1,
-          "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )
-      `);
-      isTableEnsured = true;
-    } catch (err) {
-      console.error('CartRepository ensureTable warning:', err.message);
-    }
+    if (tableEnsuredPromise) return tableEnsuredPromise;
+
+    tableEnsuredPromise = (async () => {
+      try {
+        await prisma.$executeRawUnsafe(`
+          CREATE TABLE IF NOT EXISTS "CartItem" (
+            "id" TEXT PRIMARY KEY,
+            "userId" TEXT NOT NULL REFERENCES "User"("id") ON DELETE CASCADE,
+            "productId" TEXT NOT NULL REFERENCES "Product"("id") ON DELETE CASCADE,
+            "variantId" TEXT REFERENCES "ProductVariant"("id") ON DELETE CASCADE,
+            "quantity" INTEGER NOT NULL DEFAULT 1,
+            "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+          )
+        `);
+        isTableEnsured = true;
+      } catch (err) {
+        console.error('CartRepository ensureTable warning:', err.message);
+      } finally {
+        tableEnsuredPromise = null;
+      }
+    })();
+
+    return tableEnsuredPromise;
   }
 
   /**
@@ -184,6 +193,15 @@ export class CartRepository {
             },
           },
         },
+        giftsGiven: {
+          include: {
+            giftProduct: {
+              include: {
+                productImages: true,
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -204,6 +222,15 @@ export class CartRepository {
             attributeValues: {
               include: {
                 attribute: true,
+              },
+            },
+          },
+        },
+        giftsGiven: {
+          include: {
+            giftProduct: {
+              include: {
+                productImages: true,
               },
             },
           },
