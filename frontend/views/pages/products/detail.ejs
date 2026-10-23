@@ -53,12 +53,26 @@
           <div class="pdp-gallery">
 
             <div class="pdp-gallery__main-wrap" id="pdpMainWrap">
-              <span class="pdp-gallery__badge" id="pdpBadge">Sale</span>
-              <!-- JS injects SVG placeholder here -->
-              <div class="pdp-gallery__main-img" id="pdpMainImg"></div>
+              <span class="pdp-gallery__badge pdp-skeleton" id="pdpBadge"></span>
+              <!-- JS injects SVG placeholder or actual image here -->
+              <div class="pdp-gallery__main-img" id="pdpMainImg">
+                <div class="pdp-skeleton pdp-skeleton--gallery-main">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(148, 163, 184, 0.45)"
+                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
-            <div class="pdp-gallery__thumbs" id="pdpThumbs"></div>
+            <div class="pdp-gallery__thumbs" id="pdpThumbs">
+              <div class="pdp-skeleton pdp-skeleton--thumb"></div>
+              <div class="pdp-skeleton pdp-skeleton--thumb"></div>
+              <div class="pdp-skeleton pdp-skeleton--thumb"></div>
+              <div class="pdp-skeleton pdp-skeleton--thumb"></div>
+            </div>
 
           </div>
 
@@ -66,21 +80,26 @@
           <div class="pdp-info">
 
             <!-- Brand -->
-            <span class="pdp-info__brand" id="pdpBrand">Brand</span>
+            <span class="pdp-info__brand" id="pdpBrand"><span class="pdp-skeleton pdp-skeleton--brand"></span></span>
 
             <!-- Title + tagline -->
             <div>
-              <h1 class="pdp-info__title" id="pdpTitle">Loading…</h1>
-              <p class="pdp-info__tagline" id="pdpTagline"></p>
+              <h1 class="pdp-info__title" id="pdpTitle"><span class="pdp-skeleton--title-wrap"><span
+                    class="pdp-skeleton pdp-skeleton--title-1"></span><span
+                    class="pdp-skeleton pdp-skeleton--title-2"></span></span></h1>
+              <p class="pdp-info__tagline" id="pdpTagline"><span class="pdp-skeleton pdp-skeleton--tagline"></span></p>
             </div>
 
             <!-- Rating -->
-            <div class="pdp-info__rating" id="pdpRating"></div>
+            <div class="pdp-info__rating" id="pdpRating">
+              <div class="pdp-skeleton pdp-skeleton--rating"></div>
+            </div>
 
             <!-- Price -->
             <div class="pdp-info__price-block">
               <div class="pdp-info__price-row">
-                <span class="pdp-info__price-sale" id="pdpPriceSale">—</span>
+                <span class="pdp-info__price-sale" id="pdpPriceSale"><span
+                    class="pdp-skeleton pdp-skeleton--price"></span></span>
                 <span class="pdp-info__price-original" id="pdpPriceOrig"></span>
                 <span class="pdp-info__price-discount" id="pdpPriceDiscount"></span>
               </div>
@@ -96,17 +115,38 @@
             <!-- Color Selector -->
             <div class="pdp-colors reveal">
               <p class="pdp-colors__label">
-                Color: <span id="pdpColorLabel">—</span>
+                Color: <span id="pdpColorLabel"><span class="pdp-skeleton pdp-skeleton--color-name"></span></span>
               </p>
-              <div class="pdp-colors__options" id="pdpColors"></div>
+              <div class="pdp-colors__options" id="pdpColors">
+                <div class="pdp-skeleton pdp-skeleton--color-circle"></div>
+                <div class="pdp-skeleton pdp-skeleton--color-circle"></div>
+                <div class="pdp-skeleton pdp-skeleton--color-circle"></div>
+              </div>
             </div>
 
             <!-- Variant Selectors -->
-            <div class="pdp-variants reveal" id="pdpVariants"></div>
+            <div class="pdp-variants reveal" id="pdpVariants">
+              <div class="pdp-variant-group">
+                <div class="pdp-skeleton pdp-skeleton--label" style="margin-bottom: 8px;"></div>
+                <div class="pdp-variant-group__options">
+                  <div class="pdp-skeleton pdp-skeleton--var-pill"></div>
+                  <div class="pdp-skeleton pdp-skeleton--var-pill"></div>
+                  <div class="pdp-skeleton pdp-skeleton--var-pill"></div>
+                </div>
+              </div>
+            </div>
 
             <!-- Delivery Info -->
-            <div class="pdp-delivery reveal" id="pdpDelivery"></div>
-
+            <div class="pdp-delivery reveal" id="pdpDelivery">
+              <div class="pdp-delivery__row">
+                <div class="pdp-skeleton pdp-skeleton--delivery-icon"></div>
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+                  <div class="pdp-skeleton pdp-skeleton--line" style="width: 38%; height: 16px;"></div>
+                  <div class="pdp-skeleton pdp-skeleton--line" style="width: 62%; height: 13px;"></div>
+                  <div class="pdp-skeleton pdp-skeleton--line" style="width: 48%; height: 12px;"></div>
+                </div>
+              </div>
+            </div>
             <!-- ── Purchase Action Controls (In-line on mobile between Specs & Reviews; Fixed bottom bar on desktop) ── -->
             <div class="pdp-buy-bar" id="pdpBuyBar" role="region" aria-label="Purchase actions">
               <div class="pdp-buy-bar__inner">
@@ -124,7 +164,8 @@
                 <div class="pdp-buy-bar__buy-row">
                   <button class="pdp-buy-bar__buy" data-action="buy-now" aria-label="Buy Now">
                     <span class="pdp-buy-bar__buy-label">Buy Now</span>
-                    <span class="pdp-buy-bar__buy-price" id="pdpBarPrice">—</span>
+                    <span class="pdp-buy-bar__buy-price" id="pdpBarPrice"><span
+                        class="pdp-skeleton pdp-skeleton--price-xs"></span></span>
                   </button>
                 </div>
 
@@ -134,7 +175,24 @@
             <!-- Highlights -->
             <div class="pdp-highlights reveal">
               <p class="pdp-section__title">Highlights</p>
-              <ul class="pdp-highlights__list" id="pdpHighlights"></ul>
+              <ul class="pdp-highlights__list" id="pdpHighlights">
+                <li class="pdp-highlights__item">
+                  <span class="pdp-skeleton pdp-skeleton--hl-bullet"></span>
+                  <span class="pdp-skeleton pdp-skeleton--line" style="width: 82%; height: 14px;"></span>
+                </li>
+                <li class="pdp-highlights__item">
+                  <span class="pdp-skeleton pdp-skeleton--hl-bullet"></span>
+                  <span class="pdp-skeleton pdp-skeleton--line" style="width: 68%; height: 14px;"></span>
+                </li>
+                <li class="pdp-highlights__item">
+                  <span class="pdp-skeleton pdp-skeleton--hl-bullet"></span>
+                  <span class="pdp-skeleton pdp-skeleton--line" style="width: 76%; height: 14px;"></span>
+                </li>
+                <li class="pdp-highlights__item">
+                  <span class="pdp-skeleton pdp-skeleton--hl-bullet"></span>
+                  <span class="pdp-skeleton pdp-skeleton--line" style="width: 62%; height: 14px;"></span>
+                </li>
+              </ul>
             </div>
 
           </div>
@@ -155,7 +213,12 @@
           <!-- Description -->
           <div class="pdp-description reveal" style="margin-top:var(--space-6);">
             <p class="pdp-section__title">Description</p>
-            <div class="pdp-description__body pdp-description__body--collapsed" id="pdpDescBody"></div>
+            <div class="pdp-description__body pdp-description__body--collapsed" id="pdpDescBody">
+              <div class="pdp-skeleton pdp-skeleton--line" style="width: 100%; height: 14px; margin-bottom: 8px;"></div>
+              <div class="pdp-skeleton pdp-skeleton--line" style="width: 94%; height: 14px; margin-bottom: 8px;"></div>
+              <div class="pdp-skeleton pdp-skeleton--line" style="width: 88%; height: 14px; margin-bottom: 8px;"></div>
+              <div class="pdp-skeleton pdp-skeleton--line" style="width: 58%; height: 14px;"></div>
+            </div>
             <button class="pdp-description__toggle" id="pdpDescToggle" type="button" aria-expanded="false"
               style="display:none;">
               Read More
@@ -170,7 +233,46 @@
           <!-- Specifications -->
           <div class="pdp-specs reveal" id="pdpSpecsSection" style="margin-top:var(--space-6);">
             <p class="pdp-section__title">Specifications</p>
-            <div id="pdpSpecs"></div>
+            <div id="pdpSpecs">
+              <div class="pdp-specs__group">
+                <div class="pdp-skeleton pdp-skeleton--line" style="width: 110px; height: 16px; margin-bottom: 12px;">
+                </div>
+                <table class="pdp-specs__table">
+                  <tr class="pdp-specs__row">
+                    <td class="pdp-specs__key">
+                      <div class="pdp-skeleton pdp-skeleton--line" style="width: 80px; height: 14px;"></div>
+                    </td>
+                    <td class="pdp-specs__val">
+                      <div class="pdp-skeleton pdp-skeleton--line" style="width: 140px; height: 14px;"></div>
+                    </td>
+                  </tr>
+                  <tr class="pdp-specs__row">
+                    <td class="pdp-specs__key">
+                      <div class="pdp-skeleton pdp-skeleton--line" style="width: 90px; height: 14px;"></div>
+                    </td>
+                    <td class="pdp-specs__val">
+                      <div class="pdp-skeleton pdp-skeleton--line" style="width: 160px; height: 14px;"></div>
+                    </td>
+                  </tr>
+                  <tr class="pdp-specs__row">
+                    <td class="pdp-specs__key">
+                      <div class="pdp-skeleton pdp-skeleton--line" style="width: 70px; height: 14px;"></div>
+                    </td>
+                    <td class="pdp-specs__val">
+                      <div class="pdp-skeleton pdp-skeleton--line" style="width: 120px; height: 14px;"></div>
+                    </td>
+                  </tr>
+                  <tr class="pdp-specs__row">
+                    <td class="pdp-specs__key">
+                      <div class="pdp-skeleton pdp-skeleton--line" style="width: 85px; height: 14px;"></div>
+                    </td>
+                    <td class="pdp-specs__val">
+                      <div class="pdp-skeleton pdp-skeleton--line" style="width: 130px; height: 14px;"></div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
           </div>
 
           <!-- Rate & Review Section -->
@@ -212,7 +314,32 @@
             </div>
 
             <div class="pdp-reviews__list" id="pdpReviewsList">
-              <!-- JS will populate reviews here -->
+              <div class="pdp-review-card pdp-review-card--skeleton">
+                <div class="pdp-review-card__header">
+                  <div class="pdp-skeleton pdp-skeleton--review-avatar"></div>
+                  <div class="pdp-review-card__meta" style="flex:1;">
+                    <div class="pdp-skeleton pdp-skeleton--line"
+                      style="width: 110px; height: 14px; margin-bottom: 6px;"></div>
+                    <div class="pdp-skeleton pdp-skeleton--line" style="width: 85px; height: 12px;"></div>
+                  </div>
+                </div>
+                <div class="pdp-skeleton pdp-skeleton--line"
+                  style="width: 100%; height: 14px; margin-top: 10px; margin-bottom: 6px;"></div>
+                <div class="pdp-skeleton pdp-skeleton--line" style="width: 72%; height: 14px;"></div>
+              </div>
+              <div class="pdp-review-card pdp-review-card--skeleton">
+                <div class="pdp-review-card__header">
+                  <div class="pdp-skeleton pdp-skeleton--review-avatar"></div>
+                  <div class="pdp-review-card__meta" style="flex:1;">
+                    <div class="pdp-skeleton pdp-skeleton--line" style="width: 95px; height: 14px; margin-bottom: 6px;">
+                    </div>
+                    <div class="pdp-skeleton pdp-skeleton--line" style="width: 85px; height: 12px;"></div>
+                  </div>
+                </div>
+                <div class="pdp-skeleton pdp-skeleton--line"
+                  style="width: 96%; height: 14px; margin-top: 10px; margin-bottom: 6px;"></div>
+                <div class="pdp-skeleton pdp-skeleton--line" style="width: 65%; height: 14px;"></div>
+              </div>
             </div>
           </div>
 
@@ -234,12 +361,32 @@
               </div>
             </div>
             <div class="pdp-related__viewport" id="pdpRelViewport">
-              <div class="pdp-related__track" id="pdpRelTrack" role="list"></div>
+              <div class="pdp-related__track" id="pdpRelTrack" role="list">
+                <% for (let i=0; i < 4; i++) { %>
+                  <article class="plp-card product-card--skeleton" role="listitem" style="width:200px; flex-shrink:0;">
+                    <div class="plp-card__image-wrap">
+                      <div class="pdp-skeleton" style="width:100%; height:160px; border-radius:0;"></div>
+                    </div>
+                    <div class="plp-card__body" style="display:flex; flex-direction:column; gap:8px; padding:12px;">
+                      <div class="pdp-skeleton pdp-skeleton--line" style="width:40%; height:12px;"></div>
+                      <div class="pdp-skeleton pdp-skeleton--line" style="width:88%; height:14px;"></div>
+                      <div class="pdp-skeleton pdp-skeleton--line" style="width:64%; height:14px;"></div>
+                      <div class="pdp-skeleton pdp-skeleton--line" style="width:52%; height:20px; margin-top:4px;">
+                      </div>
+                    </div>
+                    <div class="plp-card__footer" style="padding: 0 12px 12px;">
+                      <div class="pdp-skeleton" style="width:100%; height:36px; border-radius:var(--radius-lg, 10px);">
+                      </div>
+                    </div>
+                  </article>
+                  <% } %>
+              </div>
             </div>
           </section>
 
         </div>
         <!-- end pdp-below-wrap -->
+
 
       </div>
       <!-- end pdp__container -->

@@ -228,6 +228,7 @@
     });
 
     if (pdpBadge) {
+      pdpBadge.classList.remove('pdp-skeleton');
       if (!isAvail) {
         pdpBadge.textContent = 'Out of Stock';
         pdpBadge.style.backgroundColor = 'var(--color-primary-700)';
@@ -376,6 +377,7 @@
 
     // Badge
     if (pdpBadge) {
+      pdpBadge.classList.remove('pdp-skeleton');
       if (!isAvailable) {
         pdpBadge.textContent = 'Out of Stock';
         pdpBadge.style.backgroundColor = 'var(--color-primary-700)';
@@ -761,6 +763,7 @@
 
         // Update badge
         if (pdpBadge) {
+          pdpBadge.classList.remove('pdp-skeleton');
           if (!isVariantAvailable) {
             pdpBadge.textContent = 'Out of Stock';
             pdpBadge.style.backgroundColor = 'var(--color-primary-700)';
@@ -1152,7 +1155,6 @@
   async function initProduct() {
     // 1. First attempt to fetch from backend database API (/api/products/:identifier)
     try {
-      if (titleEl) titleEl.textContent = 'Loading product details…';
       const res = await fetch(`/api/products/${encodeURIComponent(rawId)}`);
       if (res.ok) {
         const json = await res.json();
