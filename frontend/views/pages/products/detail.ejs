@@ -1,35 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title><%= title %></title>
-  <link rel="icon" type="image/svg+xml" href="/public/icons/favicon.svg"/>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    <%= title %>
+  </title>
+  <link rel="icon" type="image/svg+xml" href="/public/icons/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
 
   <!-- Foundation -->
-  <link rel="stylesheet" href="/assets/css/variables.css"/>
-  <link rel="stylesheet" href="/assets/css/base.css"/>
-  <link rel="stylesheet" href="/assets/css/utilities.css"/>
+  <link rel="stylesheet" href="/assets/css/variables.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/utilities.css" />
 
   <!-- Header (reused exactly — no category strip) -->
-  <link rel="stylesheet" href="/assets/css/home-header.css"/>
-  <link rel="stylesheet" href="/assets/css/category-header.css"/>
+  <link rel="stylesheet" href="/assets/css/home-header.css" />
+  <link rel="stylesheet" href="/assets/css/category-header.css" />
 
   <!-- PLP card styles (for related products) -->
-  <link rel="stylesheet" href="/assets/css/category-page.css"/>
+  <link rel="stylesheet" href="/assets/css/category-page.css" />
 
   <!-- PDP styles -->
-  <link rel="stylesheet" href="/assets/css/pdp.css"/>
+  <link rel="stylesheet" href="/assets/css/pdp.css" />
 
   <!-- Footer -->
-  <link rel="stylesheet" href="/assets/css/footer.css"/>
-  <link rel="stylesheet" href="/assets/css/home-footer.css"/>
+  <link rel="stylesheet" href="/assets/css/footer.css" />
+  <link rel="stylesheet" href="/assets/css/home-footer.css" />
 
   <!-- Responsive last -->
-  <link rel="stylesheet" href="/assets/css/responsive.css"/>
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
 </head>
 
 <body>
@@ -37,198 +41,221 @@
   <!-- ── Existing category header — reused exactly, NO strip ── -->
   <%- include('../../partials/category-header') %>
 
-  <main id="main-content" class="pdp pdp-below">
-    <div class="pdp__container">
+    <main id="main-content" class="pdp pdp-below">
+      <div class="pdp__container">
 
-      <!-- ══════════════════════════════════════════════════════
+        <!-- ══════════════════════════════════════════════════════
            MAIN: Two-column — Gallery (left) | Info (right)
       ══════════════════════════════════════════════════════ -->
-      <div class="pdp__main">
+        <div class="pdp__main">
 
-        <!-- ─── LEFT: Image Gallery ─── -->
-        <div class="pdp-gallery">
+          <!-- ─── LEFT: Image Gallery ─── -->
+          <div class="pdp-gallery">
 
-          <div class="pdp-gallery__main-wrap" id="pdpMainWrap">
-            <span class="pdp-gallery__badge" id="pdpBadge">Sale</span>
-            <!-- JS injects SVG placeholder here -->
-            <div class="pdp-gallery__main-img" id="pdpMainImg"></div>
-          </div>
-
-          <div class="pdp-gallery__thumbs" id="pdpThumbs"></div>
-
-        </div>
-
-        <!-- ─── RIGHT: Product Info ─── -->
-        <div class="pdp-info">
-
-          <!-- Brand -->
-          <span class="pdp-info__brand" id="pdpBrand">Brand</span>
-
-          <!-- Title + tagline -->
-          <div>
-            <h1 class="pdp-info__title" id="pdpTitle">Loading…</h1>
-            <p class="pdp-info__tagline" id="pdpTagline"></p>
-          </div>
-
-          <!-- Rating -->
-          <div class="pdp-info__rating" id="pdpRating"></div>
-
-          <!-- Price -->
-          <div class="pdp-info__price-block">
-            <div class="pdp-info__price-row">
-              <span class="pdp-info__price-sale" id="pdpPriceSale">—</span>
-              <span class="pdp-info__price-original" id="pdpPriceOrig"></span>
-              <span class="pdp-info__price-discount" id="pdpPriceDiscount"></span>
+            <div class="pdp-gallery__main-wrap" id="pdpMainWrap">
+              <span class="pdp-gallery__badge" id="pdpBadge">Sale</span>
+              <!-- JS injects SVG placeholder here -->
+              <div class="pdp-gallery__main-img" id="pdpMainImg"></div>
             </div>
-            <span class="pdp-info__price-save" id="pdpPriceSave"></span>
+
+            <div class="pdp-gallery__thumbs" id="pdpThumbs"></div>
+
           </div>
 
-          <!-- Free Gifts Included Banner -->
-          <div class="pdp-free-gift-card reveal" id="pdpFreeGiftsBanner" style="display: none; background: linear-gradient(135deg, #fdf4ff 0%, #fbcfe8 100%); border: 1.5px solid #f472b6; border-radius: var(--radius-lg, 12px); padding: 14px 16px; margin-bottom: var(--space-4); box-shadow: 0 4px 12px rgba(219, 39, 119, 0.08);">
-            <!-- Populated dynamically by pdp.js -->
+          <!-- ─── RIGHT: Product Info ─── -->
+          <div class="pdp-info">
+
+            <!-- Brand -->
+            <span class="pdp-info__brand" id="pdpBrand">Brand</span>
+
+            <!-- Title + tagline -->
+            <div>
+              <h1 class="pdp-info__title" id="pdpTitle">Loading…</h1>
+              <p class="pdp-info__tagline" id="pdpTagline"></p>
+            </div>
+
+            <!-- Rating -->
+            <div class="pdp-info__rating" id="pdpRating"></div>
+
+            <!-- Price -->
+            <div class="pdp-info__price-block">
+              <div class="pdp-info__price-row">
+                <span class="pdp-info__price-sale" id="pdpPriceSale">—</span>
+                <span class="pdp-info__price-original" id="pdpPriceOrig"></span>
+                <span class="pdp-info__price-discount" id="pdpPriceDiscount"></span>
+              </div>
+              <span class="pdp-info__price-save" id="pdpPriceSave"></span>
+            </div>
+
+            <!-- Free Gifts Included Banner -->
+            <div class="pdp-free-gift-card reveal" id="pdpFreeGiftsBanner"
+              style="display: none; background: linear-gradient(135deg, #fdf4ff 0%, #fbcfe8 100%); border: 1.5px solid #f472b6; border-radius: var(--radius-lg, 12px); padding: 14px 16px; margin-bottom: var(--space-4); box-shadow: 0 4px 12px rgba(219, 39, 119, 0.08);">
+              <!-- Populated dynamically by pdp.js -->
+            </div>
+
+            <!-- Color Selector -->
+            <div class="pdp-colors reveal">
+              <p class="pdp-colors__label">
+                Color: <span id="pdpColorLabel">—</span>
+              </p>
+              <div class="pdp-colors__options" id="pdpColors"></div>
+            </div>
+
+            <!-- Variant Selectors -->
+            <div class="pdp-variants reveal" id="pdpVariants"></div>
+
+            <!-- Delivery Info -->
+            <div class="pdp-delivery reveal" id="pdpDelivery"></div>
+
+            <!-- ── Purchase Action Controls (In-line on mobile between Specs & Reviews; Fixed bottom bar on desktop) ── -->
+            <div class="pdp-buy-bar" id="pdpBuyBar" role="region" aria-label="Purchase actions">
+              <div class="pdp-buy-bar__inner">
+
+                <button class="pdp-buy-bar__cart" data-action="add-cart" aria-label="Add to cart">
+                  <svg class="pdp-buy-bar__cart-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor"
+                    stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 2h2l2.5 10M8 15h10l3-8H6.5" />
+                    <circle cx="10" cy="19" r="1.5" fill="currentColor" stroke="none" />
+                    <circle cx="18" cy="19" r="1.5" fill="currentColor" stroke="none" />
+                  </svg>
+                  <span class="pdp-buy-bar__cart-label">Add to Cart</span>
+                </button>
+
+                <div class="pdp-buy-bar__buy-row">
+                  <button class="pdp-buy-bar__buy" data-action="buy-now" aria-label="Buy Now">
+                    <span class="pdp-buy-bar__buy-label">Buy Now</span>
+                    <span class="pdp-buy-bar__buy-price" id="pdpBarPrice">—</span>
+                  </button>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Highlights -->
+            <div class="pdp-highlights reveal">
+              <p class="pdp-section__title">Highlights</p>
+              <ul class="pdp-highlights__list" id="pdpHighlights"></ul>
+            </div>
+
           </div>
-
-          <!-- Color Selector -->
-          <div class="pdp-colors reveal">
-            <p class="pdp-colors__label">
-              Color: <span id="pdpColorLabel">—</span>
-            </p>
-            <div class="pdp-colors__options" id="pdpColors"></div>
-          </div>
-
-          <!-- Variant Selectors -->
-          <div class="pdp-variants reveal" id="pdpVariants"></div>
-
-          <!-- Delivery Info -->
-          <div class="pdp-delivery reveal" id="pdpDelivery"></div>
-
-          <!-- Highlights -->
-          <div class="pdp-highlights reveal">
-            <p class="pdp-section__title">Highlights</p>
-            <ul class="pdp-highlights__list" id="pdpHighlights"></ul>
-          </div>
+          <!-- end pdp-info -->
 
         </div>
-        <!-- end pdp-info -->
-
-      </div>
-      <!-- end pdp__main -->
+        <!-- end pdp__main -->
 
 
-      <!-- ══════════════════════════════════════════════════════
+        <!-- ══════════════════════════════════════════════════════
            BELOW FOLD: Description, Specs, Related + Sticky Bar
            The bar is position:sticky inside this wrapper.
            It sticks to the bottom while scrolling through this
            section and naturally stops at the end — zero JS needed.
       ══════════════════════════════════════════════════════ -->
-      <div class="pdp-below-wrap">
+        <div class="pdp-below-wrap">
 
-        <!-- Description -->
-        <div class="pdp-description reveal" style="margin-top:var(--space-6);">
-          <p class="pdp-section__title">Description</p>
-          <div class="pdp-description__body pdp-description__body--collapsed" id="pdpDescBody"></div>
-          <button class="pdp-description__toggle" id="pdpDescToggle" type="button" aria-expanded="false" style="display:none;">
-            Read More
-            <svg class="pdp-desc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <polyline points="19 12 12 19 5 12"></polyline>
-            </svg>
-          </button>
-        </div>
-
-        <!-- Specifications -->
-        <div class="pdp-specs reveal" id="pdpSpecsSection" style="margin-top:var(--space-6);">
-          <p class="pdp-section__title">Specifications</p>
-          <div id="pdpSpecs"></div>
-        </div>
-
-        <!-- Rate & Review Section -->
-        <div class="pdp-reviews reveal" id="pdpReviewsSection" style="margin-top:var(--space-6);">
-          <p class="pdp-section__title">Customer Reviews</p>
-          
-          <div class="pdp-reviews__submit-box">
-            <h3 class="pdp-reviews__submit-title">Rate and Review the Product</h3>
-            <div class="pdp-reviews__star-rating" id="pdpSubmitRating">
-              <svg data-star="1" class="pdp-star-icon-interactive" width="24" height="24" viewBox="0 0 16 16"><path d="M8 1.5l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11.5l-5.2 3.3 1.8-5.5L0 7h6.2z"/></svg>
-              <svg data-star="2" class="pdp-star-icon-interactive" width="24" height="24" viewBox="0 0 16 16"><path d="M8 1.5l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11.5l-5.2 3.3 1.8-5.5L0 7h6.2z"/></svg>
-              <svg data-star="3" class="pdp-star-icon-interactive" width="24" height="24" viewBox="0 0 16 16"><path d="M8 1.5l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11.5l-5.2 3.3 1.8-5.5L0 7h6.2z"/></svg>
-              <svg data-star="4" class="pdp-star-icon-interactive" width="24" height="24" viewBox="0 0 16 16"><path d="M8 1.5l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11.5l-5.2 3.3 1.8-5.5L0 7h6.2z"/></svg>
-              <svg data-star="5" class="pdp-star-icon-interactive" width="24" height="24" viewBox="0 0 16 16"><path d="M8 1.5l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11.5l-5.2 3.3 1.8-5.5L0 7h6.2z"/></svg>
-              <svg width="0" height="0" style="position:absolute;">
-                <defs>
-                  <linearGradient id="dynamicStarGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop id="dynamicStarStop1" offset="50%" stop-color="var(--color-warning-500)" />
-                    <stop id="dynamicStarStop2" offset="50%" stop-color="var(--gray-300)" />
-                  </linearGradient>
-                </defs>
+          <!-- Description -->
+          <div class="pdp-description reveal" style="margin-top:var(--space-6);">
+            <p class="pdp-section__title">Description</p>
+            <div class="pdp-description__body pdp-description__body--collapsed" id="pdpDescBody"></div>
+            <button class="pdp-description__toggle" id="pdpDescToggle" type="button" aria-expanded="false"
+              style="display:none;">
+              Read More
+              <svg class="pdp-desc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <polyline points="19 12 12 19 5 12"></polyline>
               </svg>
-              <span id="pdpHoverRatingVal" style="margin-left: 12px; font-size: 1.1rem; font-weight: 600; color: var(--gray-700); font-variant-numeric: tabular-nums;">0.00</span>
-            </div>
-            <textarea class="pdp-reviews__textarea" id="pdpSubmitComment" placeholder="Write a review (optional)..." rows="3"></textarea>
-            <button class="pdp-reviews__submit-btn" id="pdpSubmitReviewBtn">Submit Review</button>
+            </button>
           </div>
 
-          <div class="pdp-reviews__list" id="pdpReviewsList">
-            <!-- JS will populate reviews here -->
+          <!-- Specifications -->
+          <div class="pdp-specs reveal" id="pdpSpecsSection" style="margin-top:var(--space-6);">
+            <p class="pdp-section__title">Specifications</p>
+            <div id="pdpSpecs"></div>
           </div>
+
+          <!-- Rate & Review Section -->
+          <div class="pdp-reviews reveal" id="pdpReviewsSection" style="margin-top:var(--space-6);">
+            <p class="pdp-section__title">Customer Reviews</p>
+
+            <div class="pdp-reviews__submit-box">
+              <h3 class="pdp-reviews__submit-title">Rate and Review the Product</h3>
+              <div class="pdp-reviews__star-rating" id="pdpSubmitRating">
+                <svg data-star="1" class="pdp-star-icon-interactive" width="24" height="24" viewBox="0 0 16 16">
+                  <path d="M8 1.5l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11.5l-5.2 3.3 1.8-5.5L0 7h6.2z" />
+                </svg>
+                <svg data-star="2" class="pdp-star-icon-interactive" width="24" height="24" viewBox="0 0 16 16">
+                  <path d="M8 1.5l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11.5l-5.2 3.3 1.8-5.5L0 7h6.2z" />
+                </svg>
+                <svg data-star="3" class="pdp-star-icon-interactive" width="24" height="24" viewBox="0 0 16 16">
+                  <path d="M8 1.5l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11.5l-5.2 3.3 1.8-5.5L0 7h6.2z" />
+                </svg>
+                <svg data-star="4" class="pdp-star-icon-interactive" width="24" height="24" viewBox="0 0 16 16">
+                  <path d="M8 1.5l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11.5l-5.2 3.3 1.8-5.5L0 7h6.2z" />
+                </svg>
+                <svg data-star="5" class="pdp-star-icon-interactive" width="24" height="24" viewBox="0 0 16 16">
+                  <path d="M8 1.5l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11.5l-5.2 3.3 1.8-5.5L0 7h6.2z" />
+                </svg>
+                <svg width="0" height="0" style="position:absolute;">
+                  <defs>
+                    <linearGradient id="dynamicStarGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop id="dynamicStarStop1" offset="50%" stop-color="var(--color-warning-500)" />
+                      <stop id="dynamicStarStop2" offset="50%" stop-color="var(--gray-300)" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <span id="pdpHoverRatingVal"
+                  style="margin-left: 12px; font-size: 1.1rem; font-weight: 600; color: var(--gray-700); font-variant-numeric: tabular-nums;">0.00</span>
+              </div>
+              <textarea class="pdp-reviews__textarea" id="pdpSubmitComment" placeholder="Write a review (optional)..."
+                rows="3"></textarea>
+              <button class="pdp-reviews__submit-btn" id="pdpSubmitReviewBtn">Submit Review</button>
+            </div>
+
+            <div class="pdp-reviews__list" id="pdpReviewsList">
+              <!-- JS will populate reviews here -->
+            </div>
+          </div>
+
+          <!-- Related Products -->
+          <section class="pdp-related reveal" aria-label="You may also like">
+            <div class="pdp-related__header">
+              <h2 class="pdp-related__title">You May Also Like</h2>
+              <div class="pdp-related__controls">
+                <button class="pdp-related__ctrl" id="pdpRelPrev" aria-label="Scroll left">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <polyline points="10 12 6 8 10 4" />
+                  </svg>
+                </button>
+                <button class="pdp-related__ctrl" id="pdpRelNext" aria-label="Scroll right">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <polyline points="6 4 10 8 6 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="pdp-related__viewport" id="pdpRelViewport">
+              <div class="pdp-related__track" id="pdpRelTrack" role="list"></div>
+            </div>
+          </section>
+
         </div>
-
-        <!-- Related Products -->
-        <section class="pdp-related reveal" aria-label="You may also like">
-          <div class="pdp-related__header">
-            <h2 class="pdp-related__title">You May Also Like</h2>
-            <div class="pdp-related__controls">
-              <button class="pdp-related__ctrl" id="pdpRelPrev" aria-label="Scroll left">
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="10 12 6 8 10 4"/></svg>
-              </button>
-              <button class="pdp-related__ctrl" id="pdpRelNext" aria-label="Scroll right">
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 4 10 8 6 12"/></svg>
-              </button>
-            </div>
-          </div>
-          <div class="pdp-related__viewport" id="pdpRelViewport">
-            <div class="pdp-related__track" id="pdpRelTrack" role="list"></div>
-          </div>
-        </section>
+        <!-- end pdp-below-wrap -->
 
       </div>
-      <!-- end pdp-below-wrap -->
+      <!-- end pdp__container -->
+    </main>
 
-    </div>
-    <!-- end pdp__container -->
-  </main>
+    <%# Footer %>
+      <%- include('../../partials/home-footer') %>
 
-  <!-- ── Fixed purchase action bar — always visible from page load ── -->
-  <div class="pdp-buy-bar" id="pdpBuyBar" role="region" aria-label="Purchase actions">
-    <div class="pdp-buy-bar__inner">
+        <!-- Data (must load before pdp.js) -->
+        <script src="/assets/data/product-data.js"></script>
+        <script src="/assets/data/category-plp-data.js"></script>
 
-      <button class="pdp-buy-bar__cart" data-action="add-cart" aria-label="Add to cart">
-        <svg class="pdp-buy-bar__cart-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M2 2h2l2.5 10M8 15h10l3-8H6.5"/>
-          <circle cx="10" cy="19" r="1.5" fill="currentColor" stroke="none"/>
-          <circle cx="18" cy="19" r="1.5" fill="currentColor" stroke="none"/>
-        </svg>
-        <span class="pdp-buy-bar__cart-label">Add to Cart</span>
-      </button>
-
-      <button class="pdp-buy-bar__buy" data-action="buy-now" aria-label="Buy Now">
-        <span class="pdp-buy-bar__buy-label">Buy Now</span>
-        <span class="pdp-buy-bar__buy-price" id="pdpBarPrice">—</span>
-      </button>
-
-    </div>
-  </div>
-
-  <%# Footer %>
-  <%- include('../../partials/home-footer') %>
-
-  <!-- Data (must load before pdp.js) -->
-  <script src="/assets/data/product-data.js"></script>
-  <script src="/assets/data/category-plp-data.js"></script>
-
-  <!-- JS -->
-  <script src="/assets/js/category-header.js" defer></script>
-  <script src="/assets/js/pdp.js"             defer></script>
+        <!-- JS -->
+        <script src="/assets/js/category-header.js" defer></script>
+        <script src="/assets/js/pdp.js" defer></script>
 
 </body>
+
 </html>

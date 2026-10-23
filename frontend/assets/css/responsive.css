@@ -240,11 +240,7 @@
   /* Specs table — responsive key width */
   .pdp-specs__key { width: 35%; font-size: var(--text-xs); }
   .pdp-specs__val { font-size: var(--text-xs); }
-  /* Buy bar — make all buttons equal on very small screens */
-  .pdp-buy-bar__cart  { flex: 0 0 42px; padding: var(--space-2); }
-  .pdp-buy-bar__emi-btn { flex: 1; }
-  .pdp-buy-bar__buy   { flex: 1.5; padding-inline: var(--space-3); }
-  .pdp-buy-bar__buy-label { font-size: var(--text-xs); }
+
 }
 
 /* =============================================
@@ -401,11 +397,7 @@ section,
     max-width: 100%;
   }
 
-  /* Fixed PDP controls stay usable on narrow phones. */
-  .pdp-buy-bar__inner { gap: var(--space-2); }
-  .pdp-buy-bar__emi-btn { padding-inline: var(--space-2); }
-  .pdp-buy-bar__emi-label { white-space: normal; text-align: center; }
-  .pdp-buy-bar__buy { padding-inline: var(--space-2); }
+
 }
 
 @media (max-width: 375px) {
@@ -436,11 +428,7 @@ section,
   .plp-card__price-discount { font-size: 9px; }
 
   .pdp-info { padding: var(--space-4) var(--space-3); }
-  .pdp-buy-bar { padding-inline: var(--space-2); }
-  .pdp-buy-bar__cart { flex-basis: 40px; }
-  .pdp-buy-bar__emi-btn { flex: 1; }
-  .pdp-buy-bar__emi-btn svg { display: none; }
-  .pdp-buy-bar__buy { flex: 1.25; }
+
 }
 
 /* =============================================

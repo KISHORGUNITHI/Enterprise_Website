@@ -252,14 +252,6 @@
     border: 1.5px solid #ffffff;
   }
 
-  /* Coordination with PDP sticky buy bar */
-  .pdp-buy-bar {
-    bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
-  }
-
-  body.has-pdp-buy-bar {
-    padding-bottom: calc(124px + env(safe-area-inset-bottom, 0px)) !important;
-  }
 }
 
 @media (max-width: 360px) {

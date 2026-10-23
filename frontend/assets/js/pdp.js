@@ -139,6 +139,7 @@
   const deliveryEl  = document.getElementById('pdpDelivery');
   const emiEl       = document.getElementById('pdpEmi');
   const barPrice    = document.getElementById('pdpBarPrice');
+  const mobilePrice = document.getElementById('pdpMobilePrice');
   const barEmi      = document.getElementById('pdpBarEmi');
   const relTrack    = document.getElementById('pdpRelTrack');
   const relPrev     = document.getElementById('pdpRelPrev');
@@ -180,6 +181,12 @@
       barPrice.classList.remove('pdp-price--updated');
       void barPrice.offsetWidth;
       barPrice.classList.add('pdp-price--updated');
+    }
+    if (mobilePrice) {
+      mobilePrice.textContent = fmt(newPrice);
+      mobilePrice.classList.remove('pdp-price--updated');
+      void mobilePrice.offsetWidth;
+      mobilePrice.classList.add('pdp-price--updated');
     }
 
     const baseOrig = (currentProductData && (currentProductData.originalPrice || currentProductData.salePrice)) || newPrice;
@@ -451,6 +458,7 @@
 
     // Sticky bar price
     barPrice && (barPrice.textContent = fmt(salePriceVal));
+    mobilePrice && (mobilePrice.textContent = fmt(salePriceVal));
     barEmi   && (barEmi.textContent   = product.emi ? `EMI from ${fmt(product.emi.from)}/mo` : '');
 
     // Buy bar availability state
@@ -705,6 +713,7 @@
         if (product.rawVariants && product.rawVariants.length > 0 && !matched) {
           if (priceSale) priceSale.textContent = 'Unavailable';
           if (barPrice) barPrice.textContent = 'Unavailable';
+          if (mobilePrice) mobilePrice.textContent = 'Unavailable';
           if (priceOrig) priceOrig.textContent = '';
           if (priceDis) priceDis.textContent = '';
           if (priceSave) priceSave.textContent = '';
@@ -744,6 +753,7 @@
 
         if (priceSale) priceSale.textContent = fmt(finalSalePrice);
         if (barPrice) barPrice.textContent = fmt(finalSalePrice);
+        if (mobilePrice) mobilePrice.textContent = fmt(finalSalePrice);
         if (priceOrig) priceOrig.textContent = save > 0 ? fmt(origPrice) : '';
         if (priceDis) priceDis.textContent = offer > 0 ? `${offer}% off` : '';
         if (priceSave) priceSave.textContent = save > 0 ? `Save ${fmt(save)}` : '';

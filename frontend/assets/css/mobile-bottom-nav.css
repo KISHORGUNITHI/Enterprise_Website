@@ -202,14 +202,6 @@
     border: 1.5px solid #ffffff;
   }
 
-  /* ── PDP Buy Bar Clearance Coordination ── */
-  .pdp-buy-bar {
-    bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
-  }
-
-  body.has-pdp-buy-bar {
-    padding-bottom: calc(124px + env(safe-area-inset-bottom, 0px)) !important;
-  }
 }
 
 /* ── Narrow Mobile Tweaks (e.g. 360px and smaller) ── */

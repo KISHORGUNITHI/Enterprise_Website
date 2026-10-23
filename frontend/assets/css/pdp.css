@@ -861,6 +861,16 @@
   margin-inline: auto;
 }
 
+/* On desktop, buy-row is purely a transparent wrapper for buy button */
+.pdp-buy-bar__buy-row {
+  display: contents;
+}
+
+/* Mobile-only price alongside Buy Now button — hidden on desktop */
+.pdp-buy-bar__mobile-price {
+  display: none;
+}
+
 /* ── Button 1: Add to Cart — smallest ── */
 .pdp-buy-bar__cart {
   display: flex;
@@ -1023,23 +1033,179 @@
   .pdp-info { padding: var(--space-5) var(--space-4); }
   .pdp-info__title { font-size: var(--text-xl); }
   .pdp-info__price-sale { font-size: var(--text-2xl); }
-  .pdp-buy-bar { padding-inline: var(--container-padding-mobile); }
-  .pdp-buy-bar__emi-sub { display: none; }
-  .pdp-buy-bar__emi-label { font-size: var(--text-xs); }
-  .pdp-buy-bar__buy-label { font-size: var(--text-sm); }
+  /* ── Mobile Purchase Section: In-line between Specs and Customer Reviews ── */
+  .pdp-buy-bar {
+    position: static !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    z-index: 1 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: var(--space-8) auto var(--space-6) !important;
+    width: 100% !important;
+  }
+
+  .pdp-buy-bar__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    width: 100%;
+    max-width: 360px;
+    margin-inline: auto;
+    padding-inline: var(--space-2);
+    box-sizing: border-box;
+  }
+
+  /* Row 1: Add to Cart button on its own row, centered */
+  .pdp-buy-bar__cart {
+    width: 100%;
+    max-width: 360px;
+    height: 48px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-5);
+    background-color: var(--color-bg-card, #ffffff);
+    color: var(--color-primary-700);
+    border: 1.5px solid var(--color-primary-300);
+    border-radius: var(--radius-xl);
+    font-family: inherit;
+    font-size: var(--text-sm);
+    font-weight: var(--font-bold);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    flex: none !important;
+    box-sizing: border-box;
+  }
+
+  .pdp-buy-bar__cart-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .pdp-buy-bar__cart-label {
+    display: inline !important;
+    font-size: var(--text-sm);
+    font-weight: var(--font-bold);
+    line-height: 1;
+  }
+
+  .pdp-buy-bar__cart:hover {
+    background-color: var(--color-primary-700);
+    border-color: var(--color-primary-700);
+    color: #ffffff;
+  }
+
+  /* Row 2: Product price + Buy Now button, centered together */
+  .pdp-buy-bar__buy-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    width: 100%;
+    max-width: 360px;
+    box-sizing: border-box;
+  }
+
+  .pdp-buy-bar__mobile-price {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-xl);
+    font-weight: var(--font-extrabold);
+    color: var(--color-text-primary);
+    letter-spacing: var(--tracking-tight);
+    white-space: nowrap;
+    line-height: 1;
+    padding-inline: var(--space-1);
+    flex-shrink: 0;
+  }
+
+  .pdp-buy-bar__buy {
+    flex: 1;
+    height: 48px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-3) var(--space-5);
+    background: linear-gradient(135deg, var(--color-accent-500) 0%, var(--color-accent-600) 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-accent);
+    cursor: pointer;
+    font-family: inherit;
+    transition: var(--transition-fast);
+    white-space: nowrap;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .pdp-buy-bar__buy-label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-extrabold);
+    letter-spacing: var(--tracking-wide);
+    line-height: 1;
+  }
+
+  /* Inside the button, the price is hidden on mobile because it's displayed alongside the button */
+  .pdp-buy-bar__buy-price {
+    display: none !important;
+  }
+
+  .pdp-below {
+    padding-bottom: var(--space-8) !important;
+  }
 }
 
 @media (max-width: 480px) {
   .pdp-gallery__thumb { width: 50px; height: 50px; }
   .pdp-related__track .plp-card { width: 160px; }
-  .pdp-buy-bar { padding-inline: var(--space-3); gap: var(--space-2); }
-  .pdp-buy-bar__inner { gap: var(--space-2); }
-  .pdp-buy-bar__cart-label { display: none; }
-  .pdp-buy-bar__cart { flex: 0 0 44px; padding: var(--space-3); }
+
+  .pdp-buy-bar__inner,
+  .pdp-buy-bar__cart,
+  .pdp-buy-bar__buy-row {
+    max-width: 100%;
+  }
+
+  .pdp-buy-bar__cart {
+    height: 46px;
+  }
+
+  .pdp-buy-bar__buy {
+    height: 46px;
+    padding-inline: var(--space-4);
+  }
+
+  .pdp-buy-bar__mobile-price {
+    font-size: var(--text-lg);
+  }
 }
 
-/* Bottom padding — keeps last section above the fixed buy bar */
-.pdp-below { padding-bottom: 80px; }
+@media (max-width: 375px) {
+  .pdp-buy-bar__buy-row {
+    gap: var(--space-2);
+  }
+
+  .pdp-buy-bar__mobile-price {
+    font-size: var(--text-base);
+  }
+
+  .pdp-buy-bar__buy {
+    padding-inline: var(--space-3);
+  }
+}
 
 /* =============================================
    REVIEWS SECTION
