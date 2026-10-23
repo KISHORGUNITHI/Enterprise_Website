@@ -4,10 +4,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>
-    <%= title %>
-  </title>
-  <link rel="icon" type="image/svg+xml" href="/public/icons/favicon.svg" />
+  <title><%= title %></title>
+  <meta name="description" content="View product specifications, pricing, reviews, and store availability at Kishor Mobiles. Official warranty and store pickup in Pathapatnam." />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://kishormobiles.in/product/<%= productId %>" />
+
+  <!-- Google Search & Browser Favicons (Derived from official Kishor Mobiles logo) -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/images/favicon-48x48.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/images/android-chrome-192x192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/apple-touch-icon.png" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="product" />
+  <meta property="og:site_name" content="Kishor Mobiles" />
+  <meta property="og:title" content="<%= title %>" />
+  <meta property="og:description" content="View product specifications, pricing, reviews, and store availability at Kishor Mobiles." />
+  <meta property="og:url" content="https://kishormobiles.in/product/<%= productId %>" />
+  <meta property="og:image" content="https://kishormobiles.in/assets/images/kishor-mobiles-logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"

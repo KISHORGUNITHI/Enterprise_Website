@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/admin/
+Disallow: /profile/
+Disallow: /checkout
+Disallow: /orders
+
+Sitemap: https://kishormobiles.in/sitemap.xml

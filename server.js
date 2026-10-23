@@ -15,6 +15,7 @@ import adminGuard from './src/middleware/adminGuard.js'
 import jwt from 'jsonwebtoken';
 import { isCategoryInactive } from './src/config/categoryConfig.js'
 import bannerRoutes from './src/features/banners/routes/bannerRoutes.js'
+import prisma from './src/config/prisma.js'
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -150,10 +151,22 @@ app.use("/admin", adminRoutes);
 
 // ─── Site-wide constants ─────────────────────────────────────────────────────
 const site = {
-  name: 'Kishor Enterprises',
+  name: 'Kishor Mobiles',
+  altName: 'Kishor Enterprises',
   tagline: 'Official Electronics Store',
   phone: '9963657799',
+  phoneFormatted: '+91-9963657799',
   wa: 'https://wa.me/919963657799',
+  domain: 'https://kishormobiles.in',
+  url: 'https://kishormobiles.in/',
+  logo: 'https://kishormobiles.in/assets/images/kishor-mobiles-logo.png',
+  address: {
+    streetAddress: 'All Andhra Road',
+    addressLocality: 'Pathapatnam',
+    addressRegion: 'Andhra Pradesh',
+    postalCode: '532213',
+    addressCountry: 'IN'
+  }
 };
 
 // ─── Helper: render stub for pages not yet designed ──────────────────────────
@@ -172,11 +185,75 @@ function stub(label) {
 //  BUILT PAGES
 // =====================================================================
 
+// SEO: Explicit Robots.txt
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain');
+  res.sendFile(path.join(__dirname, 'frontend/robots.txt'));
+});
+
+// SEO: XML Sitemap
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const baseUrl = 'https://kishormobiles.in';
+    const now = new Date().toISOString().split('T')[0];
+
+    const staticPages = [
+      { loc: `${baseUrl}/`, priority: '1.0', changefreq: 'daily' },
+      { loc: `${baseUrl}/home`, priority: '0.9', changefreq: 'daily' },
+      { loc: `${baseUrl}/products`, priority: '0.8', changefreq: 'daily' },
+      { loc: `${baseUrl}/products/trending`, priority: '0.8', changefreq: 'daily' },
+      { loc: `${baseUrl}/products/mobiles`, priority: '0.8', changefreq: 'weekly' },
+      { loc: `${baseUrl}/products/tvs`, priority: '0.8', changefreq: 'weekly' },
+      { loc: `${baseUrl}/products/acs`, priority: '0.8', changefreq: 'weekly' },
+      { loc: `${baseUrl}/products/home-theatres`, priority: '0.7', changefreq: 'weekly' },
+      { loc: `${baseUrl}/products/kitchen`, priority: '0.7', changefreq: 'weekly' },
+      { loc: `${baseUrl}/products/refrigerators`, priority: '0.8', changefreq: 'weekly' }
+    ];
+
+    let productPages = [];
+    try {
+      const products = await prisma.product.findMany({
+        select: { id: true, updatedAt: true },
+        orderBy: { updatedAt: 'desc' }
+      });
+      productPages = products.map(p => ({
+        loc: `${baseUrl}/product/${p.id}`,
+        lastmod: p.updatedAt ? new Date(p.updatedAt).toISOString().split('T')[0] : now,
+        priority: '0.7',
+        changefreq: 'weekly'
+      }));
+    } catch (err) {
+      console.warn('Dynamic sitemap fallback to static pages:', err.message);
+    }
+
+    const allUrls = [...staticPages, ...productPages];
+
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    for (const item of allUrls) {
+      xml += '  <url>\n';
+      xml += `    <loc>${item.loc}</loc>\n`;
+      if (item.lastmod) xml += `    <lastmod>${item.lastmod}</lastmod>\n`;
+      if (item.changefreq) xml += `    <changefreq>${item.changefreq}</changefreq>\n`;
+      if (item.priority) xml += `    <priority>${item.priority}</priority>\n`;
+      xml += '  </url>\n';
+    }
+    xml += '</urlset>\n';
+
+    res.header('Content-Type', 'application/xml');
+    res.send(xml);
+  } catch (err) {
+    console.error('Error generating dynamic sitemap:', err);
+    res.sendFile(path.join(__dirname, 'frontend/sitemap.xml'));
+  }
+});
+
 // Landing — marketing / pre-login
 app.get('/', (req, res) => {
   res.render('pages/landing', {
-    title: `${site.name} — ${site.tagline}`,
-    description: 'Premium electronics at best prices. Mobiles, TVs, ACs, Refrigerators and more with 0% EMI and official warranty.',
+    title: 'Kishor Mobiles | Official Electronics Store',
+    description: 'Shop mobiles, TVs, ACs, refrigerators and home appliances at Kishor Mobiles. Explore products, offers and store information.',
+    canonicalUrl: 'https://kishormobiles.in/',
     site,
   });
 });
@@ -184,8 +261,9 @@ app.get('/', (req, res) => {
 // Home — main shopping hub (fully built)
 app.get('/home', (req, res) => {
   res.render('pages/home', {
-    title: `Home — ${site.name}`,
-    description: 'Shop mobiles, TVs, ACs, refrigerators and more at Enterprise Store.',
+    title: 'Kishor Mobiles | Official Electronics Store',
+    description: 'Shop mobiles, TVs, ACs, refrigerators and home appliances at Kishor Mobiles. Explore products, offers and store information.',
+    canonicalUrl: 'https://kishormobiles.in/home',
     site,
   });
 });
