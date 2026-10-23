@@ -51,48 +51,114 @@
     </svg>`;
   }
 
-  function showRightToast(message) {
+  function showRightToast(message, explicitType, explicitTitle) {
     let toast = document.getElementById('top-right-toast');
     if (!toast) {
-      const style = document.createElement('style');
-      style.textContent = `
-        #top-right-toast {
-          position: fixed;
-          top: 90px;
-          right: 20px;
-          background: #1a1a1a;
-          color: #fff;
-          padding: 12px 20px;
-          border-radius: 8px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-          z-index: 9999;
-          transform: translateX(150%);
-          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          font-family: Inter, sans-serif;
-          font-weight: 500;
-          font-size: 14px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          max-width: 350px;
-        }
-        #top-right-toast.show { transform: translateX(0); }
-        @media (max-width: 768px) {
-          #top-right-toast {
-            top: 75px; right: 16px; width: calc(100vw - 32px); max-width: none;
-          }
-        }
-      `;
-      document.head.appendChild(style);
       toast = document.createElement('div');
       toast.id = 'top-right-toast';
-      toast.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> <span class="toast-msg"></span>`;
+      toast.className = 'pdp-toast';
+      toast.setAttribute('role', 'alert');
+      toast.setAttribute('aria-live', 'assertive');
+      toast.innerHTML = `
+        <div class="pdp-toast__icon-wrap" id="pdpToastIconWrap"></div>
+        <div class="pdp-toast__content">
+          <div class="pdp-toast__title" id="pdpToastTitle"></div>
+          <div class="pdp-toast__message toast-msg" id="pdpToastMsg"></div>
+        </div>
+        <button type="button" class="pdp-toast__close" id="pdpToastClose" aria-label="Dismiss notification">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="pdp-toast__progress"></div>
+      `;
       document.body.appendChild(toast);
+
+      const closeBtn = toast.querySelector('#pdpToastClose');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toast.classList.remove('show');
+          if (toast.hideTimeout) clearTimeout(toast.hideTimeout);
+        });
+      }
+
+      toast.addEventListener('mouseenter', () => {
+        if (toast.hideTimeout) clearTimeout(toast.hideTimeout);
+      });
+      toast.addEventListener('mouseleave', () => {
+        if (toast.classList.contains('show')) {
+          toast.hideTimeout = setTimeout(() => toast.classList.remove('show'), 1500);
+        }
+      });
     }
-    toast.querySelector('.toast-msg').textContent = message;
+
+    const lower = (message || '').toLowerCase();
+    let type = explicitType;
+    if (!type) {
+      if (lower.includes('added') || lower.includes('cart') || lower.includes('success')) {
+        type = 'success';
+      } else if (lower.includes('select') || lower.includes('login') || lower.includes('rating')) {
+        type = 'warning';
+      } else if (lower.includes('fail') || lower.includes('error') || lower.includes('invalid')) {
+        type = 'error';
+      } else {
+        type = 'info';
+      }
+    }
+
+    const icons = {
+      success: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 5 8 13 4 9"></polyline></svg>`,
+      warning: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8"></circle><line x1="10" y1="6" x2="10" y2="10"></line><line x1="10" y1="14" x2="10.01" y2="14"></line></svg>`,
+      error: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8"></circle><line x1="13" y1="7" x2="7" y2="13"></line><line x1="7" y1="7" x2="13" y2="13"></line></svg>`,
+      info: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8"></circle><line x1="10" y1="10" x2="10" y2="14"></line><line x1="10" y1="6" x2="10.01" y2="6"></line></svg>`
+    };
+
+    const titles = {
+      success: 'Success',
+      warning: 'Action Required',
+      error: 'Notice',
+      info: 'Notification'
+    };
+
+    if (lower.includes('cart')) {
+      titles.success = 'Added to Cart';
+    } else if (lower.includes('review') && lower.includes('success')) {
+      titles.success = 'Review Submitted';
+    } else if (lower.includes('login')) {
+      titles.warning = 'Authentication Required';
+    } else if (lower.includes('star rating')) {
+      titles.warning = 'Rating Required';
+    }
+
+    const iconWrap = toast.querySelector('#pdpToastIconWrap');
+    if (iconWrap) {
+      iconWrap.className = `pdp-toast__icon-wrap pdp-toast__icon-wrap--${type}`;
+      iconWrap.innerHTML = icons[type] || icons.info;
+    }
+
+    const titleEl = toast.querySelector('#pdpToastTitle');
+    if (titleEl) {
+      titleEl.textContent = explicitTitle || titles[type] || 'Notification';
+    }
+
+    const msgEl = toast.querySelector('#pdpToastMsg') || toast.querySelector('.toast-msg');
+    if (msgEl) {
+      msgEl.textContent = message;
+    }
+
+    // Reset progress animation
+    const progress = toast.querySelector('.pdp-toast__progress');
+    if (progress) {
+      progress.style.animation = 'none';
+      void progress.offsetWidth; // Trigger reflow
+      progress.style.animation = '';
+    }
+
     requestAnimationFrame(() => toast.classList.add('show'));
     if (toast.hideTimeout) clearTimeout(toast.hideTimeout);
-    toast.hideTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
+    toast.hideTimeout = setTimeout(() => toast.classList.remove('show'), 3500);
   }
 
   function escapeHtml(str) {
