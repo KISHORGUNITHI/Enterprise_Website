@@ -6,11 +6,13 @@
 /* ── Page shell ── */
 .auth-body {
   min-height: 100vh;
+  width: 100%;
   background: linear-gradient(160deg, var(--color-bg-secondary) 0%, var(--color-primary-50) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--space-5) var(--space-4);
+  overflow-x: hidden;
 }
 
 .auth-page {
@@ -199,20 +201,60 @@
   display: none;
 }
 
-/* Server errors are displayed as a page-level alert at the top center. */
+/* Server errors are displayed as a page-level alert at top center.
+   Uses left/right pinning + margin:0 auto instead of translateX(-50%) to prevent
+   keyframe collisions from throwing the alert off-screen on mobile viewports. */
 #authServerMessage:not([hidden]) {
   position: fixed;
-  top: var(--space-6);
-  left: 50%;
-  z-index: var(--z-toast);
-  width: min(calc(100% - (2 * var(--space-4))), 420px);
-  padding: var(--space-3) var(--space-4);
-  margin: 0;
-  border: 1px solid var(--color-error-500);
-  border-radius: var(--radius-lg);
-  background: #fff;
-  box-shadow: var(--shadow-lg);
-  transform: translateX(-50%);
+  top: var(--space-5, 20px);
+  left: var(--space-4, 16px);
+  right: var(--space-4, 16px);
+  margin: 0 auto;
+  width: calc(100% - (2 * var(--space-4, 16px)));
+  max-width: 440px;
+  box-sizing: border-box;
+  z-index: var(--z-toast, 100000);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2, 8px);
+  padding: 12px 18px;
+  font-size: var(--text-sm, 14px);
+  font-weight: var(--font-semibold, 600);
+  line-height: 1.4;
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-xl, 12px);
+  box-shadow: 0 10px 25px -5px rgba(220, 38, 38, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+  word-break: break-word;
+  overflow-wrap: break-word;
+  text-align: center;
+  transform: none !important;
+  animation: authServerSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+#authServerMessage::before {
+  content: "";
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23dc2626'%3E%3Cpath fill-rule='evenodd' d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z' clip-rule='evenodd'/%3E%3C/svg%3E");
+}
+
+@keyframes authServerSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .auth-form__error svg {
@@ -529,7 +571,7 @@
   /* No animation by default — only when actively shown */
 }
 
-.auth-form__error:not([hidden]) {
+.auth-form__error:not(#authServerMessage):not([hidden]) {
   animation: errorFadeIn 0.2s ease both;
 }
 
@@ -616,4 +658,13 @@
 @media (max-width: 480px) {
   .auth-body--split { padding: var(--space-4) var(--space-3); }
   .auth-split__form-side { padding: var(--space-5) var(--space-3); }
+
+  #authServerMessage:not([hidden]) {
+    top: var(--space-3, 12px);
+    left: var(--space-3, 12px);
+    right: var(--space-3, 12px);
+    width: calc(100% - (2 * var(--space-3, 12px)));
+    padding: 10px 14px;
+    font-size: var(--text-xs, 13px);
+  }
 }

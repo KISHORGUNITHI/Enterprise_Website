@@ -1,8 +1,5 @@
-<%#
-  home-header.ejs — Two-row sticky header. Layout reference: Flipkart desktop.
-  Row 1: Logo (left) | Location (right)
-  Row 2: Search flex-1 (left) | Profile Cart Orders (right)
-  Future React component: <HomeHeader />
+<%# home-header.ejs — Two-row sticky header. Layout reference: Flipkart desktop. Row 1: Logo (left) | Location (right)
+  Row 2: Search flex-1 (left) | Profile Cart Orders (right) Future React component: <HomeHeader />
 %>
 
 <header class="hdr" id="homeHeader" role="banner">
@@ -16,9 +13,10 @@
       <!-- Logo -->
       <a href="/home" class="hdr__logo" aria-label="Kishor Enterprises — Go to home">
         <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-          <rect width="32" height="32" rx="8" fill="rgba(255,255,255,0.95)"/>
-          <path d="M8 10h16M8 16h10M8 22h13" stroke="var(--color-primary-700)" stroke-width="2.5" stroke-linecap="round"/>
-          <circle cx="24" cy="22" r="3" fill="var(--color-accent-500)"/>
+          <rect width="32" height="32" rx="8" fill="rgba(255,255,255,0.95)" />
+          <path d="M8 10h16M8 16h10M8 22h13" stroke="var(--color-primary-700)" stroke-width="2.5"
+            stroke-linecap="round" />
+          <circle cx="24" cy="22" r="3" fill="var(--color-accent-500)" />
         </svg>
         <div class="hdr__logo-text">
           <span class="hdr__logo-name">Kishor</span>
@@ -28,9 +26,10 @@
 
       <!-- Location — right-aligned (desktop/tablet only) -->
       <button class="hdr__location" id="hdrLocation" aria-label="Set delivery location" aria-haspopup="true">
-        <svg class="hdr__location-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M10 11a3 3 0 100-6 3 3 0 000 6z"/>
-          <path d="M10 18s-7-5.686-7-10a7 7 0 1114 0C17 12.314 10 18 10 18z"/>
+        <svg class="hdr__location-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M10 11a3 3 0 100-6 3 3 0 000 6z" />
+          <path d="M10 18s-7-5.686-7-10a7 7 0 1114 0C17 12.314 10 18 10 18z" />
         </svg>
         <div class="hdr__location-text">
           <!-- Desktop: "Deliver to" label + value -->
@@ -42,28 +41,33 @@
             <span class="hdr__loc-short">📍 Set Location</span>
           </span>
         </div>
-        <svg class="hdr__chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-          <polyline points="4 6 8 10 12 6"/>
+        <svg class="hdr__chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" aria-hidden="true">
+          <polyline points="4 6 8 10 12 6" />
         </svg>
       </button>
 
-      <!-- Mobile Logout — right-aligned (Row 1 on mobile) -->
-      <button class="hdr__mobile-logout" id="hdrMobileLogoutBtn" aria-label="Logout" style="display: <%= locals.isAuthenticated ? 'inline-flex' : 'none' %>;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
-        </svg>
-        <span>Logout</span>
-      </button>
-
-      <!-- Mobile Login — right-aligned (Row 1 on mobile) -->
-      <a href="/login" class="hdr__mobile-login" id="hdrMobileLoginBtn" aria-label="Login" style="display: <%= locals.isAuthenticated ? 'none' : 'inline-flex' %>;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
-          <polyline points="10 17 15 12 10 7"/>
-          <line x1="15" y1="12" x2="3" y2="12"/>
-        </svg>
-        <span>Login</span>
-      </a>
+      <% if (locals.isAuthenticated) { %>
+        <!-- Mobile Logout — right-aligned (Row 1 on mobile) -->
+        <button class="hdr__mobile-logout" id="hdrMobileLogoutBtn" aria-label="Logout">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
+          </svg>
+          <span>Logout</span>
+        </button>
+        <% } else { %>
+          <!-- Mobile Login — right-aligned (Row 1 on mobile) -->
+          <a href="/login" class="hdr__mobile-login" id="hdrMobileLoginBtn" aria-label="Login">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
+              <polyline points="10 17 15 12 10 7" />
+              <line x1="15" y1="12" x2="3" y2="12" />
+            </svg>
+            <span>Login</span>
+          </a>
+          <% } %>
 
     </div>
 
@@ -78,29 +82,23 @@
           <div class="hdr__search-box" id="hdrSearchBox">
             <!-- Search icon (left) -->
             <span class="hdr__search-icon" aria-hidden="true">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="9" cy="9" r="6"/>
-                <path d="M13.5 13.5L17 17"/>
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="9" cy="9" r="6" />
+                <path d="M13.5 13.5L17 17" />
               </svg>
             </span>
             <!-- Input -->
-            <input
-              type="search"
-              name="q"
-              id="hdrSearchInput"
-              class="hdr__search-input"
-              placeholder="Search for Mobiles, TVs, Refrigerators and more"
-              autocomplete="off"
-              aria-label="Search for products"
-              aria-autocomplete="list"
-              aria-controls="hdrSuggestions"
-              aria-expanded="false"
-            />
+            <input type="search" name="q" id="hdrSearchInput" class="hdr__search-input"
+              placeholder="Search for Mobiles, TVs, Refrigerators and more" autocomplete="off"
+              aria-label="Search for products" aria-autocomplete="list" aria-controls="hdrSuggestions"
+              aria-expanded="false" />
             <!-- Search button (right) -->
             <button type="submit" class="hdr__search-submit" aria-label="Search">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="9" cy="9" r="6"/>
-                <path d="M13.5 13.5L17 17"/>
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round" aria-hidden="true">
+                <circle cx="9" cy="9" r="6" />
+                <path d="M13.5 13.5L17 17" />
               </svg>
             </button>
           </div>
@@ -110,21 +108,24 @@
             <div class="hdr__suggestions-group">
               <p class="hdr__suggestions-label">Popular Searches</p>
               <ul class="hdr__suggestions-list">
-                <li><a href="/products?q=Samsung"     class="hdr__suggestion-item" role="option">Samsung Galaxy</a></li>
-                <li><a href="/products?q=OnePlus"     class="hdr__suggestion-item" role="option">OnePlus Phones</a></li>
-                <li><a href="/products?q=Smart+TV"    class="hdr__suggestion-item" role="option">4K Smart & OLED TV</a></li>
-                <li><a href="/products?q=Inverter+AC" class="hdr__suggestion-item" role="option">Inverter Split AC</a></li>
-                <li><a href="/products?q=Soundbar"    class="hdr__suggestion-item" role="option">Dolby Atmos Soundbar</a></li>
+                <li><a href="/products?q=Samsung" class="hdr__suggestion-item" role="option">Samsung Galaxy</a></li>
+                <li><a href="/products?q=OnePlus" class="hdr__suggestion-item" role="option">OnePlus Phones</a></li>
+                <li><a href="/products?q=Smart+TV" class="hdr__suggestion-item" role="option">4K Smart & OLED TV</a>
+                </li>
+                <li><a href="/products?q=Inverter+AC" class="hdr__suggestion-item" role="option">Inverter Split AC</a>
+                </li>
+                <li><a href="/products?q=Soundbar" class="hdr__suggestion-item" role="option">Dolby Atmos Soundbar</a>
+                </li>
               </ul>
             </div>
             <div class="hdr__suggestions-group">
               <p class="hdr__suggestions-label">Browse Categories</p>
               <div class="hdr__suggestions-cats">
-                <a href="/products/mobiles"        class="hdr__suggestion-cat">Mobiles</a>
-                <a href="/products/tvs"            class="hdr__suggestion-cat">TVs</a>
-                <a href="/products/acs"            class="hdr__suggestion-cat">ACs</a>
-                <a href="/products/refrigerators"  class="hdr__suggestion-cat">Fridges</a>
-                <a href="/products/kitchen"        class="hdr__suggestion-cat">Kitchen</a>
+                <a href="/products/mobiles" class="hdr__suggestion-cat">Mobiles</a>
+                <a href="/products/tvs" class="hdr__suggestion-cat">TVs</a>
+                <a href="/products/acs" class="hdr__suggestion-cat">ACs</a>
+                <a href="/products/refrigerators" class="hdr__suggestion-cat">Fridges</a>
+                <a href="/products/kitchen" class="hdr__suggestion-cat">Kitchen</a>
               </div>
             </div>
           </div>
@@ -134,79 +135,91 @@
       <!-- Mobile Call Button — right of search bar (Row 2 on mobile) -->
       <a href="tel:9963657799" class="hdr__mobile-call-btn" id="hdrMobileCallBtn" aria-label="Call store at 9963657799">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.02-.24 11.45 11.45 0 003.58.57 1 1 0 011 1v3.49a1 1 0 01-1 1A17.93 17.93 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.45 11.45 0 00.57 3.58 1 1 0 01-.25 1.02l-2.2 2.19z"/>
+          <path
+            d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.02-.24 11.45 11.45 0 003.58.57 1 1 0 011 1v3.49a1 1 0 01-1 1A17.93 17.93 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.45 11.45 0 00.57 3.58 1 1 0 01-.25 1.02l-2.2 2.19z" />
         </svg>
       </a>
 
       <!-- Action icons — right side (desktop/tablet only) -->
       <nav class="hdr__actions" aria-label="Account and shopping">
 
-        <!-- Admin Panel Link (Shown only for ADMIN users) -->
-        <a href="/admin/dashboard" class="hdr__action-btn hdr__action-btn--admin" id="hdrAdminBtn" aria-label="Admin Dashboard" style="display: <%= locals.isAdmin ? 'flex' : 'none' %>;">
-          <div class="hdr__action-icon-wrap" style="color: var(--color-accent-500);">
-            <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <rect x="3" y="3" width="7" height="7" rx="1.5"/>
-              <rect x="12" y="3" width="7" height="7" rx="1.5"/>
-              <rect x="12" y="12" width="7" height="7" rx="1.5"/>
-              <rect x="3" y="12" width="7" height="7" rx="1.5"/>
-            </svg>
-          </div>
-          <span class="hdr__action-label">Admin</span>
-        </a>
+        <% if (locals.isAdmin) { %>
+          <!-- Admin Panel Link (Shown only for ADMIN users) -->
+          <a href="/admin/dashboard" class="hdr__action-btn hdr__action-btn--admin" id="hdrAdminBtn"
+            aria-label="Admin Dashboard">
+            <div class="hdr__action-icon-wrap" style="color: var(--color-accent-500);">
+              <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                <rect x="12" y="3" width="7" height="7" rx="1.5" />
+                <rect x="12" y="12" width="7" height="7" rx="1.5" />
+                <rect x="3" y="12" width="7" height="7" rx="1.5" />
+              </svg>
+            </div>
+            <span class="hdr__action-label">Admin</span>
+          </a>
+          <% } %>
 
-        <a href="/profile" class="hdr__action-btn" aria-label="My Profile">
-          <div class="hdr__action-icon-wrap">
-            <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M11 11a4 4 0 100-8 4 4 0 000 8z"/>
-              <path d="M3 20c0-3.314 3.582-6 8-6s8 2.686 8 6"/>
-            </svg>
-          </div>
-          <span class="hdr__action-label">Profile</span>
-        </a>
+            <a href="/profile" class="hdr__action-btn" aria-label="My Profile">
+              <div class="hdr__action-icon-wrap">
+                <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+                  stroke-linejoin="round" aria-hidden="true">
+                  <path d="M11 11a4 4 0 100-8 4 4 0 000 8z" />
+                  <path d="M3 20c0-3.314 3.582-6 8-6s8 2.686 8 6" />
+                </svg>
+              </div>
+              <span class="hdr__action-label">Profile</span>
+            </a>
 
-        <a href="/cart" class="hdr__action-btn" aria-label="Cart">
-          <div class="hdr__action-icon-wrap hdr__action-icon-wrap--badge">
-            <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M2 2h2l2.5 10M8 15h10l3-8H6.5"/>
-              <circle cx="10" cy="19" r="1.5" fill="currentColor" stroke="none"/>
-              <circle cx="18" cy="19" r="1.5" fill="currentColor" stroke="none"/>
-            </svg>
-            <span class="hdr__badge" id="hdrCartBadge" aria-label="Shopping Cart" style="display: none;">0</span>
-          </div>
-          <span class="hdr__action-label">Cart</span>
-        </a>
+            <a href="/cart" class="hdr__action-btn" aria-label="Cart">
+              <div class="hdr__action-icon-wrap hdr__action-icon-wrap--badge">
+                <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+                  stroke-linejoin="round" aria-hidden="true">
+                  <path d="M2 2h2l2.5 10M8 15h10l3-8H6.5" />
+                  <circle cx="10" cy="19" r="1.5" fill="currentColor" stroke="none" />
+                  <circle cx="18" cy="19" r="1.5" fill="currentColor" stroke="none" />
+                </svg>
+                <span class="hdr__badge" id="hdrCartBadge" aria-label="Shopping Cart" style="display: none;">0</span>
+              </div>
+              <span class="hdr__action-label">Cart</span>
+            </a>
 
-        <a href="/orders" class="hdr__action-btn" aria-label="My Orders">
-          <div class="hdr__action-icon-wrap">
-            <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <rect x="3" y="2" width="16" height="18" rx="2.5"/>
-              <path d="M7 8h8M7 12h5"/>
-            </svg>
-          </div>
-          <span class="hdr__action-label">Orders</span>
-        </a>
+            <a href="/orders" class="hdr__action-btn" aria-label="My Orders">
+              <div class="hdr__action-icon-wrap">
+                <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+                  stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="2" width="16" height="18" rx="2.5" />
+                  <path d="M7 8h8M7 12h5" />
+                </svg>
+              </div>
+              <span class="hdr__action-label">Orders</span>
+            </a>
 
-        <button class="hdr__action-btn hdr__action-btn--logout" id="hdrLogoutBtn" aria-label="Logout" style="display: <%= locals.isAuthenticated ? 'flex' : 'none' %>;">
-          <div class="hdr__action-icon-wrap">
-            <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M9 3H5a2 2 0 00-2 2v12a2 2 0 002 2h4"/>
-              <polyline points="16 17 21 12 16 7"/>
-              <line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
-          </div>
-          <span class="hdr__action-label">Logout</span>
-        </button>
-
-        <a href="/login" class="hdr__action-btn hdr__action-btn--login" id="hdrLoginBtn" aria-label="Login" style="display: <%= locals.isAuthenticated ? 'none' : 'flex' %>;">
-          <div class="hdr__action-icon-wrap">
-            <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
-              <polyline points="10 17 15 12 10 7"/>
-              <line x1="15" y1="12" x2="3" y2="12"/>
-            </svg>
-          </div>
-          <span class="hdr__action-label">Login</span>
-        </a>
+            <% if (locals.isAuthenticated) { %>
+              <button class="hdr__action-btn hdr__action-btn--logout" id="hdrLogoutBtn" aria-label="Logout">
+                <div class="hdr__action-icon-wrap">
+                  <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 3H5a2 2 0 00-2 2v12a2 2 0 002 2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                </div>
+                <span class="hdr__action-label">Logout</span>
+              </button>
+              <% } else { %>
+                <a href="/login" class="hdr__action-btn hdr__action-btn--login" id="hdrLoginBtn" aria-label="Login">
+                  <div class="hdr__action-icon-wrap">
+                    <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.75"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
+                      <polyline points="10 17 15 12 10 7" />
+                      <line x1="15" y1="12" x2="3" y2="12" />
+                    </svg>
+                  </div>
+                  <span class="hdr__action-label">Login</span>
+                </a>
+                <% } %>
 
       </nav>
 
@@ -221,46 +234,63 @@
 ════════════════════════════════════════ -->
 <div class="hdr__row3" id="hdrRow3">
   <button type="button" class="hdr__mobile-location" id="hdrMobileLocation" aria-label="Select delivery location">
-    <svg class="hdr__mobile-location-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M10 11a3 3 0 100-6 3 3 0 000 6z"/>
-      <path d="M10 18s-7-5.686-7-10a7 7 0 1114 0C17 12.314 10 18 10 18z"/>
+    <svg class="hdr__mobile-location-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"
+      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M10 11a3 3 0 100-6 3 3 0 000 6z" />
+      <path d="M10 18s-7-5.686-7-10a7 7 0 1114 0C17 12.314 10 18 10 18z" />
     </svg>
     <span class="hdr__mobile-location-text">
       Deliver to <strong class="hdr__mobile-location-city" id="hdrMobileLocCity">Select Location</strong>
     </span>
-    <svg class="hdr__mobile-location-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-      <polyline points="4 6 8 10 12 6"/>
+    <svg class="hdr__mobile-location-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" aria-hidden="true">
+      <polyline points="4 6 8 10 12 6" />
     </svg>
   </button>
 </div>
 
 <script>
-(function () {
-  // Sync Cart Badge
-  function syncHdrCartBadge() {
-    try {
-      var badge = document.getElementById('hdrCartBadge');
-      if (!badge) return;
-      var count = 0;
-      var raw = localStorage.getItem('ks_cart');
-      if (raw) {
-        var cart = JSON.parse(raw);
-        if (Array.isArray(cart)) {
-          for (var i = 0; i < cart.length; i++) {
-            count += (parseInt(cart[i].quantity, 10) || 1);
+  (function () {
+    // Sync Cart Badge
+    function syncHdrCartBadge() {
+      try {
+        var badge = document.getElementById('hdrCartBadge');
+        if (!badge) return;
+        var count = 0;
+        var raw = localStorage.getItem('ks_cart');
+        if (raw) {
+          var cart = JSON.parse(raw);
+          if (Array.isArray(cart)) {
+            for (var i = 0; i < cart.length; i++) {
+              count += (parseInt(cart[i].quantity, 10) || 1);
+            }
           }
         }
-      }
-      if (count > 0) {
-        badge.textContent = count > 99 ? '99+' : count;
-        badge.style.display = 'inline-flex';
-      } else {
-        badge.style.display = 'none';
-      }
-    } catch (_) {}
-  }
-  syncHdrCartBadge();
-  window.addEventListener('storage', syncHdrCartBadge);
-}());
+        if (count > 0) {
+          badge.textContent = count > 99 ? '99+' : count;
+          badge.style.display = 'inline-flex';
+        } else {
+          badge.style.display = 'none';
+        }
+      } catch (_) { }
+    }
+    syncHdrCartBadge();
+    window.addEventListener('storage', syncHdrCartBadge);
+
+    function handleLogout() {
+      fetch('/logout', { method: 'POST', credentials: 'same-origin' })
+        .finally(function () {
+          localStorage.removeItem('authUser');
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('pendingRoute');
+          window.location.href = '/';
+        });
+    }
+
+    var logoutBtn = document.getElementById('hdrLogoutBtn');
+    if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+
+    var mobileLogoutBtn = document.getElementById('hdrMobileLogoutBtn');
+    if (mobileLogoutBtn) mobileLogoutBtn.addEventListener('click', handleLogout);
+  }());
 </script>
-<script src="/assets/js/auth-state.js" defer></script>
