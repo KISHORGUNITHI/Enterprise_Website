@@ -567,10 +567,6 @@
 }
 
 /* Error message — hidden by default, fade in only when shown */
-.auth-form__error {
-  /* No animation by default — only when actively shown */
-}
-
 .auth-form__error:not(#authServerMessage):not([hidden]) {
   animation: errorFadeIn 0.2s ease both;
 }

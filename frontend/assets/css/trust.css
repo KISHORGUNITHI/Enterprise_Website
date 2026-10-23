@@ -109,10 +109,7 @@
   transform: scale(1.1) rotate(-3deg);
 }
 
-/* Icon variants */
-.trust__card-icon--accent  { /* orange — default SVG already uses accent */ }
-.trust__card-icon--success { /* green */ }
-.trust__card-icon--purple  { /* purple */ }
+/* Icon variants (accent, success, purple handled via inline SVG colors) */
 
 .trust__card-number {
   font-size: var(--text-4xl);

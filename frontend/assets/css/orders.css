@@ -48,7 +48,7 @@
 .order-card__image svg { width:100%; height:100%; }
 
 .order-card__info { flex:1; min-width:0; }
-.order-card__product-name { font-size:var(--text-base); font-weight:var(--font-bold); color:var(--color-text-primary); line-height:var(--leading-snug); margin-bottom:var(--space-1); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.order-card__product-name { font-size:var(--text-base); font-weight:var(--font-bold); color:var(--color-text-primary); line-height:var(--leading-snug); margin-bottom:var(--space-1); display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 .order-card__variant { font-size:var(--text-xs); color:var(--color-text-muted); margin-bottom:var(--space-3); }
 .order-card__price { font-size:var(--text-lg); font-weight:var(--font-extrabold); color:var(--color-text-primary); margin-bottom:var(--space-2); }
 .order-card__delivery { font-size:var(--text-xs); color:var(--color-text-muted); }

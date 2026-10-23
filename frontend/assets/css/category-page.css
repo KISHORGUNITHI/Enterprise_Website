@@ -262,7 +262,6 @@
   gap: var(--space-4);
 }
 
-.plp-toolbar__left {}
 
 .plp-toolbar__category {
   font-size: var(--text-lg);
@@ -686,6 +685,7 @@
   line-height: var(--leading-snug);
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
