@@ -170,6 +170,20 @@
                   <p class="checkout-empty-items__desc">Explore our top deals and add items to place an order.</p>
                   <a href="/products/mobiles" class="btn btn--primary">Browse Products</a>
                 </div>
+
+                <!-- Desktop Place Order Action Bar (Flipkart-style at bottom of Order Items) -->
+                <div class="checkout-section-items__cta" id="checkoutDesktopCta">
+                  <div class="checkout-section-items__cta-hint">
+                    <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16" aria-hidden="true">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Order confirmation & invoice will be sent to your verified account</span>
+                  </div>
+                  <button type="button" class="btn btn--accent checkout-place-order-btn" id="placeOrderBtn">
+                    <span class="checkout-place-order-btn__text">PLACE ORDER</span>
+                    <span class="checkout-btn-spinner" id="placeOrderSpinner" hidden aria-hidden="true"></span>
+                  </button>
+                </div>
               </div>
             </section>
 
@@ -245,7 +259,7 @@
                 <span>You will save <strong id="savingsAmountText">₹0</strong> on this order!</span>
               </div>
 
-              <!-- Payment Method Selection -->
+              <!-- Payment Method Selection (Cash on Delivery Only) -->
               <div class="checkout-payment-section">
                 <span class="checkout-payment-section__title" id="paymentMethodTitle">Payment Mode</span>
                 <div class="checkout-payment-options" role="radiogroup" aria-labelledby="paymentMethodTitle">
@@ -256,22 +270,8 @@
                       <span class="checkout-payment-opt__sub">Pay cash or UPI at the time of delivery</span>
                     </div>
                   </label>
-
-                  <label for="payment_mode_upi" class="checkout-payment-opt">
-                    <input type="radio" id="payment_mode_upi" name="payment_mode" value="UPI" class="checkout-payment-radio" />
-                    <div class="checkout-payment-opt__info">
-                      <span class="checkout-payment-opt__name">UPI / Online Payment</span>
-                      <span class="checkout-payment-opt__sub">Instant payment via GPay, PhonePe, Cards</span>
-                    </div>
-                  </label>
                 </div>
               </div>
-
-              <!-- Place Order CTA Button -->
-              <button type="button" class="btn btn--accent btn--block checkout-place-order-btn" id="placeOrderBtn">
-                <span class="checkout-place-order-btn__text">PLACE ORDER</span>
-                <span class="checkout-btn-spinner" id="placeOrderSpinner" hidden aria-hidden="true"></span>
-              </button>
 
               <!-- Trust / Security Signals -->
               <div class="checkout-trust-badges">
@@ -539,7 +539,20 @@
       <!-- ── 6. Existing Footer (reused untouched) ── -->
       <%- include('../../partials/home-footer') %>
 
+        <!-- ── 7. Mobile Fixed Bottom Checkout Bar (Replaces Mobile Bottom Nav) ── -->
+        <div class="checkout-mobile-bottom-bar" id="checkoutMobileBottomBar" role="region" aria-label="Checkout action bar">
+          <div class="checkout-mobile-bottom-bar__info">
+            <span class="checkout-mobile-bottom-bar__label">Total Amount</span>
+            <strong class="checkout-mobile-bottom-bar__price" id="mobileBottomTotal">₹0</strong>
+          </div>
+          <button type="button" class="btn btn--accent checkout-mobile-place-order-btn" id="mobilePlaceOrderBtn" aria-label="Place Order">
+            <span class="checkout-mobile-place-order-btn__text">PLACE ORDER</span>
+            <span class="checkout-btn-spinner" id="mobilePlaceOrderSpinner" hidden aria-hidden="true"></span>
+          </button>
+        </div>
+
         <!-- Scripts -->
+        <script src="/assets/js/category-header.js" defer></script>
         <script src="/assets/js/auth-guard.js"></script>
         <script src="/assets/js/checkout.js"></script>
 

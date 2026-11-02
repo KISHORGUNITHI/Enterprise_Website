@@ -156,37 +156,73 @@
   if (locBtn) locBtn.addEventListener('click', goToAddresses);
   if (mobileLocBtn) mobileLocBtn.addEventListener('click', goToAddresses);
 
-  // Fetch user's address to display
-  fetch('/api/profile/addresses')
+  function applyHomeLocation(displayText, city, pincode) {
+    if (!displayText) return;
+    const locFull = document.querySelector('.hdr__loc-full');
+    const locShort = document.querySelector('.hdr__loc-short');
+    const locMobileCity = document.getElementById('hdrMobileLocCity');
+
+    if (locFull) locFull.textContent = displayText;
+    if (locShort && city) locShort.textContent = `📍 ${city}`;
+
+    if (locMobileCity) {
+      locMobileCity.textContent = (city && pincode) ? `${city} (${pincode})` : displayText;
+    }
+  }
+
+  // 1. Immediately render cached location from localStorage
+  try {
+    const cachedLoc = localStorage.getItem('ks_user_location');
+    if (cachedLoc) {
+      const parsed = JSON.parse(cachedLoc);
+      if (parsed && (parsed.text || parsed.city)) {
+        applyHomeLocation(parsed.text || parsed.city, parsed.city, parsed.postal_code);
+      }
+    } else {
+      const storedAddrs = localStorage.getItem('userAddresses');
+      if (storedAddrs) {
+        const list = JSON.parse(storedAddrs);
+        if (Array.isArray(list) && list.length > 0) {
+          const a = list.find(x => x.is_default) || list[0];
+          const name = a.city || a.address_line_1 || '';
+          const pin = a.postal_code || a.pincode || '';
+          const text = (name && pin) ? `${name} (${pin})` : (name || pin || 'Select Location');
+          applyHomeLocation(text, a.city, pin);
+        }
+      }
+    }
+  } catch (_) {}
+
+  // 2. Fetch authenticated user's address to display & sync
+  const homeAuthHeaders = { 'Accept': 'application/json' };
+  const homeAuthToken = localStorage.getItem('authToken');
+  if (homeAuthToken) homeAuthHeaders['Authorization'] = `Bearer ${homeAuthToken}`;
+
+  fetch('/api/profile/addresses', {
+    headers: homeAuthHeaders,
+    credentials: 'same-origin',
+  })
     .then(res => res.json())
     .then(data => {
       if (data.success && data.data && data.data.length > 0) {
         const address = data.data.find(a => a.is_default) || data.data[0];
-        
-        // Format as City, Postal Code or Address Line 1
+        const placeName = address.city || address.address_line_1 || '';
+        const pincode = address.postal_code || address.pincode || '';
         const displayText = address.city ? `${address.city}, ${address.postal_code || ''}`.replace(/,\s*$/, '') : address.address_line_1;
-        
-        const locFull = document.querySelector('.hdr__loc-full');
-        const locShort = document.querySelector('.hdr__loc-short');
-        const locMobileCity = document.getElementById('hdrMobileLocCity');
-        
-        if (locFull && displayText) locFull.textContent = displayText;
-        if (locShort && address.city) locShort.textContent = `📍 ${address.city}`;
+        const shortText = (placeName && pincode) ? `${placeName} (${pincode})` : (placeName || pincode || '');
 
-        if (locMobileCity) {
-          const placeName = address.city || address.address_line_1 || '';
-          const pincode = address.postal_code || address.pincode || '';
-          if (placeName && pincode) {
-            locMobileCity.textContent = `${placeName} (${pincode})`;
-          } else if (placeName) {
-            locMobileCity.textContent = placeName;
-          } else if (pincode) {
-            locMobileCity.textContent = pincode;
-          }
-        }
+        applyHomeLocation(displayText || shortText, address.city, pincode);
+
+        try {
+          localStorage.setItem('ks_user_location', JSON.stringify({
+            city: address.city || '',
+            postal_code: address.postal_code || '',
+            text: shortText || displayText
+          }));
+        } catch (_) {}
       }
     })
-    .catch(err => console.error("Error fetching location:", err));
+    .catch(err => console.warn("Location fetch status:", err));
 
   // ─── Cart badge sync ──────────────────────────────────────────────────────
   function syncHomeCartBadge() {

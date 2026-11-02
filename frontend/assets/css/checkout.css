@@ -2029,3 +2029,169 @@ body.checkout-body {
     padding: var(--space-6) var(--space-4);
   }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Desktop Place Order Action Bar (Bottom of Section 2)
+══════════════════════════════════════════════════════════════ */
+.checkout-section-items__cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--color-bg-secondary, #f9fafb);
+  border-top: 1px solid var(--color-border, #e5e7eb);
+  border-bottom-left-radius: var(--radius-lg, 12px);
+  border-bottom-right-radius: var(--radius-lg, 12px);
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+.checkout-section-items__cta-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text-muted, #6b7280);
+}
+
+.checkout-section-items__cta-hint svg {
+  color: var(--color-success-600, #16a34a);
+  flex-shrink: 0;
+}
+
+.checkout-section-items__cta .checkout-place-order-btn {
+  min-width: 220px;
+  height: 48px;
+  padding: 0 28px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-radius: var(--radius-md, 8px);
+  background: var(--color-accent-500, #ff6b00);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 3px 10px rgba(255, 107, 0, 0.3);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.checkout-section-items__cta .checkout-place-order-btn:hover:not(:disabled) {
+  background: var(--color-accent-600, #e05e00);
+  box-shadow: 0 5px 14px rgba(255, 107, 0, 0.4);
+  transform: translateY(-1px);
+}
+
+.checkout-section-items__cta .checkout-place-order-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Mobile Fixed Bottom Place Order Bar (Only Mobile UI)
+══════════════════════════════════════════════════════════════ */
+.checkout-mobile-bottom-bar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Hide down bar (Home, You, Call, Cart, Orders) ONLY in order checkout page */
+  body.checkout-body #mobileBottomNav,
+  body.checkout-body .mobile-bottom-nav,
+  body.checkout-body #mobileBottomBar,
+  body.checkout-body .mobile-bottom-bar {
+    display: none !important;
+  }
+
+  /* Ensure page content is not hidden behind the mobile place order bar */
+  body.checkout-body {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Hide Desktop CTA in Section 2 on Mobile */
+  .checkout-section-items__cta {
+    display: none !important;
+  }
+
+  /* Show Sticky Mobile Bottom Place Order Bar */
+  .checkout-mobile-bottom-bar {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: var(--color-surface, #ffffff);
+    border-top: 1px solid var(--color-border, #e5e7eb);
+    box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.08);
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    box-sizing: border-box;
+  }
+
+  .checkout-mobile-bottom-bar__info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .checkout-mobile-bottom-bar__label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-text-muted, #6b7280);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .checkout-mobile-bottom-bar__price {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--color-text-primary, #111827);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .checkout-mobile-place-order-btn {
+    flex: 1;
+    max-width: 220px;
+    height: 46px;
+    padding: 0 18px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    border-radius: var(--radius-md, 8px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--color-accent-500, #ff6b00);
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(255, 107, 0, 0.3);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .checkout-mobile-place-order-btn:hover:not(:disabled) {
+    background: var(--color-accent-600, #e05e00);
+    box-shadow: 0 5px 14px rgba(255, 107, 0, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .checkout-mobile-place-order-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+}
+

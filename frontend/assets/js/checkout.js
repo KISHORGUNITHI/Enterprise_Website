@@ -62,6 +62,9 @@
   // Order Placement
   const placeOrderBtn = document.getElementById('placeOrderBtn');
   const placeOrderSpinner = document.getElementById('placeOrderSpinner');
+  const mobilePlaceOrderBtn = document.getElementById('mobilePlaceOrderBtn');
+  const mobilePlaceOrderSpinner = document.getElementById('mobilePlaceOrderSpinner');
+  const mobileBottomTotal = document.getElementById('mobileBottomTotal');
 
   // Success Modal
   const orderSuccessModal = document.getElementById('orderSuccessModal');
@@ -238,7 +241,39 @@
       openChangeAddressBtn && openChangeAddressBtn.removeAttribute('hidden');
     }
 
+    updateHeaderLocationFromAddr(addr);
     renderModalAddressList();
+  }
+
+  function updateHeaderLocationFromAddr(addr) {
+    if (!addr) return;
+    const placeName = addr.city || addr.address_line_1 || '';
+    const pincode = addr.postal_code || addr.pincode || '';
+    let locDisplay = placeName;
+    if (placeName && pincode) {
+      locDisplay = `${placeName} (${pincode})`;
+    } else if (pincode) {
+      locDisplay = pincode;
+    }
+
+    try {
+      localStorage.setItem('ks_user_location', JSON.stringify({
+        city: addr.city || '',
+        postal_code: addr.postal_code || '',
+        text: locDisplay
+      }));
+    } catch (_) {}
+
+    const catMobileCity = document.getElementById('catMobileLocCity');
+    if (catMobileCity) catMobileCity.textContent = locDisplay;
+    const hdrMobileCity = document.getElementById('hdrMobileLocCity');
+    if (hdrMobileCity) hdrMobileCity.textContent = locDisplay;
+    const catHdrLocFull = document.getElementById('catHdrLocFull');
+    if (catHdrLocFull) catHdrLocFull.textContent = locDisplay;
+    const locFull = document.querySelector('.hdr__loc-full');
+    if (locFull) locFull.textContent = locDisplay;
+    const locShort = document.querySelector('.hdr__loc-short');
+    if (locShort && addr.city) locShort.textContent = `📍 ${addr.city}`;
   }
 
   // Render list inside the change address modal
@@ -720,24 +755,30 @@
   }
 
   function updatePlaceOrderBtnState() {
-    if (!placeOrderBtn) return;
-    const btnText = placeOrderBtn.querySelector('.checkout-place-order-btn__text');
-    if (!isUserAuthed) {
-      placeOrderBtn.disabled = true;
-      placeOrderBtn.style.opacity = '0.6';
-      placeOrderBtn.style.cursor = 'not-allowed';
-      if (btnText) btnText.textContent = 'LOGIN TO PLACE ORDER';
-    } else if (checkoutItems.length === 0) {
-      placeOrderBtn.disabled = true;
-      placeOrderBtn.style.opacity = '';
-      placeOrderBtn.style.cursor = '';
-      if (btnText) btnText.textContent = 'PLACE ORDER';
-    } else {
-      placeOrderBtn.disabled = false;
-      placeOrderBtn.style.opacity = '';
-      placeOrderBtn.style.cursor = '';
-      if (btnText) btnText.textContent = 'PLACE ORDER';
-    }
+    const btns = [
+      { btn: placeOrderBtn, textEl: placeOrderBtn ? placeOrderBtn.querySelector('.checkout-place-order-btn__text') : null, defaultText: 'PLACE ORDER', loginText: 'LOGIN TO PLACE ORDER' },
+      { btn: mobilePlaceOrderBtn, textEl: mobilePlaceOrderBtn ? mobilePlaceOrderBtn.querySelector('.checkout-mobile-place-order-btn__text') : null, defaultText: 'PLACE ORDER', loginText: 'LOGIN TO ORDER' }
+    ];
+
+    btns.forEach(({ btn, textEl, defaultText, loginText }) => {
+      if (!btn) return;
+      if (!isUserAuthed) {
+        btn.disabled = true;
+        btn.style.opacity = '0.6';
+        btn.style.cursor = 'not-allowed';
+        if (textEl) textEl.textContent = loginText;
+      } else if (checkoutItems.length === 0) {
+        btn.disabled = true;
+        btn.style.opacity = '';
+        btn.style.cursor = '';
+        if (textEl) textEl.textContent = defaultText;
+      } else {
+        btn.disabled = false;
+        btn.style.opacity = '';
+        btn.style.cursor = '';
+        if (textEl) textEl.textContent = defaultText;
+      }
+    });
   }
 
   function renderCheckoutItems() {
@@ -972,6 +1013,7 @@
 
     // 4. Update Final Total Amount
     summaryTotalAmount && (summaryTotalAmount.textContent = fmt(totalAmount));
+    mobileBottomTotal && (mobileBottomTotal.textContent = fmt(totalAmount));
 
     // 5. Update Savings Banner
     if (totalSavings > 0) {
@@ -1043,9 +1085,13 @@
 
     isPlacingOrder = true;
     if (placeOrderBtn) placeOrderBtn.disabled = true;
+    if (mobilePlaceOrderBtn) mobilePlaceOrderBtn.disabled = true;
     placeOrderSpinner && placeOrderSpinner.removeAttribute('hidden');
-    const btnText = placeOrderBtn.querySelector('.checkout-place-order-btn__text');
+    mobilePlaceOrderSpinner && mobilePlaceOrderSpinner.removeAttribute('hidden');
+    const btnText = placeOrderBtn && placeOrderBtn.querySelector('.checkout-place-order-btn__text');
     if (btnText) btnText.textContent = 'PLACING ORDER...';
+    const mobileBtnText = mobilePlaceOrderBtn && mobilePlaceOrderBtn.querySelector('.checkout-mobile-place-order-btn__text');
+    if (mobileBtnText) mobileBtnText.textContent = 'PLACING...';
 
     try {
       const res = await fetch('/api/orders', {
@@ -1098,11 +1144,13 @@
     } finally {
       isPlacingOrder = false;
       placeOrderSpinner && placeOrderSpinner.setAttribute('hidden', '');
+      mobilePlaceOrderSpinner && mobilePlaceOrderSpinner.setAttribute('hidden', '');
       updatePlaceOrderBtnState();
     }
   }
 
   placeOrderBtn && placeOrderBtn.addEventListener('click', handlePlaceOrder);
+  mobilePlaceOrderBtn && mobilePlaceOrderBtn.addEventListener('click', handlePlaceOrder);
 
   // ═════════════════════════════════════════════════════════════════════════
   // 5. INITIALIZATION

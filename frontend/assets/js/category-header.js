@@ -80,31 +80,94 @@
     });
   });
 
-  // ─── Mobile Location button ───────────────────────────────────────────────
+  // ─── Location buttons (Desktop & Mobile) ──────────────────────────────────
   const mobileLocBtn = document.getElementById('catMobileLocation');
-  if (mobileLocBtn) {
-    mobileLocBtn.addEventListener('click', () => {
-      window.location.href = '/profile#addresses';
-    });
+  const desktopLocBtn = document.getElementById('catHdrLocation');
+
+  function handleLocClick() {
+    if (window.location.pathname === '/checkout') {
+      const changeBtn = document.getElementById('openChangeAddressBtn');
+      const addBtn = document.getElementById('noAddrAddBtn');
+      if (changeBtn && !changeBtn.hasAttribute('hidden')) {
+        changeBtn.click();
+      } else if (addBtn) {
+        addBtn.click();
+      } else {
+        const modal = document.getElementById('addressModalBackdrop');
+        if (modal) modal.removeAttribute('hidden');
+      }
+      return;
+    }
+    window.location.href = '/profile#addresses';
   }
 
-  // Fetch address to display in mobile location bar
-  fetch('/api/profile/addresses')
+  if (mobileLocBtn) mobileLocBtn.addEventListener('click', handleLocClick);
+  if (desktopLocBtn) desktopLocBtn.addEventListener('click', handleLocClick);
+
+  function applyHeaderLocationText(text) {
+    if (!text) return;
+    const locMobileCity = document.getElementById('catMobileLocCity');
+    if (locMobileCity) locMobileCity.textContent = text;
+    const catHdrLocFull = document.getElementById('catHdrLocFull');
+    if (catHdrLocFull) catHdrLocFull.textContent = text;
+    const locFull = document.querySelector('.hdr__loc-full');
+    if (locFull) locFull.textContent = text;
+  }
+
+  // 1. Immediately read cached location from localStorage
+  try {
+    const cachedLoc = localStorage.getItem('ks_user_location');
+    if (cachedLoc) {
+      const parsed = JSON.parse(cachedLoc);
+      if (parsed && parsed.text) {
+        applyHeaderLocationText(parsed.text);
+      }
+    } else {
+      const storedAddrs = localStorage.getItem('userAddresses');
+      if (storedAddrs) {
+        const list = JSON.parse(storedAddrs);
+        if (Array.isArray(list) && list.length > 0) {
+          const a = list.find(x => x.is_default) || list[0];
+          const name = a.city || a.address_line_1 || '';
+          const pin = a.postal_code || a.pincode || '';
+          const display = (name && pin) ? `${name} (${pin})` : (name || pin || 'Select Location');
+          applyHeaderLocationText(display);
+        }
+      }
+    }
+  } catch (_) {}
+
+  // 2. Fetch authenticated address from server to update & sync
+  const authHeaders = { 'Accept': 'application/json' };
+  const token = localStorage.getItem('authToken');
+  if (token) authHeaders['Authorization'] = `Bearer ${token}`;
+
+  fetch('/api/profile/addresses', {
+    headers: authHeaders,
+    credentials: 'same-origin',
+  })
     .then(res => res.json())
     .then(data => {
       if (data.success && data.data && data.data.length > 0) {
         const address = data.data.find(a => a.is_default) || data.data[0];
-        const locMobileCity = document.getElementById('catMobileLocCity');
-        if (locMobileCity) {
-          const placeName = address.city || address.address_line_1 || '';
-          const pincode = address.postal_code || address.pincode || '';
-          if (placeName && pincode) {
-            locMobileCity.textContent = `${placeName} (${pincode})`;
-          } else if (placeName) {
-            locMobileCity.textContent = placeName;
-          } else if (pincode) {
-            locMobileCity.textContent = pincode;
-          }
+        const placeName = address.city || address.address_line_1 || '';
+        const pincode = address.postal_code || address.pincode || '';
+        let locText = placeName;
+        if (placeName && pincode) {
+          locText = `${placeName} (${pincode})`;
+        } else if (pincode) {
+          locText = pincode;
+        }
+
+        if (locText) {
+          applyHeaderLocationText(locText);
+          try {
+            localStorage.setItem('ks_user_location', JSON.stringify({
+              city: address.city || '',
+              postal_code: address.postal_code || '',
+              text: locText
+            }));
+          } catch (_) {}
         }
       }
     })
