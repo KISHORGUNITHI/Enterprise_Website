@@ -400,8 +400,16 @@
 
   // Prevent link clicks when dragging & support navigation for image-only slides
   sliderEl.addEventListener('click', (e) => {
-    if (dragStarted) e.preventDefault();
-    dragStarted = false;
+    if (dragStarted) {
+      e.preventDefault();
+      dragStarted = false;
+      return;
+    }
+    const imageOnlySlide = e.target.closest('.hero__slide--image-only[data-href]');
+    if (imageOnlySlide && !e.target.closest('button') && !e.target.closest('a')) {
+      const href = imageOnlySlide.dataset.href;
+      if (href) window.location.href = href;
+    }
   });
 
   // ─── Keyboard navigation ───────────────────────────────────────────────────

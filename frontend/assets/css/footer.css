@@ -113,17 +113,42 @@
 }
 
 .footer__social-link:hover {
-  background-color: var(--color-primary-700);
-  border-color: var(--color-primary-700);
-  color: #fff;
   transform: translateY(-3px);
-  box-shadow: var(--shadow-primary);
 }
 
-.footer__social-link--whatsapp:hover {
-  background-color: var(--color-whatsapp);
-  border-color: var(--color-whatsapp);
-  box-shadow: 0 8px 20px rgba(37, 211, 102, 0.35);
+/* Instagram — Official native gradient */
+.footer__social-link--instagram,
+.footer__social-link[href*="instagram.com"] {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  border-color: transparent;
+  color: #ffffff;
+}
+
+.footer__social-link--instagram:hover,
+.footer__social-link[href*="instagram.com"]:hover {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  border-color: transparent;
+  color: #ffffff;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(204, 35, 102, 0.45);
+  filter: brightness(1.1);
+}
+
+/* WhatsApp — Official native green */
+.footer__social-link--whatsapp,
+.footer__social-link[href*="wa.me"] {
+  background-color: var(--color-whatsapp, #25d366);
+  border-color: var(--color-whatsapp, #25d366);
+  color: #ffffff;
+}
+
+.footer__social-link--whatsapp:hover,
+.footer__social-link[href*="wa.me"]:hover {
+  background-color: #20ba5a;
+  border-color: #20ba5a;
+  color: #ffffff;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(37, 211, 102, 0.45);
 }
 
 /* =============================================
