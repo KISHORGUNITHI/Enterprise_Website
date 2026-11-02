@@ -947,17 +947,57 @@
   // 5. SIDEBAR LOGOUT
   // ═════════════════════════════════════════════════════════════════════════
 
-  profileSidebarLogoutBtn && profileSidebarLogoutBtn.addEventListener('click', function (e) {
-    e.preventDefault();
+  function handleProfileLogout(e) {
+    if (e && e.preventDefault) e.preventDefault();
+
+    const btn = document.getElementById('profileSidebarLogoutBtn');
+    if (btn) {
+      btn.disabled = true;
+      const textSpan = btn.querySelector('span');
+      if (textSpan) textSpan.textContent = 'Logging out…';
+      btn.style.opacity = '0.7';
+      btn.style.pointerEvents = 'none';
+    }
+
+    // 1. Clear all client authentication, tokens, cached addresses and session data
+    try {
+      localStorage.removeItem('authUser');
+      localStorage.removeItem('authToken');
+      localStorage.removeItem(STORAGE_KEY_PENDING);
+      localStorage.removeItem(STORAGE_KEY_ADDRESSES);
+      localStorage.removeItem('ks_cart');
+      localStorage.removeItem('ks_checkout_item');
+      localStorage.removeItem('ks_user_location');
+      sessionStorage.clear();
+      // Notify other open tabs for real-time synchronization
+      localStorage.setItem('auth_event', 'logout:' + Date.now());
+    } catch (_) {}
+
+    // 2. Call EnterpriseAuth if available
     if (window.EnterpriseAuth && typeof window.EnterpriseAuth.logout === 'function') {
       window.EnterpriseAuth.logout();
-    } else {
-      fetch('/logout', { method: 'POST', credentials: 'same-origin' })
-        .finally(function () {
-          localStorage.removeItem('authUser');
-          localStorage.removeItem(STORAGE_KEY_PENDING);
-          window.location.href = '/home';
-        });
+      return;
+    }
+
+    // 3. Clear server-side session cookie via POST /logout, then redirect to Landing page
+    fetch('/logout', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Accept': 'application/json' }
+    })
+      .catch(function (err) {
+        console.warn('POST /logout failed, proceeding with redirect:', err);
+      })
+      .finally(function () {
+        window.location.href = '/';
+      });
+  }
+
+  // Delegated click listener guarantees logout even if clicking nested SVG/path/span
+  document.addEventListener('click', function (e) {
+    const logoutBtn = e.target.closest('#profileSidebarLogoutBtn');
+    if (logoutBtn) {
+      handleProfileLogout(e);
     }
   });
 

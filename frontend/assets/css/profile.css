@@ -670,8 +670,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  border-bottom: 1px solid var(--color-border-light);
-  padding-bottom: var(--space-5);
 }
 
 .profile-faq-question {
@@ -686,38 +684,6 @@
   color: var(--color-text-muted);
   line-height: var(--leading-relaxed);
 }
-
-.profile-account-danger {
-  display: flex;
-  align-items: center;
-  gap: var(--space-6);
-  padding-top: var(--space-5);
-}
-
-.profile-danger-link {
-  background: none;
-  border: none;
-  font-family: inherit;
-  font-size: var(--text-sm);
-  font-weight: var(--font-semibold);
-  color: var(--color-primary-700);
-  cursor: pointer;
-  padding: 0;
-  transition: color 0.15s ease;
-}
-
-.profile-danger-link:hover {
-  text-decoration: underline;
-}
-
-.profile-danger-link--delete {
-  color: var(--color-error-600);
-}
-
-.profile-danger-link--delete:hover {
-  color: var(--color-error-500);
-}
-
 
 /* =============================================
    MANAGE ADDRESSES TAB
@@ -1171,12 +1137,32 @@
 
 @media (max-width: 768px) {
   .profile-page {
-    padding-block: var(--space-4) var(--space-10);
+    padding-block: var(--space-4) 80px;
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  .profile-page__container {
+    width: 100%;
+    max-width: 100%;
+    padding-inline: 16px;
+    box-sizing: border-box;
   }
 
   .profile-layout {
     grid-template-columns: 1fr;
     gap: var(--space-4);
+    width: 100%;
+    min-width: 0;
+  }
+
+  .profile-sidebar,
+  .profile-main,
+  .profile-tab-content {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .profile-sidebar {
@@ -1185,6 +1171,20 @@
 
   .profile-user-card {
     padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .profile-user-card__name {
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .profile-nav-card {
+    border-radius: var(--radius-lg);
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .profile-nav-items {
@@ -1208,8 +1208,49 @@
     border-bottom-color: var(--color-primary-700);
   }
 
-  .profile-card {
-    padding: var(--space-4) var(--space-5);
+  .profile-nav-item--logout {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--text-sm);
+    justify-content: flex-start;
+    border-bottom: none;
+    border-radius: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .profile-card,
+  .profile-faqs-card,
+  .address-form-panel {
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .profile-input-wrap {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .profile-form-group {
+    width: 100%;
+  }
+
+  .profile-input,
+  .profile-select,
+  .profile-textarea {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .address-add-trigger-card {
+    border-radius: var(--radius-lg);
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .address-add-btn {
+    padding: var(--space-3) var(--space-4);
   }
 
   .address-form-grid--2 {
@@ -1219,25 +1260,63 @@
 
   .address-card {
     padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .address-card__recipient {
     gap: var(--space-2);
   }
-
-  .address-form-panel {
-    padding: var(--space-4) var(--space-5);
-  }
 }
 
 @media (max-width: 480px) {
+  .profile-page__container {
+    padding-inline: 16px;
+  }
+
+  .profile-card,
+  .profile-faqs-card,
+  .address-form-panel,
+  .address-card {
+    padding: 14px 14px;
+  }
+
+  .profile-user-card {
+    padding: 12px 14px;
+  }
+
+  .profile-nav-items {
+    padding: var(--space-2);
+  }
+
+  .profile-nav-item {
+    flex: 1 1 auto;
+    justify-content: center;
+    text-align: center;
+    padding: 8px 12px;
+  }
+
+  .profile-nav-item--logout {
+    flex: none;
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--text-sm);
+    border-bottom: none;
+    border-radius: 0;
+  }
+
   .address-form-panel__header {
     align-items: stretch;
     flex-direction: column;
+    gap: var(--space-3);
   }
 
   .address-location-btn {
     justify-content: center;
+    width: 100%;
   }
 
   .profile-gender-options {
@@ -1259,8 +1338,13 @@
     align-items: stretch;
   }
 
+  .address-form-actions .btn {
+    width: 100%;
+  }
+
   .address-card__header {
     flex-wrap: wrap;
+    gap: var(--space-2);
   }
 
   .address-card__actions {
