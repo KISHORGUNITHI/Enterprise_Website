@@ -1,6 +1,10 @@
 <%# navbar.ejs — Site navigation Future React component: <Navbar />
 Props: none (static for now, dynamic via JS scroll behavior)
 %>
+<%
+  var isAuth = Boolean(locals.isAuthenticated);
+  var isAdmin = Boolean(locals.isAdmin);
+%>
 
 <header class="navbar" id="navbar" role="banner">
   <div class="container navbar__container">
@@ -40,7 +44,7 @@ Props: none (static for now, dynamic via JS scroll behavior)
         </svg>
         <span>Call Us</span>
       </a>
-      <a href="/admin/dashboard" class="btn btn--accent btn--sm" id="navAdminBtn" style="display: none;">
+      <a href="/admin/dashboard" class="btn btn--accent btn--sm" id="navAdminBtn" style="<%= (isAuth && isAdmin) ? 'display: inline-flex;' : 'display: none;' %>">
         <svg class="icon icon--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="2" y="2" width="6" height="6" rx="1.5" />
           <rect x="12" y="2" width="6" height="6" rx="1.5" />
@@ -49,18 +53,18 @@ Props: none (static for now, dynamic via JS scroll behavior)
         </svg>
         Admin
       </a>
-      <a href="/profile" class="btn btn--outline btn--sm" id="navProfileBtn" style="display: none;">
+      <a href="/profile" class="btn btn--outline btn--sm" id="navProfileBtn" style="<%= isAuth ? 'display: inline-flex;' : 'display: none;' %>">
         Profile
       </a>
       <button type="button" class="btn btn--ghost btn--sm" id="navLogoutBtn"
-        style="display: none; color: var(--color-text-primary);" aria-label="Log out">
+        style="<%= isAuth ? 'display: inline-flex;' : 'display: none;' %>" aria-label="Log out">
         <svg class="icon icon--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M13 16l4-4-4-4M17 12H7M7 4H4a1 1 0 00-1 1v14a1 1 0 001 1h3"></path>
         </svg>
         <span>Logout</span>
       </button>
-      <a href="/login" class="btn btn--primary btn--sm navbar__login-btn" id="navbarLoginBtn">
+      <a href="/login" class="btn btn--primary btn--sm navbar__login-btn" id="navbarLoginBtn" style="<%= isAuth ? 'display: none;' : '' %>">
         <svg class="icon icon--sm" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
           <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
         </svg>
@@ -96,9 +100,12 @@ Props: none (static for now, dynamic via JS scroll behavior)
           </svg>
           Call: 9963 657 799
         </a>
-        <a href="/login" class="btn btn--primary btn--lg w-full" id="navMobileLoginBtn">Login</a>
-        <a href="/profile" class="btn btn--primary btn--lg w-full" id="navMobileProfileBtn" style="display: none;">My
+        <a href="/login" class="btn btn--primary btn--lg w-full" id="navMobileLoginBtn" style="<%= isAuth ? 'display: none;' : '' %>">Login</a>
+        <a href="/profile" class="btn btn--primary btn--lg w-full" id="navMobileProfileBtn" style="<%= isAuth ? 'display: block;' : 'display: none;' %>">My
           Profile</a>
+        <button type="button" class="btn btn--outline btn--lg w-full" id="navMobileLogoutBtn" style="<%= isAuth ? 'display: block;' : 'display: none;' %> color: var(--color-error-600, #dc2626); border-color: rgba(239, 68, 68, 0.35);">
+          Logout
+        </button>
       </div>
     </nav>
   </div>
@@ -108,9 +115,9 @@ Props: none (static for now, dynamic via JS scroll behavior)
 <div class="navbar__spacer" aria-hidden="true"></div>
 
 <!-- Mobile Fixed Bottom Action Bar (Authenticated Only) -->
-<nav class="mobile-bottom-bar" id="mobileBottomBar" aria-label="Quick actions" style="display: none;">
+<nav class="mobile-bottom-bar" id="mobileBottomBar" aria-label="Quick actions" style="<%= isAuth ? '' : 'display: none;' %>">
   <!-- Admin Bottom Bar: 3 actions (Admin, circular Call, View Store) -->
-  <div class="mobile-bottom-bar__admin" id="mobileBottomBarAdmin" style="display: none;">
+  <div class="mobile-bottom-bar__admin" id="mobileBottomBarAdmin" style="<%= (isAuth && isAdmin) ? '' : 'display: none;' %>">
     <a href="/admin/dashboard" class="mobile-bottom-bar__action mobile-bottom-bar__action--admin"
       id="mobileBottomAdminBtn">
       <div class="mobile-bottom-bar__icon-wrap">
@@ -152,7 +159,7 @@ Props: none (static for now, dynamic via JS scroll behavior)
   </div>
 
   <!-- Regular User Bottom Bar: 2 actions (Rectangular Call, Rectangular View Store) -->
-  <div class="mobile-bottom-bar__user" id="mobileBottomBarUser" style="display: none;">
+  <div class="mobile-bottom-bar__user" id="mobileBottomBarUser" style="<%= (isAuth && !isAdmin) ? '' : 'display: none;' %>">
     <a href="tel:9963657799" class="mobile-bottom-bar__user-btn mobile-bottom-bar__user-btn--call"
       id="mobileBottomUserCallBtn">
       <svg class="mobile-bottom-bar__btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -176,7 +183,7 @@ Props: none (static for now, dynamic via JS scroll behavior)
 
 <script>
   (function () {
-    var serverAuth = <% - JSON.stringify({ isAuthenticated: Boolean(locals.isAuthenticated), isAdmin: Boolean(locals.isAdmin) }) %>;
+    var serverAuth = <%- JSON.stringify({ isAuthenticated: Boolean(locals.isAuthenticated), isAdmin: Boolean(locals.isAdmin) }) %>;
 
     function syncAuthUI() {
       try {
@@ -185,11 +192,13 @@ Props: none (static for now, dynamic via JS scroll behavior)
 
         var raw = localStorage.getItem('authUser');
         if (raw) {
-          var u = JSON.parse(raw);
-          if (u && (u.id || u.email)) {
-            isAuth = true;
-            isAdmin = (u.role === 'ADMIN' || u.role === 'admin');
-          }
+          try {
+            var u = JSON.parse(raw);
+            if (u && (u.id || u.email)) {
+              isAuth = true;
+              isAdmin = (u.role === 'ADMIN' || u.role === 'admin');
+            }
+          } catch (_) {}
         }
 
         if (serverAuth && serverAuth.isAuthenticated) {
@@ -215,6 +224,7 @@ Props: none (static for now, dynamic via JS scroll behavior)
           var logoutBtn = document.getElementById('navLogoutBtn');
           var mobileLogin = document.getElementById('navMobileLoginBtn');
           var mobileProfile = document.getElementById('navMobileProfileBtn');
+          var mobileLogout = document.getElementById('navMobileLogoutBtn');
           var adminBtn = document.getElementById('navAdminBtn');
 
           if (loginBtn) loginBtn.style.display = 'none';
@@ -222,6 +232,7 @@ Props: none (static for now, dynamic via JS scroll behavior)
           if (logoutBtn) logoutBtn.style.display = 'inline-flex';
           if (mobileLogin) mobileLogin.style.display = 'none';
           if (mobileProfile) mobileProfile.style.display = 'block';
+          if (mobileLogout) mobileLogout.style.display = 'block';
 
           if (adminBtn) {
             adminBtn.style.display = isAdmin ? 'inline-flex' : 'none';
@@ -231,8 +242,8 @@ Props: none (static for now, dynamic via JS scroll behavior)
           var adminBottom = document.getElementById('mobileBottomBarAdmin');
           var userBottom = document.getElementById('mobileBottomBarUser');
           if (bottomBar) bottomBar.style.display = '';
-          if (adminBottom) adminBottom.style.display = isAdmin ? '' : 'none';
-          if (userBottom) userBottom.style.display = isAdmin ? 'none' : '';
+          if (adminBottom) adminBottom.style.display = isAdmin ? 'grid' : 'none';
+          if (userBottom) userBottom.style.display = isAdmin ? 'none' : 'flex';
           return;
         }
 
@@ -245,6 +256,7 @@ Props: none (static for now, dynamic via JS scroll behavior)
         var logoutBtn = document.getElementById('navLogoutBtn');
         var mobileLogin = document.getElementById('navMobileLoginBtn');
         var mobileProfile = document.getElementById('navMobileProfileBtn');
+        var mobileLogout = document.getElementById('navMobileLogoutBtn');
         var adminBtn = document.getElementById('navAdminBtn');
         var bottomBar = document.getElementById('mobileBottomBar');
         var adminBottom = document.getElementById('mobileBottomBarAdmin');
@@ -255,30 +267,68 @@ Props: none (static for now, dynamic via JS scroll behavior)
         if (logoutBtn) logoutBtn.style.display = 'none';
         if (mobileLogin) mobileLogin.style.display = '';
         if (mobileProfile) mobileProfile.style.display = 'none';
+        if (mobileLogout) mobileLogout.style.display = 'none';
         if (adminBtn) adminBtn.style.display = 'none';
         if (bottomBar) bottomBar.style.display = 'none';
         if (adminBottom) adminBottom.style.display = 'none';
         if (userBottom) userBottom.style.display = 'none';
-      } catch (e) { }
+      } catch (e) {
+        console.error('syncAuthUI error:', e);
+      }
     }
 
+    // Run synchronously to prevent UI flicker
     syncAuthUI();
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', syncAuthUI);
     }
     window.addEventListener('storage', syncAuthUI);
+    window.addEventListener('pageshow', syncAuthUI);
+
+    // Global / page logout handler
+    function handleLogout(e) {
+      if (e && e.preventDefault) e.preventDefault();
+
+      // Immediately clear client state and update UI
+      try {
+        localStorage.removeItem('authUser');
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('pendingRoute');
+        localStorage.removeItem('ks_cart');
+        try {
+          localStorage.setItem('auth_event', 'logout:' + Date.now());
+        } catch (_) {}
+      } catch (_) {}
+
+      serverAuth = { isAuthenticated: false, isAdmin: false };
+      syncAuthUI();
+
+      // Clear server cookie and redirect
+      fetch('/logout', { method: 'POST', credentials: 'same-origin' })
+        .catch(function (err) {
+          console.error('Logout error:', err);
+        })
+        .finally(function () {
+          window.location.href = '/';
+        });
+    }
 
     var logoutBtn = document.getElementById('navLogoutBtn');
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', function () {
-        fetch('/logout', { method: 'POST', credentials: 'same-origin' })
-          .finally(function () {
-            localStorage.removeItem('authUser');
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('pendingRoute');
-            window.location.href = '/';
-          });
-      });
+      logoutBtn.addEventListener('click', handleLogout);
     }
+
+    var mobileLogoutBtn = document.getElementById('navMobileLogoutBtn');
+    if (mobileLogoutBtn) {
+      mobileLogoutBtn.addEventListener('click', handleLogout);
+    }
+
+    // Delegated click handler to guarantee clicks on child icon or text always trigger logout
+    document.addEventListener('click', function (e) {
+      var target = e.target.closest('#navLogoutBtn, #navMobileLogoutBtn');
+      if (target) {
+        handleLogout(e);
+      }
+    });
   })();
 </script>

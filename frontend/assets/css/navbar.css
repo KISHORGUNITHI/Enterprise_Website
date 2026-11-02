@@ -423,8 +423,11 @@
   }
 
   #navbarLoginBtn[style*="display: none"],
-  #navLogoutBtn[style*="display: none"],
   .navbar__login-btn[style*="display: none"] {
+    display: none !important;
+  }
+
+  body:not(.is-authenticated) .navbar #navLogoutBtn {
     display: none !important;
   }
 
@@ -705,6 +708,70 @@
   .mobile-bottom-bar__user-btn--store:active {
     background: linear-gradient(135deg, var(--color-primary-700) 0%, var(--color-primary-900) 100%);
     box-shadow: 0 6px 16px rgba(30, 61, 143, 0.35);
+  }
+
+  /* Down bar role-based display rules (Admin vs User) */
+  body.has-mobile-bottom-bar.is-admin .mobile-bottom-bar__admin {
+    display: grid !important;
+  }
+  body.has-mobile-bottom-bar.is-admin .mobile-bottom-bar__user {
+    display: none !important;
+  }
+
+  body.has-mobile-bottom-bar.is-user .mobile-bottom-bar__user {
+    display: flex !important;
+  }
+  body.has-mobile-bottom-bar.is-user .mobile-bottom-bar__admin {
+    display: none !important;
+  }
+}
+
+/* =============================================
+   DESKTOP AUTHENTICATION STATES (Screens > 768px)
+============================================= */
+@media (min-width: 769px) {
+  #navLogoutBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    border-radius: var(--radius-md);
+    transition: var(--transition-fast);
+  }
+
+  body.is-authenticated #navLogoutBtn {
+    display: inline-flex !important;
+    color: var(--color-error-600, #dc2626) !important;
+    background-color: rgba(239, 68, 68, 0.06);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+  }
+
+  body.is-authenticated #navLogoutBtn:hover {
+    background-color: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.45);
+    color: var(--color-error-700, #b91c1c) !important;
+  }
+
+  body:not(.is-authenticated) #navLogoutBtn {
+    display: none !important;
+  }
+
+  body.is-authenticated #navbarLoginBtn {
+    display: none !important;
+  }
+
+  body.is-authenticated #navProfileBtn {
+    display: inline-flex !important;
+  }
+
+  body.is-authenticated.is-admin #navAdminBtn {
+    display: inline-flex !important;
+  }
+
+  body.is-authenticated:not(.is-admin) #navAdminBtn {
+    display: none !important;
   }
 }
 
