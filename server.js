@@ -50,7 +50,7 @@ app.use((error, req, res, next) => {
 // Robust cookie parser helper
 function getCookie(req, name) {
   const header = req.headers.cookie || '';
-  const match  = header.split(';').map(c => c.trim()).find(c => c.startsWith(name + '='));
+  const match = header.split(';').map(c => c.trim()).find(c => c.startsWith(name + '='));
   if (!match) return null;
   let val = match.slice(name.length + 1);
   if (val.startsWith('"') && val.endsWith('"')) {
@@ -425,5 +425,5 @@ app.use((req, res) => {
 
 // ─── Start ───────────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`\n  Enterprise Store  →  http://localhost:${PORT}\n`);
+  console.log(`\n  Kishor Enterprise Store  →  http://localhost:${PORT}\n`);
 });

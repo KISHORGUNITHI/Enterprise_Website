@@ -1,169 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title><%= title %></title>
-  <link rel="icon" type="image/svg+xml" href="/public/icons/favicon.svg"/>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    <%= title %>
+  </title>
+  <link rel="icon" type="image/svg+xml" href="/public/icons/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
 
   <!-- Foundation -->
-  <link rel="stylesheet" href="/assets/css/variables.css"/>
-  <link rel="stylesheet" href="/assets/css/base.css"/>
-  <link rel="stylesheet" href="/assets/css/utilities.css"/>
+  <link rel="stylesheet" href="/assets/css/variables.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/utilities.css" />
 
   <!-- Header -->
-  <link rel="stylesheet" href="/assets/css/home-header.css"/>
-  <link rel="stylesheet" href="/assets/css/category-header.css"/>
+  <link rel="stylesheet" href="/assets/css/home-header.css" />
+  <link rel="stylesheet" href="/assets/css/category-header.css" />
 
   <!-- Footer -->
-  <link rel="stylesheet" href="/assets/css/footer.css"/>
-  <link rel="stylesheet" href="/assets/css/home-footer.css"/>
+  <link rel="stylesheet" href="/assets/css/footer.css" />
+  <link rel="stylesheet" href="/assets/css/home-footer.css" />
 
   <!-- Orders page -->
-  <link rel="stylesheet" href="/assets/css/orders.css"/>
+  <link rel="stylesheet" href="/assets/css/orders.css" />
 
   <!-- Responsive -->
-  <link rel="stylesheet" href="/assets/css/responsive.css"/>
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
 </head>
 
 <body>
 
   <%- include('../../partials/category-header') %>
 
-  <main class="orders-page" id="main-content">
-    <div class="orders-page__container">
+    <main class="orders-page" id="main-content">
+      <div class="orders-page__container">
 
-      <!-- ── Page heading ── -->
-      <div class="orders-heading">
-        <h1 class="orders-heading__title">My Orders</h1>
-        <p class="orders-heading__sub">Track all your purchases from Enterprise Store.</p>
-      </div>
+        <!-- ── Page heading ── -->
+        <div class="orders-heading">
+          <h1 class="orders-heading__title">My Orders</h1>
+          <p class="orders-heading__sub">Track all your purchases from Kishor Enterprises.</p>
+        </div>
 
-      <!-- ── Search ── -->
-      <div class="orders-search" role="search">
-        <svg class="orders-search__icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="9" cy="9" r="6"/><path d="M13.5 13.5L17 17"/>
-        </svg>
-        <input
-          type="search"
-          id="ordersSearch"
-          class="orders-search__input"
-          placeholder="Search by Product Name or Order ID"
-          autocomplete="off"
-          aria-label="Search orders"
-        />
-      </div>
+        <!-- ── Search ── -->
+        <div class="orders-search" role="search">
+          <svg class="orders-search__icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="9" cy="9" r="6" />
+            <path d="M13.5 13.5L17 17" />
+          </svg>
+          <input type="search" id="ordersSearch" class="orders-search__input"
+            placeholder="Search by Product Name or Order ID" autocomplete="off" aria-label="Search orders" />
+        </div>
 
-      <!-- ── Filter chips ── -->
-      <div class="orders-filters" role="group" aria-label="Filter orders by status">
+        <!-- ── Filter chips ── -->
+        <div class="orders-filters" role="group" aria-label="Filter orders by status">
 
-        <button class="orders-filter-chip active" data-filter="all">
-          All
-        </button>
-        <button class="orders-filter-chip" data-filter="processing">
-          <span class="orders-filter-chip__dot" style="background:#eab308;"></span>
-          Processing
-        </button>
-        <button class="orders-filter-chip" data-filter="confirmed">
-          <span class="orders-filter-chip__dot" style="background:#3b82f6;"></span>
-          Confirmed
-        </button>
-        <button class="orders-filter-chip" data-filter="out_for_delivery">
-          <span class="orders-filter-chip__dot" style="background:#f97316;"></span>
-          Out for Delivery
-        </button>
-        <button class="orders-filter-chip" data-filter="delivered">
-          <span class="orders-filter-chip__dot" style="background:#22c55e;"></span>
-          Delivered
-        </button>
-        <button class="orders-filter-chip" data-filter="cancelled">
-          <span class="orders-filter-chip__dot" style="background:#ef4444;"></span>
-          Cancelled
-        </button>
+          <button class="orders-filter-chip active" data-filter="all">
+            All
+          </button>
+          <button class="orders-filter-chip" data-filter="processing">
+            <span class="orders-filter-chip__dot" style="background:#eab308;"></span>
+            Processing
+          </button>
+          <button class="orders-filter-chip" data-filter="confirmed">
+            <span class="orders-filter-chip__dot" style="background:#3b82f6;"></span>
+            Confirmed
+          </button>
+          <button class="orders-filter-chip" data-filter="out_for_delivery">
+            <span class="orders-filter-chip__dot" style="background:#f97316;"></span>
+            Out for Delivery
+          </button>
+          <button class="orders-filter-chip" data-filter="delivered">
+            <span class="orders-filter-chip__dot" style="background:#22c55e;"></span>
+            Delivered
+          </button>
+          <button class="orders-filter-chip" data-filter="cancelled">
+            <span class="orders-filter-chip__dot" style="background:#ef4444;"></span>
+            Cancelled
+          </button>
 
-      </div>
+        </div>
 
-      <!-- ── Results count ── -->
-      <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-4);">
-        <span id="ordersCount">—</span>
-      </p>
-
-      <!-- ── Orders list (rendered by orders.js) ── -->
-      <div id="ordersList" aria-label="Orders" aria-live="polite"></div>
-
-    </div>
-  </main>
-
-  <!-- ── Order detail drawer ── -->
-  <div class="orders-overlay" id="ordersOverlay" aria-hidden="true"></div>
-  <aside
-    class="orders-drawer"
-    id="ordersDrawer"
-    role="dialog"
-    aria-modal="true"
-    aria-label="Order Details"
-    aria-hidden="true"
-  >
-    <div class="orders-drawer__header">
-      <h2 class="orders-drawer__title">Order Details</h2>
-      <button class="orders-drawer__close" id="ordersDrawerClose" aria-label="Close order details">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <path d="M3 3l10 10M13 3L3 13"/>
-        </svg>
-      </button>
-    </div>
-    <div class="orders-drawer__body" id="ordersDrawerBody">
-      <%# Populated by orders.js %>
-    </div>
-  </aside>
-
-  <!-- ── Customer Cancellation Modal ── -->
-  <div class="orders-modal-backdrop" id="customerCancelModal" role="dialog" aria-modal="true" aria-labelledby="cancelModalTitle" aria-hidden="true" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); z-index:1000; align-items:center; justify-content:center; padding:16px;">
-    <div class="orders-modal" style="background:#ffffff; border-radius:16px; max-width:480px; width:100%; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); overflow:hidden; border:1px solid var(--color-border-light);">
-      <div style="padding:16px 20px; border-bottom:1px solid var(--color-border-light); display:flex; justify-content:space-between; align-items:center;">
-        <h3 id="cancelModalTitle" style="font-size:16px; font-weight:700; color:#b91c1c; margin:0; display:flex; align-items:center; gap:8px;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-          Cancel Order
-        </h3>
-        <button type="button" id="closeCustomerCancelModalBtn" aria-label="Close" style="background:none; border:none; font-size:22px; line-height:1; cursor:pointer; color:var(--color-text-muted);">&times;</button>
-      </div>
-      <div style="padding:20px;">
-        <p style="font-size:13px; color:var(--color-text-secondary); margin-bottom:16px;">
-          Please select a reason for cancelling this order. Your feedback helps us improve our service and store fulfillment.
+        <!-- ── Results count ── -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-4);">
+          <span id="ordersCount">—</span>
         </p>
 
-        <div style="margin-bottom:14px;">
-          <label for="customerCancelReasonSelect" style="display:block; font-size:12px; font-weight:600; color:var(--color-text-primary); margin-bottom:6px;">Reason for Cancellation</label>
-          <select id="customerCancelReasonSelect" style="width:100%; padding:10px 12px; font-size:13px; border:1px solid var(--color-border-light); border-radius:8px; background:#fff; color:var(--color-text-primary);">
-            <option value="Ordered by mistake / Duplicate order">Ordered by mistake / Duplicate order</option>
-            <option value="Found a cheaper price elsewhere">Found a cheaper price elsewhere</option>
-            <option value="Estimated delivery date is too long">Estimated delivery date is too long</option>
-            <option value="Need to change shipping address or contact info">Need to change shipping address or contact info</option>
-            <option value="Changed my mind / No longer required">Changed my mind / No longer required</option>
-            <option value="OTHER">Other reason (Type custom message)</option>
-          </select>
-        </div>
+        <!-- ── Orders list (rendered by orders.js) ── -->
+        <div id="ordersList" class="orders-list" aria-label="Orders" aria-live="polite"></div>
 
-        <div id="customerCustomReasonWrap" style="display:none; margin-bottom:14px;">
-          <label for="customerCustomReasonInput" style="display:block; font-size:12px; font-weight:600; color:var(--color-text-primary); margin-bottom:6px;">Tell us more</label>
-          <textarea id="customerCustomReasonInput" rows="3" placeholder="Please specify why you are cancelling..." style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--color-border-light); border-radius:8px; box-sizing:border-box;"></textarea>
-        </div>
       </div>
-      <div style="padding:14px 20px; background:var(--color-bg-secondary); border-top:1px solid var(--color-border-light); display:flex; justify-content:flex-end; gap:10px;">
-        <button type="button" class="btn btn--outline btn--sm" id="abortCustomerCancelBtn" style="font-size:12px; padding:6px 14px;">Keep Order</button>
-        <button type="button" class="btn btn--sm" id="confirmCustomerCancelBtn" style="background:#ef4444; color:#fff; border:none; font-size:12px; font-weight:600; padding:6px 14px; border-radius:6px; cursor:pointer;">Confirm Cancellation</button>
+    </main>
+
+    <!-- ── Order detail drawer ── -->
+    <div class="orders-overlay" id="ordersOverlay" aria-hidden="true"></div>
+    <aside class="orders-drawer" id="ordersDrawer" role="dialog" aria-modal="true" aria-label="Order Details"
+      aria-hidden="true">
+      <div class="orders-drawer__header">
+        <h2 class="orders-drawer__title">Order Details</h2>
+        <button class="orders-drawer__close" id="ordersDrawerClose" aria-label="Close order details">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M3 3l10 10M13 3L3 13" />
+          </svg>
+        </button>
+      </div>
+      <div class="orders-drawer__body" id="ordersDrawerBody">
+        <%# Populated by orders.js %>
+      </div>
+    </aside>
+
+    <!-- ── Customer Cancellation Modal ── -->
+    <div class="orders-modal-backdrop" id="customerCancelModal" role="dialog" aria-modal="true"
+      aria-labelledby="cancelModalTitle" aria-hidden="true"
+      style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); z-index:1000; align-items:center; justify-content:center; padding:16px;">
+      <div class="orders-modal"
+        style="background:#ffffff; border-radius:16px; max-width:480px; width:100%; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); overflow:hidden; border:1px solid var(--color-border-light);">
+        <div
+          style="padding:16px 20px; border-bottom:1px solid var(--color-border-light); display:flex; justify-content:space-between; align-items:center;">
+          <h3 id="cancelModalTitle"
+            style="font-size:16px; font-weight:700; color:#b91c1c; margin:0; display:flex; align-items:center; gap:8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="15" y1="9" x2="9" y2="15"></line>
+              <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+            Cancel Order
+          </h3>
+          <button type="button" id="closeCustomerCancelModalBtn" aria-label="Close"
+            style="background:none; border:none; font-size:22px; line-height:1; cursor:pointer; color:var(--color-text-muted);">&times;</button>
+        </div>
+        <div style="padding:20px;">
+          <p style="font-size:13px; color:var(--color-text-secondary); margin-bottom:16px;">
+            Please select a reason for cancelling this order. Your feedback helps us improve our service and store
+            fulfillment.
+          </p>
+
+          <div style="margin-bottom:14px;">
+            <label for="customerCancelReasonSelect"
+              style="display:block; font-size:12px; font-weight:600; color:var(--color-text-primary); margin-bottom:6px;">Reason
+              for Cancellation</label>
+            <select id="customerCancelReasonSelect"
+              style="width:100%; padding:10px 12px; font-size:13px; border:1px solid var(--color-border-light); border-radius:8px; background:#fff; color:var(--color-text-primary);">
+              <option value="Ordered by mistake / Duplicate order">Ordered by mistake / Duplicate order</option>
+              <option value="Found a cheaper price elsewhere">Found a cheaper price elsewhere</option>
+              <option value="Estimated delivery date is too long">Estimated delivery date is too long</option>
+              <option value="Need to change shipping address or contact info">Need to change shipping address or contact
+                info</option>
+              <option value="Changed my mind / No longer required">Changed my mind / No longer required</option>
+              <option value="OTHER">Other reason (Type custom message)</option>
+            </select>
+          </div>
+
+          <div id="customerCustomReasonWrap" style="display:none; margin-bottom:14px;">
+            <label for="customerCustomReasonInput"
+              style="display:block; font-size:12px; font-weight:600; color:var(--color-text-primary); margin-bottom:6px;">Tell
+              us more</label>
+            <textarea id="customerCustomReasonInput" rows="3" placeholder="Please specify why you are cancelling..."
+              style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--color-border-light); border-radius:8px; box-sizing:border-box;"></textarea>
+          </div>
+        </div>
+        <div
+          style="padding:14px 20px; background:var(--color-bg-secondary); border-top:1px solid var(--color-border-light); display:flex; justify-content:flex-end; gap:10px;">
+          <button type="button" class="btn btn--outline btn--sm" id="abortCustomerCancelBtn"
+            style="font-size:12px; padding:6px 14px;">Keep Order</button>
+          <button type="button" class="btn btn--sm" id="confirmCustomerCancelBtn"
+            style="background:#ef4444; color:#fff; border:none; font-size:12px; font-weight:600; padding:6px 14px; border-radius:6px; cursor:pointer;">Confirm
+            Cancellation</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <%- include('../../partials/home-footer') %>
+    <%- include('../../partials/home-footer') %>
 
-  <!-- JS -->
-  <script src="/assets/js/category-header.js" defer></script>
-  <script src="/assets/js/orders.js"           defer></script>
+      <!-- JS -->
+      <script src="/assets/js/category-header.js" defer></script>
+      <script src="/assets/js/orders.js" defer></script>
 
 </body>
+
 </html>

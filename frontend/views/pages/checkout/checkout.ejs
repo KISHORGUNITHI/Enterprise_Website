@@ -175,9 +175,11 @@
                 <div class="checkout-section-items__cta" id="checkoutDesktopCta">
                   <div class="checkout-section-items__cta-hint">
                     <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16" aria-hidden="true">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                      <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clip-rule="evenodd" />
                     </svg>
-                    <span>Order confirmation & invoice will be sent to your verified account</span>
+                    <span>Order confirmation & invoice will be sent to email account or What'sapp</span>
                   </div>
                   <button type="button" class="btn btn--accent checkout-place-order-btn" id="placeOrderBtn">
                     <span class="checkout-place-order-btn__text">PLACE ORDER</span>
@@ -220,7 +222,8 @@
 
               <dl class="checkout-price-breakdown" id="checkoutPriceBreakdown">
                 <div class="checkout-price-row">
-                  <dt class="checkout-price-row__label" id="summarySubtotalLabel">Price (<span id="summaryItemCount">0</span> items)</dt>
+                  <dt class="checkout-price-row__label" id="summarySubtotalLabel">Price (<span
+                      id="summaryItemCount">0</span> items)</dt>
                   <dd class="checkout-price-row__val" id="summarySubtotal">₹0</dd>
                 </div>
 
@@ -264,7 +267,8 @@
                 <span class="checkout-payment-section__title" id="paymentMethodTitle">Payment Mode</span>
                 <div class="checkout-payment-options" role="radiogroup" aria-labelledby="paymentMethodTitle">
                   <label for="payment_mode_cod" class="checkout-payment-opt checkout-payment-opt--selected">
-                    <input type="radio" id="payment_mode_cod" name="payment_mode" value="COD" checked class="checkout-payment-radio" />
+                    <input type="radio" id="payment_mode_cod" name="payment_mode" value="COD" checked
+                      class="checkout-payment-radio" />
                     <div class="checkout-payment-opt__info">
                       <span class="checkout-payment-opt__name">Cash on Delivery (COD)</span>
                       <span class="checkout-payment-opt__sub">Pay cash or UPI at the time of delivery</span>
@@ -540,12 +544,14 @@
       <%- include('../../partials/home-footer') %>
 
         <!-- ── 7. Mobile Fixed Bottom Checkout Bar (Replaces Mobile Bottom Nav) ── -->
-        <div class="checkout-mobile-bottom-bar" id="checkoutMobileBottomBar" role="region" aria-label="Checkout action bar">
+        <div class="checkout-mobile-bottom-bar" id="checkoutMobileBottomBar" role="region"
+          aria-label="Checkout action bar">
           <div class="checkout-mobile-bottom-bar__info">
             <span class="checkout-mobile-bottom-bar__label">Total Amount</span>
             <strong class="checkout-mobile-bottom-bar__price" id="mobileBottomTotal">₹0</strong>
           </div>
-          <button type="button" class="btn btn--accent checkout-mobile-place-order-btn" id="mobilePlaceOrderBtn" aria-label="Place Order">
+          <button type="button" class="btn btn--accent checkout-mobile-place-order-btn" id="mobilePlaceOrderBtn"
+            aria-label="Place Order">
             <span class="checkout-mobile-place-order-btn__text">PLACE ORDER</span>
             <span class="checkout-btn-spinner" id="mobilePlaceOrderSpinner" hidden aria-hidden="true"></span>
           </button>

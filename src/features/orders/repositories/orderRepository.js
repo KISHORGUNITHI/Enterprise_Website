@@ -114,6 +114,15 @@ export class OrderRepository {
       include: {
         items: {
           include: {
+            variant: {
+              include: {
+                attributeValues: {
+                  include: {
+                    attribute: true,
+                  },
+                },
+              },
+            },
             product: {
               select: {
                 id: true,
@@ -161,8 +170,15 @@ export class OrderRepository {
       ...o,
       items: (o.items || []).map(i => {
         const r = reviews.find(rev => rev.productId === i.productId);
+        let variantDesc = i.variantDescription;
+        if ((!variantDesc || variantDesc === 'Standard Warranty' || variantDesc === '1 Year Official Warranty') && i.variant && Array.isArray(i.variant.attributeValues) && i.variant.attributeValues.length > 0) {
+          variantDesc = i.variant.attributeValues
+            .map((av) => `${av.attribute?.displayName || av.attribute?.name}: ${av.displayValue || av.value}`)
+            .join(', ');
+        }
         return {
           ...i,
+          variantDescription: variantDesc || '',
           review: r ? {
             id: r.id,
             rating: Number(r.rating),
@@ -186,6 +202,15 @@ export class OrderRepository {
       include: {
         items: {
           include: {
+            variant: {
+              include: {
+                attributeValues: {
+                  include: {
+                    attribute: true,
+                  },
+                },
+              },
+            },
             product: {
               select: {
                 id: true,
@@ -229,8 +254,15 @@ export class OrderRepository {
       ...order,
       items: (order.items || []).map(i => {
         const r = reviews.find(rev => rev.productId === i.productId);
+        let variantDesc = i.variantDescription;
+        if ((!variantDesc || variantDesc === 'Standard Warranty' || variantDesc === '1 Year Official Warranty') && i.variant && Array.isArray(i.variant.attributeValues) && i.variant.attributeValues.length > 0) {
+          variantDesc = i.variant.attributeValues
+            .map((av) => `${av.attribute?.displayName || av.attribute?.name}: ${av.displayValue || av.value}`)
+            .join(', ');
+        }
         return {
           ...i,
+          variantDescription: variantDesc || '',
           review: r ? {
             id: r.id,
             rating: Number(r.rating),

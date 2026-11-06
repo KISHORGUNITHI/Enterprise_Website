@@ -27,20 +27,22 @@
 .orders-filter-chip__dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 
 /* ── Orders list — gap between cards ── */
+#ordersList,
 .orders-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-8);
+  gap: var(--space-5);
 }
 
 /* ── Single order card ── */
 .order-card { background-color:var(--color-bg-card); border:1px solid var(--color-border-light); border-radius:var(--radius-2xl); overflow:hidden; box-shadow:var(--shadow-sm); transition:var(--transition-base); }
 .order-card:hover { box-shadow:var(--shadow-lg); border-color:var(--color-border-medium); }
 
-.order-card__header { display:flex; align-items:center; justify-content:space-between; padding:var(--space-3) var(--space-6); background-color:var(--color-bg-secondary); border-bottom:1px solid var(--color-border-light); flex-wrap:wrap; gap:var(--space-3); }
-.order-card__meta { display:flex; align-items:center; gap:var(--space-4); flex-wrap:wrap; }
-.order-card__id { font-size:var(--text-xs); font-weight:var(--font-bold); color:var(--color-text-muted); letter-spacing:var(--tracking-wide); text-transform:uppercase; }
-.order-card__date { font-size:var(--text-xs); color:var(--color-text-muted); }
+.order-card__header { display:flex; align-items:center; justify-content:space-between; padding:var(--space-3) var(--space-6); background-color:var(--color-bg-secondary); border-bottom:1px solid var(--color-border-light); flex-wrap:nowrap; gap:var(--space-3); }
+.order-card__meta { display:flex; align-items:center; gap:var(--space-4); min-width:0; flex:1; }
+.order-card__id { font-size:var(--text-xs); font-weight:var(--font-bold); color:var(--color-text-muted); letter-spacing:var(--tracking-wide); text-transform:uppercase; white-space:nowrap; }
+.order-card__date { font-size:var(--text-xs); color:var(--color-text-muted); white-space:nowrap; }
+.order-card__header .order-status { margin-left:auto; flex-shrink:0; white-space:nowrap; }
 
 .order-card__body { display:flex; align-items:center; gap:var(--space-5); padding:var(--space-5) var(--space-6); }
 
@@ -134,6 +136,31 @@
   .order-card__view-btn { flex:1; justify-content:center; text-align:center; }
   .orders-drawer { width:100%; top:auto; height:92vh; border-radius:var(--radius-2xl) var(--radius-2xl) 0 0; }
   .orders-heading__title { font-size:var(--text-2xl); }
+}
+@media (max-width:640px) {
+  #ordersList,
+  .orders-list {
+    gap: var(--space-4);
+  }
+  .order-card__header {
+    padding: var(--space-3) var(--space-4);
+    gap: var(--space-2);
+  }
+  .order-card__meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  .order-card__id {
+    font-size: 0.72rem;
+  }
+  .order-card__date {
+    font-size: 0.72rem;
+  }
+  .order-card__header .order-status {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+  }
 }
 @media (max-width:480px) {
   .order-card__header { padding:var(--space-3) var(--space-4); }

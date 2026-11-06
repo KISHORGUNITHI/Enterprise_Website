@@ -262,7 +262,7 @@
         postal_code: addr.postal_code || '',
         text: locDisplay
       }));
-    } catch (_) {}
+    } catch (_) { }
 
     const catMobileCity = document.getElementById('catMobileLocCity');
     if (catMobileCity) catMobileCity.textContent = locDisplay;
@@ -700,7 +700,7 @@
                 dbId: p.id,
                 slug: p.slug,
                 name: p.name,
-                brand: p.brand || 'Enterprise Store',
+                brand: p.brand || 'Kishor Enterprises',
                 price,
                 originalPrice,
                 imageUrl: primaryImg,
@@ -823,15 +823,15 @@
               <div class="checkout-gift-row">
                 <div class="checkout-gift-thumb">
                   ${gift.imageUrl
-                    ? `<img src="${gift.imageUrl}" alt="${escapeHtml(gift.name)}" loading="lazy" />`
-                    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="20" height="20">
+          ? `<img src="${gift.imageUrl}" alt="${escapeHtml(gift.name)}" loading="lazy" />`
+          : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="20" height="20">
                          <path d="M20 12v10H4V12"/>
                          <path d="M2 7h20v5H2z"/>
                          <path d="M12 22V7"/>
                          <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
                          <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
                        </svg>`
-                  }
+        }
                 </div>
                 <div class="checkout-gift-info">
                   <div class="checkout-gift-name-wrap">
@@ -855,9 +855,9 @@
           <div class="checkout-item-main">
             <div class="checkout-item-thumb">
               ${item.imageUrl
-                ? `<img src="${item.imageUrl}" alt="${escapeHtml(item.name)}" />`
-                : `<svg viewBox="0 0 60 60" fill="none" width="40" height="40"><rect width="60" height="60" rx="8" fill="#e8edf5"/><path d="M20 20h20v20H20z" fill="#1e3d8f20"/></svg>`
-              }
+          ? `<img src="${item.imageUrl}" alt="${escapeHtml(item.name)}" />`
+          : `<svg viewBox="0 0 60 60" fill="none" width="40" height="40"><rect width="60" height="60" rx="8" fill="#e8edf5"/><path d="M20 20h20v20H20z" fill="#1e3d8f20"/></svg>`
+        }
             </div>
 
             <div class="checkout-item-info">

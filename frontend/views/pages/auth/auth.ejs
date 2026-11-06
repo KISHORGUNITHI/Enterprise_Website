@@ -5,8 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sign In — Kishor Mobiles</title>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
-  <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png"/>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -56,7 +56,7 @@
     <div class="auth-split__form-side">
 
       <!-- Back to home -->
-      <a href="/" class="auth-back-home" aria-label="Back to Enterprise Store home page">
+      <a href="/" class="auth-back-home" aria-label="Back to Kishor Enterprises home page">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
           stroke-linejoin="round" aria-hidden="true">
           <polyline points="10 12 6 8 10 4" />
@@ -414,7 +414,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             const q = urlParams.get('pendingRoute');
             if (q && q.startsWith('/') && !q.startsWith('//')) pendingRoute = q;
-          } catch (_) {}
+          } catch (_) { }
         }
         localStorage.removeItem('pendingRoute');
         if (role === 'ADMIN' || role === 'admin') {
@@ -439,13 +439,13 @@
         if (qRoute && qRoute.startsWith('/') && !qRoute.startsWith('//')) {
           localStorage.setItem('pendingRoute', qRoute);
         }
-      } catch (_) {}
+      } catch (_) { }
 
       // When server renders the auth page, clear any stale client storage
       try {
         localStorage.removeItem('authUser');
         localStorage.removeItem('authToken');
-      } catch (_) {}
+      } catch (_) { }
 
       // Validate a field only if it has been touched OR forceAll is true
       function validateField(inputId, fieldId, errorId, rule, forceAll) {

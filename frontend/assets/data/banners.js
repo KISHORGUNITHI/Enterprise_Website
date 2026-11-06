@@ -56,7 +56,7 @@ const bannersData = [
     id: 5,
     eyebrow: 'Official Warranty',
     title: 'Genuine Products Only',
-    subtitle: 'Every product comes with official brand warranty. Shop with confidence from Enterprise Store.',
+    subtitle: 'Every product comes with official brand warranty. Shop with confidence from Kishor Enterprises.',
     cta_primary: { label: 'Shop Now', href: '#categories' },
     cta_secondary: { label: 'Learn More', href: '#trust' },
     badge: '100% Official Warranty',

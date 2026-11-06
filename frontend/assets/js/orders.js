@@ -71,6 +71,22 @@
               year: 'numeric'
             });
 
+            const deliveryDateFormatted = statusKey === 'delivered'
+              ? formatDeliveryDate(dbOrder.deliveryDate, dbOrder.updatedAt || dbOrder.createdAt)
+              : (dbOrder.deliveryDate || '3-5 Business Days');
+
+            const formatItemVariant = (item) => {
+              if (item.variant && Array.isArray(item.variant.attributeValues) && item.variant.attributeValues.length > 0) {
+                return item.variant.attributeValues
+                  .map(av => `${av.attribute?.displayName || av.attribute?.name || 'Option'}: ${av.displayValue || av.value}`)
+                  .join(', ');
+              }
+              if (item.variantDescription && item.variantDescription.trim()) {
+                return item.variantDescription;
+              }
+              return 'Standard Warranty';
+            };
+
             const primaryImg = firstItem.product?.productImages?.find(img => img.isPrimary)?.imageUrl
               || firstItem.product?.productImages?.[0]?.imageUrl
               || '';
@@ -80,9 +96,10 @@
               dbId: dbOrder.id,
               date: dateStr,
               createdAt: dbOrder.createdAt,
+              updatedAt: dbOrder.updatedAt,
               status: statusKey,
               price: Number(dbOrder.totalAmount),
-              deliveryDate: dbOrder.deliveryDate || '3-5 Business Days',
+              deliveryDate: deliveryDateFormatted,
               address: dbOrder.shippingAddress || 'Registered Address',
               cancelReason: dbOrder.cancelReason || null,
               cancelledBy: dbOrder.cancelledBy || null,
@@ -90,20 +107,27 @@
               product: {
                 id: firstItem.productId,
                 name: (firstItem.productName || 'Electronics Item') + extraItemsText,
-                variant: firstItem.variantDescription || 'Standard Warranty',
+                variant: formatItemVariant(firstItem),
                 color: '#1e3d8f',
                 imageUrl: primaryImg,
               },
-              items: (dbOrder.items || []).map(i => ({
-                id: i.id,
-                productId: i.productId,
-                name: i.productName || 'Product',
-                variant: i.variantDescription || 'Standard Warranty',
-                quantity: i.quantity || 1,
-                unitPrice: Number(i.unitPrice),
-                review: i.review || null
-              })),
-              timeline: buildTimeline(statusKey, dbOrder.createdAt, dbOrder.cancelledAt)
+              items: (dbOrder.items || []).map(i => {
+                const itemImg = i.product?.productImages?.find(img => img.isPrimary)?.imageUrl
+                  || i.product?.productImages?.[0]?.imageUrl
+                  || '';
+                return {
+                  id: i.id,
+                  productId: i.productId,
+                  name: i.productName || 'Product',
+                  variant: formatItemVariant(i),
+                  quantity: i.quantity || 1,
+                  unitPrice: Number(i.unitPrice),
+                  imageUrl: itemImg,
+                  color: '#1e3d8f',
+                  review: i.review || null
+                };
+              }),
+              timeline: buildTimeline(statusKey, dbOrder.createdAt, dbOrder.cancelledAt, deliveryDateFormatted)
             };
           });
 
@@ -158,11 +182,35 @@
     </span>`;
   }
 
+  function formatDeliveryDate(val, fallbackDate) {
+    if (!val) {
+      return fallbackDate ? new Date(fallbackDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+    }
+    const valStr = String(val).trim();
+    if (/^\d{1,2}\s+[A-Za-z]{3}\s+\d{4}$/.test(valStr)) {
+      return valStr;
+    }
+    const isGeneric = valStr.toLowerCase().includes('business') || valStr.toLowerCase().includes('pending');
+    if (!isGeneric) {
+      const parsed = new Date(valStr);
+      if (!isNaN(parsed.getTime())) {
+        return parsed.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      }
+    }
+    if (fallbackDate) {
+      const fb = new Date(fallbackDate);
+      if (!isNaN(fb.getTime())) {
+        return fb.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      }
+    }
+    return valStr;
+  }
+
   // ─── Build Timeline ───────────────────────────────────────────────────────
-  function buildTimeline(status, createdAt, cancelledAt) {
+  function buildTimeline(status, createdAt, cancelledAt, deliveryDate) {
     const d = new Date(createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
     const st = (status || '').toLowerCase();
-    
+
     if (st === 'cancelled') {
       const cancelDate = cancelledAt ? new Date(cancelledAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
       return [
@@ -170,13 +218,13 @@
         { label: 'Cancelled', date: cancelDate, done: true }
       ];
     }
-    
+
     return [
       { label: 'Order Placed', date: d, done: true },
       { label: 'Processing', date: '', done: ['processing', 'confirmed', 'out_for_delivery', 'delivered'].includes(st) },
       { label: 'Confirmed', date: '', done: ['confirmed', 'out_for_delivery', 'delivered'].includes(st) },
       { label: 'Out for Delivery', date: '', done: ['out_for_delivery', 'delivered'].includes(st) },
-      { label: 'Delivered', date: '', done: st === 'delivered' }
+      { label: 'Delivered', date: st === 'delivered' ? (deliveryDate || '') : '', done: st === 'delivered' }
     ];
   }
 
@@ -185,7 +233,7 @@
     if (listEl) {
       listEl.innerHTML = `<div style="text-align:center; padding: 2rem;">Loading your orders...</div>`;
     }
-    
+
     try {
       const response = await fetch('/api/orders', {
         method: 'GET',
@@ -194,34 +242,41 @@
         },
         credentials: 'same-origin' // Uses HTTP-only cookie automatically
       });
-      
+
       if (response.status === 401) {
         window.location.href = '/home'; // Redirect if not logged in
         return;
       }
-      
+
       if (!response.ok) throw new Error('Failed to fetch orders');
-      
+
       const result = await response.json();
       if (result.success && result.data) {
-        orders = result.data.map(o => ({
-          id: o.shortId || o.id,
-          date: new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-          createdAt: o.createdAt,
-          status: o.status.toLowerCase(),
-          deliveryDate: o.deliveryDate || 'Pending',
-          price: o.totalAmount,
-          address: o.shippingAddress,
-          cancelReason: o.cancelReason || null,
-          cancelledBy: o.cancelledBy || null,
-          cancelledAt: o.cancelledAt || null,
-          product: {
-            name: o.items?.[0]?.productName || 'Order Items',
-            variant: o.items?.[0]?.variantDescription || '',
-            color: '#3b82f6'
-          },
-          timeline: buildTimeline(o.status, o.createdAt, o.cancelledAt)
-        }));
+        orders = result.data.map(o => {
+          const statusKey = o.status.toLowerCase();
+          const deliveryDateFormatted = statusKey === 'delivered'
+            ? formatDeliveryDate(o.deliveryDate, o.updatedAt || o.createdAt)
+            : (o.deliveryDate || 'Pending');
+          return {
+            id: o.shortId || o.id,
+            date: new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+            createdAt: o.createdAt,
+            updatedAt: o.updatedAt,
+            status: statusKey,
+            deliveryDate: deliveryDateFormatted,
+            price: o.totalAmount,
+            address: o.shippingAddress,
+            cancelReason: o.cancelReason || null,
+            cancelledBy: o.cancelledBy || null,
+            cancelledAt: o.cancelledAt || null,
+            product: {
+              name: o.items?.[0]?.productName || 'Order Items',
+              variant: o.items?.[0]?.variantDescription || '',
+              color: '#3b82f6'
+            },
+            timeline: buildTimeline(o.status, o.createdAt, o.cancelledAt, deliveryDateFormatted)
+          };
+        });
         render();
       }
     } catch (error) {
@@ -357,22 +412,47 @@
 
     body.innerHTML = `
       <!-- Product -->
-      <div class="drawer-product">
-        <div class="drawer-product__image" aria-hidden="true">
-          ${renderProductImage(o.product, 80, true)}
+      ${o.items && o.items.length > 1 ? `
+        <div class="drawer-section">
+          <p class="drawer-section__title">Ordered Items (${o.items.length})</p>
+          <div style="display:flex; flex-direction:column; gap:var(--space-3);">
+            ${o.items.map(item => `
+              <div class="drawer-product">
+                <div class="drawer-product__image" aria-hidden="true">
+                  ${renderProductImage(item, 80, true)}
+                </div>
+                <div style="flex:1; min-width:0;">
+                  <p class="drawer-product__name">${item.name}</p>
+                  <p class="drawer-product__variant">${item.variant}</p>
+                  <p class="drawer-product__price" style="font-size:var(--text-base);">${fmt(item.unitPrice * (item.quantity || 1))} <span style="font-size:var(--text-xs); font-weight:normal; color:var(--color-text-muted);">(Qty: ${item.quantity || 1} &bull; ${fmt(item.unitPrice)} each)</span></p>
+                </div>
+              </div>
+            `).join('')}
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:var(--space-3) var(--space-4); background:var(--color-bg-secondary); border-radius:var(--radius-lg); border:1px solid var(--color-border-light); font-weight:var(--font-bold); margin-top:var(--space-1);">
+              <span>Order Total</span>
+              <span style="font-size:var(--text-lg); color:var(--color-primary-700);">${fmt(o.price)}</span>
+            </div>
+          </div>
         </div>
-        <div>
-          <p class="drawer-product__name">${o.product.name}</p>
-          <p class="drawer-product__variant">${o.product.variant}</p>
-          <p class="drawer-product__price">${fmt(o.price)}</p>
+      ` : `
+        <div class="drawer-product">
+          <div class="drawer-product__image" aria-hidden="true">
+            ${renderProductImage(o.product, 80, true)}
+          </div>
+          <div style="flex:1; min-width:0;">
+            <p class="drawer-product__name">${o.product.name}</p>
+            <p class="drawer-product__variant">${o.product.variant}</p>
+            <p class="drawer-product__price">${fmt(o.price)}</p>
+          </div>
         </div>
-      </div>
+      `}
 
       <!-- Status -->
       <div class="drawer-section">
         <p class="drawer-section__title">Order Status</p>
-        <div style="display:flex; align-items:center; gap:var(--space-3);">
+        <div style="display:flex; align-items:center; gap:var(--space-3); flex-wrap:wrap;">
           ${statusBadge(o.status)}
+          ${o.status === 'delivered' ? `<span style="font-size:var(--text-xs); color:var(--color-success-700); font-weight:var(--font-semibold);">Delivered on ${o.deliveryDate}</span>` : ''}
           <span style="font-size:var(--text-xs); color:var(--color-text-muted);">Order # ${o.id}</span>
         </div>
       </div>
@@ -423,9 +503,9 @@
         <p class="drawer-section__content">${o.address}</p>
       </div>
 
-      <!-- Expected delivery -->
+      <!-- Delivery Date / Expected delivery -->
       <div class="drawer-section">
-        <p class="drawer-section__title">Expected Delivery</p>
+        <p class="drawer-section__title">${o.status === 'delivered' ? 'Delivered Date' : 'Expected Delivery'}</p>
         <p class="drawer-section__content" style="font-weight:var(--font-semibold); color:var(--color-success-600);">
           ${o.status === 'cancelled' ? 'Order Cancelled' : o.status === 'delivered' ? `Delivered on ${o.deliveryDate}` : `By ${o.deliveryDate}`}
         </p>
@@ -436,7 +516,9 @@
         <div class="drawer-section" id="customerReviewSection">
           <p class="drawer-section__title">Rate & Review Products</p>
           <div style="display:flex; flex-direction:column; gap:var(--space-3);">
-            ${o.items.filter(item => item.productId).map(item => `
+            ${o.items.filter(item => item.productId).map(item => {
+      const currentRating = item.review && item.review.rating ? Math.round(item.review.rating) : 0;
+      return `
               <div class="drawer-review-card" style="padding:var(--space-3) var(--space-4); background:var(--color-bg-secondary); border-radius:var(--radius-lg); border:1px solid var(--color-border-light);" data-review-product-id="${item.productId}">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--space-2);">
                   <strong style="font-size:var(--text-sm);">${item.name}</strong>
@@ -453,18 +535,22 @@
                 ` : ''}
 
                 <div class="review-form-container" style="${item.review ? 'display:none;' : 'display:block;'} margin-top:var(--space-2);">
-                  <div class="star-rating-select" data-selected-rating="${item.review?.rating || 5}" style="display:flex; gap:4px; font-size:22px; cursor:pointer; color:#f59e0b; user-select:none; margin-bottom:var(--space-2);">
-                    <span data-star="1">★</span>
-                    <span data-star="2">★</span>
-                    <span data-star="3">★</span>
-                    <span data-star="4">★</span>
-                    <span data-star="5">★</span>
+                  <div style="display:flex; align-items:center; gap:8px; margin-bottom:var(--space-2);">
+                    <div class="star-rating-select" data-selected-rating="${currentRating}" style="display:flex; gap:4px; font-size:22px; cursor:pointer; user-select:none;">
+                      <span data-star="1" style="color:${currentRating >= 1 ? '#f59e0b' : '#cbd5e1'};">${currentRating >= 1 ? '★' : '☆'}</span>
+                      <span data-star="2" style="color:${currentRating >= 2 ? '#f59e0b' : '#cbd5e1'};">${currentRating >= 2 ? '★' : '☆'}</span>
+                      <span data-star="3" style="color:${currentRating >= 3 ? '#f59e0b' : '#cbd5e1'};">${currentRating >= 3 ? '★' : '☆'}</span>
+                      <span data-star="4" style="color:${currentRating >= 4 ? '#f59e0b' : '#cbd5e1'};">${currentRating >= 4 ? '★' : '☆'}</span>
+                      <span data-star="5" style="color:${currentRating >= 5 ? '#f59e0b' : '#cbd5e1'};">${currentRating >= 5 ? '★' : '☆'}</span>
+                    </div>
+                    <span class="star-rating-hint" style="font-size:12px; font-weight:${currentRating > 0 ? '600' : 'normal'}; color:${currentRating > 0 ? '#b45309' : 'var(--color-text-muted)'};">${currentRating > 0 ? `(${currentRating}/5)` : 'Tap to rate'}</span>
                   </div>
                   <textarea class="form-input form-textarea review-comment-input" rows="2" placeholder="Write a quick review about this product..." style="width:100%; font-size:var(--text-xs); margin-bottom:var(--space-2); padding:6px 8px; border:1px solid var(--color-border-light); border-radius:var(--radius-md);">${item.review?.comment || ''}</textarea>
                   <button type="button" class="btn btn--primary btn--sm btn-submit-review" data-prod-id="${item.productId}" data-order-id="${o.dbId || o.id}" style="font-size:12px;">Submit Review</button>
                 </div>
               </div>
-            `).join('')}
+            `;
+    }).join('')}
           </div>
         </div>
       ` : ''}
@@ -495,15 +581,43 @@
     // Star rating selection interaction
     body.querySelectorAll('.star-rating-select').forEach(starContainer => {
       const stars = starContainer.querySelectorAll('span[data-star]');
+      const card = starContainer.closest('.drawer-review-card');
+      const hint = card?.querySelector('.star-rating-hint');
+
+      function renderStars(ratingVal) {
+        stars.forEach(st => {
+          const val = parseInt(st.dataset.star, 10);
+          if (ratingVal > 0 && val <= ratingVal) {
+            st.textContent = '★';
+            st.style.color = '#f59e0b';
+          } else {
+            st.textContent = '☆';
+            st.style.color = '#cbd5e1';
+          }
+        });
+        if (hint) {
+          hint.textContent = ratingVal > 0 ? `(${ratingVal}/5)` : 'Tap to rate';
+          hint.style.color = ratingVal > 0 ? '#b45309' : 'var(--color-text-muted)';
+          hint.style.fontWeight = ratingVal > 0 ? '600' : 'normal';
+        }
+      }
+
       stars.forEach(s => {
         s.addEventListener('click', () => {
           const ratingVal = parseInt(s.dataset.star, 10);
           starContainer.dataset.selectedRating = ratingVal;
-          stars.forEach(st => {
-            const val = parseInt(st.dataset.star, 10);
-            st.textContent = val <= ratingVal ? '★' : '☆';
-          });
+          renderStars(ratingVal);
         });
+
+        s.addEventListener('mouseenter', () => {
+          const hoverVal = parseInt(s.dataset.star, 10);
+          renderStars(hoverVal);
+        });
+      });
+
+      starContainer.addEventListener('mouseleave', () => {
+        const currentSelected = parseInt(starContainer.dataset.selectedRating || '0', 10);
+        renderStars(currentSelected);
       });
     });
 
@@ -525,8 +639,13 @@
         const card = btn.closest('.drawer-review-card');
         const starContainer = card?.querySelector('.star-rating-select');
         const commentInput = card?.querySelector('.review-comment-input');
-        const rating = parseInt(starContainer?.dataset.selectedRating || '5', 10);
+        const rating = parseInt(starContainer?.dataset.selectedRating || '0', 10);
         const comment = (commentInput?.value || '').trim();
+
+        if (!rating || rating < 1 || rating > 5) {
+          alert('Please select a star rating (1 to 5 stars) before submitting.');
+          return;
+        }
 
         btn.disabled = true;
         btn.textContent = 'Submitting...';

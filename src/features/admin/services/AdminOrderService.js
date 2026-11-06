@@ -120,8 +120,11 @@ export class AdminOrderService {
 
       // Update status and deliveryDate if transitioning to DELIVERED
       const updateData = { status: newStatus };
-      if (newStatus === 'DELIVERED' && !existing.deliveryDate) {
-        updateData.deliveryDate = new Date().toISOString().split('T')[0];
+      if (newStatus === 'DELIVERED') {
+        const isGenericOrEmpty = !existing.deliveryDate || existing.deliveryDate.includes('Business Days') || existing.deliveryDate === 'Pending';
+        if (isGenericOrEmpty) {
+          updateData.deliveryDate = new Date().toISOString().split('T')[0];
+        }
       }
 
       if (newStatus === 'CANCELLED') {

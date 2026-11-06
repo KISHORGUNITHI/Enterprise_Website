@@ -1,5 +1,5 @@
 /**
- * auth-guard.js — Enterprise Store Login Required Modal
+ * auth-guard.js — Kishor Enterprises Login Required Modal
  *
  * Public API (attach to window for global access):
  *   showLoginRequiredModal(targetRoute?: string) — opens the modal
@@ -23,11 +23,11 @@
   const STORAGE_KEY = 'pendingRoute';
 
   // ─── DOM refs ──────────────────────────────────────────────────────────────
-  const backdrop   = document.getElementById('authModalBackdrop');
-  const closeBtn   = document.getElementById('authModalClose');
-  const browseBtn  = document.getElementById('authModalBrowse');
-  const loginBtn   = document.getElementById('authModalLogin');
-  const signupBtn  = document.getElementById('authModalSignup');
+  const backdrop = document.getElementById('authModalBackdrop');
+  const closeBtn = document.getElementById('authModalClose');
+  const browseBtn = document.getElementById('authModalBrowse');
+  const loginBtn = document.getElementById('authModalLogin');
+  const signupBtn = document.getElementById('authModalSignup');
 
   if (!backdrop) return; // modal partial not included on this page
 
@@ -45,7 +45,7 @@
           }
         }
       }
-    } catch (_) {}
+    } catch (_) { }
 
     // Store the intended destination for post-login redirect
     if (targetRoute) {
@@ -102,7 +102,7 @@
   });
 
   // ─── Close and Browse buttons ──────────────────────────────────────────────
-  closeBtn  && closeBtn.addEventListener('click', handleClose);
+  closeBtn && closeBtn.addEventListener('click', handleClose);
   browseBtn && browseBtn.addEventListener('click', handleBrowse);
 
   // ─── Focus trap ───────────────────────────────────────────────────────────
@@ -119,7 +119,7 @@
       if (!focusable.length) return;
 
       const first = focusable[0];
-      const last  = focusable[focusable.length - 1];
+      const last = focusable[focusable.length - 1];
 
       if (e.shiftKey) {
         if (document.activeElement === first) {
@@ -136,7 +136,7 @@
   }
 
   // ─── Expose global API ────────────────────────────────────────────────────
-  window.showLoginRequiredModal  = openModal;
+  window.showLoginRequiredModal = openModal;
   window.closeLoginRequiredModal = closeModal;
 
 })();

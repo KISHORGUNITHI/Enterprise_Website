@@ -107,7 +107,7 @@ export class OrderService {
           if (variant.priceOverride) {
             unitPrice = Number(variant.priceOverride);
           }
-          if (!variantDesc && variant.attributeValues) {
+          if (variant.attributeValues && variant.attributeValues.length > 0) {
             variantDesc = variant.attributeValues
               .map((av) => `${av.attribute.displayName || av.attribute.name}: ${av.displayValue || av.value}`)
               .join(', ');

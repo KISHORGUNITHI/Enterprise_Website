@@ -1,5 +1,5 @@
 /**
- * admin.js — Enterprise Store Admin Panel Interactive Logic
+ * admin.js — Kishor Enterprises Admin Panel Interactive Logic
  * Handles real-time search, filters, modals, drawers, status updates, and mock mutations.
  */
 
@@ -943,8 +943,8 @@
 
     const filtered = data.banners.filter(b => {
       const matchSearch = (b.title || '').toLowerCase().includes(query) ||
-                          (b.eyebrow || '').toLowerCase().includes(query) ||
-                          (b.slug || '').toLowerCase().includes(query);
+        (b.eyebrow || '').toLowerCase().includes(query) ||
+        (b.slug || '').toLowerCase().includes(query);
       const matchStatus = filterStatus === 'all' || (b.status || '').toLowerCase() === filterStatus.toLowerCase();
       return matchSearch && matchStatus;
     });
@@ -1133,7 +1133,7 @@
         catSel.value = 'custom';
       }
     }
-    
+
     setBannerImage(banner.imageUrl || banner.image || '');
 
     document.getElementById('bannerModalTitle').textContent = 'Edit Banner';
@@ -1471,8 +1471,8 @@
       if (res && res.success && Array.isArray(res.data)) {
         data.products = res.data.map(p => {
           const primaryImg = (p.productImages && p.productImages.find(img => img.isPrimary)?.imageUrl) ||
-                             p.productImages?.[0]?.imageUrl ||
-                             '';
+            p.productImages?.[0]?.imageUrl ||
+            '';
           const images = (p.productImages || []).map(img => ({
             url: img.imageUrl,
             isPrimary: !!img.isPrimary
@@ -1482,37 +1482,37 @@
           const gifts = Array.isArray(p.gifts) && p.gifts.length > 0
             ? p.gifts
             : (p.giftsGiven || []).map(g => {
-                const isCustom = Boolean(!g.giftProductId || g.customGiftName);
-                if (isCustom) {
-                  const customImg = g.customGiftImage || '';
-                  return {
-                    giftLinkId: g.id,
-                    id: g.id,
-                    name: g.customGiftName || 'Free Gift',
-                    brand: null,
-                    price: 0,
-                    slug: null,
-                    primaryImage: customImg,
-                    imageUrl: customImg,
-                    customGiftName: g.customGiftName,
-                    customGiftImage: g.customGiftImage,
-                    isCustom: true
-                  };
-                } else {
-                  const primaryImg = g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || '';
-                  return {
-                    giftLinkId: g.id,
-                    id: g.giftProduct?.id || g.giftProductId,
-                    name: g.giftProduct?.name || 'Store Item',
-                    brand: g.giftProduct?.brand || null,
-                    price: parseFloat(g.giftProduct?.price) || 0,
-                    slug: g.giftProduct?.slug,
-                    primaryImage: primaryImg,
-                    imageUrl: primaryImg,
-                    isCustom: false
-                  };
-                }
-              });
+              const isCustom = Boolean(!g.giftProductId || g.customGiftName);
+              if (isCustom) {
+                const customImg = g.customGiftImage || '';
+                return {
+                  giftLinkId: g.id,
+                  id: g.id,
+                  name: g.customGiftName || 'Free Gift',
+                  brand: null,
+                  price: 0,
+                  slug: null,
+                  primaryImage: customImg,
+                  imageUrl: customImg,
+                  customGiftName: g.customGiftName,
+                  customGiftImage: g.customGiftImage,
+                  isCustom: true
+                };
+              } else {
+                const primaryImg = g.giftProduct?.productImages?.find(img => img.isPrimary)?.imageUrl || g.giftProduct?.productImages?.[0]?.imageUrl || '';
+                return {
+                  giftLinkId: g.id,
+                  id: g.giftProduct?.id || g.giftProductId,
+                  name: g.giftProduct?.name || 'Store Item',
+                  brand: g.giftProduct?.brand || null,
+                  price: parseFloat(g.giftProduct?.price) || 0,
+                  slug: g.giftProduct?.slug,
+                  primaryImage: primaryImg,
+                  imageUrl: primaryImg,
+                  isCustom: false
+                };
+              }
+            });
           return {
             id: p.id,
             name: p.name,
@@ -1561,9 +1561,9 @@
 
     const filtered = data.products.filter(p => {
       const matchQuery = (p.name || '').toLowerCase().includes(query) ||
-                         (p.brand || '').toLowerCase().includes(query) ||
-                         (p.category || '').toLowerCase().includes(query) ||
-                         (p.slug || '').toLowerCase().includes(query);
+        (p.brand || '').toLowerCase().includes(query) ||
+        (p.category || '').toLowerCase().includes(query) ||
+        (p.slug || '').toLowerCase().includes(query);
       const matchCat = cat === 'all' || p.category.toLowerCase() === cat.toLowerCase();
       const matchStock = stockStatus === 'all' || p.status === stockStatus;
       return matchQuery && matchCat && matchStock;
@@ -1775,43 +1775,55 @@
 
     if (!availableAttributes.length) {
       availableAttributes = [
-        { id: 'attr-ram', name: 'RAM', displayName: 'RAM', values: [
-          { id: 'cmue4phix000s9gdxka1vv50u', value: '8gb', displayValue: '8GB' },
-          { id: 'cmue4phix000t9gdx9rz0s7jp', value: '12gb', displayValue: '12GB' },
-          { id: 'cmue4phix000u9gdx4ui0c3d0', value: '16gb', displayValue: '16GB' }
-        ]},
-        { id: 'attr-storage', name: 'Storage', displayName: 'Storage', values: [
-          { id: 'cmue4ph83000n9gdx7lce6uh7', value: '128gb', displayValue: '128GB' },
-          { id: 'cmue4ph83000o9gdxnz6tsk75', value: '256gb', displayValue: '256GB' },
-          { id: 'cmue4ph83000p9gdxv9izipwb', value: '512gb', displayValue: '512GB' },
-          { id: 'cmue4ph83000q9gdx4rt2np3q', value: '1tb', displayValue: '1TB' }
-        ]},
-        { id: 'attr-color', name: 'Color', displayName: 'Color', values: [
-          { id: 'cmue4pgm6000i9gdxow1dzicc', value: 'black', displayValue: 'Phantom Black' },
-          { id: 'cmue4pgm6000j9gdx8q2wgfid', value: 'silver', displayValue: 'Titanium Silver' },
-          { id: 'cmue4pgm6000k9gdx90e3fjiy', value: 'blue', displayValue: 'Deep Ocean Blue' },
-          { id: 'cmue4pgm6000l9gdx8v2n5ml9', value: 'gold', displayValue: 'Desert Gold' },
-          { id: 'cmuo47gzf000ee8e53e8zy3b7', value: 'green', displayValue: 'Emerald Green' }
-        ]},
-        { id: 'attr-screen', name: 'Screen Size', displayName: 'Screen Size', values: [
-          { id: 'cmuo47h7i000ge8e5w7n2shxj', value: '24-inch', displayValue: '24 Inch' },
-          { id: 'cmuo47h9u000he8e5ksf9mx5f', value: '32-inch', displayValue: '32 Inch' },
-          { id: 'cmuo47heb000ie8e53xo0mtgx', value: '40-inch', displayValue: '40 Inch' },
-          { id: 'cmuo47hh1000je8e5n3whd2n3', value: '43-inch', displayValue: '43 Inch' },
-          { id: 'cmuo47hll000ke8e5rdnd3h7e', value: '50-inch', displayValue: '50 Inch' },
-          { id: 'cmuo47hpl000le8e5a7giwdeu', value: '55-inch', displayValue: '55 Inch' },
-          { id: 'cmuo47hta000me8e5aqbw9tdm', value: '65-inch', displayValue: '65 Inch' },
-          { id: 'cmuo47hv6000ne8e5owf09q99', value: '75-inch', displayValue: '75 Inch' }
-        ]},
-        { id: 'attr-cap', name: 'Capacity', displayName: 'Capacity', values: [
-          { id: 'cmuo47i0t000pe8e5jhimnirp', value: '1-ton', displayValue: '1.0 Ton' },
-          { id: 'cmuo47i4l000qe8e5e96c32dw', value: '1.5-ton', displayValue: '1.5 Ton' },
-          { id: 'cmuo47ifg000re8e5d6kkufrt', value: '2-ton', displayValue: '2.0 Ton' }
-        ]},
-        { id: 'attr-star', name: 'Star Rating', displayName: 'Energy Rating', values: [
-          { id: 'cmuo47ior000te8e5fu02z6k2', value: '3-star', displayValue: '3 Star' },
-          { id: 'cmuo47isp000ue8e5t8p1jhqy', value: '5-star', displayValue: '5 Star' }
-        ]}
+        {
+          id: 'attr-ram', name: 'RAM', displayName: 'RAM', values: [
+            { id: 'cmue4phix000s9gdxka1vv50u', value: '8gb', displayValue: '8GB' },
+            { id: 'cmue4phix000t9gdx9rz0s7jp', value: '12gb', displayValue: '12GB' },
+            { id: 'cmue4phix000u9gdx4ui0c3d0', value: '16gb', displayValue: '16GB' }
+          ]
+        },
+        {
+          id: 'attr-storage', name: 'Storage', displayName: 'Storage', values: [
+            { id: 'cmue4ph83000n9gdx7lce6uh7', value: '128gb', displayValue: '128GB' },
+            { id: 'cmue4ph83000o9gdxnz6tsk75', value: '256gb', displayValue: '256GB' },
+            { id: 'cmue4ph83000p9gdxv9izipwb', value: '512gb', displayValue: '512GB' },
+            { id: 'cmue4ph83000q9gdx4rt2np3q', value: '1tb', displayValue: '1TB' }
+          ]
+        },
+        {
+          id: 'attr-color', name: 'Color', displayName: 'Color', values: [
+            { id: 'cmue4pgm6000i9gdxow1dzicc', value: 'black', displayValue: 'Phantom Black' },
+            { id: 'cmue4pgm6000j9gdx8q2wgfid', value: 'silver', displayValue: 'Titanium Silver' },
+            { id: 'cmue4pgm6000k9gdx90e3fjiy', value: 'blue', displayValue: 'Deep Ocean Blue' },
+            { id: 'cmue4pgm6000l9gdx8v2n5ml9', value: 'gold', displayValue: 'Desert Gold' },
+            { id: 'cmuo47gzf000ee8e53e8zy3b7', value: 'green', displayValue: 'Emerald Green' }
+          ]
+        },
+        {
+          id: 'attr-screen', name: 'Screen Size', displayName: 'Screen Size', values: [
+            { id: 'cmuo47h7i000ge8e5w7n2shxj', value: '24-inch', displayValue: '24 Inch' },
+            { id: 'cmuo47h9u000he8e5ksf9mx5f', value: '32-inch', displayValue: '32 Inch' },
+            { id: 'cmuo47heb000ie8e53xo0mtgx', value: '40-inch', displayValue: '40 Inch' },
+            { id: 'cmuo47hh1000je8e5n3whd2n3', value: '43-inch', displayValue: '43 Inch' },
+            { id: 'cmuo47hll000ke8e5rdnd3h7e', value: '50-inch', displayValue: '50 Inch' },
+            { id: 'cmuo47hpl000le8e5a7giwdeu', value: '55-inch', displayValue: '55 Inch' },
+            { id: 'cmuo47hta000me8e5aqbw9tdm', value: '65-inch', displayValue: '65 Inch' },
+            { id: 'cmuo47hv6000ne8e5owf09q99', value: '75-inch', displayValue: '75 Inch' }
+          ]
+        },
+        {
+          id: 'attr-cap', name: 'Capacity', displayName: 'Capacity', values: [
+            { id: 'cmuo47i0t000pe8e5jhimnirp', value: '1-ton', displayValue: '1.0 Ton' },
+            { id: 'cmuo47i4l000qe8e5e96c32dw', value: '1.5-ton', displayValue: '1.5 Ton' },
+            { id: 'cmuo47ifg000re8e5d6kkufrt', value: '2-ton', displayValue: '2.0 Ton' }
+          ]
+        },
+        {
+          id: 'attr-star', name: 'Star Rating', displayName: 'Energy Rating', values: [
+            { id: 'cmuo47ior000te8e5fu02z6k2', value: '3-star', displayValue: '3 Star' },
+            { id: 'cmuo47isp000ue8e5t8p1jhqy', value: '5-star', displayValue: '5 Star' }
+          ]
+        }
       ];
     }
   }
@@ -2652,6 +2664,10 @@
 
     const targetImg = document.getElementById('productOfferTargetImg');
     if (targetImg) {
+      targetImg.onerror = function() {
+        this.onerror = null;
+        this.src = '/assets/images/placeholder.png';
+      };
       targetImg.src = prod.primaryImage || '/assets/images/placeholder.png';
       targetImg.alt = prod.name;
     }
@@ -3056,21 +3072,21 @@
 
       const giftsHtml = hasGifts
         ? gifts.map(g => {
-            const isCustom = Boolean(g.isCustom || (g.id && String(g.id).startsWith('custom-')) || (!g.id && g.customGiftName));
-            const imgUrl = g.primaryImage || g.imageUrl || '';
-            const thumb = imgUrl
-              ? `<img src="${imgUrl}" style="width:20px;height:20px;min-width:20px;object-fit:contain;background:#fff;border-radius:3px;border:1px solid #e2e8f0;vertical-align:middle;margin-right:4px;" alt="${g.name}"/>`
-              : `<span style="margin-right:3px;">🎁</span>`;
-            const badgeText = isCustom
-              ? `<span class="badge" style="background:#f3e8ff; color:#7e22ce; border:1px solid #e9d5ff; font-size:9px; padding:0 4px; margin-left:3px; font-weight:700;">CUSTOM</span>`
-              : `<span style="font-size: 11px; opacity: 0.8;">(${formatRupees(g.price)})</span>`;
-            return `
+          const isCustom = Boolean(g.isCustom || (g.id && String(g.id).startsWith('custom-')) || (!g.id && g.customGiftName));
+          const imgUrl = g.primaryImage || g.imageUrl || '';
+          const thumb = imgUrl
+            ? `<img src="${imgUrl}" style="width:20px;height:20px;min-width:20px;object-fit:contain;background:#fff;border-radius:3px;border:1px solid #e2e8f0;vertical-align:middle;margin-right:4px;" alt="${g.name}"/>`
+            : `<span style="margin-right:3px;">🎁</span>`;
+          const badgeText = isCustom
+            ? `<span class="badge" style="background:#f3e8ff; color:#7e22ce; border:1px solid #e9d5ff; font-size:9px; padding:0 4px; margin-left:3px; font-weight:700;">CUSTOM</span>`
+            : `<span style="font-size: 11px; opacity: 0.8;">(${formatRupees(g.price)})</span>`;
+          return `
               <span class="active-gift-chip">
                 ${thumb}<strong>${g.name}</strong> ${badgeText}
                 <button type="button" class="gift-chip-remove-btn" data-remove-gift="${g.giftLinkId || g.id}" data-parent-product="${item.id}" title="Remove ${g.name} as gift">&times;</button>
               </span>
             `;
-          }).join('')
+        }).join('')
         : `<span style="font-size: 11.5px; color: var(--color-text-muted); font-style: italic;">No free gifts attached</span>`;
 
       return `
@@ -4185,9 +4201,9 @@
 
     const filtered = data.orders.filter(o => {
       const matchQuery = (o.id || '').toLowerCase().includes(query) ||
-                         (o.shortId || '').toLowerCase().includes(query) ||
-                         (o.customer?.name || '').toLowerCase().includes(query) ||
-                         (o.customer?.phone || '').includes(query);
+        (o.shortId || '').toLowerCase().includes(query) ||
+        (o.customer?.name || '').toLowerCase().includes(query) ||
+        (o.customer?.phone || '').includes(query);
       const matchFilter = currentOrderFilter === 'all' || o.status === currentOrderFilter;
       return matchQuery && matchFilter;
     });
@@ -4379,10 +4395,10 @@
       reviewsHtml = `
         <div style="display:flex; flex-direction:column; gap:var(--space-3);">
           ${order.items.map(item => {
-            if (item.review) {
-              const ratingNum = Math.min(5, Math.max(1, Math.round(item.review.rating || 0)));
-              const stars = '★'.repeat(ratingNum) + '☆'.repeat(5 - ratingNum);
-              return `
+        if (item.review) {
+          const ratingNum = Math.min(5, Math.max(1, Math.round(item.review.rating || 0)));
+          const stars = '★'.repeat(ratingNum) + '☆'.repeat(5 - ratingNum);
+          return `
                 <div style="background:#ffffff; border:1px solid var(--color-border-light); border-left:4px solid var(--color-success-600); border-radius:var(--radius-lg); padding:var(--space-3) var(--space-4); box-shadow:var(--shadow-xs);">
                   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                     <span style="font-weight:var(--font-bold); font-size:var(--text-sm); color:var(--color-text-primary);">${item.name}</span>
@@ -4398,15 +4414,15 @@
                   </div>
                 </div>
               `;
-            } else {
-              return `
+        } else {
+          return `
                 <div style="background:var(--color-bg-secondary); border:1px dashed var(--color-border-light); border-radius:var(--radius-lg); padding:var(--space-3) var(--space-4); font-size:var(--text-xs); color:var(--color-text-muted); display:flex; justify-content:space-between; align-items:center;">
                   <span>${item.name}</span>
                   <span class="badge" style="background:#f3f4f6; color:#6b7280; font-size:11px;">No review submitted yet</span>
                 </div>
               `;
-            }
-          }).join('')}
+        }
+      }).join('')}
         </div>
       `;
     } else {
@@ -5016,7 +5032,7 @@
           try {
             const stored = localStorage.getItem('authUser');
             if (stored) authUser = JSON.parse(stored);
-          } catch (e) {}
+          } catch (e) { }
           authUser.username = updatedUser.username;
           authUser.email = updatedUser.email;
           authUser.phone_number = updatedUser.phone_number;
@@ -5218,7 +5234,7 @@
             showAdminToast(`Attribute "${displayName}" created successfully.`);
             closeModal('createAttributeModal');
             if (form) form.reset();
-            
+
             // Reload all available attributes from server
             if (useApi) {
               await loadAdminAttributes();
