@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <link rel="icon" type="image/svg+xml" href="/public/icons/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Foundation Styles -->
+  <link rel="stylesheet" href="/assets/css/variables.css" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/utilities.css" />
+
+  <!-- Reused Existing Header Styles untouched -->
+  <link rel="stylesheet" href="/assets/css/home-header.css" />
+  <link rel="stylesheet" href="/assets/css/category-header.css" />
+
+  <!-- Cart Specific Page Styles -->
+  <link rel="stylesheet" href="/assets/css/cart.css?v=3" />
+
+  <!-- Auth Modal Styles -->
+  <link rel="stylesheet" href="/assets/css/login-required-modal.css" />
+
+  <!-- Footer Styles -->
+  <link rel="stylesheet" href="/assets/css/footer.css" />
+  <link rel="stylesheet" href="/assets/css/home-footer.css" />
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
+</head>
+
+<body class="cart-body">
+
+  <!-- ── 1. Reused Existing Header (Untouched per requirement) ── -->
+  <%- include('../../partials/category-header') %>
+
+  <!-- ── 2. Main Cart View ── -->
+  <main class="cart-page" id="main-content">
+    <div class="cart-container">
+
+      <!-- Toast / Alert Notification Banner -->
+      <div id="cartToast" class="cart-toast" role="alert" hidden>
+        <span class="cart-toast__icon" id="cartToastIcon" aria-hidden="true"></span>
+        <span class="cart-toast__msg" id="cartToastMsg"></span>
+        <button type="button" class="cart-toast__close" id="cartToastClose" aria-label="Dismiss">&times;</button>
+      </div>
+
+      <!-- ── A. Cart Summary Header (Amazon / Flipkart Style) ── -->
+      <header class="cart-top-summary-bar" id="cartTopSummaryBar">
+        <div class="cart-top-summary-bar__info">
+          <div class="cart-top-title-group">
+            <h1 class="cart-page-title">My Cart</h1>
+            <span class="cart-items-counter-badge" id="cartHeaderCountBadge">(0 items)</span>
+          </div>
+          <div class="cart-top-subtotal-wrap" id="cartTopSubtotalWrap">
+            <span class="cart-top-subtotal-label">Subtotal:</span>
+            <span class="cart-top-subtotal-amount" id="cartTopSubtotal">₹0.00</span>
+          </div>
+        </div>
+        <div class="cart-top-summary-bar__right">
+          <button type="button" class="cart-clear-all-btn" id="clearAllCartBtn" title="Clear Shopping Cart" aria-label="Clear all items in cart" style="display: none;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+          <div class="cart-top-summary-bar__cta" id="cartTopSummaryCta">
+            <button type="button" class="btn-proceed-buy" id="topProceedToBuyBtn" aria-label="Proceed to Buy">
+              <span class="btn-proceed-buy__text" id="topProceedBtnText">Proceed to Buy (0 items)</span>
+              <svg class="btn-proceed-buy__arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Selection Controls Bar (Hidden when cart is empty) -->
+      <div class="cart-controls-bar" id="cartControlsBar" style="display: none;">
+        <label class="cart-select-all-label">
+          <input type="checkbox" id="selectAllCheckbox" class="custom-cart-checkbox" checked />
+          <span class="cart-select-all-text" id="selectAllText">Deselect all items</span>
+        </label>
+        <span class="cart-controls-price-header">Price</span>
+      </div>
+
+      <!-- ── Cart Grid: Main Products List (Left) + Order Summary (Right) ── -->
+      <div class="cart-grid" id="cartGrid">
+
+        <!-- ══════════════════════════════════════════════════════════
+             LEFT / MAIN COLUMN: Products List
+        ══════════════════════════════════════════════════════════ -->
+        <section class="cart-items-section" aria-labelledby="cartHeading">
+          <h2 class="sr-only" id="cartHeading">Shopping Cart Items</h2>
+
+          <!-- Loading Skeletons -->
+          <div class="cart-skeletons" id="cartSkeletons" aria-label="Loading cart items">
+            <div class="cart-skeleton-card">
+              <div class="skeleton-box skeleton-check"></div>
+              <div class="skeleton-box skeleton-thumb"></div>
+              <div class="skeleton-content">
+                <div class="skeleton-box skeleton-line skeleton-title"></div>
+                <div class="skeleton-box skeleton-line skeleton-price"></div>
+                <div class="skeleton-box skeleton-line skeleton-stock"></div>
+                <div class="skeleton-box skeleton-line skeleton-actions"></div>
+              </div>
+            </div>
+            <div class="cart-skeleton-card">
+              <div class="skeleton-box skeleton-check"></div>
+              <div class="skeleton-box skeleton-thumb"></div>
+              <div class="skeleton-content">
+                <div class="skeleton-box skeleton-line skeleton-title"></div>
+                <div class="skeleton-box skeleton-line skeleton-price"></div>
+                <div class="skeleton-box skeleton-line skeleton-stock"></div>
+                <div class="skeleton-box skeleton-line skeleton-actions"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty Cart State -->
+          <div class="cart-empty-state" id="cartEmptyState" hidden>
+            <div class="cart-empty-state__icon" aria-hidden="true">
+              <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+              </svg>
+            </div>
+            <h2 class="cart-empty-state__title">Your Kishor Mobiles Cart is empty</h2>
+            <p class="cart-empty-state__desc">Your shopping cart is waiting. Explore our latest flagship mobiles, 5G smartphones, and genuine accessories!</p>
+            <div class="cart-empty-state__actions">
+              <a href="/home" class="btn-shop-deals">Shop Today's Deals</a>
+              <a href="/orders" class="btn-view-orders">View My Orders</a>
+            </div>
+          </div>
+
+          <!-- Active Products List Container (Hydrated from DB) -->
+          <div class="cart-items-list" id="cartItemsList" hidden>
+            <!-- Generated dynamically by cart.js -->
+          </div>
+
+          <!-- Bottom Subtotal Bar -->
+          <div class="cart-bottom-subtotal-row" id="cartBottomSubtotalRow" hidden>
+            <span class="cart-bottom-subtotal-text">
+              Subtotal (<span id="cartBottomQty">0 items</span>): <strong class="cart-bottom-subtotal-val" id="cartBottomAmount">₹0.00</strong>
+            </span>
+          </div>
+
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+             RIGHT COLUMN: Order Summary
+        ══════════════════════════════════════════════════════════ -->
+        <aside class="cart-summary-sidebar" id="cartSummarySidebar">
+
+          <!-- Order Summary Card -->
+          <div class="cart-order-summary-card">
+            <h2 class="cart-order-summary-title">Order Summary</h2>
+
+            <div class="cart-summary-rows">
+              <div class="cart-summary-row">
+                <span class="cart-summary-row__label">Items (<span id="summaryItemsCount">0</span>)</span>
+                <span class="cart-summary-row__val" id="summaryItemsSubtotal">₹0.00</span>
+              </div>
+
+              <div class="cart-summary-row">
+                <span class="cart-summary-row__label">Delivery</span>
+                <span class="cart-summary-row__val" id="summaryDeliveryFee">₹80.00</span>
+              </div>
+
+              <div class="cart-summary-row cart-summary-row--divider">
+                <span class="cart-summary-row__label">Total</span>
+                <span class="cart-summary-row__val" id="summaryGrossTotal">₹0.00</span>
+              </div>
+
+              <div class="cart-summary-row cart-summary-row--savings" id="summaryFreeDeliveryRow">
+                <span class="cart-summary-row__label text-green">Free Delivery</span>
+                <span class="cart-summary-row__val text-green" id="summaryFreeDeliveryDiscount">-₹80.00</span>
+              </div>
+
+              <div class="cart-summary-row cart-summary-row--order-total">
+                <span class="cart-summary-total-label">Order Total</span>
+                <span class="cart-summary-total-amount" id="summaryOrderTotal">₹0.00</span>
+              </div>
+            </div>
+
+            <!-- Savings Banner -->
+            <div class="cart-savings-callout" id="cartSavingsCallout" hidden>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 14 14"></polyline>
+              </svg>
+              <span>You will save <strong id="summarySavingsAmount">₹0.00</strong> on this order</span>
+            </div>
+
+            <!-- Primary Checkout CTA in Sidebar -->
+            <div class="cart-summary-actions">
+              <button type="button" class="btn-proceed-buy btn-proceed-buy--sidebar" id="sidebarProceedToBuyBtn" aria-label="Proceed to Buy">
+                <span class="btn-proceed-buy__text" id="sidebarProceedBtnText">Proceed to Buy (0 items)</span>
+                <svg class="btn-proceed-buy__arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+        </aside>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Login Required Modal (Reused) -->
+  <%- include('../../partials/login-required-modal') %>
+
+  <!-- Footer (Reused) -->
+  <%- include('../../partials/home-footer') %>
+
+  <!-- Mobile Fixed Bottom Checkout Bar (Directly matching reference screenshot) -->
+  <div class="cart-mobile-bottom-bar" id="cartMobileBottomBar" role="region" aria-label="Cart action bar">
+    <div class="cart-mobile-bottom-bar__info">
+      <span class="cart-mobile-bottom-bar__label">Total</span>
+      <div class="cart-mobile-bottom-bar__price-row">
+        <strong class="cart-mobile-bottom-bar__price" id="mobileBottomTotal">₹0.00</strong>
+        <svg class="cart-mobile-bottom-bar__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+      </div>
+    </div>
+    <button type="button" class="btn-proceed-buy btn-proceed-buy--mobile" id="mobileProceedToBuyBtn" aria-label="Proceed to Buy">
+      <span class="btn-proceed-buy__text" id="mobileProceedBtnText">Proceed to Buy (0 items)</span>
+      <svg class="btn-proceed-buy__arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/assets/js/category-header.js" defer></script>
+  <script src="/assets/js/auth-guard.js"></script>
+  <script src="/assets/js/cart.js?v=3"></script>
+</body>
+
+</html>
+

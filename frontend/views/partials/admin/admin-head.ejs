@@ -1,5 +1,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="cf-rocket-loader" content="off"/>
+<meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'self' 'unsafe-inline' 'unsafe-eval' https: http: data: blob: chrome-extension:; style-src * 'self' 'unsafe-inline' https: http: fonts.googleapis.com; font-src * 'self' https: http: fonts.gstatic.com data:; img-src * 'self' data: blob: https: http:; connect-src * 'self' https: http: ws: wss:;"/>
 <title><%= typeof title !== 'undefined' ? title : 'Admin Panel — Kishor Enterprises' %></title>
 <link rel="icon" type="image/svg+xml" href="/public/icons/favicon.svg"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -18,6 +20,6 @@
 <link rel="stylesheet" href="/assets/css/responsive.css"/>
 
 <!-- Global Admin Configuration -->
-<script>
+<script data-cfasync="false">
   window.ADMIN_USE_API = <%= typeof useApi !== 'undefined' ? useApi : false %>;
 </script>

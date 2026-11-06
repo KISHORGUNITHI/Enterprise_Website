@@ -340,6 +340,7 @@
         }
         syncCatCartBadge();
         window.addEventListener('storage', syncCatCartBadge);
+        document.addEventListener('cart:updated', syncCatCartBadge);
 
         // Client-side Auth UI Sync
         function syncCatAuthUI() {

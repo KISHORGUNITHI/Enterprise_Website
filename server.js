@@ -95,6 +95,23 @@ app.use((req, res, next) => {
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
   }
+
+  // Global Content Security Policy (CSP) allowing inline scripts, eval, data/blob assets, and proxy/extension origins
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; " +
+    "script-src * 'self' 'unsafe-inline' 'unsafe-eval' https: http: data: blob: chrome-extension:; " +
+    "script-src-elem * 'self' 'unsafe-inline' 'unsafe-eval' https: http: data: blob: chrome-extension:; " +
+    "style-src * 'self' 'unsafe-inline' https: http: fonts.googleapis.com; " +
+    "style-src-elem * 'self' 'unsafe-inline' https: http: fonts.googleapis.com; " +
+    "font-src * 'self' https: http: fonts.gstatic.com data:; " +
+    "img-src * 'self' data: blob: https: http:; " +
+    "connect-src * 'self' https: http: ws: wss:; " +
+    "frame-src * 'self' https: http:; " +
+    "object-src 'none';"
+  );
+  res.setHeader('cf-rocket-loader', 'off');
+
   next();
 });
 
@@ -354,6 +371,19 @@ app.get('/product/:id', (req, res) => {
   });
 });
 
+// Product detail page alias: route /products/:id to PDP (excluding reserved category slugs)
+app.get('/products/:id', (req, res, next) => {
+  const reservedCategories = ['mobiles', 'tvs', 'acs', 'home-theatres', 'kitchen', 'refrigerators', 'trending', 'all'];
+  if (reservedCategories.includes(req.params.id)) {
+    return next();
+  }
+  return res.render('pages/products/detail', {
+    title: `Product Details — ${site.name}`,
+    productId: req.params.id,
+    site,
+  });
+});
+
 // ─── Auth Guard for Customer Pages ──────────────────────────────────────────
 function requireAuthPage(req, res, next) {
   if (req.user) {
@@ -363,7 +393,16 @@ function requireAuthPage(req, res, next) {
 }
 
 // Shopping
-app.get('/cart', stub('Shopping Cart'));
+app.get('/cart', (req, res) => {
+  res.render('pages/cart/cart', {
+    title: `Shopping Cart — ${site.name}`,
+    pageLabel: 'Shopping Cart',
+    currentPath: req.path,
+    site,
+    user: req.user,
+    isAuthenticated: Boolean(req.user),
+  });
+});
 app.get('/checkout', requireAuthPage, (req, res) => {
   res.render('pages/checkout/checkout', {
     title: `Checkout — ${site.name}`,

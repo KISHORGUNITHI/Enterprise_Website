@@ -583,13 +583,15 @@
     try {
       let items = [];
 
-      // 1. Priority A: Direct Buy Now item in localStorage
+      // 1. Priority A: Direct Buy Now item or selected cart items in localStorage
       try {
         const buyNowRaw = localStorage.getItem('ks_checkout_item');
         if (buyNowRaw) {
-          const item = JSON.parse(buyNowRaw);
-          if (item && (item.id || item.productId || item.slug)) {
-            items = [item];
+          const parsed = JSON.parse(buyNowRaw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            items = parsed;
+          } else if (parsed && (parsed.id || parsed.productId || parsed.slug)) {
+            items = [parsed];
           }
         }
       } catch (e) { }

@@ -19,6 +19,7 @@ model User {
   addresses     Address[]
   orders        Order[]
   reviews       Review[]
+  cartItems     CartItem[]
 
   @@index([email])
 }
@@ -70,6 +71,7 @@ model Product {
   interactions   ProductInteraction[]
   variants       ProductVariant[]
   productReviews Review[]
+  cartItems      CartItem[]
   giftsGiven     ProductGift[]        @relation("ProductOffersGifts")
   giftedIn       ProductGift[]        @relation("GiftProductItems")
 
@@ -183,6 +185,23 @@ model OrderItem {
   @@index([variantId])
 }
 
+model CartItem {
+  id        String          @id @default(cuid())
+  userId    String
+  productId String
+  variantId String?
+  quantity  Int             @default(1)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([productId])
+  @@index([variantId])
+}
+
 model Banner {
   id           String       @id @default(cuid())
   title        String
@@ -209,6 +228,7 @@ model ProductVariant {
   createdAt       DateTime                @default(now())
   updatedAt       DateTime                @updatedAt
   orderItems      OrderItem[]
+  cartItems       CartItem[]
   images          ProductImage[]
   product         Product                 @relation(fields: [productId], references: [id], onDelete: Cascade)
   attributeValues VariantAttributeValue[] @relation("ProductVariantToVariantAttributeValue")

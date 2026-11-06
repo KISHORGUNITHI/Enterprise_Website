@@ -1,4 +1,5 @@
 import { OrderRepository } from '../repositories/orderRepository.js';
+import prisma from '../../../config/prisma.js';
 
 export class OrderService {
   constructor() {
@@ -167,6 +168,25 @@ export class OrderService {
       orderData,
       orderItemsData,
     });
+
+    // 5. Clean up ordered items from the user's database cart
+    try {
+      for (const item of orderItemsData) {
+        if (item.variantId) {
+          await prisma.$executeRawUnsafe(
+            `DELETE FROM "CartItem" WHERE "userId" = $1 AND "productId" = $2 AND "variantId" = $3`,
+            userId, item.productId, item.variantId
+          );
+        } else {
+          await prisma.$executeRawUnsafe(
+            `DELETE FROM "CartItem" WHERE "userId" = $1 AND "productId" = $2 AND ("variantId" IS NULL OR "variantId" = '')`,
+            userId, item.productId
+          );
+        }
+      }
+    } catch (cartCleanErr) {
+      console.warn('Cart cleanup after order warning:', cartCleanErr.message);
+    }
 
     return {
       order: createdOrder,

@@ -9,13 +9,15 @@ export class CartService {
 
   /**
    * Helper to format readable variant description string
+   * Outputs comma-separated values matching clean mobile style e.g. 'Astral Trail, 12GB RAM, 256GB Storage'
    */
   formatVariantDescription(variant) {
     if (!variant || !variant.attributeValues || variant.attributeValues.length === 0) {
       return '';
     }
     return variant.attributeValues
-      .map((av) => `${av.attribute?.displayName || av.attribute?.name || 'Attribute'}: ${av.displayValue || av.value}`)
+      .map((av) => av.displayValue || av.value)
+      .filter(Boolean)
       .join(', ');
   }
 
@@ -49,6 +51,7 @@ export class CartService {
     const productMap = new Map(products.map((p) => [p.id, p]));
 
     let calculatedSubtotal = 0;
+    let calculatedMRP = 0;
     let totalQuantity = 0;
     const enrichedItems = [];
 
@@ -59,14 +62,14 @@ export class CartService {
         continue;
       }
 
-      let unitPrice = Number(product.price);
+      let basePrice = Number(product.price);
       let variantInfo = null;
 
       if (rawItem.variantId && product.variants && product.variants.length > 0) {
         const variant = product.variants.find((v) => v.id === rawItem.variantId);
         if (variant) {
           if (variant.priceOverride) {
-            unitPrice = Number(variant.priceOverride);
+            basePrice = Number(variant.priceOverride);
           }
           variantInfo = {
             id: variant.id,
@@ -78,16 +81,26 @@ export class CartService {
       }
 
       // Apply product offer / promotional discount if applicable
+      let unitPrice = basePrice;
       const offer = (product.offer && parseFloat(product.offer) > 0) ? parseFloat(product.offer) : 0;
       if (offer > 0) {
-        unitPrice = Math.round(unitPrice * (1 - offer / 100));
+        unitPrice = Math.round(basePrice * (1 - offer / 100));
       }
+
+      const originalPrice = basePrice;
+      const discountPct = (offer > 0 && originalPrice > unitPrice)
+        ? Math.round(((originalPrice - unitPrice) / originalPrice) * 100)
+        : 0;
 
       const primaryImage = product.productImages?.find((img) => img.isPrimary)?.imageUrl ||
                            product.productImages?.[0]?.imageUrl || '';
 
       const lineTotal = unitPrice * rawItem.quantity;
+      const lineMRP = originalPrice * rawItem.quantity;
+      const lineSavings = Math.max(0, lineMRP - lineTotal);
+
       calculatedSubtotal += lineTotal;
+      calculatedMRP += lineMRP;
       totalQuantity += rawItem.quantity;
 
       const mappedGifts = (product.giftsGiven || []).map((g) => {
@@ -112,7 +125,11 @@ export class CartService {
         variantId: rawItem.variantId || null,
         quantity: rawItem.quantity,
         unitPrice,
+        originalPrice,
+        discountPct,
         lineTotal,
+        lineMRP,
+        lineSavings,
         createdAt: rawItem.createdAt,
         updatedAt: rawItem.updatedAt,
         gifts: mappedGifts,
@@ -132,18 +149,24 @@ export class CartService {
     }
 
     const subtotal = calculatedSubtotal;
-    const discountAmount = 0;
+    const totalMRP = calculatedMRP;
+    const discountAmount = Math.max(0, totalMRP - subtotal);
+    const standardDeliveryFee = calculatedSubtotal > 0 ? 80 : 0;
+    const freeDeliverySavings = calculatedSubtotal > 0 ? 80 : 0;
     const deliveryFee = 0;
-    const totalAmount = subtotal - discountAmount + deliveryFee;
+    const totalAmount = subtotal;
 
     return {
       items: enrichedItems,
       summary: {
         itemsCount: enrichedItems.length,
         totalQuantity,
+        totalMRP,
         subtotal,
         discountAmount,
         deliveryFee,
+        standardDeliveryFee,
+        freeDeliverySavings,
         totalAmount,
       },
     };

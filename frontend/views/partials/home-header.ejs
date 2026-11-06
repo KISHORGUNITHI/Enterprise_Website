@@ -271,6 +271,7 @@
         }
         syncHdrCartBadge();
         window.addEventListener('storage', syncHdrCartBadge);
+        document.addEventListener('cart:updated', syncHdrCartBadge);
 
         // Client-side Auth UI Sync
         function syncHomeAuthUI() {

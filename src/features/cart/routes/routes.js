@@ -22,7 +22,8 @@ router.put('/items/:id', cartController.editQuantity);
 router.put('/:id', cartController.editQuantity);
 router.patch('/:id', cartController.editQuantity);
 
-// 4. Delete item from cart
+// 4. Delete item from cart / Clear cart
+router.delete('/clear', cartController.clearCart);
 router.delete('/delete/:id', cartController.deleteItem);
 router.delete('/items/:id', cartController.deleteItem);
 router.delete('/:id', cartController.deleteItem);

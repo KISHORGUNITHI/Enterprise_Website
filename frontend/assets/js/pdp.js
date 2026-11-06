@@ -1549,7 +1549,22 @@
           if (existingIdx >= 0) cart[existingIdx].quantity += 1;
           else cart.push(itemToCart);
           localStorage.setItem('ks_cart', JSON.stringify(cart));
+          document.dispatchEvent(new Event('cart:updated'));
         } catch (e) { }
+
+        // Sync to server cart if user is authenticated
+        try {
+          fetch('/api/cart/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              productId: currentProductData.dbId || currentProductData.id,
+              variantId: currentProductData.selectedVariantId || null,
+              quantity: 1,
+            }),
+          }).catch(() => {});
+        } catch (_) {}
 
         // Trigger interaction recording for CART_ADD
         try {
