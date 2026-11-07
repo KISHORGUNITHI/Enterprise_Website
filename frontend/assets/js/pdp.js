@@ -23,7 +23,7 @@
   function starsSVG(rating) {
     const rId = Math.random().toString(36).slice(2, 8);
     const percent = Math.round((rating % 1) * 100);
-    
+
     const stars = Array.from({ length: 5 }, (_, i) => {
       let fill = 'var(--gray-300)';
       let defs = '';
@@ -33,21 +33,21 @@
         fill = `url(#grad-${rId}-${i})`;
         defs = `<defs><linearGradient id="grad-${rId}-${i}" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="${percent}%" stop-color="var(--color-warning-500)" /><stop offset="${percent}%" stop-color="var(--gray-300)" /></linearGradient></defs>`;
       }
-      return `<svg data-star="${i+1}" class="pdp-star-icon" width="18" height="18" viewBox="0 0 16 16" style="fill:${fill}; cursor: pointer; transition: transform 0.1s; margin-right: 2px;">${defs}<path d="M8 1.5l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11.5l-5.2 3.3 1.8-5.5L0 7h6.2z"/></svg>`;
+      return `<svg data-star="${i + 1}" class="pdp-star-icon" width="18" height="18" viewBox="0 0 16 16" style="fill:${fill}; cursor: pointer; transition: transform 0.1s; margin-right: 2px;">${defs}<path d="M8 1.5l1.8 5.5H16l-4.6 3.3 1.8 5.5L8 11.5l-5.2 3.3 1.8-5.5L0 7h6.2z"/></svg>`;
     }).join('');
-    
+
     return stars;
   }
 
   function placeholder(color, size = 320) {
     return `<svg viewBox="0 0 ${size} ${size}" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="${size}" height="${size}" fill="var(--color-bg-secondary)"/>
-      <rect x="${size*0.2}" y="${size*0.15}" width="${size*0.6}" height="${size*0.7}" rx="${size*0.06}" fill="${color}14" stroke="${color}35" stroke-width="${size*0.008}"/>
-      <rect x="${size*0.28}" y="${size*0.25}" width="${size*0.44}" height="${size*0.52}" rx="${size*0.03}" fill="${color}08" stroke="${color}20" stroke-width="${size*0.005}"/>
-      <rect x="${size*0.33}" y="${size*0.33}" width="${size*0.34}" height="${size*0.03}" rx="${size*0.015}" fill="${color}45"/>
-      <rect x="${size*0.33}" y="${size*0.4}" width="${size*0.26}" height="${size*0.02}" rx="${size*0.01}" fill="${color}28"/>
-      <rect x="${size*0.33}" y="${size*0.46}" width="${size*0.3}" height="${size*0.02}" rx="${size*0.01}" fill="${color}22"/>
-      <rect x="${size*0.33}" y="${size*0.54}" width="${size*0.34}" height="${size*0.1}" rx="${size*0.04}" fill="${color}28" stroke="${color}45" stroke-width="${size*0.005}"/>
+      <rect x="${size * 0.2}" y="${size * 0.15}" width="${size * 0.6}" height="${size * 0.7}" rx="${size * 0.06}" fill="${color}14" stroke="${color}35" stroke-width="${size * 0.008}"/>
+      <rect x="${size * 0.28}" y="${size * 0.25}" width="${size * 0.44}" height="${size * 0.52}" rx="${size * 0.03}" fill="${color}08" stroke="${color}20" stroke-width="${size * 0.005}"/>
+      <rect x="${size * 0.33}" y="${size * 0.33}" width="${size * 0.34}" height="${size * 0.03}" rx="${size * 0.015}" fill="${color}45"/>
+      <rect x="${size * 0.33}" y="${size * 0.4}" width="${size * 0.26}" height="${size * 0.02}" rx="${size * 0.01}" fill="${color}28"/>
+      <rect x="${size * 0.33}" y="${size * 0.46}" width="${size * 0.3}" height="${size * 0.02}" rx="${size * 0.01}" fill="${color}22"/>
+      <rect x="${size * 0.33}" y="${size * 0.54}" width="${size * 0.34}" height="${size * 0.1}" rx="${size * 0.04}" fill="${color}28" stroke="${color}45" stroke-width="${size * 0.005}"/>
     </svg>`;
   }
 
@@ -183,33 +183,33 @@
   }
 
   // ─── DOM refs ─────────────────────────────────────────────────────────────
-  const mainImg     = document.getElementById('pdpMainImg');
-  const pdpBadge    = document.getElementById('pdpBadge');
-  const thumbWrap   = document.getElementById('pdpThumbs');
-  const titleEl     = document.getElementById('pdpTitle');
-  const taglineEl   = document.getElementById('pdpTagline');
-  const brandEl     = document.getElementById('pdpBrand');
-  const ratingEl    = document.getElementById('pdpRating');
-  const priceSale   = document.getElementById('pdpPriceSale');
-  const priceOrig   = document.getElementById('pdpPriceOrig');
-  const priceDis    = document.getElementById('pdpPriceDiscount');
-  const priceSave   = document.getElementById('pdpPriceSave');
-  const emiNote     = document.getElementById('pdpEmiNote');
-  const variantsEl  = document.getElementById('pdpVariants');
-  const colorsEl    = document.getElementById('pdpColors');
-  const colorLbl    = document.getElementById('pdpColorLabel');
-  const hlList      = document.getElementById('pdpHighlights');
-  const descBody    = document.getElementById('pdpDescBody');
-  const descToggle  = document.getElementById('pdpDescToggle');
-  const specsEl     = document.getElementById('pdpSpecs');
-  const deliveryEl  = document.getElementById('pdpDelivery');
-  const emiEl       = document.getElementById('pdpEmi');
-  const barPrice    = document.getElementById('pdpBarPrice');
+  const mainImg = document.getElementById('pdpMainImg');
+  const pdpBadge = document.getElementById('pdpBadge');
+  const thumbWrap = document.getElementById('pdpThumbs');
+  const titleEl = document.getElementById('pdpTitle');
+  const taglineEl = document.getElementById('pdpTagline');
+  const brandEl = document.getElementById('pdpBrand');
+  const ratingEl = document.getElementById('pdpRating');
+  const priceSale = document.getElementById('pdpPriceSale');
+  const priceOrig = document.getElementById('pdpPriceOrig');
+  const priceDis = document.getElementById('pdpPriceDiscount');
+  const priceSave = document.getElementById('pdpPriceSave');
+  const emiNote = document.getElementById('pdpEmiNote');
+  const variantsEl = document.getElementById('pdpVariants');
+  const colorsEl = document.getElementById('pdpColors');
+  const colorLbl = document.getElementById('pdpColorLabel');
+  const hlList = document.getElementById('pdpHighlights');
+  const descBody = document.getElementById('pdpDescBody');
+  const descToggle = document.getElementById('pdpDescToggle');
+  const specsEl = document.getElementById('pdpSpecs');
+  const deliveryEl = document.getElementById('pdpDelivery');
+  const emiEl = document.getElementById('pdpEmi');
+  const barPrice = document.getElementById('pdpBarPrice');
   const mobilePrice = document.getElementById('pdpMobilePrice');
-  const barEmi      = document.getElementById('pdpBarEmi');
-  const relTrack    = document.getElementById('pdpRelTrack');
-  const relPrev     = document.getElementById('pdpRelPrev');
-  const relNext     = document.getElementById('pdpRelNext');
+  const barEmi = document.getElementById('pdpBarEmi');
+  const relTrack = document.getElementById('pdpRelTrack');
+  const relPrev = document.getElementById('pdpRelPrev');
+  const relNext = document.getElementById('pdpRelNext');
   const relViewport = document.getElementById('pdpRelViewport');
 
   let selectedColor = 0;
@@ -426,9 +426,9 @@
     const isAvailable = product.availability ? product.availability === 'AVAILABLE' : true;
 
     // Title / brand / tagline
-    titleEl   && (titleEl.textContent   = product.name);
+    titleEl && (titleEl.textContent = product.name);
     taglineEl && (taglineEl.textContent = product.tagline || '');
-    brandEl   && (brandEl.textContent   = product.brand);
+    brandEl && (brandEl.textContent = product.brand);
 
     // Rating
     if (ratingEl) {
@@ -491,17 +491,17 @@
           </div>
           <div style="display:flex; flex-direction:column; gap: 8px; margin-top: 6px;">
             ${gifts.map(g => {
-              const hasImg = Boolean(g.imageUrl && g.imageUrl.trim());
-              const isCustom = Boolean(g.isCustom || !g.slug);
-              const thumbHtml = hasImg
-                ? `<img src="${g.imageUrl}" style="width: 44px; height: 44px; min-width: 44px; object-fit: contain; background: #ffffff; border-radius: 6px; border: 1px solid #f472b6; padding: 2px;" alt="${g.name}" onerror="this.onerror=null;this.parentElement.innerHTML='<div style=\\'width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:#fdf2f8;border-radius:6px;border:1px solid #fbcfe8;font-size:20px;\\'>🎁</div>';"/>`
-                : `<div style="width: 44px; height: 44px; min-width: 44px; display: flex; align-items: center; justify-content: center; background: #fdf2f8; border-radius: 6px; border: 1px solid #fbcfe8; font-size: 20px;">🎁</div>`;
+          const hasImg = Boolean(g.imageUrl && g.imageUrl.trim());
+          const isCustom = Boolean(g.isCustom || !g.slug);
+          const thumbHtml = hasImg
+            ? `<img src="${g.imageUrl}" style="width: 44px; height: 44px; min-width: 44px; object-fit: contain; background: #ffffff; border-radius: 6px; border: 1px solid #f472b6; padding: 2px;" alt="${g.name}" onerror="this.onerror=null;this.parentElement.innerHTML='<div style=\\'width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:#fdf2f8;border-radius:6px;border:1px solid #fbcfe8;font-size:20px;\\'>🎁</div>';"/>`
+            : `<div style="width: 44px; height: 44px; min-width: 44px; display: flex; align-items: center; justify-content: center; background: #fdf2f8; border-radius: 6px; border: 1px solid #fbcfe8; font-size: 20px;">🎁</div>`;
 
-              const priceHtml = (g.price && g.price > 0)
-                ? `<div style="font-size: 11.5px; color: #64748b;">${g.brand ? `${g.brand} &bull; ` : ''}Store Value: <span style="text-decoration: line-through;">${fmt(g.price)}</span> <strong style="color: #059669; margin-left: 4px;">₹0 Free</strong></div>`
-                : `<div style="font-size: 11.5px; color: #059669; font-weight: 600;">Complimentary Gift &bull; ₹0 Free</div>`;
+          const priceHtml = (g.price && g.price > 0)
+            ? `<div style="font-size: 11.5px; color: #64748b;">${g.brand ? `${g.brand} &bull; ` : ''}Store Value: <span style="text-decoration: line-through;">${fmt(g.price)}</span> <strong style="color: #059669; margin-left: 4px;">₹0 Free</strong></div>`
+            : `<div style="font-size: 11.5px; color: #059669; font-weight: 600;">Complimentary Gift &bull; ₹0 Free</div>`;
 
-              return `
+          return `
                 <div style="display:flex; align-items:center; justify-content:space-between; background: rgba(255,255,255,0.95); border-radius: 8px; padding: 8px 12px; border: 1px solid #fbcfe8;">
                   <div style="display:flex; align-items:center; gap: 10px; min-width: 0;">
                     ${thumbHtml}
@@ -515,7 +515,7 @@
                   </div>
                 </div>
               `;
-            }).join('')}
+        }).join('')}
           </div>
         `;
       } else {
@@ -527,7 +527,7 @@
     // Sticky bar price
     barPrice && (barPrice.textContent = fmt(salePriceVal));
     mobilePrice && (mobilePrice.textContent = fmt(salePriceVal));
-    barEmi   && (barEmi.textContent   = product.emi ? `EMI from ${fmt(product.emi.from)}/mo` : '');
+    barEmi && (barEmi.textContent = product.emi ? `EMI from ${fmt(product.emi.from)}/mo` : '');
 
     // Buy bar availability state
     if (!isAvailable) {
@@ -624,7 +624,7 @@
       variantsEl.innerHTML = product.variants.map(group => `
         <div class="pdp-variant-group" data-group="${group.group}">
           <p class="pdp-variant-group__label">
-            ${group.group}: <span id="varLabel-${group.group.replace(/\s+/g,'-')}">${selectedVariants[group.group] || group.options[0]}</span>
+            ${group.group}: <span id="varLabel-${group.group.replace(/\s+/g, '-')}">${selectedVariants[group.group] || group.options[0]}</span>
           </p>
           <div class="pdp-variant-group__options">
             ${group.options.map(opt => `
@@ -655,7 +655,7 @@
           const groupName = group.group;
           const curVal = selectedVariants[groupName];
 
-          const lbl = document.getElementById(`varLabel-${groupName.replace(/\s+/g,'-')}`);
+          const lbl = document.getElementById(`varLabel-${groupName.replace(/\s+/g, '-')}`);
           if (lbl && curVal) lbl.textContent = curVal;
 
           const btns = variantsEl.querySelectorAll(`.pdp-variant-btn[data-group="${groupName}"]`);
@@ -1055,10 +1055,10 @@
     try {
       const res = await fetch(`/api/products/category/${encodeURIComponent(normalizedCat)}`);
       const json = await res.json();
-      
+
       if (json.success && Array.isArray(json.data) && json.data.length > 0) {
         const others = json.data.filter(p => p.slug !== currentProduct.slug && p.id !== currentProduct.dbId && p.id !== currentProduct.id);
-        
+
         if (others.length > 0) {
           renderRelatedTrack(others.map(p => {
             const rawPrice = parseFloat(p.price) || 0;
@@ -1127,8 +1127,8 @@
           ${p.badge ? `<span class="plp-card__badge plp-card__badge--${p.badgeType || 'primary'}">${escapeHtml(p.badge)}</span>` : ''}
           <div class="plp-card__image-placeholder" aria-hidden="true">
             ${p.imageUrl
-              ? `<img src="${p.imageUrl}" alt="${escapeHtml(p.brand || '')} ${escapeHtml(p.name || '')}" class="plp-card__img" loading="lazy" />`
-              : `<svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          ? `<img src="${p.imageUrl}" alt="${escapeHtml(p.brand || '')} ${escapeHtml(p.name || '')}" class="plp-card__img" loading="lazy" />`
+          : `<svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect width="200" height="200" fill="var(--color-bg-tertiary)"/>
                   <rect x="50" y="38" width="100" height="124" rx="9" fill="#1e3d8f14" stroke="#1e3d8f35" stroke-width="1.5"/>
                   <rect x="64" y="52" width="72" height="92" rx="5" fill="#1e3d8f08"/>
@@ -1144,11 +1144,11 @@
           <div class="plp-card__price">
             <span class="plp-card__price-sale">₹${Number(p.salePrice).toLocaleString('en-IN')}</span>
             ${(origPrice && origPrice > p.salePrice)
-              ? `<span class="plp-card__price-original">₹${Number(origPrice).toLocaleString('en-IN')}</span>`
-              : ''}
+          ? `<span class="plp-card__price-original">₹${Number(origPrice).toLocaleString('en-IN')}</span>`
+          : ''}
             ${(p.discount && p.discount > 0)
-              ? `<span class="plp-card__price-discount">${p.discount}% off</span>`
-              : ''}
+          ? `<span class="plp-card__price-discount">${p.discount}% off</span>`
+          : ''}
           </div>
           ${(p.gifts && p.gifts.length > 0) ? `
             <div style="margin-top: 6px;">
@@ -1173,7 +1173,7 @@
       relViewport && relViewport.scrollBy({ left: -SCROLL * 3, behavior: 'smooth' });
     });
     relNext && relNext.addEventListener('click', () => {
-      relViewport && relViewport.scrollBy({ left:  SCROLL * 3, behavior: 'smooth' });
+      relViewport && relViewport.scrollBy({ left: SCROLL * 3, behavior: 'smooth' });
     });
 
     // Drag
@@ -1208,12 +1208,12 @@
   function recordView(productId) {
     if (!productId) return;
     fetch(`/api/products/${encodeURIComponent(productId)}/interaction`, {
-      method:    'POST',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'x-session-id': getSessionId(),
       },
-      body:      JSON.stringify({ type: 'PRODUCT_VIEW' }),
+      body: JSON.stringify({ type: 'PRODUCT_VIEW' }),
       keepalive: true,
     }).catch(() => { /* best-effort — never block the UI */ });
   }
@@ -1305,7 +1305,6 @@
             variants: parsedVariants,
             rawVariants: rawVariants,
             highlights: [
-              `${p.brand} Official Warranty — 1 Year`,
               `100% Original & Authentic Product`,
               `Free & Secure Doorstep Delivery`,
               `7 Days Replacement Guarantee`,
@@ -1319,14 +1318,13 @@
                   ['Brand', p.brand],
                   ['Model', p.name],
                   ['Availability', isAvailable ? 'In Stock' : 'Out of Stock'],
-                  ['Warranty', '1 Year Official Warranty'],
                 ]
               },
               {
                 group: 'Purchase & Delivery',
                 rows: [
                   ['Delivery', isAvailable ? 'Available for Delivery' : 'Out of Stock'],
-                  ['Payment Modes', 'Cash on Delivery, UPI, Cards, 0% EMI'],
+                  ['Payment Modes', 'Cash on Delivery, 0% EMI'],
                   ['Store Pickup', 'Available at Kishor Enterprises, Pathapatnam'],
                 ]
               }
@@ -1419,7 +1417,7 @@
   function updateInteractiveStars(rating, hover = false) {
     const textVal = document.getElementById('pdpHoverRatingVal');
     if (textVal) textVal.textContent = rating || '0';
-    
+
     submitStars.forEach((star, index) => {
       const starNumber = index + 1;
       if (rating >= starNumber) {
@@ -1452,7 +1450,7 @@
         const res = await fetch(`/api/products/${rawId}/rate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
+          body: JSON.stringify({
             rating: currentRating,
             comment: submitComment ? submitComment.value : ''
           }),
@@ -1564,8 +1562,8 @@
               variantId: currentProductData.selectedVariantId || null,
               quantity: 1,
             }),
-          }).catch(() => {});
-        } catch (_) {}
+          }).catch(() => { });
+        } catch (_) { }
 
         // Trigger interaction recording for CART_ADD
         try {
@@ -1574,8 +1572,8 @@
             headers: { 'Content-Type': 'application/json', 'x-session-id': getSessionId() },
             body: JSON.stringify({ type: 'CART_ADD' }),
             keepalive: true,
-          }).catch(() => {});
-        } catch (_) {}
+          }).catch(() => { });
+        } catch (_) { }
 
         // Temporary button confirmation feedback
         const label = btn.querySelector('.pdp-buy-bar__cart-label');
