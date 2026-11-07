@@ -1601,9 +1601,37 @@
              <line x1="12" y1="18" x2="12.01" y2="18"></line>
            </svg>`;
 
+      const priceNum = parseFloat(p.price) || 0;
       const offerNum = (p.offer !== undefined && p.offer !== null && p.offer !== '') ? parseFloat(p.offer) : 0;
-      const hasOffer = offerNum > 0;
-      const discountedPrice = hasOffer ? Math.round(p.price * (1 - offerNum / 100)) : p.price;
+      const hasOffer = offerNum > 0 && priceNum > 0;
+      const discountedPrice = hasOffer ? Math.round(priceNum * (1 - offerNum / 100)) : priceNum;
+
+      let priceCellHtml = '';
+      if (priceNum > 0) {
+        priceCellHtml = hasOffer ? `
+          <div style="display:flex; flex-direction:column; gap:2px;">
+            <strong class="admin-cell-product__discounted-price">${formatRupees(discountedPrice)}</strong>
+            <span class="admin-cell-product__slashed-price">${formatRupees(priceNum)}</span>
+          </div>
+        ` : `
+          <strong>${formatRupees(priceNum)}</strong>
+        `;
+      } else {
+        const variantPrices = (p.variants || [])
+          .map(v => parseFloat(v.priceOverride))
+          .filter(pr => !isNaN(pr) && pr > 0);
+        if (variantPrices.length > 0) {
+          const minVar = Math.min(...variantPrices);
+          priceCellHtml = `
+            <div style="display:flex; flex-direction:column; gap:2px;">
+              <strong style="color:var(--color-primary-700);">From ${formatRupees(minVar)}</strong>
+              <span style="font-size:11px; color:var(--color-text-muted);">(Variant Rates)</span>
+            </div>
+          `;
+        } else {
+          priceCellHtml = `<span style="font-size:12px; color:var(--color-text-muted); font-style:italic;">Variant Rates</span>`;
+        }
+      }
 
       return `
         <tr data-product-id="${p.id}">
@@ -1622,14 +1650,7 @@
             <span style="font-weight:var(--font-medium); color:var(--color-text-secondary);">${p.category}</span>
           </td>
           <td>
-            ${hasOffer ? `
-              <div style="display:flex; flex-direction:column; gap:2px;">
-                <strong class="admin-cell-product__discounted-price">${formatRupees(discountedPrice)}</strong>
-                <span class="admin-cell-product__slashed-price">${formatRupees(p.price)}</span>
-              </div>
-            ` : `
-              <strong>${formatRupees(p.price)}</strong>
-            `}
+            ${priceCellHtml}
           </td>
           <td>
             ${hasOffer ? `
@@ -2175,7 +2196,7 @@
     document.getElementById('productName').value = prod.name;
     document.getElementById('productBrand').value = prod.brand;
     document.getElementById('productCategory').value = prod.category;
-    document.getElementById('productPrice').value = prod.price;
+    document.getElementById('productPrice').value = (prod.price !== undefined && prod.price !== null && Number(prod.price) > 0) ? prod.price : '';
     document.getElementById('productStock').value = prod.stock;
     document.getElementById('productSlug').value = prod.slug;
     document.getElementById('productAvailability').value = prod.availability;
@@ -2223,7 +2244,8 @@
       const name = document.getElementById('productName').value.trim();
       const brand = document.getElementById('productBrand').value.trim();
       const category = document.getElementById('productCategory').value;
-      const price = Number(document.getElementById('productPrice').value) || 0;
+      const priceRaw = document.getElementById('productPrice') ? document.getElementById('productPrice').value.trim() : '';
+      const price = priceRaw !== '' ? (parseFloat(priceRaw) || 0) : null;
       const stock = Number(document.getElementById('productStock').value) || 0;
       let slug = document.getElementById('productSlug').value.trim();
       const availability = document.getElementById('productAvailability').value;
@@ -2240,8 +2262,13 @@
         if (parsedOffer > 0) offer = parsedOffer;
       }
 
-      if (!name || !brand || price <= 0) {
-        showAdminToast('Please fill in product name, brand, and a valid price.', 'error');
+      if (!name || !brand) {
+        showAdminToast('Please fill in product name and brand.', 'error');
+        return;
+      }
+
+      if (price !== null && price < 0) {
+        showAdminToast('Price cannot be negative.', 'error');
         return;
       }
 
@@ -2288,13 +2315,23 @@
         }
       });
 
+      let resolvedPrice = price !== null ? price : 0;
+      if (resolvedPrice === 0 && variants.length > 0) {
+        const varRates = variants
+          .map(v => v.priceOverride)
+          .filter(p => p !== null && !isNaN(p) && p > 0);
+        if (varRates.length > 0) {
+          resolvedPrice = Math.min(...varRates);
+        }
+      }
+
       if (useApi) {
         try {
           const payload = {
             name,
             brand,
             category,
-            price,
+            price: resolvedPrice,
             offer,
             stock,
             slug,
@@ -2335,7 +2372,7 @@
             name,
             brand,
             category,
-            price,
+            price: resolvedPrice,
             stock,
             slug,
             availability,
@@ -2353,8 +2390,8 @@
           name,
           brand,
           category,
-          price,
-          originalPrice: price,
+          price: resolvedPrice,
+          originalPrice: resolvedPrice,
           stock,
           minStockThreshold: 4,
           status,

@@ -429,7 +429,15 @@
             || p.productImages?.[0]?.imageUrl
             || p.imageUrl
             || '';
-          const price       = parseFloat(p.price) || 0;
+          let price         = parseFloat(p.price) || 0;
+          if (price === 0 && Array.isArray(p.variants) && p.variants.length > 0) {
+            const vPrices = p.variants
+              .map(v => parseFloat(v.priceOverride))
+              .filter(pr => !isNaN(pr) && pr > 0);
+            if (vPrices.length > 0) {
+              price = Math.min(...vPrices);
+            }
+          }
           const isAvailable = p.availability === 'AVAILABLE';
 
           return {

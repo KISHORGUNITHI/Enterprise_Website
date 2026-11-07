@@ -119,8 +119,8 @@ export class AdminProductService {
 
   /**
    * Create a new product
-   * Required: name, description, brand, price, categoryId or category, slug
-   * Optional: availability, images, stock
+   * Required: name, description, brand, categoryId or category, slug
+   * Optional: price (optional if variant pricing is set), availability, images, stock, variants, gifts
    */
   async create(data) {
     try {
@@ -130,7 +130,7 @@ export class AdminProductService {
       const missing = [];
       if (!data.name || !String(data.name).trim()) missing.push('name');
       if (!data.brand || !String(data.brand).trim()) missing.push('brand');
-      if (data.price === undefined || data.price === null || data.price === '') missing.push('price');
+      // Note: price is optional (e.g. for mobiles with variant-specific rates)
       if (!categoryIdentifier) missing.push('category');
 
       if (missing.length > 0) {
@@ -139,12 +139,28 @@ export class AdminProductService {
         throw error;
       }
 
-      // Validate price is a positive number
-      const price = parseFloat(data.price);
-      if (isNaN(price) || price <= 0) {
-        const error = new Error('Price must be a positive number');
-        error.status = 400;
-        throw error;
+      // Resolve base price:
+      // If price is provided, validate it is not negative.
+      // If omitted or 0, attempt to infer starting price from lowest variant priceOverride.
+      let resolvedPrice = 0;
+      if (data.price !== undefined && data.price !== null && String(data.price).trim() !== '') {
+        const parsedPrice = parseFloat(data.price);
+        if (isNaN(parsedPrice) || parsedPrice < 0) {
+          const error = new Error('Price must be a valid positive number');
+          error.status = 400;
+          throw error;
+        }
+        resolvedPrice = parsedPrice;
+      }
+
+      // If price was omitted or 0 and variants are provided, infer starting price from lowest variant price
+      if (resolvedPrice === 0 && Array.isArray(data.variants) && data.variants.length > 0) {
+        const variantPrices = data.variants
+          .map(v => (v.priceOverride !== undefined && v.priceOverride !== null && String(v.priceOverride).trim() !== '') ? parseFloat(v.priceOverride) : null)
+          .filter(p => p !== null && !isNaN(p) && p > 0);
+        if (variantPrices.length > 0) {
+          resolvedPrice = Math.min(...variantPrices);
+        }
       }
 
       // Auto-generate slug if omitted or blank
@@ -179,7 +195,7 @@ export class AdminProductService {
         name: String(data.name).trim(),
         description,
         brand: String(data.brand).trim(),
-        price: data.price,
+        price: resolvedPrice,
         categoryId: category.id,
         slug,
         availability: data.availability || 'AVAILABLE',
@@ -262,17 +278,42 @@ export class AdminProductService {
 
       // Validate price if being updated
       if (data.price !== undefined) {
-        const price = parseFloat(data.price);
-        if (isNaN(price) || price <= 0) {
-          const error = new Error('Price must be a positive number');
-          error.status = 400;
-          throw error;
+        if (data.price === null || data.price === '' || String(data.price).trim() === '') {
+          // If price was cleared, attempt to infer starting price from updated variants or existing variants
+          let inferredPrice = 0;
+          const variantsList = Array.isArray(data.variants) ? data.variants : existing.variants;
+          if (Array.isArray(variantsList) && variantsList.length > 0) {
+            const variantPrices = variantsList
+              .map(v => (v.priceOverride !== undefined && v.priceOverride !== null && String(v.priceOverride).trim() !== '') ? parseFloat(v.priceOverride) : null)
+              .filter(p => p !== null && !isNaN(p) && p > 0);
+            if (variantPrices.length > 0) {
+              inferredPrice = Math.min(...variantPrices);
+            }
+          }
+          data.price = inferredPrice;
+        } else {
+          const price = parseFloat(data.price);
+          if (isNaN(price) || price < 0) {
+            const error = new Error('Price must be a valid positive number');
+            error.status = 400;
+            throw error;
+          }
+          data.price = price;
+        }
+      } else if (Array.isArray(data.variants) && (existing.price === null || Number(existing.price) === 0)) {
+        // If price was omitted in update payload, but variants are provided and existing price is 0
+        const variantPrices = data.variants
+          .map(v => (v.priceOverride !== undefined && v.priceOverride !== null && String(v.priceOverride).trim() !== '') ? parseFloat(v.priceOverride) : null)
+          .filter(p => p !== null && !isNaN(p) && p > 0);
+        if (variantPrices.length > 0) {
+          data.price = Math.min(...variantPrices);
         }
       }
 
       // If slug is being updated, check for duplicates
       if (data.slug && data.slug !== existing.slug) {
-        const slugExists = await this.repository.findBySlug(data.slug);
+        const cleanSlug = String(data.slug).trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        const slugExists = await this.repository.findBySlug(cleanSlug);
         if (slugExists && slugExists.id !== id) {
           const error = new Error('Product slug already exists');
           error.status = 409;

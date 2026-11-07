@@ -188,8 +188,9 @@
 
         <div class="admin-form-row">
           <div class="admin-form-group">
-            <label class="admin-label" for="productPrice">Price (₹)</label>
-            <input type="number" id="productPrice" name="price" class="admin-input" placeholder="134999" required />
+            <label class="admin-label" for="productPrice">Price (₹) <span
+                style="font-weight: normal; font-size: 0.75rem; color: var(--admin-text-muted);">(Optional if variant rates set)</span></label>
+            <input type="number" id="productPrice" name="price" class="admin-input" placeholder="e.g. 29999 (optional if variants set)" min="0" step="any" />
           </div>
           <div class="admin-form-group">
             <label class="admin-label" for="productOffer">Offer (%) <span
