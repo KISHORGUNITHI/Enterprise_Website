@@ -509,23 +509,47 @@
   color: #0f1111;
 }
 
-/* Free Gift Mini Badge (if any) */
+/* Free Gift Mini Badge / Bar */
 .cart-item-gifts-row {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 3px;
+}
+
+.cart-item-gifts-bar {
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
-  margin-top: 2px;
+  background: #fdf2f8;
+  border: 1px solid #fbcfe8;
+  color: #9d174d;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 6px;
+  letter-spacing: 0.01em;
+  user-select: none;
+  transition: background-color 0.15s ease;
+}
+
+.cart-item-gifts-bar:hover {
+  background: #fce7f3;
+}
+
+.cart-item-gifts-bar svg {
+  stroke: #db2777;
+  flex-shrink: 0;
 }
 
 .cart-item-gift-pill {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  color: #166534;
-  font-size: 12px;
-  font-weight: 500;
+  background: #fdf2f8;
+  border: 1px solid #fbcfe8;
+  color: #9d174d;
+  font-size: 11.5px;
+  font-weight: 600;
   padding: 3px 8px;
   border-radius: 6px;
 }

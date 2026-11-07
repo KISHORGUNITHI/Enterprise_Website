@@ -78,8 +78,9 @@
 
     const giftHtml = hasGifts ? `
       <div class="product-card__gift-tag" style="margin-top: 6px;">
-        <span style="display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; color:#9d174d; background:#fdf2f8; border:1px solid #fbcfe8; border-radius:4px; padding:2px 6px;">
-          🎁 Free Gift: ${p.gifts[0].name}${p.gifts.length > 1 ? ` (+${p.gifts.length - 1})` : ''}
+        <span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; color:#9d174d; background:#fdf2f8; border:1px solid #fbcfe8; border-radius:6px; padding:3px 8px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+          Free Gifts (${p.gifts.length})
         </span>
       </div>
     ` : '';
