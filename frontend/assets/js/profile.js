@@ -262,12 +262,10 @@
     }
 
     // Gender radio selection
-    if (data.gender) {
-      const targetGender = String(data.gender).toUpperCase();
-      genderRadios.forEach(radio => {
-        radio.checked = (radio.value === targetGender);
-      });
-    }
+    const targetGender = data.gender ? String(data.gender).toUpperCase() : '';
+    genderRadios.forEach(radio => {
+      radio.checked = Boolean(targetGender && radio.value === targetGender);
+    });
 
     // Check if role is ADMIN to reveal Administration link in sidebar
     try {
@@ -341,7 +339,7 @@
     isEditingPersonal = true;
     savedName = profileFullName.value;
     const checkedRadio = document.querySelector('input[name="gender"]:checked');
-    savedGender = checkedRadio ? checkedRadio.value : '';
+    savedGender = checkedRadio ? checkedRadio.value : (currentUserData.gender || '');
 
     profileFullName.removeAttribute('disabled');
     profileFullName.focus();
@@ -357,7 +355,7 @@
     isEditingPersonal = false;
     profileFullName.value = savedName;
     genderRadios.forEach(r => {
-      r.checked = (r.value === savedGender);
+      r.checked = Boolean(savedGender && r.value === savedGender);
       r.setAttribute('disabled', '');
     });
 
@@ -386,6 +384,9 @@
     }
     fullNameError.setAttribute('hidden', '');
 
+    const selectedRadio = document.querySelector('input[name="gender"]:checked');
+    const newGender = selectedRadio ? selectedRadio.value : null;
+
     // Show loading state & prevent duplicate submits
     const submitBtn = document.getElementById('savePersonalBtn');
     const spinner = submitBtn ? submitBtn.querySelector('.profile-btn-spinner') : null;
@@ -396,7 +397,7 @@
     if (btnText) btnText.textContent = 'Saving…';
 
     try {
-      // Send ONLY username — user identified via req.user in JWT cookie
+      // Send username & gender to /api/profile
       const response = await fetch('/api/profile', {
         method: 'POST',
         headers: {
@@ -406,6 +407,7 @@
         credentials: 'same-origin', // Sends authToken cookie
         body: JSON.stringify({
           username: newName,
+          gender: newGender,
         }),
       });
 
@@ -419,30 +421,39 @@
 
       if (response.ok && result.success) {
         currentUserData.username = result.data?.username || newName;
+        currentUserData.gender = result.data?.gender || newGender;
 
         // Update UI
         if (sidebarUserName) {
           sidebarUserName.textContent = currentUserData.username.toUpperCase();
         }
         profileFullName.value = currentUserData.username;
+        const targetGender = currentUserData.gender ? String(currentUserData.gender).toUpperCase() : '';
+        genderRadios.forEach(r => {
+          r.checked = Boolean(targetGender && r.value === targetGender);
+          r.setAttribute('disabled', '');
+        });
 
         // Update localStorage authUser cache
         try {
           const cached = localStorage.getItem('authUser');
           const parsed = cached ? JSON.parse(cached) : {};
           parsed.username = currentUserData.username;
+          parsed.gender = currentUserData.gender;
           localStorage.setItem('authUser', JSON.stringify(parsed));
         } catch (e) { }
 
         // Exit edit mode
         isEditingPersonal = false;
+        savedName = currentUserData.username;
+        savedGender = currentUserData.gender || '';
         profileFullName.setAttribute('disabled', '');
-        genderRadios.forEach(r => r.setAttribute('disabled', ''));
         personalActions.setAttribute('hidden', '');
         editPersonalBtn.textContent = 'Edit';
         editPersonalBtn.removeAttribute('aria-disabled');
 
         showAlert('Profile updated successfully.', 'success');
+        showRightToast('Profile Updated Successfully!');
       } else {
         const errMsg = result?.message || 'Failed to update profile. Please try again.';
         showAlert(errMsg, 'error');
@@ -820,17 +831,9 @@
 
         const result = await response.json();
         if (response.ok && result.success) {
-          addresses = addresses.map(a => {
-            if (a.id === id) return { ...a, ...payload, id };
-            return a;
-          });
-          if (isDefault) {
-            addresses.forEach(a => { a.is_default = (a.id === id); });
-          }
-          setStoredAddresses(addresses);
-          renderAddresses();
           closeAddressForm();
           showRightToast('Address Updated Successfully!');
+          await fetchAddresses();
         } else {
           showRightToast(result?.message || 'Failed to update address.', 'error');
         }
@@ -853,15 +856,9 @@
 
         const result = await response.json();
         if (response.ok && result.success) {
-          const newAddr = result.data;
-          addresses.unshift(newAddr);
-          if (isDefault) {
-            addresses.forEach(a => { a.is_default = (a.id === newAddr.id); });
-          }
-          setStoredAddresses(addresses);
-          renderAddresses();
           closeAddressForm();
           showRightToast('Address Added Successfully!');
+          await fetchAddresses();
         } else {
           showAlert(result?.message || 'Failed to add address.', 'error');
         }
@@ -913,16 +910,9 @@
 
         const result = await response.json();
         if (response.ok && result.success) {
-          const wasDefault = Boolean(targetAddr.is_default);
-          addresses = addresses.filter(a => a.id !== id);
-
-          if (wasDefault && addresses.length > 0) {
-            addresses[0].is_default = true;
-          }
-
-          setStoredAddresses(addresses);
-          renderAddresses();
           showAlert('Address deleted successfully.', 'success');
+          showRightToast('Address Deleted Successfully!');
+          await fetchAddresses();
         } else {
           showAlert(result?.message || 'Failed to delete address.', 'error');
           btn.textContent = btnText;
@@ -935,10 +925,68 @@
         btn.disabled = false;
       }
     } else if (action === 'set-default') {
+      const previousAddresses = JSON.parse(JSON.stringify(addresses));
       addresses.forEach(a => { a.is_default = (a.id === id); });
+      addresses.sort((a, b) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0));
       setStoredAddresses(addresses);
       renderAddresses();
-      showAlert('Default delivery address updated.', 'success');
+
+      const btnText = btn.textContent;
+      btn.textContent = 'Setting…';
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(`/api/profile/address/${encodeURIComponent(id)}/default`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify({ is_default: true }),
+        });
+
+        if (response.status === 401) {
+          showAlert('Session expired. Please sign in again.', 'error');
+          setTimeout(() => { window.location.href = '/login'; }, 1200);
+          return;
+        }
+
+        const result = await response.json();
+        if (response.ok && result.success) {
+          showRightToast('Default delivery address updated!');
+          showAlert('Default delivery address updated successfully.', 'success');
+          await fetchAddresses();
+        } else {
+          // Fallback to general patch
+          const fallbackRes = await fetch(`/api/profile/address/${encodeURIComponent(id)}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ is_default: true }),
+          });
+          const fallbackResult = await fallbackRes.json();
+          if (fallbackRes.ok && fallbackResult.success) {
+            showRightToast('Default delivery address updated!');
+            showAlert('Default delivery address updated successfully.', 'success');
+            await fetchAddresses();
+          } else {
+            addresses = previousAddresses;
+            setStoredAddresses(addresses);
+            renderAddresses();
+            showAlert(fallbackResult?.message || 'Failed to update default address.', 'error');
+          }
+        }
+      } catch (err) {
+        console.error('Error setting default address:', err);
+        addresses = previousAddresses;
+        setStoredAddresses(addresses);
+        renderAddresses();
+        showAlert('Could not update default address on server.', 'error');
+      }
     }
   });
 
@@ -1010,8 +1058,10 @@
       });
       if (response.ok) {
         const result = await response.json();
-        if (result.success && result.data) {
+        if (result.success && Array.isArray(result.data)) {
           addresses = result.data;
+          // Sort addresses so default address is always displayed first
+          addresses.sort((a, b) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0));
           setStoredAddresses(addresses);
           renderAddresses();
           return;

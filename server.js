@@ -422,7 +422,8 @@ app.get('/profile', requireAuthPage, (req, res) => {
   res.render('pages/account/profile', {
     title: `My Profile — ${site.name}`,
     site,
-    user: null,
+    user: req.user,
+    isAuthenticated: Boolean(req.user),
   });
 });
 
@@ -430,7 +431,8 @@ app.get('/profile/addresses', requireAuthPage, (req, res) => {
   res.render('pages/account/profile', {
     title: `Manage Addresses — ${site.name}`,
     site,
-    user: null,
+    user: req.user,
+    isAuthenticated: Boolean(req.user),
   });
 });
 

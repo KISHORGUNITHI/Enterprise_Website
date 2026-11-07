@@ -9,7 +9,10 @@ router.get('/profile', jwtAuthenticate, profileController.getProfile.bind(profil
 router.post('/profile', jwtAuthenticate, profileController.updateProfile.bind(profileController));
 router.post('/profile/address', jwtAuthenticate, profileController.address.bind(profileController));
 router.get('/profile/addresses', jwtAuthenticate, profileController.getAddresses.bind(profileController));
-router.patch('/profile/address/:id',jwtAuthenticate,profileController.updateAdress.bind(profileController))
+router.patch('/profile/address/:id/default', jwtAuthenticate, profileController.setDefaultAddress.bind(profileController));
+router.post('/profile/address/:id/default', jwtAuthenticate, profileController.setDefaultAddress.bind(profileController));
+router.patch('/profile/address/:id', jwtAuthenticate, profileController.updateAddress.bind(profileController));
+router.put('/profile/address/:id', jwtAuthenticate, profileController.updateAddress.bind(profileController));
 router.delete('/profile/address/:id', jwtAuthenticate, profileController.deleteAddress.bind(profileController));
 
 export default router;
